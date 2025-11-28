@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { cancelInspectionReminder } from "@/utils/notifications";
 
 export type InspectionStatus = "pending" | "in_progress" | "completed";
 export type InspectionFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "annually" | "five_years";
@@ -18,6 +19,13 @@ export interface ChecklistItem {
   notes?: string;
 }
 
+export interface InspectionPhoto {
+  id: string;
+  uri: string;
+  caption: string;
+  timestamp: string;
+}
+
 export interface Inspection {
   id: string;
   type: InspectionType;
@@ -33,6 +41,9 @@ export interface Inspection {
   checklist: ChecklistItem[];
   observations: string;
   signature: string | null;
+  photos: InspectionPhoto[];
+  scheduledDate?: string;
+  notificationId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -148,6 +159,14 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const deleteInspection = async (id: string) => {
+    const inspectionToDelete = inspections.find((insp) => insp.id === id);
+    
+    if (inspectionToDelete?.notificationId) {
+      await cancelInspectionReminder(inspectionToDelete.notificationId, true);
+    } else {
+      await cancelInspectionReminder(id);
+    }
+    
     const newInspections = inspections.filter((insp) => insp.id !== id);
     await saveInspections(newInspections);
   };

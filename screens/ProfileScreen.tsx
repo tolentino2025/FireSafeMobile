@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import * as Haptics from "expo-haptics";
 
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -9,10 +10,30 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import {
+  getNotificationSettings,
+  saveNotificationSettings,
+  requestNotificationPermissions,
+  checkNotificationPermissions,
+  sendTestNotification,
+} from "@/utils/notifications";
 
 export default function ProfileScreen() {
   const { theme, isDark } = useTheme();
   const { t, language, setLanguage } = useLanguage();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
+
+  useEffect(() => {
+    loadNotificationSettings();
+  }, []);
+
+  const loadNotificationSettings = async () => {
+    const settings = await getNotificationSettings();
+    setNotificationsEnabled(settings.enabled);
+    const permission = await checkNotificationPermissions();
+    setHasPermission(permission);
+  };
 
   const toggleLanguage = () => {
     setLanguage(language === "pt-BR" ? "en" : "pt-BR");
@@ -40,6 +61,50 @@ export default function ProfileScreen() {
         },
       ]
     );
+  };
+
+  const handleToggleNotifications = async (value: boolean) => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+
+    if (value && !hasPermission) {
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        Alert.alert(
+          t.notifications.title,
+          t.notifications.permissionRequired,
+          [
+            { text: t.common.cancel, style: "cancel" },
+            Platform.OS !== "web"
+              ? {
+                  text: "Settings",
+                  onPress: () => {
+                    try {
+                      Linking.openSettings();
+                    } catch (error) {
+                      console.error("Failed to open settings:", error);
+                    }
+                  },
+                }
+              : null,
+          ].filter(Boolean) as any
+        );
+        return;
+      }
+      setHasPermission(true);
+    }
+
+    setNotificationsEnabled(value);
+    await saveNotificationSettings({ enabled: value, reminderDaysBefore: 1 });
+
+    if (value) {
+      try {
+        await sendTestNotification(language as "en" | "pt-BR");
+      } catch (error) {
+        console.error("Error sending test notification:", error);
+      }
+    }
   };
 
   const version = Constants.expoConfig?.version || "1.0.0";
@@ -89,6 +154,18 @@ export default function ProfileScreen() {
           label={t.profile.language}
           value={language === "pt-BR" ? "Português (BR)" : "English"}
           onPress={toggleLanguage}
+        />
+        <SettingsRow
+          icon="bell"
+          label={t.notifications.title}
+          rightElement={
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={handleToggleNotifications}
+              trackColor={{ false: theme.border, true: AppColors.primary }}
+              thumbColor={notificationsEnabled ? "#FFFFFF" : "#F4F4F4"}
+            />
+          }
         />
         <SettingsRow
           icon="info"

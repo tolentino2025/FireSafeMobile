@@ -20,6 +20,10 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 5. **Checklist System**: Yes/No/N/A responses with PSI value inputs
 6. **Auto-save**: Forms automatically save progress
 7. **Bilingual UI**: Portuguese and English language support
+8. **Photo Capture**: Attach photos to inspections using camera or gallery
+9. **PDF Reports**: Generate professional NFPA 25 compliant PDF reports
+10. **Share & Export**: Share reports via email, WhatsApp, and other apps
+11. **Notifications**: Schedule reminders for upcoming inspections
 
 ## Project Architecture
 
@@ -105,8 +109,7 @@ npm run dev
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
 
 ## Future Enhancements
-- PDF report generation
-- Cloud sync and backup
-- Photo attachments for inspections
-- Push notifications for scheduled inspections
-- Offline mode improvements
+- Cloud sync and backup with external API
+- Advanced scheduling with recurring inspections
+- Multi-inspector team collaboration
+- Barcode/QR code scanning for equipment identification

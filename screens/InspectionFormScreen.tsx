@@ -17,13 +17,15 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { ChecklistItemRow } from "@/components/ChecklistItemRow";
 import { SignatureCapture } from "@/components/SignatureCapture";
+import { PhotoCapture } from "@/components/PhotoCapture";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency } from "@/contexts/InspectionContext";
+import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
+import { scheduleInspectionReminder, cancelInspectionReminder } from "@/utils/notifications";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -32,7 +34,7 @@ const frequencies: InspectionFrequency[] = ["daily", "weekly", "monthly", "quart
 export default function InspectionFormScreen({ navigation, route }: InspectionFormScreenProps) {
   const { type, inspectionId } = route.params;
   const { theme, isDark } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { inspections, addInspection, updateInspection, properties } = useInspections();
 
   const existingInspection = inspectionId
@@ -51,6 +53,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   );
   const [observations, setObservations] = useState(existingInspection?.observations || "");
   const [signature, setSignature] = useState<string | null>(existingInspection?.signature || null);
+  const [photos, setPhotos] = useState<InspectionPhoto[]>(existingInspection?.photos || []);
   const [autoSaved, setAutoSaved] = useState(false);
 
   const autoSaveOpacity = useSharedValue(0);
@@ -101,7 +104,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
 
   const handleSubmit = async () => {
     if (!propertyName.trim()) {
-      Alert.alert(t.common.error, "Property name is required");
+      Alert.alert(t.common.error, t.form.required);
       return;
     }
 
@@ -120,6 +123,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       checklist,
       observations,
       signature,
+      photos,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -130,10 +134,88 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       } else {
         await addInspection(inspectionData);
       }
+      
+      const schedulingResult = await scheduleNextInspectionReminder(inspectionData);
+      
+      if (schedulingResult && (schedulingResult.notificationId || schedulingResult.scheduledDate)) {
+        await updateInspection(inspectionData.id, {
+          notificationId: schedulingResult.notificationId || undefined,
+          scheduledDate: schedulingResult.scheduledDate,
+        });
+      }
+      
       navigation.goBack();
     } catch (error) {
-      Alert.alert(t.common.error, "Failed to save inspection");
+      Alert.alert(t.common.error, t.report.shareError);
     }
+  };
+  
+  const scheduleNextInspectionReminder = async (inspection: Inspection): Promise<{ notificationId: string | null; scheduledDate: string } | null> => {
+    try {
+      const inspectionDate = new Date(inspection.date);
+      let nextDate = new Date(inspectionDate);
+      
+      switch (inspection.frequency) {
+        case "daily":
+          nextDate.setDate(nextDate.getDate() + 1);
+          break;
+        case "weekly":
+          nextDate.setDate(nextDate.getDate() + 7);
+          break;
+        case "monthly":
+          nextDate.setMonth(nextDate.getMonth() + 1);
+          break;
+        case "quarterly":
+          nextDate.setMonth(nextDate.getMonth() + 3);
+          break;
+        case "annually":
+          nextDate.setFullYear(nextDate.getFullYear() + 1);
+          break;
+        case "five_years":
+          nextDate.setFullYear(nextDate.getFullYear() + 5);
+          break;
+      }
+      
+      if (nextDate > new Date()) {
+        const notificationId = await scheduleInspectionReminder({
+          inspectionId: inspection.id,
+          propertyName: inspection.propertyName,
+          inspectionType: t.inspectionTypes[getTypeKey(inspection.type)],
+          scheduledDate: nextDate,
+          language: language as "en" | "pt-BR",
+        });
+        
+        return {
+          notificationId,
+          scheduledDate: nextDate.toISOString(),
+        };
+      }
+      return null;
+    } catch (error) {
+      console.log("Could not schedule notification:", error);
+      return null;
+    }
+  };
+  
+  const getTypeKey = (type: InspectionType): keyof typeof t.inspectionTypes => {
+    const mapping: Record<InspectionType, keyof typeof t.inspectionTypes> = {
+      wet_pipe: "wetPipe",
+      dry_pipe: "dryPipe",
+      preaction_deluge: "preactionDeluge",
+      foam_water: "foamWater",
+      water_spray: "waterSpray",
+      water_mist: "waterMist",
+      pump_weekly: "pumpWeekly",
+      pump_monthly: "pumpMonthly",
+      pump_annual: "pumpAnnual",
+      aboveground: "aboveground",
+      underground: "underground",
+      hydrant_flow: "hydrantFlow",
+      water_tank: "waterTank",
+      hazard_eval: "hazardEval",
+      standpipe: "standpipe",
+    };
+    return mapping[type];
   };
 
   const getFrequencyLabel = (freq: InspectionFrequency) => {
@@ -274,6 +356,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           onPsiChange={(psi) => handleChecklistPsiChange(item.id, psi)}
         />
       ))}
+
+      <Spacer height={Spacing["2xl"]} />
+
+      <ThemedText type="h3">{t.form.photos}</ThemedText>
+      <Spacer height={Spacing.sm} />
+      <PhotoCapture photos={photos} onPhotosChange={setPhotos} />
 
       <Spacer height={Spacing["2xl"]} />
 

@@ -1,7 +1,9 @@
-import React from "react";
-import { View, StyleSheet, ScrollView, Image, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, ScrollView, Image, Alert, Platform, ActivityIndicator, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import * as MailComposer from "expo-mail-composer";
+import { Image as ExpoImage } from "expo-image";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -13,15 +15,17 @@ import { useInspections } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
 
 type InspectionDetailScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionDetail">;
 
 export default function InspectionDetailScreen({ navigation, route }: InspectionDetailScreenProps) {
   const { inspectionId } = route.params;
   const { theme } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { inspections, deleteInspection } = useInspections();
   const insets = useSafeAreaInsets();
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const inspection = inspections.find((i) => i.id === inspectionId);
 
@@ -35,7 +39,8 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("pt-BR", {
+    const locale = language === "pt-BR" ? "pt-BR" : "en-US";
+    return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -107,8 +112,78 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     );
   };
 
-  const handleExportPDF = () => {
-    Alert.alert("Export PDF", "PDF export functionality will be available in the next version.");
+  const handlePrintPdf = async () => {
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      await generateAndPrintPdf({
+        inspection,
+        language: language as "en" | "pt-BR",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      Alert.alert(t.common.error, t.report.shareError);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleSharePdf = async () => {
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      await generateAndSharePdf({
+        inspection,
+        language: language as "en" | "pt-BR",
+      });
+    } catch (error) {
+      console.error("Error sharing PDF:", error);
+      Alert.alert(t.common.error, t.report.shareError);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleEmailPdf = async () => {
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      const isAvailable = await MailComposer.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(t.common.error, "Email is not available on this device");
+        setIsGeneratingPdf(false);
+        return;
+      }
+
+      const pdfUri = await generatePdfUri({
+        inspection,
+        language: language as "en" | "pt-BR",
+      });
+
+      await MailComposer.composeAsync({
+        subject: `${t.report.title} - ${inspection.propertyName}`,
+        body: `${t.report.inspectionDetails}\n\n${getTypeLabel()}\n${formatDate(inspection.date)}`,
+        attachments: [pdfUri],
+      });
+    } catch (error) {
+      console.error("Error emailing PDF:", error);
+      Alert.alert(t.common.error, t.report.shareError);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const showShareOptions = () => {
+    Alert.alert(
+      t.report.share,
+      "",
+      [
+        { text: t.report.generate, onPress: handlePrintPdf },
+        { text: t.report.share, onPress: handleSharePdf },
+        { text: t.report.email, onPress: handleEmailPdf },
+        { text: t.common.cancel, style: "cancel" },
+      ]
+    );
   };
 
   return (
@@ -200,6 +275,34 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           ))}
         </View>
 
+        {inspection.photos && inspection.photos.length > 0 && (
+          <>
+            <Spacer height={Spacing["2xl"]} />
+            <ThemedText type="h2">{t.form.photos}</ThemedText>
+            <Spacer height={Spacing.md} />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.photosContainer}
+            >
+              {inspection.photos.map((photo) => (
+                <View key={photo.id} style={[styles.photoCard, { backgroundColor: theme.backgroundDefault }]}>
+                  <ExpoImage
+                    source={{ uri: photo.uri }}
+                    style={styles.photoImage}
+                    contentFit="cover"
+                  />
+                  {photo.caption ? (
+                    <ThemedText type="small" style={styles.photoCaption}>
+                      {photo.caption}
+                    </ThemedText>
+                  ) : null}
+                </View>
+              ))}
+            </ScrollView>
+          </>
+        )}
+
         {inspection.observations && (
           <>
             <Spacer height={Spacing["2xl"]} />
@@ -228,12 +331,18 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
 
         <Spacer height={Spacing["3xl"]} />
 
-        <Button onPress={handleExportPDF}>
+        <Button onPress={showShareOptions} disabled={isGeneratingPdf}>
           <View style={styles.buttonContent}>
-            <Feather name="download" size={18} color="#FFFFFF" />
-            <ThemedText type="body" style={{ color: "#FFFFFF", marginLeft: Spacing.sm }}>
-              Export PDF
-            </ThemedText>
+            {isGeneratingPdf ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Feather name="share-2" size={18} color="#FFFFFF" />
+                <ThemedText type="body" style={{ color: "#FFFFFF", marginLeft: Spacing.sm }}>
+                  {t.report.share}
+                </ThemedText>
+              </>
+            )}
           </View>
         </Button>
 
@@ -380,5 +489,22 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
+  },
+  photosContainer: {
+    gap: Spacing.md,
+    paddingRight: Spacing.md,
+  },
+  photoCard: {
+    width: 180,
+    borderRadius: BorderRadius.lg,
+    overflow: "hidden",
+  },
+  photoImage: {
+    width: 180,
+    height: 140,
+  },
+  photoCaption: {
+    padding: Spacing.sm,
+    fontSize: 11,
   },
 });
