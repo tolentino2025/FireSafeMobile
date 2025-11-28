@@ -1,21 +1,81 @@
 import React from "react";
+import { View, StyleSheet, Pressable, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { Platform, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
+import InspectionsStackNavigator from "@/navigation/InspectionsStackNavigator";
+import PropertiesStackNavigator from "@/navigation/PropertiesStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { AppColors, Spacing, Shadows } from "@/constants/theme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
+  InspectionsTab: undefined;
+  PropertiesTab: undefined;
   ProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface FloatingActionButtonProps {
+  onPress: () => void;
+}
+
+function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
+  const insets = useSafeAreaInsets();
+  const scale = useSharedValue(1);
+  const rotation = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotation.value}deg` },
+    ],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(1.1, { damping: 15, stiffness: 150 });
+    rotation.value = withSpring(45, { damping: 15, stiffness: 150 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+    rotation.value = withSpring(0, { damping: 15, stiffness: 150 });
+  };
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={[
+        styles.fab,
+        {
+          bottom: insets.bottom + 70,
+        },
+        animatedStyle,
+      ]}
+    >
+      <Feather name="plus" size={28} color="#FFFFFF" />
+    </AnimatedPressable>
+  );
+}
+
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
+  const { t } = useLanguage();
 
   return (
     <Tab.Navigator
@@ -47,9 +107,29 @@ export default function MainTabNavigator() {
         name="HomeTab"
         component={HomeStackNavigator}
         options={{
-          title: "Home",
+          title: t.tabs.home,
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="InspectionsTab"
+        component={InspectionsStackNavigator}
+        options={{
+          title: t.tabs.inspections,
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="clipboard" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="PropertiesTab"
+        component={PropertiesStackNavigator}
+        options={{
+          title: t.tabs.properties,
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="map-pin" size={size} color={color} />
           ),
         }}
       />
@@ -57,7 +137,7 @@ export default function MainTabNavigator() {
         name="ProfileTab"
         component={ProfileStackNavigator}
         options={{
-          title: "Profile",
+          title: t.tabs.profile,
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),
@@ -66,3 +146,18 @@ export default function MainTabNavigator() {
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  fab: {
+    position: "absolute",
+    alignSelf: "center",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: AppColors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
+    ...Shadows.large,
+  },
+});

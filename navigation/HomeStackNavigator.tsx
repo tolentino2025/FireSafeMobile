@@ -1,14 +1,19 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "@/screens/HomeScreen";
-import DetailScreen from "@/screens/DetailScreen";
+import NewInspectionScreen from "@/screens/NewInspectionScreen";
+import InspectionFormScreen from "@/screens/InspectionFormScreen";
+import InspectionDetailScreen from "@/screens/InspectionDetailScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
+import { InspectionType } from "@/contexts/InspectionContext";
 
 export type HomeStackParamList = {
   Home: undefined;
-  Detail: undefined;
+  NewInspection: undefined;
+  InspectionForm: { type: InspectionType; inspectionId?: string };
+  InspectionDetail: { inspectionId: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -26,13 +31,32 @@ export default function HomeStackNavigator() {
         name="Home"
         component={HomeScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="My App" />,
+          headerTitle: () => <HeaderTitle title="FireSafe ITM" />,
         }}
       />
       <Stack.Screen
-        name="Detail"
-        component={DetailScreen}
-        options={{ headerTitle: "Detail" }}
+        name="NewInspection"
+        component={NewInspectionScreen}
+        options={{
+          presentation: "modal",
+          headerTitle: "Nova Inspeção",
+        }}
+      />
+      <Stack.Screen
+        name="InspectionForm"
+        component={InspectionFormScreen}
+        options={{
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+          headerTitle: "Inspeção",
+        }}
+      />
+      <Stack.Screen
+        name="InspectionDetail"
+        component={InspectionDetailScreen}
+        options={{
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+          headerTitle: "Detalhes",
+        }}
       />
     </Stack.Navigator>
   );

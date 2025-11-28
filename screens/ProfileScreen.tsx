@@ -1,194 +1,219 @@
-import { useState } from "react";
-import { StyleSheet, View, TextInput } from "react-native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React from "react";
+import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import Constants from "expo-constants";
 
-import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
+import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import Spacer from "@/components/Spacer";
-import type { ProfileStackParamList } from "@/navigation/ProfileStackNavigator";
+import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 
-type ProfileScreenProps = {
-  navigation: NativeStackNavigationProp<ProfileStackParamList, "Profile">;
-};
-
-export default function ProfileScreen({ navigation }: ProfileScreenProps) {
+export default function ProfileScreen() {
   const { theme, isDark } = useTheme();
+  const { t, language, setLanguage } = useLanguage();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = () => {
-    console.log("Form submitted:", { name, email, password });
+  const toggleLanguage = () => {
+    setLanguage(language === "pt-BR" ? "en" : "pt-BR");
   };
 
-  const inputStyle = [
-    styles.input,
-    {
-      backgroundColor: theme.backgroundDefault,
-      color: theme.text,
-    },
-  ];
+  const handleAbout = () => {
+    Alert.alert(
+      "FireSafe ITM",
+      "Sistema de Inspeção, Teste e Manutenção NFPA 25\n\nVersion: 1.0.0\n\nCompliance with NFPA 25 standards for fire protection systems inspection.",
+      [{ text: "OK" }]
+    );
+  };
+
+  const handleHelp = () => {
+    Alert.alert(
+      t.profile.help,
+      "For support, please contact:\nsupport@firesafeitm.com",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send Email",
+          onPress: () => {
+            Linking.openURL("mailto:support@firesafeitm.com");
+          },
+        },
+      ]
+    );
+  };
+
+  const version = Constants.expoConfig?.version || "1.0.0";
 
   return (
-    <ScreenKeyboardAwareScrollView>
-      <View style={styles.section}>
-        <ThemedText type="h1">Heading 1</ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          32px • Bold
+    <ScreenScrollView>
+      <View style={styles.profileHeader}>
+        <View style={[styles.avatar, { backgroundColor: AppColors.primary }]}>
+          <Feather name="user" size={40} color="#FFFFFF" />
+        </View>
+        <Spacer height={Spacing.lg} />
+        <ThemedText type="h2">{t.profile.inspector}</ThemedText>
+        <ThemedText type="body" style={{ color: theme.textSecondary }}>
+          NFPA 25 Certified
         </ThemedText>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText type="h2">Heading 2</ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          28px • Bold
-        </ThemedText>
+      <Spacer height={Spacing["3xl"]} />
+
+      <ThemedText type="h3" style={styles.sectionTitle}>
+        {t.profile.certifications}
+      </ThemedText>
+      <Spacer height={Spacing.md} />
+      <View style={[styles.certificationCard, { backgroundColor: theme.backgroundDefault }]}>
+        <View style={[styles.certBadge, { backgroundColor: `${AppColors.success}20` }]}>
+          <Feather name="award" size={24} color={AppColors.success} />
+        </View>
+        <View style={styles.certInfo}>
+          <ThemedText type="h4">NFPA 25 ITM</ThemedText>
+          <ThemedText type="small" style={{ color: theme.textSecondary }}>
+            Fire Protection Systems
+          </ThemedText>
+        </View>
+        <Feather name="check-circle" size={20} color={AppColors.success} />
       </View>
 
-      <View style={styles.section}>
-        <ThemedText type="h3">Heading 3</ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          24px • Semi-Bold
-        </ThemedText>
+      <Spacer height={Spacing["3xl"]} />
+
+      <ThemedText type="h3" style={styles.sectionTitle}>
+        Settings
+      </ThemedText>
+      <Spacer height={Spacing.md} />
+
+      <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+        <SettingsRow
+          icon="globe"
+          label={t.profile.language}
+          value={language === "pt-BR" ? "Português (BR)" : "English"}
+          onPress={toggleLanguage}
+        />
+        <SettingsRow
+          icon="info"
+          label={t.profile.about}
+          onPress={handleAbout}
+        />
+        <SettingsRow
+          icon="help-circle"
+          label={t.profile.help}
+          onPress={handleHelp}
+          isLast
+        />
       </View>
 
-      <View style={styles.section}>
-        <ThemedText type="h4">Heading 4</ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          20px • Semi-Bold
-        </ThemedText>
-      </View>
+      <Spacer height={Spacing["3xl"]} />
 
-      <View style={styles.section}>
-        <ThemedText type="body">
-          Body text - This is the default text style for paragraphs and general
-          content.
-        </ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          16px • Regular
-        </ThemedText>
-      </View>
-
-      <View style={styles.section}>
-        <ThemedText type="small">
-          Small text - Used for captions, labels, and secondary information.
-        </ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          14px • Regular
-        </ThemedText>
-      </View>
-
-      <View style={styles.section}>
-        <ThemedText type="link">Link text - Interactive elements</ThemedText>
-        <ThemedText type="small" style={styles.meta}>
-          16px • Regular • Colored
+      <View style={styles.versionContainer}>
+        <ThemedText type="small" style={{ color: theme.textSecondary }}>
+          {t.profile.version} {version}
         </ThemedText>
       </View>
 
       <Spacer height={Spacing["4xl"]} />
+    </ScreenScrollView>
+  );
+}
 
-      <View style={styles.fieldContainer}>
-        <ThemedText type="small" style={styles.label}>
-          Name
+interface SettingsRowProps {
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  value?: string;
+  onPress?: () => void;
+  isLast?: boolean;
+  rightElement?: React.ReactNode;
+}
+
+function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: SettingsRowProps) {
+  const { theme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.settingsRow,
+        !isLast && styles.settingsRowBorder,
+        { borderBottomColor: theme.border, opacity: pressed ? 0.7 : 1 },
+      ]}
+    >
+      <View style={styles.settingsRowLeft}>
+        <Feather name={icon} size={20} color={theme.textSecondary} />
+        <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
+          {label}
         </ThemedText>
-        <TextInput
-          style={inputStyle}
-          value={name}
-          onChangeText={setName}
-          placeholder="Enter your name"
-          placeholderTextColor={isDark ? "#9BA1A6" : "#687076"}
-          autoCapitalize="words"
-          returnKeyType="next"
-        />
       </View>
-
-      <Spacer height={Spacing.lg} />
-
-      <View style={styles.fieldContainer}>
-        <ThemedText type="small" style={styles.label}>
-          Email
-        </ThemedText>
-        <TextInput
-          style={inputStyle}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="your.email@example.com"
-          placeholderTextColor={isDark ? "#9BA1A6" : "#687076"}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          returnKeyType="next"
-        />
-      </View>
-
-      <Spacer height={Spacing.lg} />
-
-      <View style={styles.fieldContainer}>
-        <ThemedText type="small" style={styles.label}>
-          Password
-        </ThemedText>
-        <TextInput
-          style={inputStyle}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Enter a password"
-          placeholderTextColor={isDark ? "#9BA1A6" : "#687076"}
-          secureTextEntry
-          autoCapitalize="none"
-          returnKeyType="next"
-        />
-      </View>
-
-      <Spacer height={Spacing.lg} />
-
-      <Button onPress={handleSubmit}>Submit Form</Button>
-
-      <Spacer height={Spacing["2xl"]} />
-
-      <ThemedText type="h3" style={styles.sectionTitle}>
-        Testing
-      </ThemedText>
-      <Spacer height={Spacing.md} />
-      <Button
-        onPress={() => navigation.navigate("Crash")}
-        style={styles.crashButton}
-      >
-        Crash App
-      </Button>
-    </ScreenKeyboardAwareScrollView>
+      {rightElement ? (
+        rightElement
+      ) : (
+        <View style={styles.settingsRowRight}>
+          {value && (
+            <ThemedText type="small" style={{ color: theme.textSecondary, marginRight: Spacing.sm }}>
+              {value}
+            </ThemedText>
+          )}
+          <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+        </View>
+      )}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: Spacing["3xl"],
+  profileHeader: {
+    alignItems: "center",
+    paddingTop: Spacing.xl,
   },
-  meta: {
-    opacity: 0.5,
-    marginTop: Spacing.sm,
-  },
-  fieldContainer: {
-    width: "100%",
-  },
-  label: {
-    marginBottom: Spacing.sm,
-    fontWeight: "600",
-    opacity: 0.8,
-  },
-  input: {
-    height: Spacing.inputHeight,
-    borderWidth: 0,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    fontSize: Typography.body.fontSize,
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
   },
   sectionTitle: {
-    marginTop: Spacing.xl,
+    marginLeft: Spacing.sm,
   },
-  crashButton: {
-    backgroundColor: "#FF3B30",
+  certificationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+  },
+  certBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  certInfo: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  settingsCard: {
+    borderRadius: BorderRadius.lg,
+    overflow: "hidden",
+  },
+  settingsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+  },
+  settingsRowBorder: {
+    borderBottomWidth: 1,
+  },
+  settingsRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  settingsRowRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  versionContainer: {
+    alignItems: "center",
   },
 });

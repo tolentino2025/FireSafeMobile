@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { StyleSheet, Pressable, ViewStyle, StyleProp } from "react-native";
+import { StyleSheet, Pressable, ViewStyle, StyleProp, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,7 +9,7 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { BorderRadius, Spacing } from "@/constants/theme";
+import { BorderRadius, Spacing, AppColors } from "@/constants/theme";
 
 interface ButtonProps {
   onPress?: () => void;
@@ -53,6 +53,8 @@ export function Button({
     }
   };
 
+  const isStringChild = typeof children === "string";
+
   return (
     <AnimatedPressable
       onPress={disabled ? undefined : onPress}
@@ -62,19 +64,23 @@ export function Button({
       style={[
         styles.button,
         {
-          backgroundColor: theme.link,
+          backgroundColor: AppColors.primary,
           opacity: disabled ? 0.5 : 1,
         },
         style,
         animatedStyle,
       ]}
     >
-      <ThemedText
-        type="body"
-        style={[styles.buttonText, { color: theme.buttonText }]}
-      >
-        {children}
-      </ThemedText>
+      {isStringChild ? (
+        <ThemedText
+          type="body"
+          style={[styles.buttonText, { color: theme.buttonText }]}
+        >
+          {children}
+        </ThemedText>
+      ) : (
+        children
+      )}
     </AnimatedPressable>
   );
 }
@@ -82,7 +88,7 @@ export function Button({
 const styles = StyleSheet.create({
   button: {
     height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.full,
+    borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
   },
