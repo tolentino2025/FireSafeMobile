@@ -15,15 +15,18 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
    - Fire Pumps (Weekly, Monthly, Annual)
    - Hydrants & Piping (Aboveground, Underground, Flow Test, Standpipe)
    - Tanks & Certificates (Water Tank, Hazard Evaluation)
-3. **Property & Company Management**: Track properties and companies for inspections
-4. **Digital Signatures**: Capture signatures on inspection forms
-5. **Checklist System**: Yes/No/N/A responses with PSI value inputs, frequency-based filtering (NFPA 25 compliant)
-6. **Auto-save**: Forms automatically save progress
-7. **Bilingual UI**: Portuguese and English language support
-8. **Photo Capture**: Attach photos to inspections using camera or gallery
-9. **PDF Reports**: Generate professional NFPA 25 compliant PDF reports
-10. **Share & Export**: Share reports via email, WhatsApp, and other apps
-11. **Notifications**: Schedule reminders for upcoming inspections
+3. **Company Management**: Register and manage companies with full contact information (CNPJ, address, phone, email)
+4. **Inspector Management**: Register inspectors with role and contact details
+5. **Property Management**: Track properties linked to companies
+6. **Dropdown Selection**: Select companies and inspectors via dropdowns during inspection creation with auto-fill
+7. **Digital Signatures**: Capture signatures on inspection forms
+8. **Checklist System**: Yes/No/N/A responses with PSI value inputs, frequency-based filtering (NFPA 25 compliant)
+9. **Auto-save**: Forms automatically save progress
+10. **Bilingual UI**: Portuguese and English language support
+11. **Photo Capture**: Attach photos to inspections using camera or gallery
+12. **PDF Reports**: Generate professional NFPA 25 compliant PDF reports with full company and inspector details
+13. **Share & Export**: Share reports via email, WhatsApp, and other apps
+14. **Notifications**: Schedule reminders for upcoming inspections
 
 ## Project Architecture
 
@@ -45,6 +48,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 │   ├── ScreenFlatList.tsx
 │   ├── ScreenKeyboardAwareScrollView.tsx
 │   ├── ScreenScrollView.tsx
+│   ├── SelectPicker.tsx    # Reusable dropdown component
 │   ├── SignatureCapture.tsx
 │   ├── Spacer.tsx
 │   ├── StatCard.tsx
@@ -54,7 +58,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 │   ├── i18n.ts             # Translations (PT-BR/EN)
 │   └── theme.ts            # Colors, spacing, typography
 ├── contexts/
-│   ├── InspectionContext.tsx  # Inspection data state
+│   ├── InspectionContext.tsx  # Inspection, Company, AppUser data state
 │   └── LanguageContext.tsx    # Language preferences
 ├── hooks/
 │   ├── useColorScheme.ts
@@ -68,22 +72,34 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 │   ├── PropertiesStackNavigator.tsx
 │   └── screenOptions.ts
 ├── screens/
+│   ├── CompanyFormScreen.tsx    # Create/edit companies
 │   ├── HomeScreen.tsx
 │   ├── InspectionDetailScreen.tsx
 │   ├── InspectionFormScreen.tsx
 │   ├── InspectionsListScreen.tsx
 │   ├── NewInspectionScreen.tsx
 │   ├── ProfileScreen.tsx
-│   ├── PropertiesScreen.tsx
-│   └── PropertyFormScreen.tsx
+│   ├── PropertiesScreen.tsx     # 3-tab view: Companies, Inspectors, Properties
+│   ├── PropertyFormScreen.tsx
+│   └── UserFormScreen.tsx       # Create/edit inspectors
 └── utils/
-    └── checklistTemplates.ts  # NFPA 25 checklist templates
+    ├── checklistTemplates.ts    # NFPA 25 checklist templates
+    ├── notifications.ts         # Push notification scheduling
+    ├── pdfGenerator.ts          # PDF report generation with company/inspector data
+    └── photoUtils.ts            # Photo handling utilities
 ```
 
 ### Data Persistence
 - Uses AsyncStorage for local data persistence
-- Stores: inspections, properties, companies, language preference
+- Stores: inspections, properties, companies, appUsers, language preference
 - Auto-save functionality for inspection forms
+- Company and inspector data embedded in inspections for PDF generation
+
+### Data Types
+- **Company**: id, name, cnpj, address, city, state, zipCode, contactName, contactPhone, contactEmail
+- **AppUser**: id, name, email, phone, role
+- **Property**: id, name, address, phone, contact, companyId
+- **Inspection**: includes companyId, companyData, inspectorId, inspectorData for full data embedding
 
 ### Design System
 - **Primary Color**: Safety Orange (#FF6B00)
@@ -98,7 +114,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - **Bottom Tab Navigator** with 4 tabs:
   1. Home - Dashboard with stats and recent activity
   2. Inspections - List of all inspections
-  3. Properties - Company and property management
+  3. Properties - 3-tab layout (Companies, Inspectors, Properties)
   4. Profile - Settings and preferences
 - **Floating Action Button** for creating new inspections
 
@@ -109,13 +125,22 @@ npm run dev
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
 
 ## Recent Changes (November 2025)
-- Implemented frequency-based checklist filtering per NFPA 25 standards
-- Each checklist item now has a `frequencies` array defining when it applies (daily, weekly, monthly, quarterly, annually, five_years)
-- UI updated to show all 6 frequency options when creating inspections
-- Checklist automatically updates when frequency is changed for new inspections
-- Existing inspections preserve their saved checklist data when editing
-- Added 80+ new translation keys for comprehensive checklist coverage in PT-BR and EN
-- Fixed critical bug: updateInspection now reads from AsyncStorage to avoid stale React state from closures
+- **Company & Inspector Management System**:
+  - Created CompanyFormScreen for registering companies with CNPJ, address, and contact info
+  - Created UserFormScreen for registering inspectors with role and contact details
+  - Updated PropertiesScreen with 3-tab navigation (Companies, Inspectors, Properties)
+- **Dropdown Selection in Inspection Form**:
+  - Created SelectPicker component for reusable dropdown functionality
+  - InspectionFormScreen now has company and inspector dropdowns
+  - Auto-fill: selecting a company populates property name, address, and phone
+  - Auto-fill: selecting an inspector populates inspector name
+- **Enhanced PDF Reports**:
+  - PDF now includes full company section (name, CNPJ, address, contact)
+  - PDF now includes inspector section (name, role, phone, email)
+  - Company and inspector data embedded in inspection for offline PDF generation
+- **Previous Updates**:
+  - Implemented frequency-based checklist filtering per NFPA 25 standards
+  - Added 80+ translation keys for comprehensive checklist coverage
 
 ## Future Enhancements
 - Cloud sync and backup with external API
