@@ -115,6 +115,7 @@ Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:808
 - Checklist automatically updates when frequency is changed for new inspections
 - Existing inspections preserve their saved checklist data when editing
 - Added 80+ new translation keys for comprehensive checklist coverage in PT-BR and EN
+- Fixed critical bug: updateInspection now reads from AsyncStorage to avoid stale React state from closures
 
 ## Future Enhancements
 - Cloud sync and backup with external API

@@ -110,7 +110,6 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      console.log("Loading data from AsyncStorage...");
       const [storedInspections, storedProperties, storedCompanies] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
@@ -118,11 +117,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       ]);
 
       if (storedInspections) {
-        const parsed = JSON.parse(storedInspections);
-        console.log("Loaded inspections:", parsed.length);
-        setInspections(parsed);
-      } else {
-        console.log("No stored inspections found");
+        setInspections(JSON.parse(storedInspections));
       }
       if (storedProperties) {
         setProperties(JSON.parse(storedProperties));
@@ -143,10 +138,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveInspections = async (newInspections: Inspection[]) => {
     try {
-      console.log("Saving inspections to AsyncStorage, count:", newInspections.length);
       await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(newInspections));
       setInspections(newInspections);
-      console.log("Inspections saved and state updated");
     } catch (error) {
       console.error("Error saving inspections:", error);
       throw error;
@@ -154,7 +147,6 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addInspection = async (inspection: Inspection) => {
-    console.log("Adding inspection:", inspection.id, inspection.propertyName);
     const newInspections = [...inspections, inspection];
     await saveInspections(newInspections);
   };
