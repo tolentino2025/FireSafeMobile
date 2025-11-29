@@ -17,7 +17,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
    - Tanks & Certificates (Water Tank, Hazard Evaluation)
 3. **Property & Company Management**: Track properties and companies for inspections
 4. **Digital Signatures**: Capture signatures on inspection forms
-5. **Checklist System**: Yes/No/N/A responses with PSI value inputs
+5. **Checklist System**: Yes/No/N/A responses with PSI value inputs, frequency-based filtering (NFPA 25 compliant)
 6. **Auto-save**: Forms automatically save progress
 7. **Bilingual UI**: Portuguese and English language support
 8. **Photo Capture**: Attach photos to inspections using camera or gallery
@@ -107,6 +107,14 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 npm run dev
 ```
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
+
+## Recent Changes (November 2025)
+- Implemented frequency-based checklist filtering per NFPA 25 standards
+- Each checklist item now has a `frequencies` array defining when it applies (daily, weekly, monthly, quarterly, annually, five_years)
+- UI updated to show all 6 frequency options when creating inspections
+- Checklist automatically updates when frequency is changed for new inspections
+- Existing inspections preserve their saved checklist data when editing
+- Added 80+ new translation keys for comprehensive checklist coverage in PT-BR and EN
 
 ## Future Enhancements
 - Cloud sync and backup with external API

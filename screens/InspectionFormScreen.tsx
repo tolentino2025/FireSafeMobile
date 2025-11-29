@@ -55,6 +55,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [signature, setSignature] = useState<string | null>(existingInspection?.signature || null);
   const [photos, setPhotos] = useState<InspectionPhoto[]>(existingInspection?.photos || []);
   const [autoSaved, setAutoSaved] = useState(false);
+  const [isNewInspection] = useState(!existingInspection);
 
   const autoSaveOpacity = useSharedValue(0);
 
@@ -88,10 +89,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   }, [propertyName, observations, checklist, showAutoSaveIndicator]);
 
   useEffect(() => {
-    if (!existingInspection) {
+    if (isNewInspection) {
       setChecklist(getChecklistForType(type, frequency, t.checklistItems));
     }
-  }, [frequency, type, existingInspection]);
+  }, [frequency, type, isNewInspection]);
 
   const handleChecklistChange = (id: string, value: "yes" | "no" | "na" | null) => {
     if (Platform.OS !== "web") {
