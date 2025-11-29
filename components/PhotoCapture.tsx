@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { readAsStringAsync } from "expo-file-system";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import Animated, {
@@ -32,6 +33,21 @@ interface PhotoCaptureProps {
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+async function getBase64FromUri(uri: string): Promise<string | undefined> {
+  try {
+    if (Platform.OS === "web") {
+      return undefined;
+    }
+    const base64 = await readAsStringAsync(uri, {
+      encoding: "base64",
+    });
+    return base64;
+  } catch (error) {
+    console.log("Erro ao converter foto para base64:", error);
+    return undefined;
+  }
+}
 
 export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
   const { theme } = useTheme();
@@ -88,11 +104,16 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        console.log("Photo taken, has base64:", !!asset.base64, "base64 length:", asset.base64?.length);
+        let base64Data = asset.base64;
+        
+        if (!base64Data && asset.uri) {
+          base64Data = await getBase64FromUri(asset.uri);
+        }
+        
         const newPhoto: InspectionPhoto = {
           id: Date.now().toString(),
           uri: asset.uri,
-          base64: asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined,
+          base64: base64Data ? `data:image/jpeg;base64,${base64Data}` : undefined,
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -122,11 +143,16 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        console.log("Photo picked, has base64:", !!asset.base64, "base64 length:", asset.base64?.length);
+        let base64Data = asset.base64;
+        
+        if (!base64Data && asset.uri) {
+          base64Data = await getBase64FromUri(asset.uri);
+        }
+        
         const newPhoto: InspectionPhoto = {
           id: Date.now().toString(),
           uri: asset.uri,
-          base64: asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined,
+          base64: base64Data ? `data:image/jpeg;base64,${base64Data}` : undefined,
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -202,7 +228,7 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
               style={[styles.photoCard, { backgroundColor: theme.backgroundDefault }]}
             >
               <Image
-                source={{ uri: photo.uri }}
+                source={{ uri: photo.base64 || photo.uri }}
                 style={styles.photoImage}
                 contentFit="cover"
               />

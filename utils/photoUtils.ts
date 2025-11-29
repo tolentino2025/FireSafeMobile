@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import { readAsStringAsync } from "expo-file-system";
 
 export interface InspectionPhoto {
   id: string;
@@ -14,8 +14,8 @@ export async function ensurePhotoBase64(photo: InspectionPhoto): Promise<Inspect
   if (!photo.uri) return photo;
 
   try {
-    const fileBase64 = await FileSystem.readAsStringAsync(photo.uri, {
-      encoding: FileSystem.EncodingType.Base64,
+    const fileBase64 = await readAsStringAsync(photo.uri, {
+      encoding: "base64",
     });
 
     return {
