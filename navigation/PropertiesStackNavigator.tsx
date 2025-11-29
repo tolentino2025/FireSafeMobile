@@ -3,6 +3,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import PropertiesScreen from "@/screens/PropertiesScreen";
 import PropertyFormScreen from "@/screens/PropertyFormScreen";
+import CompaniesScreen from "@/screens/CompaniesScreen";
+import CompanyFormScreen from "@/screens/CompanyFormScreen";
+import UsersScreen from "@/screens/UsersScreen";
+import UserFormScreen from "@/screens/UserFormScreen";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
@@ -10,6 +14,10 @@ import { getCommonScreenOptions } from "@/navigation/screenOptions";
 export type PropertiesStackParamList = {
   PropertiesList: undefined;
   PropertyForm: { propertyId?: string; companyId?: string; mode: "property" | "company" };
+  Companies: undefined;
+  CompanyForm: { companyId?: string };
+  Users: undefined;
+  UserForm: { userId?: string };
 };
 
 const Stack = createNativeStackNavigator<PropertiesStackParamList>();
@@ -34,6 +42,36 @@ export default function PropertiesStackNavigator() {
       <Stack.Screen
         name="PropertyForm"
         component={PropertyFormScreen}
+        options={{
+          presentation: "modal",
+          headerTitle: "",
+        }}
+      />
+      <Stack.Screen
+        name="Companies"
+        component={CompaniesScreen}
+        options={{
+          headerTitle: t.properties.companies,
+        }}
+      />
+      <Stack.Screen
+        name="CompanyForm"
+        component={CompanyFormScreen}
+        options={{
+          presentation: "modal",
+          headerTitle: "",
+        }}
+      />
+      <Stack.Screen
+        name="Users"
+        component={UsersScreen}
+        options={{
+          headerTitle: t.profile.inspector + "es",
+        }}
+      />
+      <Stack.Screen
+        name="UserForm"
+        component={UserFormScreen}
         options={{
           presentation: "modal",
           headerTitle: "",

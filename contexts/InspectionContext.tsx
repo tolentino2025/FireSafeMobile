@@ -27,6 +27,40 @@ export interface InspectionPhoto {
   timestamp: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  cnpj: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Property {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  contact: string;
+  companyId: string;
+}
+
 export interface Inspection {
   id: string;
   type: InspectionType;
@@ -45,31 +79,19 @@ export interface Inspection {
   photos: InspectionPhoto[];
   scheduledDate?: string;
   notificationId?: string;
+  companyId?: string;
+  companyData?: Company;
+  inspectorId?: string;
+  inspectorData?: AppUser;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface Property {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  contact: string;
-  companyId: string;
-}
-
-export interface Company {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  contact: string;
 }
 
 interface InspectionContextType {
   inspections: Inspection[];
   properties: Property[];
   companies: Company[];
+  appUsers: AppUser[];
   currentInspection: Partial<Inspection> | null;
   isLoading: boolean;
   addInspection: (inspection: Inspection) => Promise<void>;
@@ -82,8 +104,12 @@ interface InspectionContextType {
   addCompany: (company: Company) => Promise<void>;
   updateCompany: (id: string, updates: Partial<Company>) => Promise<void>;
   deleteCompany: (id: string) => Promise<void>;
+  addAppUser: (user: AppUser) => Promise<void>;
+  updateAppUser: (id: string, updates: Partial<AppUser>) => Promise<void>;
+  deleteAppUser: (id: string) => Promise<void>;
   getPropertyById: (id: string) => Property | undefined;
   getCompanyById: (id: string) => Company | undefined;
+  getAppUserById: (id: string) => AppUser | undefined;
   refreshData: () => Promise<void>;
 }
 
@@ -92,6 +118,7 @@ const InspectionContext = createContext<InspectionContextType | undefined>(undef
 const INSPECTIONS_KEY = "@firesafe_inspections";
 const PROPERTIES_KEY = "@firesafe_properties";
 const COMPANIES_KEY = "@firesafe_companies";
+const APP_USERS_KEY = "@firesafe_app_users";
 
 interface InspectionProviderProps {
   children: ReactNode;
@@ -101,6 +128,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -111,10 +139,11 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [storedInspections, storedProperties, storedCompanies] = await Promise.all([
+      const [storedInspections, storedProperties, storedCompanies, storedAppUsers] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
         AsyncStorage.getItem(COMPANIES_KEY),
+        AsyncStorage.getItem(APP_USERS_KEY),
       ]);
 
       if (storedInspections) {
@@ -125,6 +154,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedCompanies) {
         setCompanies(JSON.parse(storedCompanies));
+      }
+      if (storedAppUsers) {
+        setAppUsers(JSON.parse(storedAppUsers));
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -222,8 +254,11 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const updateCompany = async (id: string, updates: Partial<Company>) => {
-    const newCompanies = companies.map((comp) =>
-      comp.id === id ? { ...comp, ...updates } : comp
+    const storedData = await AsyncStorage.getItem(COMPANIES_KEY);
+    const currentCompanies: Company[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newCompanies = currentCompanies.map((comp) =>
+      comp.id === id ? { ...comp, ...updates, updatedAt: new Date().toISOString() } : comp
     );
     await saveCompanies(newCompanies);
   };
@@ -237,12 +272,47 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
     return companies.find((comp) => comp.id === id);
   };
 
+  const saveAppUsers = async (newAppUsers: AppUser[]) => {
+    try {
+      await AsyncStorage.setItem(APP_USERS_KEY, JSON.stringify(newAppUsers));
+      setAppUsers(newAppUsers);
+    } catch (error) {
+      console.error("Error saving app users:", error);
+      throw error;
+    }
+  };
+
+  const addAppUser = async (user: AppUser) => {
+    const newAppUsers = [...appUsers, user];
+    await saveAppUsers(newAppUsers);
+  };
+
+  const updateAppUser = async (id: string, updates: Partial<AppUser>) => {
+    const storedData = await AsyncStorage.getItem(APP_USERS_KEY);
+    const currentAppUsers: AppUser[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newAppUsers = currentAppUsers.map((user) =>
+      user.id === id ? { ...user, ...updates, updatedAt: new Date().toISOString() } : user
+    );
+    await saveAppUsers(newAppUsers);
+  };
+
+  const deleteAppUser = async (id: string) => {
+    const newAppUsers = appUsers.filter((user) => user.id !== id);
+    await saveAppUsers(newAppUsers);
+  };
+
+  const getAppUserById = (id: string) => {
+    return appUsers.find((user) => user.id === id);
+  };
+
   return (
     <InspectionContext.Provider
       value={{
         inspections,
         properties,
         companies,
+        appUsers,
         currentInspection,
         isLoading,
         addInspection,
@@ -255,8 +325,12 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         addCompany,
         updateCompany,
         deleteCompany,
+        addAppUser,
+        updateAppUser,
+        deleteAppUser,
         getPropertyById,
         getCompanyById,
+        getAppUserById,
         refreshData,
       }}
     >

@@ -1,0 +1,175 @@
+Quero implementar no app FireSafeMobile um sistema completo para selecionar empresas e usuários durante o preenchimento da inspeção, com preenchimento automático dos dados.
+Hoje, o usuário precisa digitar manualmente endereço, nome da empresa, responsável, telefone etc. Quero eliminar isso.
+
+Implemente as seguintes mudanças:
+
+1) Criar módulos de cadastro de Empresas e Usuários
+
+Já existe no app o conceito de properties/companies, mas preciso que funcione de forma mais completa.
+
+Cada empresa deve ter:
+
+export interface Company {
+  id: string;
+  name: string;
+  cnpj: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+Cada usuário técnico (inspetor) deve ter:
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string; // Inspector, Supervisor etc.
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+Esses dados devem ser persistidos no AsyncStorage dentro do InspectionContext, com funções:
+
+addCompany(company)
+
+updateCompany(company)
+
+removeCompany(id)
+
+addAppUser(user)
+
+updateAppUser(user)
+
+removeAppUser(id)
+
+getCompanies()
+
+getAppUsers()
+
+2) Criar telas de cadastro/listagem
+
+Criar telas:
+
+CompaniesScreen.tsx
+
+CompanyFormScreen.tsx
+
+UsersScreen.tsx
+
+UserFormScreen.tsx
+
+Usar o mesmo padrão das telas existentes (PropertiesScreen, PropertyFormScreen).
+
+3) Durante a inspeção, permitir selecionar Empresa e Usuário em dropdown
+
+Na NewInspectionScreen e InspectionFormScreen, adicionar dois novos campos:
+
+Empresa (dropdown)
+
+Lista carregada de companies.
+
+Ao selecionar a empresa:
+
+preencher automaticamente:
+
+endereço
+
+cidade
+
+estado
+
+CEP
+
+contato
+
+telefone
+
+e-mail
+
+salvar esses valores dentro da inspeção.
+
+Usuário Inspetor (dropdown)
+
+Lista carregada de appUsers.
+
+Ao selecionar o inspetor:
+
+preencher os campos internos da inspeção:
+
+inspectorName
+
+inspectorEmail
+
+inspectorPhone
+
+Esses campos devem ser adicionados ao tipo Inspection.
+
+4) Ajustar o tipo Inspection
+
+Incluir:
+
+companyId: string;
+companyData: Company; // snapshot completo da empresa no momento da inspeção
+
+inspectorId: string;
+inspectorData: AppUser; // snapshot completo do inspetor
+
+
+E garantir que, ao salvar a inspeção, o snapshot seja persistido para que o relatório seja consistente mesmo se os dados mudarem no futuro.
+
+5) Atualizar geração de PDF
+
+O PDF deve exibir automaticamente:
+
+Dados da empresa selecionada
+
+Dados do inspetor
+
+Endereço completo
+
+Contatos
+
+CNPJ
+
+Usar o snapshot salvo em inspection.companyData e inspection.inspectorData.
+
+6) Entregar os arquivos completos ao final
+
+Quero receber:
+
+InspectionContext.tsx atualizado
+
+Telas novas (CompaniesScreen, CompanyFormScreen, UsersScreen, UserFormScreen)
+
+Alterações em NewInspectionScreen
+
+Alterações em InspectionFormScreen
+
+Alterações no tipo Inspection
+
+Alterações na geração do PDF (pdfGenerator.ts)
+
+Qualquer componente novo criado (dropdown, selector etc.)
+
+E um resumo das mudanças realizadas.
+
+Objetivo final:
+
+Durante a inspeção:
+
+✔ o usuário seleciona a empresa no dropdown
+✔ todos os dados são preenchidos automaticamente via cadastro
+✔ o usuário seleciona o inspetor no dropdown
+✔ todos os dados do inspetor entram automaticamente
+✔ tudo é salvo na inspeção
+✔ o PDF usa essas informações automaticamente
