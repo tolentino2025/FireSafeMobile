@@ -1,6 +1,7 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { Inspection, InspectionType } from "@/contexts/InspectionContext";
+import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -63,19 +64,6 @@ const getChecklistValueSymbol = (value: "yes" | "no" | "na" | null): string => {
       return '<span style="color: #6B7280;">N/A</span>';
     default:
       return '<span style="color: #9CA3AF;">-</span>';
-  }
-};
-
-const getStatusColor = (value: "yes" | "no" | "na" | null): string => {
-  switch (value) {
-    case "yes":
-      return "#22863A";
-    case "no":
-      return "#DC2626";
-    case "na":
-      return "#6B7280";
-    default:
-      return "#9CA3AF";
   }
 };
 
@@ -144,7 +132,18 @@ const translations = {
   },
 };
 
-export const generateInspectionPdfHtml = (options: GeneratePdfOptions): string => {
+interface PhotoWithBase64 {
+  id: string;
+  uri: string;
+  base64?: string;
+  caption: string;
+  timestamp: string;
+}
+
+const generateInspectionPdfHtmlWithPhotos = (
+  options: GeneratePdfOptions,
+  photosWithBase64: PhotoWithBase64[]
+): string => {
   const { inspection, language, companyName = "FireSafe ITM" } = options;
   const t = translations[language];
   const typeName = INSPECTION_TYPE_NAMES[inspection.type][language === "pt-BR" ? "pt" : "en"];
@@ -162,20 +161,19 @@ export const generateInspectionPdfHtml = (options: GeneratePdfOptions): string =
     )
     .join("");
 
-  console.log("PDF Photos:", inspection.photos?.length, inspection.photos?.map(p => ({ hasBase64: !!p.base64, base64Length: p.base64?.length })));
+  const validPhotos = photosWithBase64.filter((photo) => photo.base64);
   
   const photosHtml =
-    inspection.photos && inspection.photos.length > 0
+    validPhotos.length > 0
       ? `
     <div style="margin-top: 30px; page-break-inside: avoid;">
       <h2 style="color: #1A365D; border-bottom: 2px solid #FF6B00; padding-bottom: 8px; font-size: 16px;">${t.photos}</h2>
       <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;">
-        ${inspection.photos
-          .filter((photo) => photo.base64 || photo.uri)
+        ${validPhotos
           .map(
             (photo) => `
           <div style="width: 200px; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
-            <img src="${photo.base64 || photo.uri}" style="width: 100%; height: 150px; object-fit: cover;" />
+            <img src="${photo.base64}" style="width: 100%; height: 150px; object-fit: cover;" />
             ${photo.caption ? `<p style="margin: 0; padding: 8px; font-size: 11px; color: #4B5563;">${sanitizeHtml(photo.caption)}</p>` : ""}
           </div>
         `
@@ -441,12 +439,14 @@ export const generateInspectionPdfHtml = (options: GeneratePdfOptions): string =
 };
 
 export const generateAndPrintPdf = async (options: GeneratePdfOptions): Promise<void> => {
-  const html = generateInspectionPdfHtml(options);
+  const photosWithBase64 = await ensureAllPhotosBase64(options.inspection.photos || []);
+  const html = generateInspectionPdfHtmlWithPhotos(options, photosWithBase64);
   await Print.printAsync({ html });
 };
 
 export const generatePdfUri = async (options: GeneratePdfOptions): Promise<string> => {
-  const html = generateInspectionPdfHtml(options);
+  const photosWithBase64 = await ensureAllPhotosBase64(options.inspection.photos || []);
+  const html = generateInspectionPdfHtmlWithPhotos(options, photosWithBase64);
   const { uri } = await Print.printToFileAsync({ html });
   return uri;
 };
@@ -465,3 +465,5 @@ export const generateAndSharePdf = async (options: GeneratePdfOptions): Promise<
     throw new Error("Sharing is not available on this device");
   }
 };
+
+export const generateInspectionPdfHtml = generateInspectionPdfHtmlWithPhotos;

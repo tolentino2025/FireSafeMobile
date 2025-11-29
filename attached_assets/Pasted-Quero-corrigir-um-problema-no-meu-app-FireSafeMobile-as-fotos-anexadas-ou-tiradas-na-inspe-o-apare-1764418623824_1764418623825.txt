@@ -1,0 +1,101 @@
+Quero corrigir um problema no meu app FireSafeMobile: as fotos anexadas ou tiradas na inspeção aparecem normalmente dentro do app, mas não estão sendo carregadas no relatório PDF. Isso ocorre porque o gerador de PDFs (pdfGenerator.ts) usa photo.base64 || photo.uri, e quando não existe base64 ele tenta renderizar <img src="file:///...">, o que não funciona dentro do expo-print.
+
+Quero que você corrija definitivamente esse problema implementando as mudanças abaixo:
+
+1) Criar uma função utilitária para garantir base64 em todas as fotos
+
+No arquivo onde você achar melhor (utils/pdfGenerator.ts ou utils/photoUtils.ts), crie:
+
+import * as FileSystem from "expo-file-system";
+import { InspectionPhoto } from "@/types/Inspection";
+
+export async function ensurePhotoBase64(photo: InspectionPhoto): Promise<InspectionPhoto> {
+  // já tem base64? manter
+  if (photo.base64) return photo;
+
+  // não tem uri? não faz nada
+  if (!photo.uri) return photo;
+
+  try {
+    const fileBase64 = await FileSystem.readAsStringAsync(photo.uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    return {
+      ...photo,
+      base64: `data:image/jpeg;base64,${fileBase64}`,
+    };
+  } catch (error) {
+    console.log("Erro ao converter foto para base64", error);
+    return photo;
+  }
+}
+
+2) No pdfGenerator.ts, antes de montar o HTML, converter TODAS as fotos
+
+Substituir o trecho onde hoje ele usa inspection.photos diretamente, por:
+
+const photosWithBase64 = inspection.photos
+  ? await Promise.all(inspection.photos.map(ensurePhotoBase64))
+  : [];
+
+
+E usar somente photo.base64 dentro do HTML:
+
+<img src="${photo.base64}" style="width: 100%; height: 150px; object-fit: cover;" />
+
+
+Nunca mais usar photo.uri dentro de <img>.
+
+3) Garantir que inspeções antigas continuem funcionando
+
+Se a inspeção for antiga e só tiver uri, a função ensurePhotoBase64() deve resolver isso automaticamente antes do HTML ser gerado.
+
+4) No PhotoCapture, garantir que fotos novas sempre salvem base64
+
+Verificar se ImagePicker.launchCameraAsync() devolve base64; se não devolver, gerar manualmente com FileSystem.readAsStringAsync.
+
+Exemplo:
+
+if (!asset.base64) {
+  const backupBase64 = await FileSystem.readAsStringAsync(asset.uri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  asset.base64 = backupBase64;
+}
+
+const newPhoto: InspectionPhoto = {
+  id: Date.now().toString(),
+  uri: asset.uri,
+  base64: `data:image/jpeg;base64,${asset.base64}`,
+  caption: "",
+  timestamp: new Date().toISOString(),
+};
+
+5) Garantir que o HTML use somente base64
+
+Remover completamente o fallback:
+
+photo.base64 || photo.uri
+
+
+E deixar apenas:
+
+photo.base64
+
+6) No final, me entregue os arquivos atualizados
+
+Quero receber:
+
+pdfGenerator.ts completo
+
+qualquer arquivo de utilidade novo (photoUtils.ts, se criado)
+
+alterações no PhotoCapture.tsx
+
+alterações no tipo InspectionPhoto, se necessárias
+
+E uma explicação de tudo que foi modificado.
+
+Objetivo final:
+🔧 O PDF deve sempre carregar todas as fotos da inspeção, independentemente se vieram da câmera, galeria ou inspeções antigas que só tinham uri
