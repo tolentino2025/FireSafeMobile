@@ -9,6 +9,7 @@ import { ThemedText } from "@/components/ThemedText";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ThemeMode } from "@/contexts/ThemeContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import {
   getNotificationSettings,
@@ -19,7 +20,7 @@ import {
 } from "@/utils/notifications";
 
 export default function ProfileScreen() {
-  const { theme, isDark } = useTheme();
+  const { theme, isDark, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
@@ -37,6 +38,24 @@ export default function ProfileScreen() {
 
   const toggleLanguage = () => {
     setLanguage(language === "pt-BR" ? "en" : "pt-BR");
+  };
+
+  const handleThemeChange = (newMode: ThemeMode) => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    setMode(newMode);
+  };
+
+  const getThemeModeLabel = (themeMode: ThemeMode) => {
+    switch (themeMode) {
+      case "light":
+        return t.profile.themeLight;
+      case "dark":
+        return t.profile.themeDark;
+      case "system":
+        return t.profile.themeSystem;
+    }
   };
 
   const handleAbout = () => {
@@ -144,6 +163,35 @@ export default function ProfileScreen() {
       <Spacer height={Spacing["3xl"]} />
 
       <ThemedText type="h3" style={styles.sectionTitle}>
+        {t.profile.theme}
+      </ThemedText>
+      <Spacer height={Spacing.md} />
+
+      <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+        <ThemeOption
+          icon="sun"
+          label={t.profile.themeLight}
+          selected={mode === "light"}
+          onPress={() => handleThemeChange("light")}
+        />
+        <ThemeOption
+          icon="moon"
+          label={t.profile.themeDark}
+          selected={mode === "dark"}
+          onPress={() => handleThemeChange("dark")}
+        />
+        <ThemeOption
+          icon="smartphone"
+          label={t.profile.themeSystem}
+          selected={mode === "system"}
+          onPress={() => handleThemeChange("system")}
+          isLast
+        />
+      </View>
+
+      <Spacer height={Spacing["3xl"]} />
+
+      <ThemedText type="h3" style={styles.sectionTitle}>
         Settings
       </ThemedText>
       <Spacer height={Spacing.md} />
@@ -224,14 +272,47 @@ function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: Sett
         rightElement
       ) : (
         <View style={styles.settingsRowRight}>
-          {value && (
+          {value ? (
             <ThemedText type="small" style={{ color: theme.textSecondary, marginRight: Spacing.sm }}>
               {value}
             </ThemedText>
-          )}
+          ) : null}
           <Feather name="chevron-right" size={20} color={theme.textSecondary} />
         </View>
       )}
+    </Pressable>
+  );
+}
+
+interface ThemeOptionProps {
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  isLast?: boolean;
+}
+
+function ThemeOption({ icon, label, selected, onPress, isLast }: ThemeOptionProps) {
+  const { theme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.settingsRow,
+        !isLast && styles.settingsRowBorder,
+        { borderBottomColor: theme.border, opacity: pressed ? 0.7 : 1 },
+      ]}
+    >
+      <View style={styles.settingsRowLeft}>
+        <Feather name={icon} size={20} color={theme.textSecondary} />
+        <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
+          {label}
+        </ThemedText>
+      </View>
+      <View style={[styles.radioOuter, { borderColor: selected ? AppColors.primary : theme.border }]}>
+        {selected ? <View style={[styles.radioInner, { backgroundColor: AppColors.primary }]} /> : null}
+      </View>
     </Pressable>
   );
 }
@@ -289,6 +370,19 @@ const styles = StyleSheet.create({
   settingsRowRight: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   versionContainer: {
     alignItems: "center",

@@ -8,8 +8,22 @@ import { StatusBar } from "expo-status-bar";
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ThemeProvider, useThemeContext } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { InspectionProvider } from "@/contexts/InspectionContext";
+
+function AppContent() {
+  const { isDark } = useThemeContext();
+  
+  return (
+    <>
+      <NavigationContainer>
+        <MainTabNavigator />
+      </NavigationContainer>
+      <StatusBar style={isDark ? "light" : "dark"} />
+    </>
+  );
+}
 
 export default function App() {
   return (
@@ -17,14 +31,13 @@ export default function App() {
       <SafeAreaProvider>
         <GestureHandlerRootView style={styles.root}>
           <KeyboardProvider>
-            <LanguageProvider>
-              <InspectionProvider>
-                <NavigationContainer>
-                  <MainTabNavigator />
-                </NavigationContainer>
-              </InspectionProvider>
-            </LanguageProvider>
-            <StatusBar style="auto" />
+            <ThemeProvider>
+              <LanguageProvider>
+                <InspectionProvider>
+                  <AppContent />
+                </InspectionProvider>
+              </LanguageProvider>
+            </ThemeProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>
       </SafeAreaProvider>

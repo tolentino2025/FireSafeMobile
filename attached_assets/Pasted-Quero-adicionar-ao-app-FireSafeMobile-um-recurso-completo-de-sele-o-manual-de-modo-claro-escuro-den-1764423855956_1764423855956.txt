@@ -1,0 +1,119 @@
+Quero adicionar ao app FireSafeMobile um recurso completo de seleção manual de modo claro/escuro dentro da aba Perfil.
+Atualmente o app detecta tema automaticamente ou usa o padrão do sistema dependendo do useColorScheme, mas quero permitir ao usuário escolher manualmente:
+
+Modo Claro (Light)
+
+Modo Escuro (Dark)
+
+Automático (seguir o tema do sistema)
+
+Implemente as seguintes mudanças:
+
+1) Criar ThemeContext para gerenciar o tema manualmente
+
+Criar arquivo contexts/ThemeContext.tsx com:
+
+estado: "light" | "dark" | "system"
+
+função: setTheme(mode)
+
+persistência via AsyncStorage (@firesafe_theme_preference)
+
+função que resolve o tema final usado pelo app:
+
+const resolvedTheme = theme === "system" ? deviceTheme : theme;
+
+2) Atualizar o App.tsx
+
+Envolver toda a aplicação com o ThemeContextProvider.
+
+Alterar os componentes que usam useColorScheme() para usar o ThemeContext.
+
+O theme.ts deve receber o tema resolvido pelo contexto.
+
+3) Atualizar o design system
+
+No arquivo constants/theme.ts, permitir dois conjuntos de cores:
+
+lightTheme
+
+darkTheme
+
+E exportar um resolver:
+
+export function getTheme(mode: "light" | "dark") {
+  return mode === "light" ? lightTheme : darkTheme;
+}
+
+4) Criar componente de seleção do tema na aba Perfil
+
+Na tela ProfileScreen.tsx, criar uma seção:
+
+Tema do Aplicativo
+
+Radio Buttons ou Dropdown:
+
+"Claro"
+
+"Escuro"
+
+"Automático (Sistema)"
+
+Exemplo de UI:
+
+<ThemedView style={{ marginTop: 20 }}>
+  <ThemedText style={{ fontSize: 18, fontWeight: "bold" }}>
+    Tema do Aplicativo
+  </ThemedText>
+
+  <RadioButton
+    label="Claro"
+    selected={theme === "light"}
+    onPress={() => setTheme("light")}
+  />
+
+  <RadioButton
+    label="Escuro"
+    selected={theme === "dark"}
+    onPress={() => setTheme("dark")}
+  />
+
+  <RadioButton
+    label="Automático (Sistema)"
+    selected={theme === "system"}
+    onPress={() => setTheme("system")}
+  />
+</ThemedView>
+
+5) Ajustar todos os componentes Themed (ThemedText, ThemedView, etc.)
+
+Eles devem usar o tema vindo do ThemeContext:
+
+const { resolvedTheme } = useTheme();
+const colors = getTheme(resolvedTheme);
+
+6) Entregar ao final os arquivos completos:
+
+ThemeContext.tsx
+
+atualizações no App.tsx
+
+atualizações em theme.ts
+
+atualizações nos componentes Themed
+
+atualização completa da ProfileScreen.tsx
+
+qualquer componente de RadioButton criado
+
+E um resumo do que foi feito.
+
+Objetivo final:
+
+Na aba Perfil, o usuário deve poder escolher:
+
+🌞 Claro
+🌚 Escuro
+🌓 Automático (seguir sistema)
+
+E o app inteiro deve reagir imediatamente ao tema selecionado.
