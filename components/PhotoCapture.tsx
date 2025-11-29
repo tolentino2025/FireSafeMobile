@@ -235,7 +235,7 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
           <Feather name="image" size={32} color={theme.placeholder} />
           <ThemedText type="small" style={{ color: theme.placeholder, marginTop: Spacing.sm }}>
             {Platform.OS === "web"
-              ? "Run in Expo Go to use camera"
+              ? t.common.runInExpoGo
               : t.form.addPhoto}
           </ThemedText>
         </View>

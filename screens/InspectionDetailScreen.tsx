@@ -11,7 +11,7 @@ import { Button } from "@/components/Button";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections } from "@/contexts/InspectionContext";
+import { useInspections, InspectionFrequency } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -90,6 +90,18 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     }
   };
 
+  const getFrequencyLabel = (freq: InspectionFrequency) => {
+    const frequencyMapping: Record<InspectionFrequency, keyof typeof t.form.frequencies> = {
+      daily: "daily",
+      weekly: "weekly",
+      monthly: "monthly",
+      quarterly: "quarterly",
+      annually: "annually",
+      five_years: "fiveYears",
+    };
+    return t.form.frequencies[frequencyMapping[freq]];
+  };
+
   const handleEdit = () => {
     navigation.navigate("InspectionForm", { type: inspection.type, inspectionId: inspection.id });
   };
@@ -97,7 +109,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   const handleDelete = () => {
     Alert.alert(
       t.common.delete,
-      "Are you sure you want to delete this inspection?",
+      t.common.deleteConfirmation,
       [
         { text: t.common.cancel, style: "cancel" },
         {
@@ -150,7 +162,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     try {
       const isAvailable = await MailComposer.isAvailableAsync();
       if (!isAvailable) {
-        Alert.alert(t.common.error, "Email is not available on this device");
+        Alert.alert(t.common.error, t.common.emailNotAvailable);
         setIsGeneratingPdf(false);
         return;
       }
@@ -216,12 +228,12 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           <InfoRow icon="user" label={t.form.inspector} value={inspection.inspectorName || "-"} />
           <InfoRow icon="file-text" label={t.form.contractNo} value={inspection.contractNo || "-"} />
           <InfoRow icon="calendar" label={t.form.date} value={formatDate(inspection.date)} />
-          <InfoRow icon="clock" label={t.form.frequency} value={t.form.frequencies[inspection.frequency]} isLast />
+          <InfoRow icon="clock" label={t.form.frequency} value={getFrequencyLabel(inspection.frequency)} isLast />
         </View>
 
         <Spacer height={Spacing["2xl"]} />
 
-        <ThemedText type="h2">Checklist</ThemedText>
+        <ThemedText type="h2">{t.checklist.title}</ThemedText>
         <Spacer height={Spacing.lg} />
 
         <View style={[styles.checklistCard, { backgroundColor: theme.backgroundDefault }]}>

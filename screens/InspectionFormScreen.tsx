@@ -49,7 +49,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [date, setDate] = useState(existingInspection?.date || new Date().toISOString().split("T")[0]);
   const [frequency, setFrequency] = useState<InspectionFrequency>(existingInspection?.frequency || "weekly");
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
-    existingInspection?.checklist || getChecklistForType(type)
+    existingInspection?.checklist || getChecklistForType(type, t.checklistItems)
   );
   const [observations, setObservations] = useState(existingInspection?.observations || "");
   const [signature, setSignature] = useState<string | null>(existingInspection?.signature || null);
@@ -219,7 +219,15 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   };
 
   const getFrequencyLabel = (freq: InspectionFrequency) => {
-    return t.form.frequencies[freq];
+    const frequencyMapping: Record<InspectionFrequency, keyof typeof t.form.frequencies> = {
+      daily: "daily",
+      weekly: "weekly",
+      monthly: "monthly",
+      quarterly: "quarterly",
+      annually: "annually",
+      five_years: "fiveYears",
+    };
+    return t.form.frequencies[frequencyMapping[freq]];
   };
 
   const inputStyle = [
