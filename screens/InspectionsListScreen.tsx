@@ -2,12 +2,6 @@ import React, { useState, useMemo } from "react";
 import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
 
 import { ScreenFlatList } from "@/components/ScreenFlatList";
 import { ThemedText } from "@/components/ThemedText";
@@ -23,36 +17,13 @@ type InspectionsListScreenProps = {
   navigation: NativeStackNavigationProp<InspectionsStackParamList, "InspectionsList">;
 };
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export default function InspectionsListScreen({ navigation }: InspectionsListScreenProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const { inspections } = useInspections();
-  const insets = useSafeAreaInsets();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-
-  const fabScale = useSharedValue(1);
-  const fabRotation = useSharedValue(0);
-
-  const fabAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: fabScale.value },
-      { rotate: `${fabRotation.value}deg` },
-    ],
-  }));
-
-  const handleFabPressIn = () => {
-    fabScale.value = withSpring(1.1, { damping: 15, stiffness: 150 });
-    fabRotation.value = withSpring(45, { damping: 15, stiffness: 150 });
-  };
-
-  const handleFabPressOut = () => {
-    fabScale.value = withSpring(1, { damping: 15, stiffness: 150 });
-    fabRotation.value = withSpring(0, { damping: 15, stiffness: 150 });
-  };
 
   const filteredInspections = useMemo(() => {
     let result = [...inspections];
@@ -159,33 +130,14 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
   );
 
   return (
-    <>
-      <ScreenFlatList
-        data={filteredInspections}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmpty}
-        contentContainerStyle={styles.listContent}
-      />
-
-      <AnimatedPressable
-        onPress={() => navigation.navigate("InspectionForm", { type: "wet_pipe" })}
-        onPressIn={handleFabPressIn}
-        onPressOut={handleFabPressOut}
-        style={[
-          styles.fab,
-          { 
-            bottom: insets.bottom + 70,
-            backgroundColor: fullTheme.colors.primary,
-            ...fullTheme.shadows.large,
-          },
-          fabAnimatedStyle,
-        ]}
-      >
-        <Feather name="plus" size={28} color="#FFFFFF" />
-      </AnimatedPressable>
-    </>
+    <ScreenFlatList
+      data={filteredInspections}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id}
+      ListHeaderComponent={renderHeader}
+      ListEmptyComponent={renderEmpty}
+      contentContainerStyle={styles.listContent}
+    />
   );
 }
 
@@ -221,16 +173,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   listContent: {
-    paddingBottom: 80,
-  },
-  fab: {
-    position: "absolute",
-    alignSelf: "center",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 100,
+    paddingBottom: 40,
   },
 });
