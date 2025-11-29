@@ -10,21 +10,26 @@ interface StatCardProps {
   title: string;
   value: number;
   icon: keyof typeof Feather.glyphMap;
-  color: string;
+  color?: string;
 }
 
 export function StatCard({ title, value, icon, color }: StatCardProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
+  
+  const iconColor = color || fullTheme.colors.primary;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundDefault }]}>
-      <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
-        <Feather name={icon} size={20} color={color} />
+    <View style={[styles.container, { 
+      backgroundColor: fullTheme.colors.cardBackground,
+      borderColor: fullTheme.colors.border,
+    }]}>
+      <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
+        <Feather name={icon} size={20} color={iconColor} />
       </View>
       <ThemedText type="h2" style={styles.value}>
         {value}
       </ThemedText>
-      <ThemedText type="small" style={{ color: theme.textSecondary }}>
+      <ThemedText type="small" secondary>
         {title}
       </ThemedText>
     </View>
@@ -37,6 +42,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
+    borderWidth: 1,
   },
   iconContainer: {
     width: 40,

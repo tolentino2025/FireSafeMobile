@@ -10,7 +10,7 @@ import Animated, {
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Property } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface PropertyCardProps {
   property: Property;
@@ -20,7 +20,7 @@ interface PropertyCardProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function PropertyCard({ property, onPress }: PropertyCardProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -42,29 +42,32 @@ export function PropertyCard({ property, onPress }: PropertyCardProps) {
       onPressOut={handlePressOut}
       style={[
         styles.container,
-        { backgroundColor: theme.backgroundDefault },
+        { 
+          backgroundColor: fullTheme.colors.cardBackground,
+          borderColor: fullTheme.colors.border,
+        },
         animatedStyle,
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${AppColors.secondary}15` }]}>
-        <Feather name="home" size={24} color={AppColors.secondary} />
+      <View style={[styles.iconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name="home" size={24} color={fullTheme.colors.primary} />
       </View>
       <View style={styles.content}>
         <ThemedText type="h4" numberOfLines={1}>
           {property.name}
         </ThemedText>
         {property.address ? (
-          <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+          <ThemedText type="small" secondary numberOfLines={1}>
             {property.address}
           </ThemedText>
         ) : null}
         {property.contact ? (
-          <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+          <ThemedText type="small" secondary numberOfLines={1}>
             {property.contact}
           </ThemedText>
         ) : null}
       </View>
-      <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
     </AnimatedPressable>
   );
 }
@@ -75,6 +78,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
   },
   iconContainer: {
     width: 48,

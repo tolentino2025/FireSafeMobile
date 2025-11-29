@@ -6,7 +6,7 @@ import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface SignatureCaptureProps {
   signature: string | null;
@@ -14,7 +14,7 @@ interface SignatureCaptureProps {
 }
 
 export function SignatureCapture({ signature, onSignatureChange }: SignatureCaptureProps) {
-  const { theme, isDark } = useTheme();
+  const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
@@ -47,14 +47,17 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
     onSignatureChange(null);
   };
 
-  const strokeColor = isDark ? "#FFFFFF" : "#000000";
+  const strokeColor = isDark ? "#FFFFFF" : fullTheme.colors.textPrimary;
 
   return (
     <View style={styles.container}>
       <View
         style={[
           styles.canvasContainer,
-          { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+          { 
+            backgroundColor: fullTheme.colors.cardBackground, 
+            borderColor: fullTheme.colors.border 
+          },
         ]}
         {...panResponder.panHandlers}
       >
@@ -84,7 +87,7 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
 
         {paths.length === 0 && !currentPath && (
           <View style={styles.placeholder}>
-            <ThemedText type="small" style={{ color: theme.textSecondary }}>
+            <ThemedText type="small" secondary>
               {t.form.signature}
             </ThemedText>
           </View>
@@ -95,11 +98,14 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
         onPress={handleClear}
         style={({ pressed }) => [
           styles.clearButton,
-          { backgroundColor: theme.backgroundSecondary, opacity: pressed ? 0.7 : 1 },
+          { 
+            backgroundColor: fullTheme.colors.backgroundSecondary, 
+            opacity: pressed ? 0.7 : 1 
+          },
         ]}
       >
-        <Feather name="trash-2" size={16} color={theme.textSecondary} />
-        <ThemedText type="small" style={{ color: theme.textSecondary, marginLeft: Spacing.xs }}>
+        <Feather name="trash-2" size={16} color={fullTheme.colors.textSecondary} />
+        <ThemedText type="small" secondary style={{ marginLeft: Spacing.xs }}>
           {t.form.clearSignature}
         </ThemedText>
       </Pressable>

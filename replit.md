@@ -7,6 +7,8 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - **Version**: 1.0.0
 - **Platform**: iOS, Android, Web (Expo)
 - **Language Support**: Portuguese (BR) and English
+- **Theme Support**: Light, Dark, and System automatic modes
+- **Architecture**: Offline-first with AsyncStorage - all data saved locally on device
 
 ## Key Features
 1. **Inspection Management**: Create, view, edit, and delete fire safety inspections
@@ -56,14 +58,15 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 │   └── ThemedView.tsx
 ├── constants/
 │   ├── i18n.ts             # Translations (PT-BR/EN)
-│   └── theme.ts            # Colors, spacing, typography
+│   └── theme.ts            # Colors, spacing, typography, gradients
 ├── contexts/
 │   ├── InspectionContext.tsx  # Inspection, Company, AppUser data state
-│   └── LanguageContext.tsx    # Language preferences
+│   ├── LanguageContext.tsx    # Language preferences
+│   └── ThemeContext.tsx       # Theme mode and fullTheme provider
 ├── hooks/
 │   ├── useColorScheme.ts
 │   ├── useScreenInsets.ts
-│   └── useTheme.ts
+│   └── useTheme.ts            # Returns fullTheme object with complete theme data
 ├── navigation/
 │   ├── HomeStackNavigator.tsx
 │   ├── InspectionsStackNavigator.tsx
@@ -91,7 +94,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 
 ### Data Persistence
 - Uses AsyncStorage for local data persistence
-- Stores: inspections, properties, companies, appUsers, language preference
+- Stores: inspections, properties, companies, appUsers, language preference, theme mode
 - Auto-save functionality for inspection forms
 - Company and inspector data embedded in inspections for PDF generation
 
@@ -101,21 +104,56 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - **Property**: id, name, address, phone, contact, companyId
 - **Inspection**: includes companyId, companyData, inspectorId, inspectorData for full data embedding
 
-### Design System
-- **Primary Color**: Safety Orange (#FF6B00)
-- **Secondary Color**: Deep Blue (#1A365D)
-- **Success**: Forest Green (#22863A)
+### Design System - Red/Black Professional Theme
+- **Primary Color**: Fire Red (#DC2626)
+- **Primary Dark**: Dark Red (#991B1B) 
+- **Primary Light**: Light Red (#FCA5A5)
+- **Success**: Emerald Green (#10B981)
 - **Warning**: Amber (#F59E0B)
-- **Error**: Fire Red (#DC2626)
-- iOS Liquid Glass design aesthetic
-- Feather icons from @expo/vector-icons
+- **Error**: Rose Red (#EF4444)
+
+#### Light Theme
+- Background: White (#FFFFFF)
+- Card Background: Gray 50 (#F9FAFB)
+- Text Primary: Gray 900 (#111827)
+- Text Secondary: Gray 500 (#6B7280)
+- Border: Gray 200 (#E5E7EB)
+
+#### Dark Theme  
+- Background: Gray 950 (#030712)
+- Card Background: Gray 900 (#111827)
+- Text Primary: White (#FFFFFF)
+- Text Secondary: Gray 400 (#9CA3AF)
+- Border: Gray 700 (#374151)
+
+### Theme Usage Pattern
+Components should use `fullTheme` from `useTheme()` hook:
+```tsx
+const { fullTheme } = useTheme();
+
+// Access colors
+fullTheme.colors.primary
+fullTheme.colors.cardBackground
+fullTheme.colors.textPrimary
+fullTheme.colors.textSecondary
+fullTheme.colors.border
+
+// Access shadows
+fullTheme.shadows.small
+fullTheme.shadows.medium
+fullTheme.shadows.large
+
+// Access gradients
+fullTheme.gradients.primary
+fullTheme.gradients.dark
+```
 
 ## Navigation Structure
 - **Bottom Tab Navigator** with 4 tabs:
   1. Home - Dashboard with stats and recent activity
   2. Inspections - List of all inspections
   3. Properties - 3-tab layout (Companies, Inspectors, Properties)
-  4. Profile - Settings and preferences
+  4. Profile - Settings and preferences (including theme selection)
 - **Floating Action Button** for creating new inspections
 
 ## Running the App
@@ -125,6 +163,12 @@ npm run dev
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
 
 ## Recent Changes (November 2025)
+- **Red/Black Professional Design System**:
+  - Updated theme.ts with new color palette (Fire Red primary, dark backgrounds)
+  - Enhanced ThemeContext with fullTheme object containing complete theme data
+  - Updated all components to use fullTheme.colors.* pattern
+  - Added gradient support for buttons and cards
+  - Improved card styling with subtle borders
 - **Company & Inspector Management System**:
   - Created CompanyFormScreen for registering companies with CNPJ, address, and contact info
   - Created UserFormScreen for registering inspectors with role and contact details

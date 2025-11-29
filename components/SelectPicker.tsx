@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface SelectOption {
   id: string;
@@ -32,7 +32,7 @@ export function SelectPicker({
   title,
   emptyText = "No options available",
 }: SelectPickerProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -59,21 +59,21 @@ export function SelectPicker({
       style={[
         styles.option,
         {
-          backgroundColor: item.id === selectedId ? `${AppColors.primary}15` : "transparent",
-          borderBottomColor: theme.border,
+          backgroundColor: item.id === selectedId ? `${fullTheme.colors.primary}15` : "transparent",
+          borderBottomColor: fullTheme.colors.border,
         },
       ]}
     >
       <View style={styles.optionContent}>
         <ThemedText type="body" numberOfLines={1}>{item.label}</ThemedText>
         {item.sublabel ? (
-          <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+          <ThemedText type="small" secondary numberOfLines={1}>
             {item.sublabel}
           </ThemedText>
         ) : null}
       </View>
       {item.id === selectedId ? (
-        <Feather name="check" size={20} color={AppColors.primary} />
+        <Feather name="check" size={20} color={fullTheme.colors.primary} />
       ) : null}
     </Pressable>
   );
@@ -84,17 +84,23 @@ export function SelectPicker({
         onPress={handleOpen}
         style={[
           styles.picker,
-          { backgroundColor: theme.inputBackground, borderColor: theme.border },
+          { 
+            backgroundColor: fullTheme.colors.inputBackground, 
+            borderColor: fullTheme.colors.border 
+          },
         ]}
       >
         <ThemedText
           type="body"
-          style={{ color: selectedOption ? theme.text : theme.placeholder, flex: 1 }}
+          style={{ 
+            color: selectedOption ? fullTheme.colors.textPrimary : fullTheme.colors.placeholder, 
+            flex: 1 
+          }}
           numberOfLines={1}
         >
           {selectedOption ? selectedOption.label : placeholder}
         </ThemedText>
-        <Feather name="chevron-down" size={20} color={theme.textSecondary} />
+        <Feather name="chevron-down" size={20} color={fullTheme.colors.textSecondary} />
       </Pressable>
 
       <Modal
@@ -104,17 +110,17 @@ export function SelectPicker({
         onRequestClose={() => setIsOpen(false)}
       >
         <ThemedView style={[styles.modalContainer, { paddingTop: insets.top }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: fullTheme.colors.border }]}>
             <View style={styles.headerSpacer} />
             <ThemedText type="h3">{title}</ThemedText>
             <Pressable onPress={() => setIsOpen(false)} style={styles.closeButton}>
-              <Feather name="x" size={24} color={theme.text} />
+              <Feather name="x" size={24} color={fullTheme.colors.textPrimary} />
             </Pressable>
           </View>
 
           {options.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
+              <ThemedText type="body" secondary style={{ textAlign: "center" }}>
                 {emptyText}
               </ThemedText>
             </View>

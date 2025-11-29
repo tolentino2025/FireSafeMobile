@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme as useDeviceColorScheme } from "react-native";
-import { Colors } from "@/constants/theme";
+import { Colors, Theme, getTheme, lightTheme } from "@/constants/theme";
 
 export type ThemeMode = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
@@ -12,6 +12,7 @@ interface ThemeContextType {
   resolvedTheme: ResolvedTheme;
   isDark: boolean;
   theme: typeof Colors.light;
+  fullTheme: Theme;
   isLoading: boolean;
 }
 
@@ -63,6 +64,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const isDark = resolvedTheme === "dark";
   const theme = Colors[resolvedTheme];
+  const fullTheme = getTheme(resolvedTheme);
 
   const value = useMemo(() => ({
     mode,
@@ -70,8 +72,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     resolvedTheme,
     isDark,
     theme,
+    fullTheme,
     isLoading,
-  }), [mode, resolvedTheme, isDark, theme, isLoading]);
+  }), [mode, resolvedTheme, isDark, theme, fullTheme, isLoading]);
 
   return (
     <ThemeContext.Provider value={value}>
@@ -86,6 +89,7 @@ const defaultThemeContext: ThemeContextType = {
   resolvedTheme: "light",
   isDark: false,
   theme: Colors.light,
+  fullTheme: lightTheme,
   isLoading: false,
 };
 

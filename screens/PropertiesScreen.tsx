@@ -12,7 +12,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Property, Company, AppUser } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 
 type PropertiesScreenProps = {
@@ -28,32 +28,35 @@ function UserCard({
   user: AppUser;
   onPress: () => void;
 }) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
 
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.userCard, { backgroundColor: theme.backgroundDefault }]}
+      style={[styles.userCard, { 
+        backgroundColor: fullTheme.colors.cardBackground,
+        borderColor: fullTheme.colors.border,
+      }]}
     >
-      <View style={[styles.userIconContainer, { backgroundColor: `${AppColors.secondary}15` }]}>
-        <Feather name="user" size={24} color={AppColors.secondary} />
+      <View style={[styles.userIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name="user" size={24} color={fullTheme.colors.primary} />
       </View>
       <View style={styles.userCardContent}>
         <ThemedText type="h4" numberOfLines={1}>{user.name}</ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+        <ThemedText type="small" secondary numberOfLines={1}>
           {user.role || "Inspetor"}
         </ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+        <ThemedText type="small" secondary numberOfLines={1}>
           {user.phone || user.email || "-"}
         </ThemedText>
       </View>
-      <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
     </Pressable>
   );
 }
 
 export default function PropertiesScreen({ navigation }: PropertiesScreenProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const { properties, companies, appUsers } = useInspections();
 
@@ -147,19 +150,22 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
 
   const renderHeader = () => (
     <>
-      <View style={[styles.searchContainer, { backgroundColor: theme.backgroundDefault }]}>
-        <Feather name="search" size={20} color={theme.textSecondary} />
+      <View style={[styles.searchContainer, { 
+        backgroundColor: fullTheme.colors.cardBackground,
+        borderColor: fullTheme.colors.border,
+      }]}>
+        <Feather name="search" size={20} color={fullTheme.colors.textSecondary} />
         <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
+          style={[styles.searchInput, { color: fullTheme.colors.textPrimary }]}
           placeholder={t.properties.search}
-          placeholderTextColor={theme.placeholder}
+          placeholderTextColor={fullTheme.colors.placeholder}
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
         />
         {searchQuery.length > 0 ? (
           <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={20} color={theme.textSecondary} />
+            <Feather name="x" size={20} color={fullTheme.colors.textSecondary} />
           </Pressable>
         ) : null}
       </View>
@@ -173,19 +179,20 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
             styles.tab,
             {
               backgroundColor:
-                activeTab === "companies" ? AppColors.primary : theme.backgroundDefault,
+                activeTab === "companies" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border,
             },
           ]}
         >
           <Feather
             name="briefcase"
             size={16}
-            color={activeTab === "companies" ? "#FFFFFF" : theme.text}
+            color={activeTab === "companies" ? "#FFFFFF" : fullTheme.colors.textPrimary}
           />
           <ThemedText
             type="small"
             style={{
-              color: activeTab === "companies" ? "#FFFFFF" : theme.text,
+              color: activeTab === "companies" ? "#FFFFFF" : fullTheme.colors.textPrimary,
               marginLeft: Spacing.xs,
               fontWeight: "600",
             }}
@@ -199,19 +206,20 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
             styles.tab,
             {
               backgroundColor:
-                activeTab === "inspectors" ? AppColors.secondary : theme.backgroundDefault,
+                activeTab === "inspectors" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border,
             },
           ]}
         >
           <Feather
             name="users"
             size={16}
-            color={activeTab === "inspectors" ? "#FFFFFF" : theme.text}
+            color={activeTab === "inspectors" ? "#FFFFFF" : fullTheme.colors.textPrimary}
           />
           <ThemedText
             type="small"
             style={{
-              color: activeTab === "inspectors" ? "#FFFFFF" : theme.text,
+              color: activeTab === "inspectors" ? "#FFFFFF" : fullTheme.colors.textPrimary,
               marginLeft: Spacing.xs,
               fontWeight: "600",
             }}
@@ -225,19 +233,20 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
             styles.tab,
             {
               backgroundColor:
-                activeTab === "properties" ? AppColors.primary : theme.backgroundDefault,
+                activeTab === "properties" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border,
             },
           ]}
         >
           <Feather
             name="home"
             size={16}
-            color={activeTab === "properties" ? "#FFFFFF" : theme.text}
+            color={activeTab === "properties" ? "#FFFFFF" : fullTheme.colors.textPrimary}
           />
           <ThemedText
             type="small"
             style={{
-              color: activeTab === "properties" ? "#FFFFFF" : theme.text,
+              color: activeTab === "properties" ? "#FFFFFF" : fullTheme.colors.textPrimary,
               marginLeft: Spacing.xs,
               fontWeight: "600",
             }}
@@ -264,19 +273,14 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     }
 
     return (
-      <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
-        <Feather name={icon} size={48} color={theme.textSecondary} />
+      <View style={[styles.emptyState, { backgroundColor: fullTheme.colors.cardBackground }]}>
+        <Feather name={icon} size={48} color={fullTheme.colors.textSecondary} />
         <Spacer height={Spacing.md} />
-        <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
+        <ThemedText type="body" secondary style={{ textAlign: "center" }}>
           {message}
         </ThemedText>
       </View>
     );
-  };
-
-  const getButtonColor = () => {
-    if (activeTab === "inspectors") return AppColors.secondary;
-    return AppColors.primary;
   };
 
   return (
@@ -314,7 +318,11 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         onPress={handleAddPress}
         style={({ pressed }) => [
           styles.addButton,
-          { backgroundColor: getButtonColor(), opacity: pressed ? 0.9 : 1 },
+          { 
+            backgroundColor: fullTheme.colors.primary, 
+            opacity: pressed ? 0.9 : 1,
+            ...fullTheme.shadows.large,
+          },
         ]}
       >
         <Feather name="plus" size={24} color="#FFFFFF" />
@@ -331,6 +339,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: BorderRadius.md,
     gap: Spacing.sm,
+    borderWidth: 1,
   },
   searchInput: {
     flex: 1,
@@ -348,6 +357,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
+    borderWidth: 1,
   },
   emptyState: {
     padding: Spacing["3xl"],
@@ -367,17 +377,13 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
   },
   userCard: {
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
   },
   userIconContainer: {
     width: 48,

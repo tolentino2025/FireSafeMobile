@@ -1,0 +1,265 @@
+Quero atualizar completamente o design system do app FireSafeMobile para um tema moderno estilo Red/Black Professional, inspirado em UI de sistemas industriais e de segurança.
+O objetivo é aplicar um tema consistente, elegante e robusto em todo o app.
+
+Implemente as alterações abaixo:
+
+1) Criar um novo tema completo no arquivo constants/theme.ts
+
+Criar duas versões:
+
+🔴 lightTheme (Red/Black Light)
+
+primary: #DC2626 (vermelho forte)
+
+primaryDark: #A81E1E
+
+primaryLight: #F87171
+
+background: #F5F5F5
+
+cardBackground: #FFFFFF
+
+textPrimary: #111111
+
+textSecondary: #444444
+
+border: #E5E7EB
+
+shadow: rgba(0, 0, 0, 0.08)
+
+⚫ darkTheme (Red/Black Dark)
+
+primary: #EF4444
+
+primaryDark: #B91C1C
+
+primaryLight: #FCA5A5
+
+background: #0B0B0D
+
+cardBackground: #151518
+
+textPrimary: #FFFFFF
+
+textSecondary: #A1A1AA
+
+border: #27272A
+
+shadow: rgba(0, 0, 0, 0.45)
+
+Ambos devem exportar o formato:
+
+export interface Theme {
+  colors: {
+    primary: string;
+    primaryDark: string;
+    primaryLight: string;
+    background: string;
+    cardBackground: string;
+    textPrimary: string;
+    textSecondary: string;
+    border: string;
+    success: string;
+    warning: string;
+    error: string;
+  };
+  spacing: { ... };
+  fontSizes: { ... };
+  radii: { ... };
+  shadows: { ... };
+}
+
+
+Atualizar também:
+
+success: #22C55E
+
+warning: #FACC15
+
+error: #DC2626 (mesma essência do vermelho principal)
+
+2) Atualizar ThemeContext
+
+incluir os modos "light" | "dark" | "system"
+
+resolver automaticamente qual tema usar
+
+persistir no AsyncStorage (@firesafe_theme)
+
+exportar:
+
+const { theme, resolvedTheme, setTheme } = useTheme();
+
+3) Aplicar o tema em TODOS os componentes Themed
+
+Modificar os arquivos:
+
+ThemedView.tsx
+
+ThemedText.tsx
+
+Button.tsx
+
+FloatingActionButton.tsx
+
+Card.tsx
+
+HeaderTitle.tsx
+
+StatCard.tsx
+
+ChecklistItemRow.tsx
+
+Input, TextField, ou qualquer componente de formulário
+
+SignatureCapture
+
+DropdownSelect (se houver)
+
+Cada componente deve:
+
+const { resolvedTheme } = useTheme();
+const theme = getTheme(resolvedTheme);
+
+
+E então usar, por exemplo:
+
+theme.colors.primary
+
+theme.colors.cardBackground
+
+theme.colors.textPrimary
+
+theme.colors.border
+
+Nada de cores hardcoded.
+
+4) Ajustar botões conforme o thema
+Estado Normal:
+
+background: theme.colors.primary
+
+text: #FFFFFF
+
+Pressionado:
+
+background: theme.colors.primaryDark
+
+Desabilitado:
+
+background: #9CA3AF
+
+text: #E5E7EB
+
+5) Card e listas
+Cores:
+
+background: theme.colors.cardBackground
+
+border: theme.colors.border
+
+Sombras:
+
+usar theme.shadows
+
+6) Navegação (Tab e Headers)
+
+Atualizar:
+
+MainTabNavigator.tsx
+
+HomeStackNavigator.tsx
+
+InspectionsStackNavigator.tsx
+
+etc.
+
+De modo que:
+
+fundo do Tab Bar acompanhe o tema
+
+ícones ativos usem theme.colors.primary
+
+ícones inativos usem theme.colors.textSecondary
+
+header use theme.colors.background e textPrimary
+
+7) Checklist
+
+Atualizar os botões:
+
+Sim = theme.colors.success
+
+Não = theme.colors.error
+
+N/A = theme.colors.textSecondary
+
+Borda e texto devem ajustar automaticamente ao tema.
+
+8) Implementar suporte a gradiente opcional
+
+Criar um gradiente para partes principais:
+
+Light mode:
+
+linear-gradient(180deg, #FEE2E2, #F5F5F5)
+
+Dark mode:
+
+linear-gradient(180deg, #1E1E22, #0B0B0D)
+
+Aplicar em:
+
+HomeScreen header
+
+Cards de estatísticas (StatCard)
+
+FAB (Floating Action Button) borda
+
+9) Atualizar tela de Perfil para incluir seleção de tema
+
+Adicionar seção:
+
+Tema do Aplicativo:
+
+Claro
+
+Escuro
+
+Automático
+
+Usar RadioButtons ou Dropdown.
+
+10) Entregar tudo pronto
+
+Quero receber:
+
+theme.ts completo
+
+ThemeContext.tsx completo
+
+todos os componentes alterados
+
+todas as screens alteradas
+
+ajustes no navigation
+
+qualquer componente de UI que tenha sido atualizado
+
+E uma explicação final do que foi modificado.
+
+🎯 Objetivo final
+
+O app inteiro deve utilizar um tema Red/Black Premium, com:
+
+UI moderna
+
+consistência visual
+
+modo escuro e claro
+
+tons profissionais
+
+nenhum resquício da paleta antiga
+
+E totalmente integrado ao botão de seleção de tema na aba Perfil.

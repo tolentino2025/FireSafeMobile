@@ -17,7 +17,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection } from "@/contexts/InspectionContext";
-import { Spacing, AppColors, BorderRadius, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
 type HomeScreenProps = {
@@ -27,7 +27,7 @@ type HomeScreenProps = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const { inspections } = useInspections();
   const insets = useSafeAreaInsets();
@@ -92,7 +92,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             onPress={toggleLanguage}
             style={({ pressed }) => [
               styles.languageButton,
-              { backgroundColor: theme.backgroundDefault, opacity: pressed ? 0.7 : 1 },
+              { backgroundColor: fullTheme.colors.cardBackground, opacity: pressed ? 0.7 : 1 },
             ]}
           >
             <ThemedText type="small" style={styles.languageText}>
@@ -108,19 +108,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             title={t.home.thisWeek}
             value={thisWeekInspections.length}
             icon="calendar"
-            color={AppColors.primary}
+            color={fullTheme.colors.primary}
           />
           <StatCard
             title={t.home.thisMonth}
             value={thisMonthInspections.length}
             icon="check-circle"
-            color={AppColors.success}
+            color={fullTheme.colors.success}
           />
           <StatCard
             title={t.home.incomplete}
             value={incompleteInspections.length}
             icon="clock"
-            color={AppColors.warning}
+            color={fullTheme.colors.warning}
           />
         </View>
 
@@ -130,10 +130,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <Spacer height={Spacing.lg} />
 
         {recentInspections.length === 0 ? (
-          <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
-            <Feather name="clipboard" size={48} color={theme.textSecondary} />
+          <View style={[styles.emptyState, { backgroundColor: fullTheme.colors.cardBackground }]}>
+            <Feather name="clipboard" size={48} color={fullTheme.colors.textSecondary} />
             <Spacer height={Spacing.md} />
-            <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
+            <ThemedText type="body" secondary style={{ textAlign: "center" }}>
               {t.home.noInspections}
             </ThemedText>
           </View>
@@ -158,7 +158,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onPressOut={handleFabPressOut}
         style={[
           styles.fab,
-          { bottom: insets.bottom + 70 },
+          { 
+            bottom: insets.bottom + 70,
+            backgroundColor: fullTheme.colors.primary,
+            ...fullTheme.shadows.large,
+          },
           fabAnimatedStyle,
         ]}
       >
@@ -198,10 +202,8 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: AppColors.primary,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
-    ...Shadows.large,
   },
 });

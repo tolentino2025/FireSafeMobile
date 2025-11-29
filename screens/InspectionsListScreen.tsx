@@ -16,7 +16,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { InspectionsStackParamList } from "@/navigation/InspectionsStackNavigator";
 
 type InspectionsListScreenProps = {
@@ -26,7 +26,7 @@ type InspectionsListScreenProps = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function InspectionsListScreen({ navigation }: InspectionsListScreenProps) {
-  const { theme, isDark } = useTheme();
+  const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const { inspections } = useInspections();
   const insets = useSafeAreaInsets();
@@ -92,21 +92,21 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
 
   const renderHeader = () => (
     <>
-      <View style={[styles.searchContainer, { backgroundColor: theme.backgroundDefault }]}>
-        <Feather name="search" size={20} color={theme.textSecondary} />
+      <View style={[styles.searchContainer, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+        <Feather name="search" size={20} color={fullTheme.colors.textSecondary} />
         <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
+          style={[styles.searchInput, { color: fullTheme.colors.textPrimary }]}
           placeholder={t.inspections.search}
-          placeholderTextColor={theme.placeholder}
+          placeholderTextColor={fullTheme.colors.placeholder}
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
         />
-        {searchQuery.length > 0 && (
+        {searchQuery.length > 0 ? (
           <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={20} color={theme.textSecondary} />
+            <Feather name="x" size={20} color={fullTheme.colors.textSecondary} />
           </Pressable>
-        )}
+        ) : null}
       </View>
 
       <Spacer height={Spacing.md} />
@@ -121,15 +121,16 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
               {
                 backgroundColor:
                   statusFilter === status
-                    ? AppColors.primary
-                    : theme.backgroundDefault,
+                    ? fullTheme.colors.primary
+                    : fullTheme.colors.cardBackground,
+                borderColor: fullTheme.colors.border,
               },
             ]}
           >
             <ThemedText
               type="small"
               style={{
-                color: statusFilter === status ? "#FFFFFF" : theme.text,
+                color: statusFilter === status ? "#FFFFFF" : fullTheme.colors.textPrimary,
                 fontWeight: "600",
               }}
             >
@@ -148,10 +149,10 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
   );
 
   const renderEmpty = () => (
-    <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
-      <Feather name="clipboard" size={48} color={theme.textSecondary} />
+    <View style={[styles.emptyState, { backgroundColor: fullTheme.colors.cardBackground }]}>
+      <Feather name="clipboard" size={48} color={fullTheme.colors.textSecondary} />
       <Spacer height={Spacing.md} />
-      <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
+      <ThemedText type="body" secondary style={{ textAlign: "center" }}>
         {t.inspections.noResults}
       </ThemedText>
     </View>
@@ -174,7 +175,11 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
         onPressOut={handleFabPressOut}
         style={[
           styles.fab,
-          { bottom: insets.bottom + 70 },
+          { 
+            bottom: insets.bottom + 70,
+            backgroundColor: fullTheme.colors.primary,
+            ...fullTheme.shadows.large,
+          },
           fabAnimatedStyle,
         ]}
       >
@@ -192,6 +197,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: BorderRadius.md,
     gap: Spacing.sm,
+    borderWidth: 1,
   },
   searchInput: {
     flex: 1,
@@ -206,6 +212,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
   },
   emptyState: {
     padding: Spacing["3xl"],
@@ -222,10 +229,8 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: AppColors.primary,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
-    ...Shadows.large,
   },
 });

@@ -11,7 +11,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Inspection } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface InspectionCardProps {
   inspection: Inspection;
@@ -39,7 +39,7 @@ const inspectionTypeIcons: Record<string, keyof typeof Feather.glyphMap> = {
 };
 
 export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const scale = useSharedValue(1);
 
@@ -58,11 +58,11 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
   const getStatusColor = () => {
     switch (inspection.status) {
       case "completed":
-        return AppColors.success;
+        return fullTheme.colors.success;
       case "in_progress":
-        return AppColors.warning;
+        return fullTheme.colors.warning;
       default:
-        return AppColors.secondary;
+        return fullTheme.colors.textSecondary;
     }
   };
 
@@ -117,22 +117,25 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
       onPressOut={handlePressOut}
       style={[
         styles.container,
-        { backgroundColor: theme.backgroundDefault },
+        { 
+          backgroundColor: fullTheme.colors.cardBackground,
+          borderColor: fullTheme.colors.border,
+        },
         animatedStyle,
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${AppColors.primary}15` }]}>
-        <Feather name={icon} size={24} color={AppColors.primary} />
+      <View style={[styles.iconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name={icon} size={24} color={fullTheme.colors.primary} />
       </View>
       <View style={styles.content}>
         <ThemedText type="h4" numberOfLines={1}>
           {inspection.propertyName}
         </ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+        <ThemedText type="small" secondary numberOfLines={1}>
           {getTypeLabel()}
         </ThemedText>
         <View style={styles.footer}>
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
+          <ThemedText type="small" secondary>
             {formatDate(inspection.date)}
           </ThemedText>
           <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor()}20` }]}>
@@ -142,7 +145,7 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
           </View>
         </View>
       </View>
-      <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
     </AnimatedPressable>
   );
 }
@@ -153,6 +156,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
   },
   iconContainer: {
     width: 48,

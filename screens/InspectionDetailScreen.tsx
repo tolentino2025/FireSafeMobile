@@ -12,7 +12,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, InspectionFrequency } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
@@ -23,7 +23,7 @@ type InspectionDetailScreenProps = NativeStackScreenProps<HomeStackParamList, "I
 
 export default function InspectionDetailScreen({ navigation, route }: InspectionDetailScreenProps) {
   const { inspectionId } = route.params;
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
   const { inspections, deleteInspection } = useInspections();
   const insets = useSafeAreaInsets();
@@ -73,11 +73,11 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   const getStatusColor = () => {
     switch (inspection.status) {
       case "completed":
-        return AppColors.success;
+        return fullTheme.colors.success;
       case "in_progress":
-        return AppColors.warning;
+        return fullTheme.colors.warning;
       default:
-        return AppColors.secondary;
+        return fullTheme.colors.textSecondary;
     }
   };
 
@@ -217,14 +217,14 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
             </ThemedText>
           </View>
           <ThemedText type="h1">{inspection.propertyName}</ThemedText>
-          <ThemedText type="body" style={{ color: theme.textSecondary }}>
+          <ThemedText type="body" secondary>
             {getTypeLabel()}
           </ThemedText>
         </View>
 
         <Spacer height={Spacing["2xl"]} />
 
-        <View style={[styles.infoCard, { backgroundColor: theme.backgroundDefault }]}>
+        <View style={[styles.infoCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
           <InfoRow icon="map-pin" label={t.form.propertyAddress} value={inspection.propertyAddress || "-"} />
           <InfoRow icon="phone" label={t.form.propertyPhone} value={inspection.propertyPhone || "-"} />
           <InfoRow icon="user" label={t.form.inspector} value={inspection.inspectorName || "-"} />
@@ -238,58 +238,58 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         <ThemedText type="h2">{t.checklist.title}</ThemedText>
         <Spacer height={Spacing.lg} />
 
-        <View style={[styles.checklistCard, { backgroundColor: theme.backgroundDefault }]}>
+        <View style={[styles.checklistCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
           {inspection.checklist.map((item, index) => (
             <View
               key={item.id}
               style={[
                 styles.checklistItem,
                 index < inspection.checklist.length - 1 && styles.checklistItemBorder,
-                { borderBottomColor: theme.border },
+                { borderBottomColor: fullTheme.colors.border },
               ]}
             >
               <ThemedText type="body" style={styles.checklistLabel}>
                 {item.label}
               </ThemedText>
               <View style={styles.checklistValue}>
-                {item.value === "yes" && (
-                  <View style={[styles.valueBadge, { backgroundColor: `${AppColors.success}20` }]}>
-                    <Feather name="check" size={14} color={AppColors.success} />
-                    <ThemedText type="small" style={{ color: AppColors.success, marginLeft: 4 }}>
+                {item.value === "yes" ? (
+                  <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.success}20` }]}>
+                    <Feather name="check" size={14} color={fullTheme.colors.success} />
+                    <ThemedText type="small" style={{ color: fullTheme.colors.success, marginLeft: 4 }}>
                       {t.checklist.yes}
                     </ThemedText>
                   </View>
-                )}
-                {item.value === "no" && (
-                  <View style={[styles.valueBadge, { backgroundColor: `${AppColors.error}20` }]}>
-                    <Feather name="x" size={14} color={AppColors.error} />
-                    <ThemedText type="small" style={{ color: AppColors.error, marginLeft: 4 }}>
+                ) : null}
+                {item.value === "no" ? (
+                  <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.error}20` }]}>
+                    <Feather name="x" size={14} color={fullTheme.colors.error} />
+                    <ThemedText type="small" style={{ color: fullTheme.colors.error, marginLeft: 4 }}>
                       {t.checklist.no}
                     </ThemedText>
                   </View>
-                )}
-                {item.value === "na" && (
-                  <View style={[styles.valueBadge, { backgroundColor: `${theme.textSecondary}20` }]}>
-                    <Feather name="minus" size={14} color={theme.textSecondary} />
-                    <ThemedText type="small" style={{ color: theme.textSecondary, marginLeft: 4 }}>
+                ) : null}
+                {item.value === "na" ? (
+                  <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.textSecondary}20` }]}>
+                    <Feather name="minus" size={14} color={fullTheme.colors.textSecondary} />
+                    <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, marginLeft: 4 }}>
                       {t.checklist.na}
                     </ThemedText>
                   </View>
-                )}
-                {item.value === null && (
-                  <ThemedText type="small" style={{ color: theme.textSecondary }}>-</ThemedText>
-                )}
-                {item.psiValue && (
-                  <ThemedText type="small" style={{ color: theme.textSecondary, marginLeft: Spacing.sm }}>
+                ) : null}
+                {item.value === null ? (
+                  <ThemedText type="small" secondary>-</ThemedText>
+                ) : null}
+                {item.psiValue ? (
+                  <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm }}>
                     {item.psiValue} psi
                   </ThemedText>
-                )}
+                ) : null}
               </View>
             </View>
           ))}
         </View>
 
-        {inspection.photos && inspection.photos.length > 0 && (
+        {inspection.photos && inspection.photos.length > 0 ? (
           <>
             <Spacer height={Spacing["2xl"]} />
             <ThemedText type="h2">{t.form.photos}</ThemedText>
@@ -300,7 +300,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
               contentContainerStyle={styles.photosContainer}
             >
               {inspection.photos.map((photo) => (
-                <View key={photo.id} style={[styles.photoCard, { backgroundColor: theme.backgroundDefault }]}>
+                <View key={photo.id} style={[styles.photoCard, { backgroundColor: fullTheme.colors.cardBackground }]}>
                   <ExpoImage
                     source={{ uri: photo.uri }}
                     style={styles.photoImage}
@@ -315,25 +315,25 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
               ))}
             </ScrollView>
           </>
-        )}
+        ) : null}
 
-        {inspection.observations && (
+        {inspection.observations ? (
           <>
             <Spacer height={Spacing["2xl"]} />
             <ThemedText type="h2">{t.form.observations}</ThemedText>
             <Spacer height={Spacing.md} />
-            <View style={[styles.observationsCard, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={[styles.observationsCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
               <ThemedText type="body">{inspection.observations}</ThemedText>
             </View>
           </>
-        )}
+        ) : null}
 
-        {inspection.signature && (
+        {inspection.signature ? (
           <>
             <Spacer height={Spacing["2xl"]} />
             <ThemedText type="h2">{t.form.signature}</ThemedText>
             <Spacer height={Spacing.md} />
-            <View style={[styles.signatureCard, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={[styles.signatureCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
               <Image
                 source={{ uri: inspection.signature }}
                 style={styles.signatureImage}
@@ -341,7 +341,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
               />
             </View>
           </>
-        )}
+        ) : null}
 
         <Spacer height={Spacing["3xl"]} />
 
@@ -363,10 +363,10 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         <Spacer height={Spacing.md} />
 
         <View style={styles.actionRow}>
-          <Button onPress={handleEdit} style={[styles.actionButton, { backgroundColor: AppColors.secondary }]}>
+          <Button onPress={handleEdit} style={[styles.actionButton, { backgroundColor: fullTheme.colors.primaryDark }]}>
             {t.common.edit}
           </Button>
-          <Button onPress={handleDelete} style={[styles.actionButton, { backgroundColor: AppColors.error }]}>
+          <Button onPress={handleDelete} style={[styles.actionButton, { backgroundColor: fullTheme.colors.error }]}>
             {t.common.delete}
           </Button>
         </View>
@@ -383,18 +383,18 @@ interface InfoRowProps {
 }
 
 function InfoRow({ icon, label, value, isLast }: InfoRowProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   return (
     <View
       style={[
         styles.infoRow,
         !isLast && styles.infoRowBorder,
-        { borderBottomColor: theme.border },
+        { borderBottomColor: fullTheme.colors.border },
       ]}
     >
       <View style={styles.infoRowLeft}>
-        <Feather name={icon} size={18} color={theme.textSecondary} />
-        <ThemedText type="small" style={{ color: theme.textSecondary, marginLeft: Spacing.sm }}>
+        <Feather name={icon} size={18} color={fullTheme.colors.textSecondary} />
+        <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm }}>
           {label}
         </ThemedText>
       </View>
@@ -433,6 +433,7 @@ const styles = StyleSheet.create({
   infoCard: {
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
+    borderWidth: 1,
   },
   infoRow: {
     flexDirection: "row",
@@ -454,6 +455,7 @@ const styles = StyleSheet.create({
   checklistCard: {
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
+    borderWidth: 1,
   },
   checklistItem: {
     flexDirection: "row",
@@ -482,11 +484,13 @@ const styles = StyleSheet.create({
   observationsCard: {
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
+    borderWidth: 1,
   },
   signatureCard: {
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     alignItems: "center",
+    borderWidth: 1,
   },
   signatureImage: {
     width: "100%",

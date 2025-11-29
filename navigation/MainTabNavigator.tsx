@@ -16,7 +16,7 @@ import PropertiesStackNavigator from "@/navigation/PropertiesStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AppColors, Spacing, Shadows } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
@@ -34,6 +34,7 @@ interface FloatingActionButtonProps {
 }
 
 function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
+  const { fullTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const scale = useSharedValue(1);
   const rotation = useSharedValue(0);
@@ -64,6 +65,8 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
         styles.fab,
         {
           bottom: insets.bottom + 70,
+          backgroundColor: fullTheme.colors.primary,
+          ...fullTheme.shadows.large,
         },
         animatedStyle,
       ]}
@@ -74,20 +77,20 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
 }
 
 export default function MainTabNavigator() {
-  const { theme, isDark } = useTheme();
+  const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
 
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
       screenOptions={{
-        tabBarActiveTintColor: theme.tabIconSelected,
-        tabBarInactiveTintColor: theme.tabIconDefault,
+        tabBarActiveTintColor: fullTheme.colors.tabIconSelected,
+        tabBarInactiveTintColor: fullTheme.colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
             ios: "transparent",
-            android: theme.backgroundRoot,
+            android: fullTheme.colors.background,
           }),
           borderTopWidth: 0,
           elevation: 0,
@@ -154,10 +157,8 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: AppColors.primary,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
-    ...Shadows.large,
   },
 });

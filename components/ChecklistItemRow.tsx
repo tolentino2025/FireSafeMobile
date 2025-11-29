@@ -6,7 +6,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChecklistItem } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface ChecklistItemRowProps {
   item: ChecklistItem;
@@ -15,27 +15,27 @@ interface ChecklistItemRowProps {
 }
 
 export function ChecklistItemRow({ item, onValueChange, onPsiChange }: ChecklistItemRowProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t } = useLanguage();
 
   const getButtonStyle = (value: "yes" | "no" | "na") => {
     const isSelected = item.value === value;
     let backgroundColor = "transparent";
-    let borderColor = theme.border;
+    let borderColor = fullTheme.colors.border;
 
     if (isSelected) {
       switch (value) {
         case "yes":
-          backgroundColor = AppColors.success;
-          borderColor = AppColors.success;
+          backgroundColor = fullTheme.colors.success;
+          borderColor = fullTheme.colors.success;
           break;
         case "no":
-          backgroundColor = AppColors.error;
-          borderColor = AppColors.error;
+          backgroundColor = fullTheme.colors.error;
+          borderColor = fullTheme.colors.error;
           break;
         case "na":
-          backgroundColor = theme.textSecondary;
-          borderColor = theme.textSecondary;
+          backgroundColor = fullTheme.colors.textSecondary;
+          borderColor = fullTheme.colors.textSecondary;
           break;
       }
     }
@@ -48,13 +48,25 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
 
   const getTextColor = (value: "yes" | "no" | "na") => {
     if (item.value === value) return "#FFFFFF";
-    return theme.text;
+    return fullTheme.colors.textPrimary;
+  };
+
+  const getIconColor = (value: "yes" | "no" | "na") => {
+    if (item.value === value) return "#FFFFFF";
+    switch (value) {
+      case "yes":
+        return fullTheme.colors.success;
+      case "no":
+        return fullTheme.colors.error;
+      case "na":
+        return fullTheme.colors.textSecondary;
+    }
   };
 
   const hasPsi = item.label.toLowerCase().includes("psi") || item.label.toLowerCase().includes("pressure");
 
   return (
-    <View style={[styles.container, { borderBottomColor: theme.border }]}>
+    <View style={[styles.container, { borderBottomColor: fullTheme.colors.border }]}>
       <ThemedText type="body" style={styles.label}>
         {item.label}
       </ThemedText>
@@ -67,7 +79,7 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
           <Feather
             name="check"
             size={14}
-            color={item.value === "yes" ? "#FFFFFF" : AppColors.success}
+            color={getIconColor("yes")}
           />
           <ThemedText
             type="small"
@@ -84,7 +96,7 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
           <Feather
             name="x"
             size={14}
-            color={item.value === "no" ? "#FFFFFF" : AppColors.error}
+            color={getIconColor("no")}
           />
           <ThemedText
             type="small"
@@ -101,7 +113,7 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
           <Feather
             name="minus"
             size={14}
-            color={item.value === "na" ? "#FFFFFF" : theme.textSecondary}
+            color={getIconColor("na")}
           />
           <ThemedText
             type="small"
@@ -117,15 +129,19 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
           <TextInput
             style={[
               styles.psiInput,
-              { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.border },
+              { 
+                backgroundColor: fullTheme.colors.inputBackground, 
+                color: fullTheme.colors.textPrimary, 
+                borderColor: fullTheme.colors.border 
+              },
             ]}
             value={item.psiValue || ""}
             onChangeText={onPsiChange}
             placeholder="0"
-            placeholderTextColor={theme.placeholder}
+            placeholderTextColor={fullTheme.colors.placeholder}
             keyboardType="numeric"
           />
-          <ThemedText type="small" style={{ color: theme.textSecondary, marginLeft: Spacing.xs }}>
+          <ThemedText type="small" secondary style={{ marginLeft: Spacing.xs }}>
             psi
           </ThemedText>
         </View>

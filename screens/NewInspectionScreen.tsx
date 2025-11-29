@@ -15,7 +15,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { InspectionType } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
 const TAB_BAR_HEIGHT = 90;
@@ -77,7 +77,7 @@ interface TypeCardProps {
 }
 
 function TypeCard({ item, onPress }: TypeCardProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const scale = useSharedValue(1);
 
@@ -100,17 +100,20 @@ function TypeCard({ item, onPress }: TypeCardProps) {
       onPressOut={handlePressOut}
       style={[
         styles.typeCard,
-        { backgroundColor: theme.backgroundDefault },
+        { 
+          backgroundColor: fullTheme.colors.cardBackground,
+          borderColor: fullTheme.colors.border,
+        },
         animatedStyle,
       ]}
     >
-      <View style={[styles.typeIconContainer, { backgroundColor: `${AppColors.primary}15` }]}>
-        <Feather name={item.icon} size={28} color={AppColors.primary} />
+      <View style={[styles.typeIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name={item.icon} size={28} color={fullTheme.colors.primary} />
       </View>
       <ThemedText type="h4" style={styles.typeName}>
         {t.inspectionTypes[item.labelKey]}
       </ThemedText>
-      <ThemedText type="small" style={{ color: theme.textSecondary }}>
+      <ThemedText type="small" secondary>
         {item.nfpaRef}
       </ThemedText>
     </AnimatedPressable>
@@ -118,7 +121,7 @@ function TypeCard({ item, onPress }: TypeCardProps) {
 }
 
 export default function NewInspectionScreen({ navigation }: NewInspectionScreenProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
@@ -136,7 +139,7 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText type="body" style={{ color: theme.textSecondary }}>
+        <ThemedText type="body" secondary>
           {t.newInspection.selectType}
         </ThemedText>
 
@@ -183,6 +186,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
+    borderWidth: 1,
   },
   typeIconContainer: {
     width: 56,

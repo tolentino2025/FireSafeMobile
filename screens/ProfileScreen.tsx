@@ -10,7 +10,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ThemeMode } from "@/contexts/ThemeContext";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import {
   getNotificationSettings,
   saveNotificationSettings,
@@ -20,7 +20,7 @@ import {
 } from "@/utils/notifications";
 
 export default function ProfileScreen() {
-  const { theme, isDark, mode, setMode } = useTheme();
+  const { fullTheme, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
@@ -45,17 +45,6 @@ export default function ProfileScreen() {
       Haptics.selectionAsync();
     }
     setMode(newMode);
-  };
-
-  const getThemeModeLabel = (themeMode: ThemeMode) => {
-    switch (themeMode) {
-      case "light":
-        return t.profile.themeLight;
-      case "dark":
-        return t.profile.themeDark;
-      case "system":
-        return t.profile.themeSystem;
-    }
   };
 
   const handleAbout = () => {
@@ -131,12 +120,12 @@ export default function ProfileScreen() {
   return (
     <ScreenScrollView>
       <View style={styles.profileHeader}>
-        <View style={[styles.avatar, { backgroundColor: AppColors.primary }]}>
+        <View style={[styles.avatar, { backgroundColor: fullTheme.colors.primary }]}>
           <Feather name="user" size={40} color="#FFFFFF" />
         </View>
         <Spacer height={Spacing.lg} />
         <ThemedText type="h2">{t.profile.inspector}</ThemedText>
-        <ThemedText type="body" style={{ color: theme.textSecondary }}>
+        <ThemedText type="body" secondary>
           NFPA 25 Certified
         </ThemedText>
       </View>
@@ -147,17 +136,17 @@ export default function ProfileScreen() {
         {t.profile.certifications}
       </ThemedText>
       <Spacer height={Spacing.md} />
-      <View style={[styles.certificationCard, { backgroundColor: theme.backgroundDefault }]}>
-        <View style={[styles.certBadge, { backgroundColor: `${AppColors.success}20` }]}>
-          <Feather name="award" size={24} color={AppColors.success} />
+      <View style={[styles.certificationCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+        <View style={[styles.certBadge, { backgroundColor: `${fullTheme.colors.success}20` }]}>
+          <Feather name="award" size={24} color={fullTheme.colors.success} />
         </View>
         <View style={styles.certInfo}>
           <ThemedText type="h4">NFPA 25 ITM</ThemedText>
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
+          <ThemedText type="small" secondary>
             Fire Protection Systems
           </ThemedText>
         </View>
-        <Feather name="check-circle" size={20} color={AppColors.success} />
+        <Feather name="check-circle" size={20} color={fullTheme.colors.success} />
       </View>
 
       <Spacer height={Spacing["3xl"]} />
@@ -167,7 +156,7 @@ export default function ProfileScreen() {
       </ThemedText>
       <Spacer height={Spacing.md} />
 
-      <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+      <View style={[styles.settingsCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
         <ThemeOption
           icon="sun"
           label={t.profile.themeLight}
@@ -196,7 +185,7 @@ export default function ProfileScreen() {
       </ThemedText>
       <Spacer height={Spacing.md} />
 
-      <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+      <View style={[styles.settingsCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
         <SettingsRow
           icon="globe"
           label={t.profile.language}
@@ -210,7 +199,7 @@ export default function ProfileScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={handleToggleNotifications}
-              trackColor={{ false: theme.border, true: AppColors.primary }}
+              trackColor={{ false: fullTheme.colors.border, true: fullTheme.colors.primary }}
               thumbColor={notificationsEnabled ? "#FFFFFF" : "#F4F4F4"}
             />
           }
@@ -231,7 +220,7 @@ export default function ProfileScreen() {
       <Spacer height={Spacing["3xl"]} />
 
       <View style={styles.versionContainer}>
-        <ThemedText type="small" style={{ color: theme.textSecondary }}>
+        <ThemedText type="small" secondary>
           {t.profile.version} {version}
         </ThemedText>
       </View>
@@ -251,7 +240,7 @@ interface SettingsRowProps {
 }
 
 function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: SettingsRowProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
 
   return (
     <Pressable
@@ -259,11 +248,11 @@ function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: Sett
       style={({ pressed }) => [
         styles.settingsRow,
         !isLast && styles.settingsRowBorder,
-        { borderBottomColor: theme.border, opacity: pressed ? 0.7 : 1 },
+        { borderBottomColor: fullTheme.colors.border, opacity: pressed ? 0.7 : 1 },
       ]}
     >
       <View style={styles.settingsRowLeft}>
-        <Feather name={icon} size={20} color={theme.textSecondary} />
+        <Feather name={icon} size={20} color={fullTheme.colors.textSecondary} />
         <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
           {label}
         </ThemedText>
@@ -273,11 +262,11 @@ function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: Sett
       ) : (
         <View style={styles.settingsRowRight}>
           {value ? (
-            <ThemedText type="small" style={{ color: theme.textSecondary, marginRight: Spacing.sm }}>
+            <ThemedText type="small" secondary style={{ marginRight: Spacing.sm }}>
               {value}
             </ThemedText>
           ) : null}
-          <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+          <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
         </View>
       )}
     </Pressable>
@@ -293,7 +282,7 @@ interface ThemeOptionProps {
 }
 
 function ThemeOption({ icon, label, selected, onPress, isLast }: ThemeOptionProps) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
 
   return (
     <Pressable
@@ -301,17 +290,17 @@ function ThemeOption({ icon, label, selected, onPress, isLast }: ThemeOptionProp
       style={({ pressed }) => [
         styles.settingsRow,
         !isLast && styles.settingsRowBorder,
-        { borderBottomColor: theme.border, opacity: pressed ? 0.7 : 1 },
+        { borderBottomColor: fullTheme.colors.border, opacity: pressed ? 0.7 : 1 },
       ]}
     >
       <View style={styles.settingsRowLeft}>
-        <Feather name={icon} size={20} color={theme.textSecondary} />
+        <Feather name={icon} size={20} color={fullTheme.colors.textSecondary} />
         <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
           {label}
         </ThemedText>
       </View>
-      <View style={[styles.radioOuter, { borderColor: selected ? AppColors.primary : theme.border }]}>
-        {selected ? <View style={[styles.radioInner, { backgroundColor: AppColors.primary }]} /> : null}
+      <View style={[styles.radioOuter, { borderColor: selected ? fullTheme.colors.primary : fullTheme.colors.border }]}>
+        {selected ? <View style={[styles.radioInner, { backgroundColor: fullTheme.colors.primary }]} /> : null}
       </View>
     </Pressable>
   );
@@ -337,6 +326,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
   },
   certBadge: {
     width: 48,
@@ -352,6 +342,7 @@ const styles = StyleSheet.create({
   settingsCard: {
     borderRadius: BorderRadius.lg,
     overflow: "hidden",
+    borderWidth: 1,
   },
   settingsRow: {
     flexDirection: "row",
