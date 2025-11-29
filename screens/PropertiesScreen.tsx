@@ -1,12 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { View, StyleSheet, TextInput, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Pressable, Platform } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 import { ScreenFlatList } from "@/components/ScreenFlatList";
 import { ThemedText } from "@/components/ThemedText";
@@ -15,7 +11,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Property, Company } from "@/contexts/InspectionContext";
+import { useInspections, Property, Company, AppUser } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 
@@ -23,15 +19,46 @@ type PropertiesScreenProps = {
   navigation: NativeStackNavigationProp<PropertiesStackParamList, "PropertiesList">;
 };
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+type TabType = "companies" | "properties" | "inspectors";
+
+function UserCard({
+  user,
+  onPress,
+}: {
+  user: AppUser;
+  onPress: () => void;
+}) {
+  const { theme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.userCard, { backgroundColor: theme.backgroundDefault }]}
+    >
+      <View style={[styles.userIconContainer, { backgroundColor: `${AppColors.secondary}15` }]}>
+        <Feather name="user" size={24} color={AppColors.secondary} />
+      </View>
+      <View style={styles.userCardContent}>
+        <ThemedText type="h4" numberOfLines={1}>{user.name}</ThemedText>
+        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+          {user.role || "Inspetor"}
+        </ThemedText>
+        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+          {user.phone || user.email || "-"}
+        </ThemedText>
+      </View>
+      <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+    </Pressable>
+  );
+}
 
 export default function PropertiesScreen({ navigation }: PropertiesScreenProps) {
   const { theme } = useTheme();
   const { t } = useLanguage();
-  const { properties, companies } = useInspections();
+  const { properties, companies, appUsers } = useInspections();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"companies" | "properties">("companies");
+  const [activeTab, setActiveTab] = useState<TabType>("companies");
 
   const filteredCompanies = useMemo(() => {
     if (!searchQuery.trim()) return companies;
@@ -39,7 +66,8 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     return companies.filter(
       (comp) =>
         comp.name.toLowerCase().includes(query) ||
-        comp.address.toLowerCase().includes(query)
+        (comp.address && comp.address.toLowerCase().includes(query)) ||
+        (comp.cnpj && comp.cnpj.toLowerCase().includes(query))
     );
   }, [companies, searchQuery]);
 
@@ -53,18 +81,47 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     );
   }, [properties, searchQuery]);
 
+  const filteredInspectors = useMemo(() => {
+    if (!searchQuery.trim()) return appUsers;
+    const query = searchQuery.toLowerCase();
+    return appUsers.filter(
+      (user) =>
+        user.name.toLowerCase().includes(query) ||
+        (user.email && user.email.toLowerCase().includes(query)) ||
+        (user.role && user.role.toLowerCase().includes(query))
+    );
+  }, [appUsers, searchQuery]);
+
+  const handleTabPress = (tab: TabType) => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    setActiveTab(tab);
+  };
+
   const handleAddPress = () => {
-    navigation.navigate("PropertyForm", {
-      mode: activeTab === "companies" ? "company" : "property",
-    });
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (activeTab === "companies") {
+      navigation.navigate("CompanyForm", {});
+    } else if (activeTab === "inspectors") {
+      navigation.navigate("UserForm", {});
+    } else {
+      navigation.navigate("PropertyForm", { mode: "property" });
+    }
   };
 
   const handleCompanyPress = (company: Company) => {
-    navigation.navigate("PropertyForm", { mode: "company", companyId: company.id });
+    navigation.navigate("CompanyForm", { companyId: company.id });
   };
 
   const handlePropertyPress = (property: Property) => {
     navigation.navigate("PropertyForm", { mode: "property", propertyId: property.id });
+  };
+
+  const handleInspectorPress = (user: AppUser) => {
+    navigation.navigate("UserForm", { userId: user.id });
   };
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
@@ -81,6 +138,13 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     </>
   );
 
+  const renderInspectorItem = ({ item }: { item: AppUser }) => (
+    <>
+      <UserCard user={item} onPress={() => handleInspectorPress(item)} />
+      <Spacer height={Spacing.md} />
+    </>
+  );
+
   const renderHeader = () => (
     <>
       <View style={[styles.searchContainer, { backgroundColor: theme.backgroundDefault }]}>
@@ -93,18 +157,18 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
           onChangeText={setSearchQuery}
           returnKeyType="search"
         />
-        {searchQuery.length > 0 && (
+        {searchQuery.length > 0 ? (
           <Pressable onPress={() => setSearchQuery("")}>
             <Feather name="x" size={20} color={theme.textSecondary} />
           </Pressable>
-        )}
+        ) : null}
       </View>
 
       <Spacer height={Spacing.lg} />
 
       <View style={styles.tabRow}>
         <Pressable
-          onPress={() => setActiveTab("companies")}
+          onPress={() => handleTabPress("companies")}
           style={[
             styles.tab,
             {
@@ -115,14 +179,14 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         >
           <Feather
             name="briefcase"
-            size={18}
+            size={16}
             color={activeTab === "companies" ? "#FFFFFF" : theme.text}
           />
           <ThemedText
-            type="body"
+            type="small"
             style={{
               color: activeTab === "companies" ? "#FFFFFF" : theme.text,
-              marginLeft: Spacing.sm,
+              marginLeft: Spacing.xs,
               fontWeight: "600",
             }}
           >
@@ -130,7 +194,33 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
           </ThemedText>
         </Pressable>
         <Pressable
-          onPress={() => setActiveTab("properties")}
+          onPress={() => handleTabPress("inspectors")}
+          style={[
+            styles.tab,
+            {
+              backgroundColor:
+                activeTab === "inspectors" ? AppColors.secondary : theme.backgroundDefault,
+            },
+          ]}
+        >
+          <Feather
+            name="users"
+            size={16}
+            color={activeTab === "inspectors" ? "#FFFFFF" : theme.text}
+          />
+          <ThemedText
+            type="small"
+            style={{
+              color: activeTab === "inspectors" ? "#FFFFFF" : theme.text,
+              marginLeft: Spacing.xs,
+              fontWeight: "600",
+            }}
+          >
+            {t.users?.title || "Inspetores"}
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          onPress={() => handleTabPress("properties")}
           style={[
             styles.tab,
             {
@@ -141,14 +231,14 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         >
           <Feather
             name="home"
-            size={18}
+            size={16}
             color={activeTab === "properties" ? "#FFFFFF" : theme.text}
           />
           <ThemedText
-            type="body"
+            type="small"
             style={{
               color: activeTab === "properties" ? "#FFFFFF" : theme.text,
-              marginLeft: Spacing.sm,
+              marginLeft: Spacing.xs,
               fontWeight: "600",
             }}
           >
@@ -161,19 +251,33 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     </>
   );
 
-  const renderEmpty = () => (
-    <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
-      <Feather
-        name={activeTab === "companies" ? "briefcase" : "home"}
-        size={48}
-        color={theme.textSecondary}
-      />
-      <Spacer height={Spacing.md} />
-      <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
-        {t.properties.noResults}
-      </ThemedText>
-    </View>
-  );
+  const renderEmpty = () => {
+    let icon: "briefcase" | "users" | "home" = "briefcase";
+    let message = t.companies?.noResults || t.properties.noResults;
+    
+    if (activeTab === "inspectors") {
+      icon = "users";
+      message = t.users?.noResults || "Nenhum inspetor cadastrado";
+    } else if (activeTab === "properties") {
+      icon = "home";
+      message = t.properties.noResults;
+    }
+
+    return (
+      <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+        <Feather name={icon} size={48} color={theme.textSecondary} />
+        <Spacer height={Spacing.md} />
+        <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
+          {message}
+        </ThemedText>
+      </View>
+    );
+  };
+
+  const getButtonColor = () => {
+    if (activeTab === "inspectors") return AppColors.secondary;
+    return AppColors.primary;
+  };
 
   return (
     <>
@@ -181,6 +285,15 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         <ScreenFlatList
           data={filteredCompanies}
           renderItem={renderCompanyItem}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmpty}
+          contentContainerStyle={styles.listContent}
+        />
+      ) : activeTab === "inspectors" ? (
+        <ScreenFlatList
+          data={filteredInspectors}
+          renderItem={renderInspectorItem}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderEmpty}
@@ -201,7 +314,7 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         onPress={handleAddPress}
         style={({ pressed }) => [
           styles.addButton,
-          { backgroundColor: AppColors.primary, opacity: pressed ? 0.9 : 1 },
+          { backgroundColor: getButtonColor(), opacity: pressed ? 0.9 : 1 },
         ]}
       >
         <Feather name="plus" size={24} color="#FFFFFF" />
@@ -226,7 +339,7 @@ const styles = StyleSheet.create({
   },
   tabRow: {
     flexDirection: "row",
-    gap: Spacing.md,
+    gap: Spacing.sm,
   },
   tab: {
     flex: 1,
@@ -259,5 +372,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+  },
+  userCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+  },
+  userIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  userCardContent: {
+    flex: 1,
+    marginLeft: Spacing.md,
   },
 });

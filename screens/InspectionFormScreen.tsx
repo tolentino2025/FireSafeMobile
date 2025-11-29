@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, TextInput, Pressable, Alert, Platform } from "react-native";
-import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RouteProp } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
@@ -18,14 +17,15 @@ import { Button } from "@/components/Button";
 import { ChecklistItemRow } from "@/components/ChecklistItemRow";
 import { SignatureCapture } from "@/components/SignatureCapture";
 import { PhotoCapture } from "@/components/PhotoCapture";
+import { SelectPicker } from "@/components/SelectPicker";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto } from "@/contexts/InspectionContext";
+import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
-import { scheduleInspectionReminder, cancelInspectionReminder } from "@/utils/notifications";
+import { scheduleInspectionReminder } from "@/utils/notifications";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -33,18 +33,22 @@ const frequencies: InspectionFrequency[] = ["daily", "weekly", "monthly", "quart
 
 export default function InspectionFormScreen({ navigation, route }: InspectionFormScreenProps) {
   const { type, inspectionId } = route.params;
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
   const { t, language } = useLanguage();
-  const { inspections, addInspection, updateInspection, properties } = useInspections();
+  const { inspections, addInspection, updateInspection, companies, appUsers } = useInspections();
 
   const existingInspection = inspectionId
     ? inspections.find((i) => i.id === inspectionId)
     : undefined;
 
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>(existingInspection?.companyId);
+  const [selectedInspectorId, setSelectedInspectorId] = useState<string | undefined>(existingInspection?.inspectorId);
   const [propertyName, setPropertyName] = useState(existingInspection?.propertyName || "");
   const [propertyAddress, setPropertyAddress] = useState(existingInspection?.propertyAddress || "");
   const [propertyPhone, setPropertyPhone] = useState(existingInspection?.propertyPhone || "");
   const [inspectorName, setInspectorName] = useState(existingInspection?.inspectorName || "");
+  const [inspectorEmail, setInspectorEmail] = useState(existingInspection?.inspectorData?.email || "");
+  const [inspectorPhone, setInspectorPhone] = useState(existingInspection?.inspectorData?.phone || "");
   const [contractNo, setContractNo] = useState(existingInspection?.contractNo || "");
   const [date, setDate] = useState(existingInspection?.date || new Date().toISOString().split("T")[0]);
   const [frequency, setFrequency] = useState<InspectionFrequency>(existingInspection?.frequency || "weekly");
@@ -94,6 +98,30 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }
   }, [frequency, type, isNewInspection]);
 
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    const company = companies.find((c) => c.id === companyId);
+    if (company) {
+      setPropertyName(company.name);
+      setPropertyAddress(
+        [company.address, company.city, company.state, company.zipCode]
+          .filter(Boolean)
+          .join(", ")
+      );
+      setPropertyPhone(company.contactPhone);
+    }
+  };
+
+  const handleInspectorSelect = (inspectorId: string) => {
+    setSelectedInspectorId(inspectorId);
+    const inspector = appUsers.find((u) => u.id === inspectorId);
+    if (inspector) {
+      setInspectorName(inspector.name);
+      setInspectorEmail(inspector.email);
+      setInspectorPhone(inspector.phone);
+    }
+  };
+
   const handleChecklistChange = (id: string, value: "yes" | "no" | "na" | null) => {
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
@@ -115,6 +143,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       return;
     }
 
+    const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
+    const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+
     const inspectionData: Inspection = {
       id: existingInspection?.id || Date.now().toString(),
       type,
@@ -131,6 +162,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       observations,
       signature,
       photos,
+      companyId: selectedCompanyId,
+      companyData: selectedCompany,
+      inspectorId: selectedInspectorId,
+      inspectorData: selectedInspector,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -238,6 +273,18 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     return t.form.frequencies[frequencyMapping[freq]];
   };
 
+  const companyOptions = companies.map((c) => ({
+    id: c.id,
+    label: c.name,
+    sublabel: c.city ? `${c.city}, ${c.state}` : c.address,
+  }));
+
+  const inspectorOptions = appUsers.map((u) => ({
+    id: u.id,
+    label: u.name,
+    sublabel: u.role || "Inspetor",
+  }));
+
   const inputStyle = [
     styles.input,
     { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.border },
@@ -251,6 +298,19 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           {t.form.autoSaved}
         </ThemedText>
       </Animated.View>
+
+      <ThemedText type="h3">{t.companies.selectCompany}</ThemedText>
+      <Spacer height={Spacing.sm} />
+      <SelectPicker
+        options={companyOptions}
+        selectedId={selectedCompanyId}
+        onSelect={handleCompanySelect}
+        placeholder={t.companies.noCompanySelected}
+        title={t.companies.selectCompany}
+        emptyText={t.companies.noResults}
+      />
+
+      <Spacer height={Spacing.lg} />
 
       <ThemedText type="h3">{t.form.propertyName}</ThemedText>
       <Spacer height={Spacing.sm} />
@@ -301,6 +361,19 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           />
         </View>
       </View>
+
+      <Spacer height={Spacing["2xl"]} />
+
+      <ThemedText type="h3">{t.users.selectInspector}</ThemedText>
+      <Spacer height={Spacing.sm} />
+      <SelectPicker
+        options={inspectorOptions}
+        selectedId={selectedInspectorId}
+        onSelect={handleInspectorSelect}
+        placeholder={t.users.noInspectorSelected}
+        title={t.users.selectInspector}
+        emptyText={t.users.noResults}
+      />
 
       <Spacer height={Spacing.lg} />
 

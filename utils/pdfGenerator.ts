@@ -71,13 +71,23 @@ const translations = {
   en: {
     inspectionReport: "Inspection Report",
     nfpaCompliance: "NFPA 25 Compliant",
+    companyInformation: "Company Information",
+    companyName: "Company Name",
+    cnpj: "Tax ID",
     propertyInformation: "Property Information",
     propertyName: "Property Name",
     address: "Address",
+    city: "City",
+    state: "State",
+    zipCode: "ZIP Code",
     phone: "Phone",
+    email: "Email",
+    contact: "Contact",
     inspectionDetails: "Inspection Details",
+    inspectorInformation: "Inspector Information",
     inspectionType: "Inspection Type",
     inspector: "Inspector",
+    inspectorRole: "Role",
     date: "Date",
     frequency: "Frequency",
     contractNo: "Contract No.",
@@ -102,13 +112,23 @@ const translations = {
   "pt-BR": {
     inspectionReport: "Relatório de Inspeção",
     nfpaCompliance: "Conforme NFPA 25",
+    companyInformation: "Informações da Empresa",
+    companyName: "Nome da Empresa",
+    cnpj: "CNPJ",
     propertyInformation: "Informações da Propriedade",
     propertyName: "Nome da Propriedade",
     address: "Endereço",
+    city: "Cidade",
+    state: "Estado",
+    zipCode: "CEP",
     phone: "Telefone",
+    email: "Email",
+    contact: "Contato",
     inspectionDetails: "Detalhes da Inspeção",
+    inspectorInformation: "Informações do Inspetor",
     inspectionType: "Tipo de Inspeção",
     inspector: "Inspetor",
+    inspectorRole: "Cargo",
     date: "Data",
     frequency: "Frequência",
     contractNo: "Nº do Contrato",
@@ -148,6 +168,15 @@ const generateInspectionPdfHtmlWithPhotos = (
   const t = translations[language];
   const typeName = INSPECTION_TYPE_NAMES[inspection.type][language === "pt-BR" ? "pt" : "en"];
   const freq = t.frequencies[inspection.frequency as keyof typeof t.frequencies] || inspection.frequency;
+
+  const companyData = inspection.companyData;
+  const inspectorData = inspection.inspectorData;
+
+  const companyAddress = companyData
+    ? [companyData.address, companyData.city, companyData.state, companyData.zipCode]
+        .filter(Boolean)
+        .join(", ")
+    : inspection.propertyAddress;
 
   const checklistRows = inspection.checklist
     .map(
@@ -191,9 +220,92 @@ const generateInspectionPdfHtmlWithPhotos = (
       <div style="margin-top: 15px; padding: 15px; background: #F9FAFB; border-radius: 8px; display: inline-block;">
         <img src="${inspection.signature}" style="max-height: 80px;" />
         <p style="margin: 10px 0 0 0; font-size: 12px; color: #6B7280;">${sanitizeHtml(inspection.inspectorName) || "-"}</p>
+        ${inspectorData?.role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #9CA3AF;">${sanitizeHtml(inspectorData.role)}</p>` : ""}
       </div>
     </div>
   `
+    : "";
+
+  const companySection = companyData
+    ? `
+    <div class="section">
+      <h2 class="section-title">${t.companyInformation}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.companyName}</div>
+          <div class="info-value">${sanitizeHtml(companyData.name) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.cnpj}</div>
+          <div class="info-value">${sanitizeHtml(companyData.cnpj) || "-"}</div>
+        </div>
+        <div class="info-item" style="grid-column: span 2;">
+          <div class="info-label">${t.address}</div>
+          <div class="info-value">${sanitizeHtml(companyAddress) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.contact}</div>
+          <div class="info-value">${sanitizeHtml(companyData.contactName) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.phone}</div>
+          <div class="info-value">${sanitizeHtml(companyData.contactPhone) || "-"}</div>
+        </div>
+        <div class="info-item" style="grid-column: span 2;">
+          <div class="info-label">${t.email}</div>
+          <div class="info-value">${sanitizeHtml(companyData.contactEmail) || "-"}</div>
+        </div>
+      </div>
+    </div>
+    `
+    : `
+    <div class="section">
+      <h2 class="section-title">${t.propertyInformation}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.propertyName}</div>
+          <div class="info-value">${sanitizeHtml(inspection.propertyName) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.address}</div>
+          <div class="info-value">${sanitizeHtml(inspection.propertyAddress) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.phone}</div>
+          <div class="info-value">${sanitizeHtml(inspection.propertyPhone) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.contractNo}</div>
+          <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
+        </div>
+      </div>
+    </div>
+    `;
+
+  const inspectorSection = inspectorData
+    ? `
+    <div class="section">
+      <h2 class="section-title">${t.inspectorInformation}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.inspector}</div>
+          <div class="info-value">${sanitizeHtml(inspectorData.name) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.inspectorRole}</div>
+          <div class="info-value">${sanitizeHtml(inspectorData.role) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.phone}</div>
+          <div class="info-value">${sanitizeHtml(inspectorData.phone) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.email}</div>
+          <div class="info-value">${sanitizeHtml(inspectorData.email) || "-"}</div>
+        </div>
+      </div>
+    </div>
+    `
     : "";
 
   return `
@@ -351,27 +463,9 @@ const generateInspectionPdfHtmlWithPhotos = (
           <div class="compliance-badge">${t.nfpaCompliance}</div>
         </div>
 
-        <div class="section">
-          <h2 class="section-title">${t.propertyInformation}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.propertyName}</div>
-              <div class="info-value">${sanitizeHtml(inspection.propertyName) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.address}</div>
-              <div class="info-value">${sanitizeHtml(inspection.propertyAddress) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.phone}</div>
-              <div class="info-value">${sanitizeHtml(inspection.propertyPhone) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.contractNo}</div>
-              <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${companySection}
+
+        ${inspectorSection}
 
         <div class="section">
           <h2 class="section-title">${t.inspectionDetails}</h2>
@@ -380,10 +474,17 @@ const generateInspectionPdfHtmlWithPhotos = (
               <div class="info-label">${t.inspectionType}</div>
               <div class="info-value">${typeName}</div>
             </div>
+            ${!inspectorData ? `
             <div class="info-item">
               <div class="info-label">${t.inspector}</div>
               <div class="info-value">${sanitizeHtml(inspection.inspectorName) || "-"}</div>
             </div>
+            ` : `
+            <div class="info-item">
+              <div class="info-label">${t.contractNo}</div>
+              <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
+            </div>
+            `}
             <div class="info-item">
               <div class="info-label">${t.date}</div>
               <div class="info-value">${formatDate(inspection.date, language)}</div>
