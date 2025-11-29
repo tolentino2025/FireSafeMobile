@@ -18,6 +18,8 @@ import { InspectionType } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
+const TAB_BAR_HEIGHT = 90;
+
 type NewInspectionScreenProps = {
   navigation: NativeStackNavigationProp<HomeStackParamList, "NewInspection">;
 };
@@ -130,7 +132,7 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: Spacing.xl, paddingBottom: insets.bottom + Spacing.xl },
+          { paddingTop: Spacing.xl, paddingBottom: insets.bottom + TAB_BAR_HEIGHT + Spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
       >
