@@ -160,7 +160,10 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const updateInspection = async (id: string, updates: Partial<Inspection>) => {
-    const newInspections = inspections.map((insp) =>
+    const storedData = await AsyncStorage.getItem(INSPECTIONS_KEY);
+    const currentInspections: Inspection[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newInspections = currentInspections.map((insp) =>
       insp.id === id ? { ...insp, ...updates, updatedAt: new Date().toISOString() } : insp
     );
     await saveInspections(newInspections);
