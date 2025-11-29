@@ -136,10 +136,14 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     };
 
     try {
+      console.log("Saving inspection:", inspectionData.id, inspectionData.propertyName);
+      
       if (existingInspection) {
         await updateInspection(existingInspection.id, inspectionData);
+        console.log("Updated existing inspection");
       } else {
         await addInspection(inspectionData);
+        console.log("Added new inspection");
       }
       
       const schedulingResult = await scheduleNextInspectionReminder(inspectionData);
@@ -151,8 +155,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         });
       }
       
+      console.log("Inspection saved successfully, navigating back");
       navigation.goBack();
     } catch (error) {
+      console.error("Error saving inspection:", error);
       Alert.alert(t.common.error, t.report.shareError);
     }
   };
