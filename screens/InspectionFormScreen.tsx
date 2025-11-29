@@ -49,7 +49,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [date, setDate] = useState(existingInspection?.date || new Date().toISOString().split("T")[0]);
   const [frequency, setFrequency] = useState<InspectionFrequency>(existingInspection?.frequency || "weekly");
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
-    existingInspection?.checklist || getChecklistForType(type, t.checklistItems)
+    existingInspection?.checklist || getChecklistForType(type, existingInspection?.frequency || "weekly", t.checklistItems)
   );
   const [observations, setObservations] = useState(existingInspection?.observations || "");
   const [signature, setSignature] = useState<string | null>(existingInspection?.signature || null);
@@ -86,6 +86,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }, 5000);
     return () => clearTimeout(timer);
   }, [propertyName, observations, checklist, showAutoSaveIndicator]);
+
+  useEffect(() => {
+    if (!existingInspection) {
+      setChecklist(getChecklistForType(type, frequency, t.checklistItems));
+    }
+  }, [frequency, type, existingInspection]);
 
   const handleChecklistChange = (id: string, value: "yes" | "no" | "na" | null) => {
     if (Platform.OS !== "web") {
@@ -323,32 +329,38 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         <View style={styles.halfField}>
           <ThemedText type="h3">{t.form.frequency}</ThemedText>
           <Spacer height={Spacing.sm} />
-          <View style={styles.frequencyRow}>
-            {frequencies.slice(0, 3).map((freq) => (
-              <Pressable
-                key={freq}
-                onPress={() => setFrequency(freq)}
-                style={[
-                  styles.frequencyChip,
-                  {
-                    backgroundColor:
-                      frequency === freq ? AppColors.primary : theme.backgroundDefault,
-                  },
-                ]}
-              >
-                <ThemedText
-                  type="small"
-                  style={{
-                    color: frequency === freq ? "#FFFFFF" : theme.text,
-                    fontSize: 11,
-                  }}
-                >
-                  {getFrequencyLabel(freq)}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
         </View>
+      </View>
+
+      <Spacer height={Spacing.sm} />
+
+      <View style={styles.frequencyGrid}>
+        {frequencies.map((freq) => (
+          <Pressable
+            key={freq}
+            onPress={() => setFrequency(freq)}
+            style={[
+              styles.frequencyChip,
+              {
+                backgroundColor:
+                  frequency === freq ? AppColors.primary : theme.backgroundDefault,
+                borderWidth: 1,
+                borderColor: frequency === freq ? AppColors.primary : theme.border,
+              },
+            ]}
+          >
+            <ThemedText
+              type="small"
+              style={{
+                color: frequency === freq ? "#FFFFFF" : theme.text,
+                fontSize: 12,
+                fontWeight: frequency === freq ? "600" : "400",
+              }}
+            >
+              {getFrequencyLabel(freq)}
+            </ThemedText>
+          </Pressable>
+        ))}
       </View>
 
       <Spacer height={Spacing["3xl"]} />
@@ -425,14 +437,15 @@ const styles = StyleSheet.create({
   halfField: {
     flex: 1,
   },
-  frequencyRow: {
+  frequencyGrid: {
     flexDirection: "row",
-    gap: Spacing.xs,
+    flexWrap: "wrap",
+    gap: Spacing.sm,
   },
   frequencyChip: {
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
   },
   textArea: {
     height: 120,
