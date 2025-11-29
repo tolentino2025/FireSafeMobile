@@ -162,6 +162,8 @@ export const generateInspectionPdfHtml = (options: GeneratePdfOptions): string =
     )
     .join("");
 
+  console.log("PDF Photos:", inspection.photos?.length, inspection.photos?.map(p => ({ hasBase64: !!p.base64, base64Length: p.base64?.length })));
+  
   const photosHtml =
     inspection.photos && inspection.photos.length > 0
       ? `

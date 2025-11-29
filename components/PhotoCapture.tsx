@@ -88,6 +88,7 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
+        console.log("Photo taken, has base64:", !!asset.base64, "base64 length:", asset.base64?.length);
         const newPhoto: InspectionPhoto = {
           id: Date.now().toString(),
           uri: asset.uri,
@@ -121,6 +122,7 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
+        console.log("Photo picked, has base64:", !!asset.base64, "base64 length:", asset.base64?.length);
         const newPhoto: InspectionPhoto = {
           id: Date.now().toString(),
           uri: asset.uri,
