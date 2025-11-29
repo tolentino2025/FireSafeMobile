@@ -8,9 +8,17 @@
     "scheme": "firesafeitm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "description": "Professional fire protection systems inspection app following NFPA 25 standards. Manage inspections, generate PDF reports, and track maintenance schedules.",
+    "githubUrl": "https://github.com/firesafe-itm",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.firesafe.itm"
+      "bundleIdentifier": "com.firesafe.itm",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "FireSafe ITM needs camera access to take photos of fire protection equipment during inspections.",
+        "NSPhotoLibraryUsageDescription": "FireSafe ITM needs photo library access to attach existing photos to inspection reports.",
+        "NSPhotoLibraryAddUsageDescription": "FireSafe ITM needs permission to save inspection photos to your photo library."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +27,16 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.firesafe.itm"
+      "package": "com.firesafe.itm",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM"
+      ]
     },
     "web": {
       "output": "single",
@@ -38,10 +55,29 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#FF6B00"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FireSafe ITM needs access to your photos to attach them to inspection reports.",
+          "cameraPermission": "FireSafe ITM needs camera access to take photos during inspections."
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "firesafe-itm"
+      }
     }
   }
 }
