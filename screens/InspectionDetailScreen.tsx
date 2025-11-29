@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Image, Alert, Platform, ActivityIndicator, Pressable } from "react-native";
+import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as MailComposer from "expo-mail-composer";
@@ -16,6 +16,8 @@ import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
+
+const TAB_BAR_HEIGHT = 90;
 
 type InspectionDetailScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionDetail">;
 
@@ -204,7 +206,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + Spacing.xl },
+          { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + Spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
       >
