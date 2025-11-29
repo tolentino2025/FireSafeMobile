@@ -22,6 +22,7 @@ export interface ChecklistItem {
 export interface InspectionPhoto {
   id: string;
   uri: string;
+  base64?: string;
   caption: string;
   timestamp: string;
 }

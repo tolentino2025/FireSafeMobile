@@ -87,9 +87,11 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
       });
 
       if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
         const newPhoto: InspectionPhoto = {
           id: Date.now().toString(),
-          uri: result.assets[0].uri,
+          uri: asset.uri,
+          base64: asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined,
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -118,9 +120,11 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
       });
 
       if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
         const newPhoto: InspectionPhoto = {
           id: Date.now().toString(),
-          uri: result.assets[0].uri,
+          uri: asset.uri,
+          base64: asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined,
           caption: "",
           timestamp: new Date().toISOString(),
         };

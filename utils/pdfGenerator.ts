@@ -169,10 +169,11 @@ export const generateInspectionPdfHtml = (options: GeneratePdfOptions): string =
       <h2 style="color: #1A365D; border-bottom: 2px solid #FF6B00; padding-bottom: 8px; font-size: 16px;">${t.photos}</h2>
       <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;">
         ${inspection.photos
+          .filter((photo) => photo.base64 || photo.uri)
           .map(
             (photo) => `
           <div style="width: 200px; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
-            <img src="${photo.uri}" style="width: 100%; height: 150px; object-fit: cover;" />
+            <img src="${photo.base64 || photo.uri}" style="width: 100%; height: 150px; object-fit: cover;" />
             ${photo.caption ? `<p style="margin: 0; padding: 8px; font-size: 11px; color: #4B5563;">${sanitizeHtml(photo.caption)}</p>` : ""}
           </div>
         `
