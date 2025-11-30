@@ -94,9 +94,10 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 
 ### Data Persistence
 - Uses AsyncStorage for local data persistence
-- Stores: inspections, properties, companies, appUsers, language preference, theme mode
+- Stores: inspections, properties, companies, appUsers, schedules, language preference, theme mode
 - Auto-save functionality for inspection forms
 - Company and inspector data embedded in inspections for PDF generation
+- Inspection schedules stored for NFPA 25 compliant recurring reminders
 
 ### Data Types (types/inspection.ts)
 - **Company**: id, name, cnpj, address, city, state, zipCode, contactName, contactPhone, contactEmail
@@ -106,6 +107,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - **ChecklistItem**: id, labelKey, label, value (yes/no/na/null), psiValue, numericFields[], textFields[], notes
 - **NumericField**: id, labelKey, type (NumericFieldType), value, unit
 - **NumericFieldType**: static_psi, residual_psi, psi, seconds, minutes, gpm, rpm, voltage, amperage, percent, temperature, gallons
+- **InspectionSchedule**: id, companyId, propertyId, firePumpId, inspectionType, frequency, startDate, lastInspectionDate, nextDueDate, notificationId, isActive, createdAt, updatedAt
 
 ### Design System - Red/Black Professional Theme
 - **Primary Color**: Fire Red (#DC2626)
@@ -166,6 +168,14 @@ npm run dev
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
 
 ## Recent Changes (November 2025)
+- **NFPA 25 Automated Scheduling System**:
+  - Added InspectionSchedule interface for tracking recurring inspection schedules
+  - Created utils/scheduleUtils.ts with date calculation functions (addInterval, generateScheduleId)
+  - Extended utils/notifications.ts with scheduleNotificationForSchedule function
+  - Updated InspectionContext to manage schedules state with AsyncStorage persistence
+  - Implemented createOrUpdateScheduleForInspection for automatic schedule creation after inspection completion
+  - Supports all NFPA 25 frequencies: daily, weekly, monthly, quarterly, annually, five_years
+  - Push notifications scheduled for reminder based on next due date
 - **NFPA 25 Enhanced Compliance System**:
   - Created comprehensive type system (types/inspection.ts) with ChecklistItem, NumericField, TestSection
   - Enhanced ChecklistItem to support multiple numeric fields per item (static/residual pressure, flow rate, trip time, etc.)
@@ -201,6 +211,5 @@ Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:808
 
 ## Future Enhancements
 - Cloud sync and backup with external API
-- Advanced scheduling with recurring inspections
 - Multi-inspector team collaboration
 - Barcode/QR code scanning for equipment identification
