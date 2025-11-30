@@ -7,6 +7,9 @@ import CompaniesScreen from "@/screens/CompaniesScreen";
 import CompanyFormScreen from "@/screens/CompanyFormScreen";
 import UsersScreen from "@/screens/UsersScreen";
 import UserFormScreen from "@/screens/UserFormScreen";
+import FirePumpListScreen from "@/screens/FirePumpListScreen";
+import FirePumpFormScreen from "@/screens/FirePumpFormScreen";
+import FirePumpPanelFormScreen from "@/screens/FirePumpPanelFormScreen";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
@@ -18,6 +21,9 @@ export type PropertiesStackParamList = {
   CompanyForm: { companyId?: string };
   Users: undefined;
   UserForm: { userId?: string };
+  FirePumpList: undefined;
+  FirePumpForm: { pumpId?: string; companyId?: string };
+  FirePumpPanelForm: { pumpId: string; panelId?: string };
 };
 
 const Stack = createNativeStackNavigator<PropertiesStackParamList>();
@@ -72,6 +78,29 @@ export default function PropertiesStackNavigator() {
       <Stack.Screen
         name="UserForm"
         component={UserFormScreen}
+        options={{
+          presentation: "modal",
+          headerTitle: "",
+        }}
+      />
+      <Stack.Screen
+        name="FirePumpList"
+        component={FirePumpListScreen}
+        options={{
+          headerTitle: t.firePumps.title,
+        }}
+      />
+      <Stack.Screen
+        name="FirePumpForm"
+        component={FirePumpFormScreen}
+        options={{
+          presentation: "modal",
+          headerTitle: "",
+        }}
+      />
+      <Stack.Screen
+        name="FirePumpPanelForm"
+        component={FirePumpPanelFormScreen}
         options={{
           presentation: "modal",
           headerTitle: "",
