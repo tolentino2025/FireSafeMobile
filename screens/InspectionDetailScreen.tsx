@@ -233,6 +233,73 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           <InfoRow icon="clock" label={t.form.frequency} value={getFrequencyLabel(inspection.frequency)} isLast />
         </View>
 
+        {inspection.firePumpData ? (
+          <>
+            <Spacer height={Spacing["2xl"]} />
+            <ThemedText type="h2">{t.firePumps.pumpInfo}</ThemedText>
+            <Spacer height={Spacing.lg} />
+            <View style={[styles.infoCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+              <InfoRow icon="tag" label={t.firePumps.tag} value={inspection.firePumpData.tag} />
+              <InfoRow 
+                icon="settings" 
+                label={t.firePumps.type} 
+                value={
+                  inspection.firePumpData.type === "electric_main" ? t.firePumps.electricMain :
+                  inspection.firePumpData.type === "diesel_main" ? t.firePumps.dieselMain :
+                  t.firePumps.jockey
+                } 
+              />
+              {inspection.firePumpData.manufacturer ? (
+                <InfoRow icon="box" label={t.firePumps.manufacturer} value={inspection.firePumpData.manufacturer} />
+              ) : null}
+              {inspection.firePumpData.model ? (
+                <InfoRow icon="info" label={t.firePumps.model} value={inspection.firePumpData.model} />
+              ) : null}
+              {inspection.firePumpData.flowRateGpm ? (
+                <InfoRow icon="droplet" label={t.firePumps.flowRate} value={`${inspection.firePumpData.flowRateGpm} GPM`} />
+              ) : null}
+              {inspection.firePumpData.pressurePsi ? (
+                <InfoRow icon="activity" label={t.firePumps.pressure} value={`${inspection.firePumpData.pressurePsi} PSI`} />
+              ) : null}
+              {inspection.firePumpData.motorHp ? (
+                <InfoRow icon="zap" label={t.firePumps.motorPower} value={`${inspection.firePumpData.motorHp} HP`} isLast={!inspection.firePumpData.serialNumber && !inspection.firePumpData.installationDate} />
+              ) : null}
+              {inspection.firePumpData.serialNumber ? (
+                <InfoRow icon="hash" label={t.firePumps.serialNumber} value={inspection.firePumpData.serialNumber} isLast={!inspection.firePumpData.installationDate} />
+              ) : null}
+              {inspection.firePumpData.installationDate ? (
+                <InfoRow icon="calendar" label={t.firePumps.installationDate} value={formatDate(inspection.firePumpData.installationDate)} isLast />
+              ) : null}
+            </View>
+          </>
+        ) : null}
+
+        {inspection.firePumpPanelData ? (
+          <>
+            <Spacer height={Spacing["2xl"]} />
+            <ThemedText type="h2">{t.firePumps.panelInfo}</ThemedText>
+            <Spacer height={Spacing.lg} />
+            <View style={[styles.infoCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+              <InfoRow icon="tag" label={t.firePumps.tag} value={inspection.firePumpPanelData.tag} />
+              {inspection.firePumpPanelData.manufacturer ? (
+                <InfoRow icon="box" label={t.firePumps.manufacturer} value={inspection.firePumpPanelData.manufacturer} />
+              ) : null}
+              {inspection.firePumpPanelData.model ? (
+                <InfoRow icon="info" label={t.firePumps.model} value={inspection.firePumpPanelData.model} />
+              ) : null}
+              {inspection.firePumpPanelData.startingType ? (
+                <InfoRow icon="power" label={t.firePumps.startingType} value={inspection.firePumpPanelData.startingType} />
+              ) : null}
+              <InfoRow 
+                icon="toggle-right" 
+                label={t.firePumps.hasAutomaticTransfer} 
+                value={inspection.firePumpPanelData.hasAutomaticTransfer ? t.checklist.yes : t.checklist.no} 
+                isLast 
+              />
+            </View>
+          </>
+        ) : null}
+
         <Spacer height={Spacing["2xl"]} />
 
         <ThemedText type="h2">{t.checklist.title}</ThemedText>
