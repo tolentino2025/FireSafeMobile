@@ -1,0 +1,115 @@
+Quero implementar no app FireSafeMobile uma regra global de entrada de texto:
+todos os textos digitados pelo usuário devem ser automaticamente convertidos para MAIÚSCULAS, exceto campos de e-mail.
+
+Implemente as seguintes alterações:
+
+1) Criar um utilitário global de formatação
+
+Criar arquivo utils/textTransform.ts:
+
+export function toUpperIfNotEmail(value: string, fieldName?: string): string {
+  if (!value) return value;
+
+  // se o campo for e-mail, não altera
+  if (fieldName?.toLowerCase()?.includes("email")) {
+    return value;
+  }
+
+  // mantém números e caracteres especiais normalmente, mas converte texto para MAIÚSCULO
+  return value.toUpperCase();
+}
+
+2) Atualizar todos os componentes de input (TextInput)
+
+Nos componentes que lidam com entrada de dados (TextField, Input, FormInput, ou o componente equivalente no projeto):
+
+interceptar o onChangeText
+
+aplicar o utilitário toUpperIfNotEmail
+
+enviar o valor já convertido para o estado
+
+Exemplo:
+
+onChangeText={(text) => {
+  const formatted = toUpperIfNotEmail(text, name);
+  onChange(formatted);
+}}
+
+3) Atualizar todas as telas (screens) com campos de texto
+
+Em telas como:
+
+NewInspectionScreen
+
+InspectionFormScreen
+
+PropertyFormScreen
+
+CompanyFormScreen
+
+UserFormScreen
+
+qualquer tela que receba texto livre
+
+Garantir que:
+
+campos de e-mail mantenham texto original (minúsculo/misturado)
+
+todos os demais campos convertam imediatamente para MAIÚSCULO
+
+4) Garantir comportamento correto em campos especiais
+
+Aplicar a regra:
+
+endereço → MAIÚSCULO
+
+nome da empresa → MAIÚSCULO
+
+nome do responsável → MAIÚSCULO
+
+descrição → MAIÚSCULO
+
+observações → MAIÚSCULO
+
+checklist captions → MAIÚSCULO
+
+qualquer texto livre → MAIÚSCULO
+
+email → NÃO alterar
+
+Caso exista validação de lowerCase para e-mail, manter como está.
+
+5) Garantir consistência no armazenamento (AsyncStorage)
+
+Ao salvar dados em:
+
+InspectionContext
+
+PropertiesContext
+
+CompaniesContext
+
+UserContext
+
+Verificar que os valores já chegam em MAIÚSCULO.
+Nenhuma conversão adicional é necessária na hora de salvar.
+
+6) No final, entregar:
+
+textTransform.ts completo
+
+componentes de input atualizados
+
+telas que tiveram o onChangeText modificado
+
+qualquer ajuste necessário em contexts
+
+E uma explicação clara das mudanças realizadas.
+
+🎯 Objetivo final
+
+✔ Todo texto digitado pelo usuário deve aparecer em LETRAS MAIÚSCULAS automaticamente
+✔ Exceto campos de e-mail, que permanecem no formato original
+✔ Mesmo comportamento no app inteiro
+✔ Persistência salva já formatada

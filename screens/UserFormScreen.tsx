@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, AppUser } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
+import { toUpperIfNotEmail } from "@/utils/textTransform";
 
 type UserFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "UserForm">;
 
@@ -25,7 +26,7 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
   const [name, setName] = useState(existingUser?.name || "");
   const [email, setEmail] = useState(existingUser?.email || "");
   const [phone, setPhone] = useState(existingUser?.phone || "");
-  const [role, setRole] = useState(existingUser?.role || "Inspetor");
+  const [role, setRole] = useState(existingUser?.role || "INSPETOR");
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -68,9 +69,10 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
       <TextInput
         style={inputStyle}
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => setName(toUpperIfNotEmail(text, "name"))}
         placeholder={t.users?.name || "Nome Completo"}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -80,9 +82,10 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
       <TextInput
         style={inputStyle}
         value={role}
-        onChangeText={setRole}
+        onChangeText={(text) => setRole(toUpperIfNotEmail(text, "role"))}
         placeholder={t.users?.role || "Inspetor, Supervisor, etc."}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -92,7 +95,7 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
       <TextInput
         style={inputStyle}
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(toUpperIfNotEmail(text, "email"))}
         placeholder="email@exemplo.com"
         placeholderTextColor={theme.placeholder}
         keyboardType="email-address"

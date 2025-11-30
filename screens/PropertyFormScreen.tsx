@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Property, Company } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
+import { toUpperIfNotEmail } from "@/utils/textTransform";
 
 type PropertyFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "PropertyForm">;
 
@@ -149,10 +150,11 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
       <TextInput
         style={inputStyle}
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => setName(toUpperIfNotEmail(text, "name"))}
         placeholder={t.properties.name}
         placeholderTextColor={theme.placeholder}
         autoFocus
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -162,9 +164,10 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
       <TextInput
         style={inputStyle}
         value={address}
-        onChangeText={setAddress}
+        onChangeText={(text) => setAddress(toUpperIfNotEmail(text, "address"))}
         placeholder={t.properties.address}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -187,12 +190,13 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
       <TextInput
         style={inputStyle}
         value={contact}
-        onChangeText={setContact}
+        onChangeText={(text) => setContact(toUpperIfNotEmail(text, "contact"))}
         placeholder={t.properties.contact}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
-      {isEditing && (
+      {isEditing ? (
         <>
           <Spacer height={Spacing["4xl"]} />
           <Button
@@ -202,7 +206,7 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
             {t.common.delete}
           </Button>
         </>
-      )}
+      ) : null}
     </ScreenKeyboardAwareScrollView>
   );
 }

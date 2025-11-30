@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Company } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
+import { toUpperIfNotEmail } from "@/utils/textTransform";
 
 type CompanyFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "CompanyForm">;
 
@@ -78,9 +79,10 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
       <TextInput
         style={inputStyle}
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => setName(toUpperIfNotEmail(text, "name"))}
         placeholder={t.companies?.name || "Nome da Empresa"}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -103,9 +105,10 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
       <TextInput
         style={inputStyle}
         value={address}
-        onChangeText={setAddress}
+        onChangeText={(text) => setAddress(toUpperIfNotEmail(text, "address"))}
         placeholder={t.form.propertyAddress}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -117,9 +120,10 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
           <TextInput
             style={inputStyle}
             value={city}
-            onChangeText={setCity}
+            onChangeText={(text) => setCity(toUpperIfNotEmail(text, "city"))}
             placeholder={t.companies?.city || "Cidade"}
             placeholderTextColor={theme.placeholder}
+            autoCapitalize="characters"
           />
         </View>
         <View style={styles.halfField}>
@@ -128,7 +132,7 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
           <TextInput
             style={inputStyle}
             value={state}
-            onChangeText={setState}
+            onChangeText={(text) => setState(toUpperIfNotEmail(text, "state"))}
             placeholder="UF"
             placeholderTextColor={theme.placeholder}
             maxLength={2}
@@ -161,9 +165,10 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
       <TextInput
         style={inputStyle}
         value={contactName}
-        onChangeText={setContactName}
+        onChangeText={(text) => setContactName(toUpperIfNotEmail(text, "contactName"))}
         placeholder={t.companies?.contactName || "Nome do Contato"}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -187,7 +192,7 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
           <TextInput
             style={inputStyle}
             value={contactEmail}
-            onChangeText={setContactEmail}
+            onChangeText={(text) => setContactEmail(toUpperIfNotEmail(text, "email"))}
             placeholder="email@empresa.com"
             placeholderTextColor={theme.placeholder}
             keyboardType="email-address"

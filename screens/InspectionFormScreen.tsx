@@ -26,6 +26,7 @@ import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { scheduleInspectionReminder } from "@/utils/notifications";
+import { toUpperIfNotEmail } from "@/utils/textTransform";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -317,9 +318,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       <TextInput
         style={inputStyle}
         value={propertyName}
-        onChangeText={setPropertyName}
+        onChangeText={(text) => setPropertyName(toUpperIfNotEmail(text, "propertyName"))}
         placeholder={t.form.propertyName}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -329,9 +331,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       <TextInput
         style={inputStyle}
         value={propertyAddress}
-        onChangeText={setPropertyAddress}
+        onChangeText={(text) => setPropertyAddress(toUpperIfNotEmail(text, "propertyAddress"))}
         placeholder={t.form.propertyAddress}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -355,9 +358,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           <TextInput
             style={inputStyle}
             value={contractNo}
-            onChangeText={setContractNo}
+            onChangeText={(text) => setContractNo(toUpperIfNotEmail(text, "contractNo"))}
             placeholder={t.form.contractNo}
             placeholderTextColor={theme.placeholder}
+            autoCapitalize="characters"
           />
         </View>
       </View>
@@ -382,9 +386,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       <TextInput
         style={inputStyle}
         value={inspectorName}
-        onChangeText={setInspectorName}
+        onChangeText={(text) => setInspectorName(toUpperIfNotEmail(text, "inspectorName"))}
         placeholder={t.form.inspector}
         placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing.lg} />
@@ -465,12 +470,13 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       <TextInput
         style={[inputStyle, styles.textArea]}
         value={observations}
-        onChangeText={setObservations}
+        onChangeText={(text) => setObservations(toUpperIfNotEmail(text, "observations"))}
         placeholder={t.form.observations}
         placeholderTextColor={theme.placeholder}
         multiline
         numberOfLines={4}
         textAlignVertical="top"
+        autoCapitalize="characters"
       />
 
       <Spacer height={Spacing["2xl"]} />
