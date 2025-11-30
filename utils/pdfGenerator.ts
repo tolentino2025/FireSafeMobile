@@ -144,6 +144,26 @@ const translations = {
     date: "Date",
     frequency: "Frequency",
     contractNo: "Contract No.",
+    firePumpInformation: "Fire Pump Information",
+    controlPanelInformation: "Control Panel Information",
+    pumpTag: "Pump Tag",
+    pumpType: "Pump Type",
+    manufacturer: "Manufacturer",
+    model: "Model",
+    flowRate: "Flow Rate",
+    pressure: "Pressure",
+    motorPower: "Motor Power",
+    serialNumber: "Serial Number",
+    installationDate: "Installation Date",
+    panelTag: "Panel Tag",
+    startingType: "Starting Type",
+    automaticTransfer: "Automatic Transfer",
+    electricMain: "Electric Main",
+    dieselMain: "Diesel Main",
+    jockey: "Jockey",
+    yes: "Yes",
+    no: "No",
+    notRegistered: "Not registered",
     checklistResults: "Checklist Results",
     item: "Item",
     status: "Status",
@@ -186,6 +206,26 @@ const translations = {
     date: "Data",
     frequency: "Frequência",
     contractNo: "Nº do Contrato",
+    firePumpInformation: "Informações da Bomba de Incêndio",
+    controlPanelInformation: "Informações do Painel de Comando",
+    pumpTag: "Tag da Bomba",
+    pumpType: "Tipo de Bomba",
+    manufacturer: "Fabricante",
+    model: "Modelo",
+    flowRate: "Vazão",
+    pressure: "Pressão",
+    motorPower: "Potência do Motor",
+    serialNumber: "Número de Série",
+    installationDate: "Data de Instalação",
+    panelTag: "Tag do Painel",
+    startingType: "Tipo de Partida",
+    automaticTransfer: "Transferência Automática",
+    electricMain: "Bomba Elétrica Principal",
+    dieselMain: "Bomba Diesel Principal",
+    jockey: "Bomba Jockey",
+    yes: "Sim",
+    no: "Não",
+    notRegistered: "Não cadastrado",
     checklistResults: "Resultados da Verificação",
     item: "Item",
     status: "Status",
@@ -389,6 +429,100 @@ const generateInspectionPdfHtmlWithPhotos = (
     `
     : "";
 
+  const firePumpData = inspection.firePumpData;
+  const firePumpPanelData = inspection.firePumpPanelData;
+
+  const getPumpTypeLabel = (pumpType: string): string => {
+    switch (pumpType) {
+      case "electric_main":
+        return t.electricMain;
+      case "diesel_main":
+        return t.dieselMain;
+      case "jockey":
+        return t.jockey;
+      default:
+        return pumpType;
+    }
+  };
+
+  const firePumpSection = firePumpData
+    ? `
+    <div class="section">
+      <h2 class="section-title">${t.firePumpInformation}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.pumpTag}</div>
+          <div class="info-value">${sanitizeHtml(firePumpData.tag) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.pumpType}</div>
+          <div class="info-value">${getPumpTypeLabel(firePumpData.type)}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.manufacturer}</div>
+          <div class="info-value">${sanitizeHtml(firePumpData.manufacturer) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.model}</div>
+          <div class="info-value">${sanitizeHtml(firePumpData.model) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.flowRate}</div>
+          <div class="info-value">${firePumpData.flowRateGpm ? `${firePumpData.flowRateGpm} GPM` : "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.pressure}</div>
+          <div class="info-value">${firePumpData.pressurePsi ? `${firePumpData.pressurePsi} PSI` : "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.motorPower}</div>
+          <div class="info-value">${firePumpData.motorHp ? `${firePumpData.motorHp} HP` : "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.serialNumber}</div>
+          <div class="info-value">${sanitizeHtml(firePumpData.serialNumber) || "-"}</div>
+        </div>
+        ${firePumpData.installationDate ? `
+        <div class="info-item" style="grid-column: span 2;">
+          <div class="info-label">${t.installationDate}</div>
+          <div class="info-value">${formatDate(firePumpData.installationDate, language)}</div>
+        </div>
+        ` : ""}
+      </div>
+    </div>
+    `
+    : "";
+
+  const firePumpPanelSection = firePumpPanelData
+    ? `
+    <div class="section">
+      <h2 class="section-title">${t.controlPanelInformation}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.panelTag}</div>
+          <div class="info-value">${sanitizeHtml(firePumpPanelData.tag) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.manufacturer}</div>
+          <div class="info-value">${sanitizeHtml(firePumpPanelData.manufacturer) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.model}</div>
+          <div class="info-value">${sanitizeHtml(firePumpPanelData.model) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.startingType}</div>
+          <div class="info-value">${sanitizeHtml(firePumpPanelData.startingType) || "-"}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.automaticTransfer}</div>
+          <div class="info-value">${firePumpPanelData.hasAutomaticTransfer ? t.yes : t.no}</div>
+        </div>
+      </div>
+    </div>
+    `
+    : "";
+
   return `
     <!DOCTYPE html>
     <html>
@@ -547,6 +681,10 @@ const generateInspectionPdfHtmlWithPhotos = (
         ${companySection}
 
         ${inspectorSection}
+
+        ${firePumpSection}
+
+        ${firePumpPanelSection}
 
         <div class="section">
           <h2 class="section-title">${t.inspectionDetails}</h2>
