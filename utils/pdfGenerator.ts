@@ -67,6 +67,59 @@ const getChecklistValueSymbol = (value: "yes" | "no" | "na" | null): string => {
   }
 };
 
+const numericFieldLabels = {
+  en: {
+    staticPsi: "Static Pressure (psi)",
+    residualPsi: "Residual Pressure (psi)",
+    pressureDrop: "Pressure Drop (psi)",
+    airPressurePsi: "Air Pressure (psi)",
+    tripTimeSec: "Trip Time (sec)",
+    waterDeliveryTimeMin: "Water Delivery Time (min)",
+    flowGpm: "Flow (gpm)",
+    operationTimeSec: "Operation Time (sec)",
+    operatingPsi: "Operating Pressure (psi)",
+    suctionPsi: "Suction Pressure (psi)",
+    dischargePsi: "Discharge Pressure (psi)",
+    noFlowPsi: "No Flow Pressure (psi)",
+    ratedFlowPsi: "Rated Flow Pressure (psi)",
+    peakFlowPsi: "Peak Flow Pressure (psi)",
+    rpmValue: "RPM",
+    voltageReading: "Voltage (V)",
+    amperageReading: "Amperage (A)",
+    foamExpansionRatio: "Foam Expansion Ratio (%)",
+    foamDrainTime: "Foam Drain Time (min)",
+    pitotPsi: "Pitot Pressure (psi)",
+    tankCapacity: "Tank Capacity (gal)",
+    waterLevelPercent: "Water Level (%)",
+    waterTempF: "Water Temperature (F)",
+  },
+  "pt-BR": {
+    staticPsi: "Pressao Estatica (psi)",
+    residualPsi: "Pressao Residual (psi)",
+    pressureDrop: "Queda de Pressao (psi)",
+    airPressurePsi: "Pressao de Ar (psi)",
+    tripTimeSec: "Tempo de Disparo (seg)",
+    waterDeliveryTimeMin: "Tempo de Entrega de Agua (min)",
+    flowGpm: "Vazao (gpm)",
+    operationTimeSec: "Tempo de Operacao (seg)",
+    operatingPsi: "Pressao de Operacao (psi)",
+    suctionPsi: "Pressao de Succao (psi)",
+    dischargePsi: "Pressao de Descarga (psi)",
+    noFlowPsi: "Pressao Sem Vazao (psi)",
+    ratedFlowPsi: "Pressao de Vazao Nominal (psi)",
+    peakFlowPsi: "Pressao de Pico de Vazao (psi)",
+    rpmValue: "RPM",
+    voltageReading: "Tensao (V)",
+    amperageReading: "Corrente (A)",
+    foamExpansionRatio: "Taxa de Expansao da Espuma (%)",
+    foamDrainTime: "Tempo de Drenagem da Espuma (min)",
+    pitotPsi: "Pressao Pitot (psi)",
+    tankCapacity: "Capacidade do Tanque (gal)",
+    waterLevelPercent: "Nivel de Agua (%)",
+    waterTempF: "Temperatura da Agua (F)",
+  },
+};
+
 const translations = {
   en: {
     inspectionReport: "Inspection Report",
@@ -180,6 +233,12 @@ const generateInspectionPdfHtmlWithPhotos = (
         .join(", ")
     : inspection.propertyAddress;
 
+  const nfLabels = numericFieldLabels[language];
+  
+  const getNumericFieldLabel = (labelKey: string): string => {
+    return nfLabels[labelKey as keyof typeof nfLabels] || labelKey;
+  };
+
   const getNumericFieldsHtml = (item: any): string => {
     if (item.psiValue && !item.numericFields?.length) {
       return `<div style="font-size: 11px; color: #6B7280; margin-top: 4px;">${t.staticPsi || "Pressure"}: ${sanitizeHtml(item.psiValue)} psi</div>`;
@@ -188,7 +247,7 @@ const generateInspectionPdfHtmlWithPhotos = (
     const filledFields = item.numericFields.filter((f: any) => f.value);
     if (!filledFields.length) return "";
     return `<div style="margin-top: 6px; font-size: 11px; color: #6B7280;">
-      ${filledFields.map((f: any) => `<div>${sanitizeHtml(f.labelKey)}: ${sanitizeHtml(f.value)} ${sanitizeHtml(f.unit) || ""}</div>`).join("")}
+      ${filledFields.map((f: any) => `<div>${getNumericFieldLabel(f.labelKey)}: ${sanitizeHtml(f.value)} ${sanitizeHtml(f.unit) || ""}</div>`).join("")}
     </div>`;
   };
 

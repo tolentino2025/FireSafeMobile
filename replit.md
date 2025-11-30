@@ -98,11 +98,14 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - Auto-save functionality for inspection forms
 - Company and inspector data embedded in inspections for PDF generation
 
-### Data Types
+### Data Types (types/inspection.ts)
 - **Company**: id, name, cnpj, address, city, state, zipCode, contactName, contactPhone, contactEmail
 - **AppUser**: id, name, email, phone, role
 - **Property**: id, name, address, phone, contact, companyId
 - **Inspection**: includes companyId, companyData, inspectorId, inspectorData for full data embedding
+- **ChecklistItem**: id, labelKey, label, value (yes/no/na/null), psiValue, numericFields[], textFields[], notes
+- **NumericField**: id, labelKey, type (NumericFieldType), value, unit
+- **NumericFieldType**: static_psi, residual_psi, psi, seconds, minutes, gpm, rpm, voltage, amperage, percent, temperature, gallons
 
 ### Design System - Red/Black Professional Theme
 - **Primary Color**: Fire Red (#DC2626)
@@ -163,6 +166,15 @@ npm run dev
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
 
 ## Recent Changes (November 2025)
+- **NFPA 25 Enhanced Compliance System**:
+  - Created comprehensive type system (types/inspection.ts) with ChecklistItem, NumericField, TestSection
+  - Enhanced ChecklistItem to support multiple numeric fields per item (static/residual pressure, flow rate, trip time, etc.)
+  - Added 23 NumericFieldType values: static_psi, residual_psi, psi, seconds, minutes, gpm, rpm, voltage, amperage, percent, temperature, gallons
+  - Updated checklistTemplates.ts with test-specific sections (dryPipeTripTest, mainDrainTest, hydrantFlowTest, foamDischargeTest)
+  - ChecklistItemRow now supports multiple numeric inputs and optional notes per item
+  - InspectionDetailScreen displays all numeric fields and notes with proper translations
+  - PDF reports include all numeric measurements with bilingual labels
+  - Automatic data migration from legacy psiValue structure to new numericFields model
 - **Red/Black Professional Design System**:
   - Updated theme.ts with new color palette (Fire Red primary, dark backgrounds)
   - Enhanced ThemeContext with fullTheme object containing complete theme data
@@ -182,9 +194,10 @@ Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:808
   - PDF now includes full company section (name, CNPJ, address, contact)
   - PDF now includes inspector section (name, role, phone, email)
   - Company and inspector data embedded in inspection for offline PDF generation
+  - Numeric fields display with translated labels in reports
 - **Previous Updates**:
   - Implemented frequency-based checklist filtering per NFPA 25 standards
-  - Added 80+ translation keys for comprehensive checklist coverage
+  - Added 100+ translation keys for comprehensive checklist coverage
 
 ## Future Enhancements
 - Cloud sync and backup with external API
