@@ -8,7 +8,7 @@ export const translations = {
     tabs: {
       home: "Inicio",
       inspections: "Inspeções",
-      properties: "Propriedades",
+      properties: "Cadastros",
       profile: "Perfil",
     },
     home: {
@@ -320,7 +320,7 @@ export const translations = {
       waterTempF: "Temperatura da Água (°F)",
     },
     properties: {
-      title: "Propriedades",
+      title: "Cadastros",
       companies: "Empresas",
       properties: "Propriedades",
       search: "Buscar...",
@@ -437,7 +437,7 @@ export const translations = {
     tabs: {
       home: "Home",
       inspections: "Inspections",
-      properties: "Properties",
+      properties: "Registry",
       profile: "Profile",
     },
     home: {
@@ -749,7 +749,7 @@ export const translations = {
       waterTempF: "Water Temperature (°F)",
     },
     properties: {
-      title: "Properties",
+      title: "Registry",
       companies: "Companies",
       properties: "Properties",
       search: "Search...",

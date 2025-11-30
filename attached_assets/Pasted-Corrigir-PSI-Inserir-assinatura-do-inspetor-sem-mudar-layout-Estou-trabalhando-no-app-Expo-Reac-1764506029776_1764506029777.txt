@@ -1,0 +1,99 @@
+Corrigir PSI + Inserir assinatura do inspetor (sem mudar layout)
+
+Estou trabalhando no app Expo React Native chamado FireSafeMobile.
+O projeto já está carregado neste workspace.
+
+REGRAS IMPORTANTÍSSIMAS:
+
+NÃO alterar o layout geral do PDF (cores, fontes, margens, tabelas, espaçamentos, título, estrutura).
+
+NÃO alterar o layout ou estilo das telas do app.
+
+NÃO modificar a aparência do PDF, apenas inserir novas informações usando o mesmo padrão existente.
+
+Todas as mudanças devem ser lógicas, nunca visuais.
+
+1. Correção da coluna PSI
+
+No PDF, a tabela do checklist aparece sempre com as colunas:
+ITEM | STATUS | PSI
+mesmo quando nenhum item possui leitura de pressão.
+
+Quero corrigir isso da seguinte forma:
+
+Localize o arquivo que gera o PDF (ex.: src/utils/pdfGenerator.ts).
+
+Antes de renderizar a tabela, calcule uma flag:
+
+const hasAnyPsi = checklistItems.some(
+  item =>
+    item.hasPsi === true ||
+    item.numericField?.unit === "psi" ||
+    item.numericFields?.some(f => f.unit === "psi")
+);
+
+
+Se hasAnyPsi for false:
+
+Gerar tabela somente com ITEM e STATUS.
+
+Não renderizar a coluna PSI no cabeçalho nem nas linhas.
+
+Se hasAnyPsi for true:
+
+Manter a tabela exatamente como é hoje: ITEM | STATUS | PSI.
+
+Para itens sem psi, deixar a célula “PSI” vazia, apenas para manter a estrutura.
+
+Não altere nenhum estilo, apenas torne a coluna condicional.
+
+Mostre no final o diff completo das alterações.
+
+2. Inserção da ASSINATURA DO INSPETOR no PDF
+
+O app já possui captura de assinatura do inspetor durante o processo de inspeção.
+
+Quero que essa assinatura apareça no PDF gerado, mas SEM alterar o layout geral.
+
+Requisitos:
+
+A assinatura já é salva como imagem (base64).
+
+No arquivo de geração de PDF (pdfGenerator.ts ou equivalente), após a seção final do relatório (por exemplo perto do rodapé ou onde for mais adequado sem mudar layout), inclua uma seção de assinatura assim:
+
+Um título simples, igual ao estilo das seções existentes (mesma tag HTML, mesma classe, mesmo estilo).
+
+Imagem da assinatura do inspetor (<img src="data:image/png;base64,..." ...>).
+
+Nome do inspetor abaixo da imagem, usando a mesma tipografia usada para textos padrão do PDF.
+
+NÃO alterar margens, cores, tamanho de fonte ou qualquer estilo do PDF.
+
+Apenas inserir essa nova seção seguindo o padrão das demais (copiar estilo já usado em outras seções e reutilizar).
+
+Caso a assinatura não exista, não mostrar a seção.
+
+Estrutura sugerida (respeitando estilos existentes — não crie CSS novo):
+
+<h3>Assinatura do Inspetor</h3>
+<img src="{assinaturaBase64}" style="width: 200px; height: auto;" />
+<p>{nomeDoInspetor}</p>
+
+
+(Ajustar só tamanhos que já estejam padronizados no relatório, sem criar novos.)
+
+Resultado esperado
+
+Mostrar o diff completo de todos os arquivos modificados.
+
+Explicar:
+
+como detectou se havia PSI,
+
+como tornou a coluna condicional,
+
+onde inseriu a assinatura,
+
+e como garantiu que o layout original não mudou.
+
+Não prossiga para otimizações não solicitadas — quero apenas PSI condicional + assinatura no PDF, sem mudanças no visual.
