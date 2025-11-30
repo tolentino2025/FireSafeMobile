@@ -26,7 +26,6 @@ import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFr
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
-import { scheduleInspectionReminder } from "@/utils/notifications";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
@@ -37,7 +36,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const { type, inspectionId } = route.params;
   const { theme } = useTheme();
   const { t, language } = useLanguage();
-  const { inspections, addInspection, updateInspection, companies, appUsers, firePumps, firePumpPanels, getFirePumpsByCompany, getPanelsByPump } = useInspections();
+  const { inspections, addInspection, updateInspection, companies, appUsers, firePumps, firePumpPanels, getFirePumpsByCompany, getPanelsByPump, createOrUpdateScheduleForInspection } = useInspections();
 
   const existingInspection = inspectionId
     ? inspections.find((i) => i.id === inspectionId)
@@ -275,14 +274,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         await addInspection(inspectionData);
       }
       
-      const schedulingResult = await scheduleNextInspectionReminder(inspectionData);
-      
-      if (schedulingResult && (schedulingResult.notificationId || schedulingResult.scheduledDate)) {
-        await updateInspection(inspectionData.id, {
-          notificationId: schedulingResult.notificationId || undefined,
-          scheduledDate: schedulingResult.scheduledDate,
-        });
-      }
+      await createOrUpdateScheduleForInspection(inspectionData, language as "en" | "pt-BR");
       
       navigation.goBack();
     } catch (error) {
@@ -290,54 +282,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       Alert.alert(t.common.error, t.report.shareError);
     }
   };
-  
-  const scheduleNextInspectionReminder = async (inspection: Inspection): Promise<{ notificationId: string | null; scheduledDate: string } | null> => {
-    try {
-      const inspectionDate = new Date(inspection.date);
-      let nextDate = new Date(inspectionDate);
-      
-      switch (inspection.frequency) {
-        case "daily":
-          nextDate.setDate(nextDate.getDate() + 1);
-          break;
-        case "weekly":
-          nextDate.setDate(nextDate.getDate() + 7);
-          break;
-        case "monthly":
-          nextDate.setMonth(nextDate.getMonth() + 1);
-          break;
-        case "quarterly":
-          nextDate.setMonth(nextDate.getMonth() + 3);
-          break;
-        case "annually":
-          nextDate.setFullYear(nextDate.getFullYear() + 1);
-          break;
-        case "five_years":
-          nextDate.setFullYear(nextDate.getFullYear() + 5);
-          break;
-      }
-      
-      if (nextDate > new Date()) {
-        const notificationId = await scheduleInspectionReminder({
-          inspectionId: inspection.id,
-          propertyName: inspection.propertyName,
-          inspectionType: t.inspectionTypes[getTypeKey(inspection.type)],
-          scheduledDate: nextDate,
-          language: language as "en" | "pt-BR",
-        });
-        
-        return {
-          notificationId,
-          scheduledDate: nextDate.toISOString(),
-        };
-      }
-      return null;
-    } catch (error) {
-      console.log("Could not schedule notification:", error);
-      return null;
-    }
-  };
-  
+
   const getTypeKey = (type: InspectionType): keyof typeof t.inspectionTypes => {
     const mapping: Record<InspectionType, keyof typeof t.inspectionTypes> = {
       wet_pipe: "wetPipe",
