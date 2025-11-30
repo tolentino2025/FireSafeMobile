@@ -93,6 +93,7 @@ export const translations = {
     report: {
       generate: "Gerar Relatório",
       share: "Compartilhar",
+      send: "Enviar",
       email: "Enviar por Email",
       title: "Relatório de Inspeção",
       inspectionDetails: "Detalhes da Inspeção",
@@ -447,6 +448,7 @@ export const translations = {
     report: {
       generate: "Generate Report",
       share: "Share",
+      send: "Send",
       email: "Send by Email",
       title: "Inspection Report",
       inspectionDetails: "Inspection Details",

@@ -1,0 +1,116 @@
+Quero criar no FireSafeMobile uma área de ações padrão para cada inspeção, contendo os botões Compartilhar, Editar e Excluir (também permitir opcionalmente Enviar).
+Atualmente esses botões aparecem desalinhados e sem componente próprio.
+
+Implemente o seguinte:
+
+1) Criar um componente reutilizável ActionBar.tsx em /components
+
+O componente deve receber props:
+
+interface ActionBarProps {
+  onShare?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onSend?: () => void; // opcional
+  showSend?: boolean;  // padrão: false
+}
+
+
+E renderizar botões horizontalmente alinhados, com ícones do Expo Vector Icons (Feather):
+
+Share → ícone "share-2"
+
+Edit → "edit-3"
+
+Delete → "trash-2"
+
+Send (opcional) → "send"
+
+Estilo desejado:
+
+Layout horizontal (flexDirection: "row")
+
+Espaçamento uniforme entre cada botão
+
+Ícone + texto ao lado
+
+Cores usando o tema atual:
+
+theme.colors.textPrimary
+theme.colors.error (para excluir)
+theme.colors.primary (para enviar/compartilhar/editar)
+
+Exemplo esperado de markup:
+<TouchableOpacity style={styles.action} onPress={onShare}>
+  <Feather name="share-2" size={18} color={theme.colors.primary} />
+  <ThemedText style={styles.label}>Compartilhar</ThemedText>
+</TouchableOpacity>
+
+2) Estilização do componente
+
+Criar estilos:
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  action: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+});
+
+3) Substituir o código atual da Inspeção
+
+Na InspectionDetailScreen.tsx, substituir o bloco atual de botões pelo componente criado:
+
+<ActionBar
+  onShare={handleShare}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+  onSend={handleSendReport}
+  showSend={true} // ou false, conforme a tela
+/>
+
+4) Integrar ao Thema
+
+ThemedText deve respeitar tema claro/escuro.
+
+Ícones devem usar theme.colors.primary.
+
+Botão Excluir deve usar theme.colors.error.
+
+5) Entrega final
+
+Me envie:
+
+ActionBar.tsx completo
+
+alterações em InspectionDetailScreen.tsx
+
+qualquer ajuste em estilos ou tema necessários
+
+🎯 Objetivo final
+
+Criar uma barra de ações profissional e responsiva com:
+
+Compartilhar
+
+Editar
+
+Excluir
+
+Enviar (opcional)
+
+Todas alinhadas corretamente e integradas ao tema.

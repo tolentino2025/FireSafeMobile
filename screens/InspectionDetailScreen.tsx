@@ -7,7 +7,7 @@ import { Image as ExpoImage } from "expo-image";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Button } from "@/components/Button";
+import { ActionBar } from "@/components/ActionBar";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -206,7 +206,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + Spacing.xl },
+          { paddingBottom: Spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -343,34 +343,27 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           </>
         ) : null}
 
-        <Spacer height={Spacing["3xl"]} />
-
-        <Button onPress={showShareOptions} disabled={isGeneratingPdf}>
-          <View style={styles.buttonContent}>
-            {isGeneratingPdf ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <>
-                <Feather name="share-2" size={18} color="#FFFFFF" />
-                <ThemedText type="body" style={{ color: "#FFFFFF", marginLeft: Spacing.sm }}>
-                  {t.report.share}
-                </ThemedText>
-              </>
-            )}
-          </View>
-        </Button>
-
-        <Spacer height={Spacing.md} />
-
-        <View style={styles.actionRow}>
-          <Button onPress={handleEdit} style={[styles.actionButton, { backgroundColor: fullTheme.colors.primaryDark }]}>
-            {t.common.edit}
-          </Button>
-          <Button onPress={handleDelete} style={[styles.actionButton, { backgroundColor: fullTheme.colors.error }]}>
-            {t.common.delete}
-          </Button>
-        </View>
+        <Spacer height={Spacing.xl} />
       </ScrollView>
+
+      <View style={[styles.actionBarContainer, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT }]}>
+        {isGeneratingPdf ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={fullTheme.colors.primary} />
+            <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm }}>
+              {t.report.generatingPdf}
+            </ThemedText>
+          </View>
+        ) : (
+          <ActionBar
+            onShare={showShareOptions}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSend={handleEmailPdf}
+            showSend={true}
+          />
+        )}
+      </View>
     </ThemedView>
   );
 }
@@ -496,17 +489,14 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 150,
   },
-  buttonContent: {
+  actionBarContainer: {
+    backgroundColor: "transparent",
+  },
+  loadingContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-  },
-  actionRow: {
-    flexDirection: "row",
-    gap: Spacing.md,
-  },
-  actionButton: {
-    flex: 1,
+    paddingVertical: Spacing.lg,
   },
   photosContainer: {
     gap: Spacing.md,
