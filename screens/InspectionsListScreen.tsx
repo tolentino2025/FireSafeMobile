@@ -63,21 +63,35 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
 
   const renderHeader = () => (
     <>
-      <View style={[styles.searchContainer, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
-        <Feather name="search" size={20} color={fullTheme.colors.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: fullTheme.colors.textPrimary }]}
-          placeholder={t.inspections.search}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          returnKeyType="search"
-        />
-        {searchQuery.length > 0 ? (
-          <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={20} color={fullTheme.colors.textSecondary} />
-          </Pressable>
-        ) : null}
+      <View style={styles.searchRow}>
+        <View style={[styles.searchContainer, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+          <Feather name="search" size={20} color={fullTheme.colors.textSecondary} />
+          <TextInput
+            style={[styles.searchInput, { color: fullTheme.colors.textPrimary }]}
+            placeholder={t.inspections.search}
+            placeholderTextColor={fullTheme.colors.placeholder}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 ? (
+            <Pressable onPress={() => setSearchQuery("")}>
+              <Feather name="x" size={20} color={fullTheme.colors.textSecondary} />
+            </Pressable>
+          ) : null}
+        </View>
+        <Pressable
+          onPress={() => navigation.navigate("InspectionSchedule")}
+          style={[
+            styles.calendarButton,
+            {
+              backgroundColor: fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border,
+            },
+          ]}
+        >
+          <Feather name="calendar" size={22} color={fullTheme.colors.primary} />
+        </Pressable>
       </View>
 
       <Spacer height={Spacing.md} />
@@ -142,7 +156,13 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
 }
 
 const styles = StyleSheet.create({
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
   searchContainer: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.lg,
@@ -150,6 +170,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     gap: Spacing.sm,
     borderWidth: 1,
+  },
+  calendarButton: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   searchInput: {
     flex: 1,
