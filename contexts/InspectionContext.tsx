@@ -1,91 +1,56 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cancelInspectionReminder } from "@/utils/notifications";
+import { 
+  Inspection, 
+  Property, 
+  Company, 
+  AppUser, 
+  InspectionStatus,
+  InspectionFrequency,
+  InspectionType,
+  ChecklistItem,
+  ChecklistValue,
+  NumericField,
+  NumericFieldType,
+  TextFieldData,
+  TestSection,
+  InspectionTestData,
+  InspectionPhoto,
+  SystemInfo,
+  MainDrainTestData,
+  HydrantFlowTestData,
+  PumpTestData,
+  DryPipeTripTestData,
+  PreactionDelugeTripTestData,
+  WaterTankData,
+  migrateInspections,
+} from "@/types/inspection";
 
-export type InspectionStatus = "pending" | "in_progress" | "completed";
-export type InspectionFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "annually" | "five_years";
-
-export type InspectionType = 
-  | "wet_pipe" | "dry_pipe" | "preaction_deluge" | "foam_water" | "water_spray" | "water_mist"
-  | "pump_weekly" | "pump_monthly" | "pump_annual"
-  | "aboveground" | "underground" | "hydrant_flow"
-  | "water_tank" | "hazard_eval" | "standpipe";
-
-export interface ChecklistItem {
-  id: string;
-  label: string;
-  value: "yes" | "no" | "na" | null;
-  psiValue?: string;
-  notes?: string;
-}
-
-export interface InspectionPhoto {
-  id: string;
-  uri: string;
-  base64?: string;
-  caption: string;
-  timestamp: string;
-}
-
-export interface Company {
-  id: string;
-  name: string;
-  cnpj: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  contactName: string;
-  contactPhone: string;
-  contactEmail: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AppUser {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Property {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  contact: string;
-  companyId: string;
-}
-
-export interface Inspection {
-  id: string;
-  type: InspectionType;
-  status: InspectionStatus;
-  propertyId: string;
-  propertyName: string;
-  propertyAddress: string;
-  propertyPhone: string;
-  inspectorName: string;
-  contractNo: string;
-  date: string;
-  frequency: InspectionFrequency;
-  checklist: ChecklistItem[];
-  observations: string;
-  signature: string | null;
-  photos: InspectionPhoto[];
-  scheduledDate?: string;
-  notificationId?: string;
-  companyId?: string;
-  companyData?: Company;
-  inspectorId?: string;
-  inspectorData?: AppUser;
-  createdAt: string;
-  updatedAt: string;
-}
+export type {
+  InspectionStatus,
+  InspectionFrequency,
+  InspectionType,
+  ChecklistItem,
+  ChecklistValue,
+  NumericField,
+  NumericFieldType,
+  TextFieldData,
+  TestSection,
+  InspectionTestData,
+  InspectionPhoto,
+  Property,
+  Company,
+  AppUser,
+  Inspection,
+  SystemInfo,
+  MainDrainTestData,
+  HydrantFlowTestData,
+  PumpTestData,
+  DryPipeTripTestData,
+  PreactionDelugeTripTestData,
+  WaterTankData,
+};
 
 interface InspectionContextType {
   inspections: Inspection[];
@@ -119,6 +84,8 @@ const INSPECTIONS_KEY = "@firesafe_inspections";
 const PROPERTIES_KEY = "@firesafe_properties";
 const COMPANIES_KEY = "@firesafe_companies";
 const APP_USERS_KEY = "@firesafe_app_users";
+const DATA_VERSION_KEY = "@firesafe_data_version";
+const CURRENT_DATA_VERSION = 2;
 
 interface InspectionProviderProps {
   children: ReactNode;
@@ -139,6 +106,10 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const loadData = async () => {
     try {
       setIsLoading(true);
+      
+      const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
+      const version = storedVersion ? parseInt(storedVersion, 10) : 1;
+      
       const [storedInspections, storedProperties, storedCompanies, storedAppUsers] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
@@ -147,7 +118,15 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       ]);
 
       if (storedInspections) {
-        setInspections(JSON.parse(storedInspections));
+        let parsedInspections = JSON.parse(storedInspections);
+        
+        if (version < CURRENT_DATA_VERSION) {
+          parsedInspections = migrateInspections(parsedInspections);
+          await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(parsedInspections));
+          await AsyncStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
+        }
+        
+        setInspections(parsedInspections);
       }
       if (storedProperties) {
         setProperties(JSON.parse(storedProperties));
@@ -180,7 +159,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addInspection = async (inspection: Inspection) => {
-    const newInspections = [...inspections, inspection];
+    const inspectionWithVersion = { ...inspection, version: CURRENT_DATA_VERSION };
+    const newInspections = [...inspections, inspectionWithVersion];
     await saveInspections(newInspections);
   };
 

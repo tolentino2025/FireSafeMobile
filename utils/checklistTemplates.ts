@@ -1,12 +1,20 @@
-import { ChecklistItem, InspectionType, InspectionFrequency } from "@/contexts/InspectionContext";
+import { ChecklistItem, InspectionType, InspectionFrequency, NumericField, NumericFieldType } from "@/types/inspection";
 import { TranslationKeys } from "@/constants/i18n";
 
 type ChecklistItemKey = keyof TranslationKeys["checklistItems"];
+
+interface NumericFieldTemplate {
+  labelKey: string;
+  type: NumericFieldType;
+  unit?: string;
+}
 
 interface ChecklistTemplate {
   labelKey: ChecklistItemKey;
   hasPsi?: boolean;
   frequencies: InspectionFrequency[];
+  numericFields?: NumericFieldTemplate[];
+  isTestSection?: boolean;
 }
 
 const wetPipeChecklist: ChecklistTemplate[] = [
@@ -45,6 +53,11 @@ const wetPipeChecklist: ChecklistTemplate[] = [
   { labelKey: "pressureReducingValveOpen", frequencies: ["quarterly"] },
   { labelKey: "pressureReducingValveMaintaining", frequencies: ["quarterly"] },
   { labelKey: "pressureReducingValveGoodCondition", frequencies: ["quarterly"] },
+  { labelKey: "mainDrainTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
+  ]},
   { labelKey: "hydraulicDesignSignAttached", frequencies: ["annually"] },
   { labelKey: "sprinklersNoDamageLeaks", frequencies: ["annually"] },
   { labelKey: "sprinklersFreeCorrosion", frequencies: ["annually"] },
@@ -98,6 +111,16 @@ const dryPipeChecklist: ChecklistTemplate[] = [
   { labelKey: "pressureReducingValveOpen", frequencies: ["quarterly"] },
   { labelKey: "pressureReducingValveMaintaining", frequencies: ["quarterly"] },
   { labelKey: "pressureReducingValveGoodCondition", frequencies: ["quarterly"] },
+  { labelKey: "dryPipeTripTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
+    { labelKey: "airPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "tripTimeSec", type: "seconds", unit: "sec" },
+    { labelKey: "waterDeliveryTimeMin", type: "minutes", unit: "min" },
+  ]},
+  { labelKey: "mainDrainTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
+  ]},
   { labelKey: "hydraulicDesignSignAttached", frequencies: ["annually"] },
   { labelKey: "sprinklersNoDamageLeaks", frequencies: ["annually"] },
   { labelKey: "sprinklersFreeCorrosion", frequencies: ["annually"] },
@@ -154,6 +177,15 @@ const preactionDelugeChecklist: ChecklistTemplate[] = [
   { labelKey: "pressureReducingValveOpen", frequencies: ["quarterly"] },
   { labelKey: "pressureReducingValveMaintaining", frequencies: ["quarterly"] },
   { labelKey: "pressureReducingValveGoodCondition", frequencies: ["quarterly"] },
+  { labelKey: "preactionDelugeTripTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
+    { labelKey: "tripTimeSec", type: "seconds", unit: "sec" },
+    { labelKey: "waterDeliveryTimeMin", type: "minutes", unit: "min" },
+  ]},
+  { labelKey: "mainDrainTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
+  ]},
   { labelKey: "hydraulicDesignSignAttached", frequencies: ["annually"] },
   { labelKey: "sprinklersNoDamageLeaks", frequencies: ["annually"] },
   { labelKey: "sprinklersFreeCorrosion", frequencies: ["annually"] },
@@ -198,6 +230,10 @@ const foamWaterChecklist: ChecklistTemplate[] = [
   { labelKey: "sprinklersFreeCorrosion", frequencies: ["annually"] },
   { labelKey: "hangersNotDamagedLoose", frequencies: ["annually"] },
   { labelKey: "pipesGoodCondition", frequencies: ["annually"] },
+  { labelKey: "foamDischargeTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "foamExpansionRatio", type: "generic", unit: "%" },
+    { labelKey: "foamDrainTime", type: "minutes", unit: "min" },
+  ]},
   { labelKey: "obstructionInspection", frequencies: ["five_years"] },
 ];
 
@@ -216,6 +252,11 @@ const waterSprayChecklist: ChecklistTemplate[] = [
   { labelKey: "hangersNotDamagedLoose", frequencies: ["annually"] },
   { labelKey: "pipesGoodCondition", frequencies: ["annually"] },
   { labelKey: "detectionSystemOperational", frequencies: ["annually"] },
+  { labelKey: "waterSprayTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+    { labelKey: "operationTimeSec", type: "seconds", unit: "sec" },
+  ]},
   { labelKey: "obstructionInspection", frequencies: ["five_years"] },
 ];
 
@@ -234,12 +275,19 @@ const waterMistChecklist: ChecklistTemplate[] = [
   { labelKey: "pumpUnitInspection", frequencies: ["annually"] },
   { labelKey: "cylindersInspected", frequencies: ["annually"] },
   { labelKey: "actuatorsInspected", frequencies: ["annually"] },
+  { labelKey: "waterMistTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "operatingPsi", type: "psi", unit: "psi" },
+    { labelKey: "operationTimeSec", type: "seconds", unit: "sec" },
+  ]},
   { labelKey: "obstructionInspection", frequencies: ["five_years"] },
 ];
 
 const pumpWeeklyChecklist: ChecklistTemplate[] = [
   { labelKey: "pumpHouseConditions", frequencies: ["weekly", "monthly"] },
-  { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["weekly", "monthly"] },
+  { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "suctionPsi", type: "psi", unit: "psi" },
+    { labelKey: "dischargePsi", type: "psi", unit: "psi" },
+  ]},
   { labelKey: "pumpPackingGlands", frequencies: ["weekly", "monthly"] },
   { labelKey: "systemValvesProperPosition", frequencies: ["weekly", "monthly"] },
   { labelKey: "suctionReservoirFull", frequencies: ["weekly", "monthly"] },
@@ -254,7 +302,10 @@ const pumpWeeklyChecklist: ChecklistTemplate[] = [
 
 const pumpMonthlyChecklist: ChecklistTemplate[] = [
   { labelKey: "pumpHouseConditions", frequencies: ["monthly"] },
-  { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["monthly"], numericFields: [
+    { labelKey: "suctionPsi", type: "psi", unit: "psi" },
+    { labelKey: "dischargePsi", type: "psi", unit: "psi" },
+  ]},
   { labelKey: "pumpPackingGlands", frequencies: ["monthly"] },
   { labelKey: "systemValvesProperPosition", frequencies: ["monthly"] },
   { labelKey: "suctionReservoirFull", frequencies: ["monthly"] },
@@ -268,7 +319,9 @@ const pumpMonthlyChecklist: ChecklistTemplate[] = [
   { labelKey: "pumpStartedRun10Min", frequencies: ["monthly"] },
   { labelKey: "suctionPressureRecorded", hasPsi: true, frequencies: ["monthly"] },
   { labelKey: "dischargePressureRecorded", hasPsi: true, frequencies: ["monthly"] },
-  { labelKey: "pumpSpeed", frequencies: ["monthly"] },
+  { labelKey: "pumpSpeed", frequencies: ["monthly"], numericFields: [
+    { labelKey: "rpmValue", type: "rpm", unit: "rpm" },
+  ]},
   { labelKey: "pumpBearingTemp", frequencies: ["monthly"] },
   { labelKey: "packingGlandDripRate", frequencies: ["monthly"] },
   { labelKey: "unusualNoiseVibration", frequencies: ["monthly"] },
@@ -277,7 +330,10 @@ const pumpMonthlyChecklist: ChecklistTemplate[] = [
 
 const pumpAnnualChecklist: ChecklistTemplate[] = [
   { labelKey: "pumpHouseConditions", frequencies: ["annually"] },
-  { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["annually"] },
+  { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["annually"], numericFields: [
+    { labelKey: "suctionPsi", type: "psi", unit: "psi" },
+    { labelKey: "dischargePsi", type: "psi", unit: "psi" },
+  ]},
   { labelKey: "pumpPackingGlands", frequencies: ["annually"] },
   { labelKey: "systemValvesProperPosition", frequencies: ["annually"] },
   { labelKey: "suctionReservoirFull", frequencies: ["annually"] },
@@ -290,12 +346,22 @@ const pumpAnnualChecklist: ChecklistTemplate[] = [
   { labelKey: "pumpStartedRun10Min", frequencies: ["annually"] },
   { labelKey: "suctionPressureRecorded", hasPsi: true, frequencies: ["annually"] },
   { labelKey: "dischargePressureRecorded", hasPsi: true, frequencies: ["annually"] },
-  { labelKey: "pumpSpeed", frequencies: ["annually"] },
+  { labelKey: "pumpSpeed", frequencies: ["annually"], numericFields: [
+    { labelKey: "rpmValue", type: "rpm", unit: "rpm" },
+  ]},
   { labelKey: "pumpBearingTemp", frequencies: ["annually"] },
   { labelKey: "packingGlandDripRate", frequencies: ["annually"] },
   { labelKey: "unusualNoiseVibration", frequencies: ["annually"] },
   { labelKey: "dieselEngineCooling", frequencies: ["annually"] },
-  { labelKey: "annualPerformanceTest", frequencies: ["annually"] },
+  { labelKey: "annualPerformanceTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "noFlowPsi", type: "psi", unit: "psi" },
+    { labelKey: "ratedFlowPsi", type: "psi", unit: "psi" },
+    { labelKey: "peakFlowPsi", type: "psi", unit: "psi" },
+    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+    { labelKey: "rpmValue", type: "rpm", unit: "rpm" },
+    { labelKey: "voltageReading", type: "voltage", unit: "V" },
+    { labelKey: "amperageReading", type: "amperage", unit: "A" },
+  ]},
   { labelKey: "pumpFlowTest", frequencies: ["annually"] },
   { labelKey: "reliefValveTest", frequencies: ["annually"] },
   { labelKey: "alarmConditionsVerified", frequencies: ["annually"] },
@@ -312,12 +378,24 @@ const abovegroundChecklist: ChecklistTemplate[] = [
   { labelKey: "hydrantsAccessibleOperational", frequencies: ["annually"] },
   { labelKey: "hydrantBarrelsFullyDrained", frequencies: ["annually"] },
   { labelKey: "hydrantNozzlesCapsOperational", frequencies: ["annually"] },
-  { labelKey: "mainDrainTest", frequencies: ["annually"] },
+  { labelKey: "mainDrainTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
+  ]},
 ];
 
 const undergroundChecklist: ChecklistTemplate[] = [
-  { labelKey: "mainDrainTest", frequencies: ["annually"] },
-  { labelKey: "flowTestPerformed", frequencies: ["five_years"] },
+  { labelKey: "mainDrainTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "flowTestPerformed", frequencies: ["five_years"], isTestSection: true, numericFields: [
+    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+  ]},
   { labelKey: "undergroundPipingCondition", frequencies: ["five_years"] },
   { labelKey: "hydrantsAccessibleOperational", frequencies: ["annually"] },
   { labelKey: "hydrantBarrelsFullyDrained", frequencies: ["annually"] },
@@ -327,15 +405,20 @@ const undergroundChecklist: ChecklistTemplate[] = [
 ];
 
 const hydrantFlowChecklist: ChecklistTemplate[] = [
-  { labelKey: "flowHydrantId", frequencies: ["annually", "five_years"] },
-  { labelKey: "testHydrantId", frequencies: ["annually", "five_years"] },
-  { labelKey: "staticPressureRecorded", hasPsi: true, frequencies: ["annually", "five_years"] },
-  { labelKey: "residualPressureRecorded", hasPsi: true, frequencies: ["annually", "five_years"] },
-  { labelKey: "pitotPressureRecorded", hasPsi: true, frequencies: ["annually", "five_years"] },
-  { labelKey: "flowRateCalculated", frequencies: ["annually", "five_years"] },
+  { labelKey: "hydrantFlowTest", frequencies: ["annually", "five_years"], isTestSection: true, numericFields: [
+    { labelKey: "flowHydrantId", type: "generic", unit: "" },
+    { labelKey: "testHydrantId", type: "generic", unit: "" },
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pitotPsi", type: "pitot_psi", unit: "psi" },
+    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+  ]},
   { labelKey: "hydrantsAccessibleOperational", frequencies: ["annually"] },
   { labelKey: "capsPlugsInPlace", frequencies: ["annually"] },
   { labelKey: "hydrantWrenchAvailable", frequencies: ["annually"] },
+  { labelKey: "hydrantDrainsProperly", frequencies: ["annually"] },
+  { labelKey: "hydrantLubricatedOperable", frequencies: ["annually"] },
+  { labelKey: "hydrantPitboxAccessible", frequencies: ["annually"] },
 ];
 
 const waterTankChecklist: ChecklistTemplate[] = [
@@ -349,6 +432,11 @@ const waterTankChecklist: ChecklistTemplate[] = [
   { labelKey: "cathodicProtection", frequencies: ["annually"] },
   { labelKey: "tankVentsUnobstructed", frequencies: ["quarterly", "annually"] },
   { labelKey: "overflowPipeUnobstructed", frequencies: ["quarterly", "annually"] },
+  { labelKey: "tankInspection", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "tankCapacity", type: "generic", unit: "gal" },
+    { labelKey: "waterLevelPercent", type: "percent", unit: "%" },
+    { labelKey: "waterTempF", type: "temperature_f", unit: "F" },
+  ]},
   { labelKey: "tankInteriorInspection", frequencies: ["five_years"] },
   { labelKey: "tankPaintingCondition", frequencies: ["five_years"] },
 ];
@@ -379,8 +467,16 @@ const standpipeChecklist: ChecklistTemplate[] = [
   { labelKey: "controlValvesCorrectPosition", frequencies: ["quarterly"] },
   { labelKey: "controlValvesAccessible", frequencies: ["quarterly"] },
   { labelKey: "properSignage", frequencies: ["quarterly"] },
-  { labelKey: "mainDrainTest", frequencies: ["annually"] },
-  { labelKey: "flowTestPerformed", frequencies: ["five_years"] },
+  { labelKey: "standpipeFlowTest", frequencies: ["annually", "five_years"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+  ]},
+  { labelKey: "mainDrainTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
+  ]},
 ];
 
 const checklistsByType: Record<InspectionType, ChecklistTemplate[]> = {
@@ -412,12 +508,26 @@ export function getChecklistForType(
     ? template.filter((item) => item.frequencies.includes(frequency))
     : template;
   
-  return filteredTemplate.map((item, index) => ({
-    id: `${type}_${index}_${Date.now()}`,
-    label: translations[item.labelKey],
-    value: null,
-    psiValue: item.hasPsi ? "" : undefined,
-  }));
+  return filteredTemplate.map((item, index) => {
+    const numericFields: NumericField[] | undefined = item.numericFields?.map((nf, nfIndex) => ({
+      id: `${type}_${index}_nf_${nfIndex}_${Date.now()}`,
+      labelKey: nf.labelKey,
+      type: nf.type,
+      value: "",
+      unit: nf.unit,
+    }));
+
+    return {
+      id: `${type}_${index}_${Date.now()}`,
+      labelKey: item.labelKey,
+      label: translations[item.labelKey] || item.labelKey,
+      value: null,
+      psiValue: item.hasPsi ? "" : undefined,
+      numericFields,
+      textFields: [],
+      notes: "",
+    };
+  });
 }
 
 export function getAllChecklistForType(
@@ -426,10 +536,34 @@ export function getAllChecklistForType(
 ): ChecklistItem[] {
   const template = checklistsByType[type] || [];
   
-  return template.map((item, index) => ({
-    id: `${type}_${index}_${Date.now()}`,
-    label: translations[item.labelKey],
-    value: null,
-    psiValue: item.hasPsi ? "" : undefined,
-  }));
+  return template.map((item, index) => {
+    const numericFields: NumericField[] | undefined = item.numericFields?.map((nf, nfIndex) => ({
+      id: `${type}_${index}_nf_${nfIndex}_${Date.now()}`,
+      labelKey: nf.labelKey,
+      type: nf.type,
+      value: "",
+      unit: nf.unit,
+    }));
+
+    return {
+      id: `${type}_${index}_${Date.now()}`,
+      labelKey: item.labelKey,
+      label: translations[item.labelKey] || item.labelKey,
+      value: null,
+      psiValue: item.hasPsi ? "" : undefined,
+      numericFields,
+      textFields: [],
+      notes: "",
+    };
+  });
+}
+
+export function getTemplateByLabelKey(type: InspectionType, labelKey: string): ChecklistTemplate | undefined {
+  const template = checklistsByType[type] || [];
+  return template.find((item) => item.labelKey === labelKey);
+}
+
+export function isTestSection(type: InspectionType, labelKey: string): boolean {
+  const template = getTemplateByLabelKey(type, labelKey);
+  return template?.isTestSection === true;
 }

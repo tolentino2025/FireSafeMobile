@@ -1,22 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Pressable, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChecklistItem } from "@/contexts/InspectionContext";
+import { ChecklistItem, NumericField } from "@/types/inspection";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface ChecklistItemRowProps {
   item: ChecklistItem;
   onValueChange: (value: "yes" | "no" | "na" | null) => void;
   onPsiChange?: (psi: string) => void;
+  onNumericFieldChange?: (fieldId: string, value: string) => void;
+  onNotesChange?: (notes: string) => void;
+  showNotes?: boolean;
 }
 
-export function ChecklistItemRow({ item, onValueChange, onPsiChange }: ChecklistItemRowProps) {
+export function ChecklistItemRow({ 
+  item, 
+  onValueChange, 
+  onPsiChange,
+  onNumericFieldChange,
+  onNotesChange,
+  showNotes = false,
+}: ChecklistItemRowProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
+  const [showNotesInput, setShowNotesInput] = useState(!!item.notes);
 
   const getButtonStyle = (value: "yes" | "no" | "na") => {
     const isSelected = item.value === value;
@@ -63,13 +74,36 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
     }
   };
 
-  const hasPsi = item.label.toLowerCase().includes("psi") || item.label.toLowerCase().includes("pressure");
+  const hasPsi = item.psiValue !== undefined || 
+    item.label.toLowerCase().includes("psi") || 
+    item.label.toLowerCase().includes("pressure");
+  
+  const hasNumericFields = item.numericFields && item.numericFields.length > 0;
+
+  const getFieldLabel = (field: NumericField): string => {
+    const key = field.labelKey as keyof typeof t.checklistItems;
+    return t.checklistItems[key] || field.labelKey;
+  };
 
   return (
     <View style={[styles.container, { borderBottomColor: fullTheme.colors.border }]}>
-      <ThemedText type="body" style={styles.label}>
-        {item.label}
-      </ThemedText>
+      <View style={styles.labelRow}>
+        <ThemedText type="body" style={styles.label}>
+          {item.label}
+        </ThemedText>
+        {showNotes && (
+          <Pressable 
+            onPress={() => setShowNotesInput(!showNotesInput)}
+            style={styles.notesToggle}
+          >
+            <Feather 
+              name="message-square" 
+              size={16} 
+              color={item.notes ? fullTheme.colors.primary : fullTheme.colors.textSecondary} 
+            />
+          </Pressable>
+        )}
+      </View>
       
       <View style={styles.buttonsRow}>
         <Pressable
@@ -124,7 +158,7 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
         </Pressable>
       </View>
 
-      {hasPsi && (
+      {hasPsi && !hasNumericFields && (
         <View style={styles.psiRow}>
           <TextInput
             style={[
@@ -146,6 +180,62 @@ export function ChecklistItemRow({ item, onValueChange, onPsiChange }: Checklist
           </ThemedText>
         </View>
       )}
+
+      {hasNumericFields && (
+        <View style={styles.numericFieldsContainer}>
+          {item.numericFields!.map((field) => (
+            <View key={field.id} style={styles.numericFieldRow}>
+              <ThemedText type="small" secondary style={styles.fieldLabel}>
+                {getFieldLabel(field)}
+              </ThemedText>
+              <View style={styles.fieldInputRow}>
+                <TextInput
+                  style={[
+                    styles.numericInput,
+                    { 
+                      backgroundColor: fullTheme.colors.inputBackground, 
+                      color: fullTheme.colors.textPrimary, 
+                      borderColor: fullTheme.colors.border 
+                    },
+                  ]}
+                  value={field.value}
+                  onChangeText={(value) => onNumericFieldChange?.(field.id, value)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+                {field.unit ? (
+                  <ThemedText type="small" secondary style={{ marginLeft: Spacing.xs, minWidth: 30 }}>
+                    {field.unit}
+                  </ThemedText>
+                ) : null}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {showNotesInput && (
+        <View style={styles.notesContainer}>
+          <TextInput
+            style={[
+              styles.notesInput,
+              { 
+                backgroundColor: fullTheme.colors.inputBackground, 
+                color: fullTheme.colors.textPrimary, 
+                borderColor: fullTheme.colors.border 
+              },
+            ]}
+            value={item.notes || ""}
+            onChangeText={onNotesChange}
+            placeholder={t.form.observations}
+            placeholderTextColor={fullTheme.colors.placeholder}
+            multiline
+            numberOfLines={2}
+            textAlignVertical="top"
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -155,8 +245,18 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     borderBottomWidth: 1,
   },
-  label: {
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: Spacing.md,
+  },
+  label: {
+    flex: 1,
+    marginRight: Spacing.md,
+  },
+  notesToggle: {
+    padding: Spacing.xs,
   },
   buttonsRow: {
     flexDirection: "row",
@@ -189,5 +289,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     fontSize: 16,
     textAlign: "center",
+  },
+  numericFieldsContainer: {
+    marginTop: Spacing.md,
+    gap: Spacing.sm,
+  },
+  numericFieldRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  fieldLabel: {
+    flex: 1,
+    marginRight: Spacing.md,
+  },
+  fieldInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  numericInput: {
+    width: 80,
+    height: 36,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  notesContainer: {
+    marginTop: Spacing.md,
+  },
+  notesInput: {
+    height: 60,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.sm,
+    fontSize: 14,
   },
 });

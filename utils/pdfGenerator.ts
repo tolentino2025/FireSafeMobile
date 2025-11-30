@@ -95,6 +95,7 @@ const translations = {
     item: "Item",
     status: "Status",
     psi: "PSI",
+    staticPsi: "Static Pressure",
     observations: "Observations",
     signature: "Inspector Signature",
     photos: "Inspection Photos",
@@ -136,6 +137,7 @@ const translations = {
     item: "Item",
     status: "Status",
     psi: "PSI",
+    staticPsi: "Pressão Estática",
     observations: "Observações",
     signature: "Assinatura do Inspetor",
     photos: "Fotos da Inspeção",
@@ -178,13 +180,33 @@ const generateInspectionPdfHtmlWithPhotos = (
         .join(", ")
     : inspection.propertyAddress;
 
+  const getNumericFieldsHtml = (item: any): string => {
+    if (item.psiValue && !item.numericFields?.length) {
+      return `<div style="font-size: 11px; color: #6B7280; margin-top: 4px;">${t.staticPsi || "Pressure"}: ${sanitizeHtml(item.psiValue)} psi</div>`;
+    }
+    if (!item.numericFields?.length) return "";
+    const filledFields = item.numericFields.filter((f: any) => f.value);
+    if (!filledFields.length) return "";
+    return `<div style="margin-top: 6px; font-size: 11px; color: #6B7280;">
+      ${filledFields.map((f: any) => `<div>${sanitizeHtml(f.labelKey)}: ${sanitizeHtml(f.value)} ${sanitizeHtml(f.unit) || ""}</div>`).join("")}
+    </div>`;
+  };
+
+  const getNotesHtml = (notes: string | undefined): string => {
+    if (!notes) return "";
+    return `<div style="margin-top: 6px; font-size: 11px; color: #4B5563; background: #F3F4F6; padding: 6px 8px; border-radius: 4px; font-style: italic;">${sanitizeHtml(notes)}</div>`;
+  };
+
   const checklistRows = inspection.checklist
     .map(
       (item) => `
       <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB;">${sanitizeHtml(item.label)}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center;">${getChecklistValueSymbol(item.value)}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center;">${sanitizeHtml(item.psiValue) || "-"}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB;">
+          ${sanitizeHtml(item.label)}
+          ${getNumericFieldsHtml(item)}
+          ${getNotesHtml(item.notes)}
+        </td>
+        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getChecklistValueSymbol(item.value)}</td>
       </tr>
     `
     )

@@ -138,6 +138,28 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     );
   };
 
+  const handleNumericFieldChange = (itemId: string, fieldId: string, value: string) => {
+    setChecklist((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId && item.numericFields) {
+          return {
+            ...item,
+            numericFields: item.numericFields.map((field) =>
+              field.id === fieldId ? { ...field, value } : field
+            ),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleNotesChange = (itemId: string, notes: string) => {
+    setChecklist((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, notes } : item))
+    );
+  };
+
   const handleSubmit = async () => {
     if (!propertyName.trim()) {
       Alert.alert(t.common.error, t.form.required);
@@ -454,6 +476,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           item={item}
           onValueChange={(value) => handleChecklistChange(item.id, value)}
           onPsiChange={(psi) => handleChecklistPsiChange(item.id, psi)}
+          onNumericFieldChange={(fieldId, value) => handleNumericFieldChange(item.id, fieldId, value)}
+          onNotesChange={(notes) => handleNotesChange(item.id, notes)}
+          showNotes={true}
         />
       ))}
 

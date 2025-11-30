@@ -248,43 +248,66 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
                 { borderBottomColor: fullTheme.colors.border },
               ]}
             >
-              <ThemedText type="body" style={styles.checklistLabel}>
-                {item.label}
-              </ThemedText>
-              <View style={styles.checklistValue}>
-                {item.value === "yes" ? (
-                  <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.success}20` }]}>
-                    <Feather name="check" size={14} color={fullTheme.colors.success} />
-                    <ThemedText type="small" style={{ color: fullTheme.colors.success, marginLeft: 4 }}>
-                      {t.checklist.yes}
-                    </ThemedText>
-                  </View>
-                ) : null}
-                {item.value === "no" ? (
-                  <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.error}20` }]}>
-                    <Feather name="x" size={14} color={fullTheme.colors.error} />
-                    <ThemedText type="small" style={{ color: fullTheme.colors.error, marginLeft: 4 }}>
-                      {t.checklist.no}
-                    </ThemedText>
-                  </View>
-                ) : null}
-                {item.value === "na" ? (
-                  <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.textSecondary}20` }]}>
-                    <Feather name="minus" size={14} color={fullTheme.colors.textSecondary} />
-                    <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, marginLeft: 4 }}>
-                      {t.checklist.na}
-                    </ThemedText>
-                  </View>
-                ) : null}
-                {item.value === null ? (
-                  <ThemedText type="small" secondary>-</ThemedText>
-                ) : null}
-                {item.psiValue ? (
-                  <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm }}>
-                    {item.psiValue} psi
-                  </ThemedText>
-                ) : null}
+              <View style={styles.checklistHeader}>
+                <ThemedText type="body" style={styles.checklistLabel}>
+                  {item.label}
+                </ThemedText>
+                <View style={styles.checklistValue}>
+                  {item.value === "yes" ? (
+                    <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.success}20` }]}>
+                      <Feather name="check" size={14} color={fullTheme.colors.success} />
+                      <ThemedText type="small" style={{ color: fullTheme.colors.success, marginLeft: 4 }}>
+                        {t.checklist.yes}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                  {item.value === "no" ? (
+                    <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.error}20` }]}>
+                      <Feather name="x" size={14} color={fullTheme.colors.error} />
+                      <ThemedText type="small" style={{ color: fullTheme.colors.error, marginLeft: 4 }}>
+                        {t.checklist.no}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                  {item.value === "na" ? (
+                    <View style={[styles.valueBadge, { backgroundColor: `${fullTheme.colors.textSecondary}20` }]}>
+                      <Feather name="minus" size={14} color={fullTheme.colors.textSecondary} />
+                      <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, marginLeft: 4 }}>
+                        {t.checklist.na}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                  {item.value === null ? (
+                    <ThemedText type="small" secondary>-</ThemedText>
+                  ) : null}
+                </View>
               </View>
+              {item.psiValue ? (
+                <View style={styles.numericFieldRow}>
+                  <ThemedText type="small" secondary>
+                    {t.checklistItems.staticPsi || "Pressure"}: {item.psiValue} psi
+                  </ThemedText>
+                </View>
+              ) : null}
+              {item.numericFields && item.numericFields.length > 0 ? (
+                <View style={styles.numericFieldsContainer}>
+                  {item.numericFields.filter(f => f.value).map((field) => (
+                    <View key={field.id} style={styles.numericFieldRow}>
+                      <ThemedText type="small" secondary>
+                        {t.checklistItems[field.labelKey as keyof typeof t.checklistItems] || field.labelKey}: {field.value} {field.unit || ""}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+              {item.notes ? (
+                <View style={[styles.notesContainer, { backgroundColor: fullTheme.colors.backgroundSecondary }]}>
+                  <Feather name="message-square" size={12} color={fullTheme.colors.textSecondary} />
+                  <ThemedText type="small" secondary style={styles.notesText}>
+                    {item.notes}
+                  </ThemedText>
+                </View>
+              ) : null}
             </View>
           ))}
         </View>
@@ -451,13 +474,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   checklistItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     paddingVertical: Spacing.md,
   },
   checklistItemBorder: {
     borderBottomWidth: 1,
+  },
+  checklistHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   checklistLabel: {
     flex: 1,
@@ -473,6 +498,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: BorderRadius.sm,
+  },
+  numericFieldsContainer: {
+    marginTop: Spacing.sm,
+    gap: 4,
+  },
+  numericFieldRow: {
+    marginTop: Spacing.xs,
+  },
+  notesContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: Spacing.sm,
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.xs,
+  },
+  notesText: {
+    flex: 1,
   },
   observationsCard: {
     borderRadius: BorderRadius.lg,

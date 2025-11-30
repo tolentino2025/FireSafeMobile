@@ -1,0 +1,71 @@
+PROMPT 1 – Refatorar modelo de inspeção para suportar 100% NFPA 25
+
+Você é um engenheiro de software sênior especializado em React Native/Expo e TypeScript.
+Estou trabalhando no projeto FireSafeMobile (pasta raiz do repositório).
+Objetivo: adaptar a estrutura de inspeções para que seja 100% compatível com os formulários NFPA 25 eForms (arquivo 2520FMPDF.pdf que contém os formulários “WET PIPE SPRINKLER SYSTEMS INSPECTION, TESTING, AND MAINTENANCE”, “DRY PIPE…”, “PREACTION/DELUGE…”, “STANDPIPE AND HOSE SYSTEMS…”, “WATER SPRAY…”, “WATER MIST…”, “FOAM-WATER…”, “PRIVATE FIRE SERVICE MAINS…”, “PRIVATE FIRE SERVICE MAINS HYDRANT FLOW TEST REPORT”, “WATER STORAGE TANKS…”, “FIRE SPRINKLER SYSTEM HAZARD EVALUATION”, “CONTRACTOR’S MATERIAL AND TEST CERTIFICATE…” e todos os formulários de FIRE PUMP: weekly, monthly, quarterly, semiannual, annual, annual performance, etc.).
+
+Tarefas:
+
+Ler o código atual:
+
+contexts/InspectionContext.tsx (tipos Inspection, InspectionType, InspectionFrequency, ChecklistItem, etc.).
+
+utils/checklistTemplates.ts (mapeamento por tipo e frequência, função getChecklistForType e getAllChecklistForType).
+
+constants/i18n.ts (objeto translations, em especial checklistItems).
+
+Telas de inspeção: screens/InspectionFormScreen.tsx, screens/InspectionDetailScreen.tsx, screens/InspectionsListScreen.tsx, screens/NewInspectionScreen.tsx.
+
+Comparar o modelo atual com o que a NFPA 25 exige:
+
+Para cada formulário da NFPA 25 eForms, identificar:
+
+Itens de inspeção/“Yes–No–N/A”.
+
+Campos numéricos e de texto (por exemplo: pressões estática/residual, psi, gpm, tempo de disparo em segundos, tempo de entrega da água em minutos, datas, etc.).
+
+Listar claramente quais tipos de dados hoje não são representados no nosso modelo (por exemplo, não há lugar para static psi e residual psi separados, nem para trip time (sec), water delivery time (min), flow (gpm) etc.).
+
+Propor e implementar uma nova estrutura de dados em TypeScript para suportar 100% destes campos, mantendo retrocompatibilidade:
+
+Evoluir ChecklistItem ou criar estruturas adicionais (ex.: NumericField, TestResultSection) de forma que:
+
+Itens booleanos continuem existindo (Yes/No/N/A).
+
+Campos numéricos e de texto específicos de testes (pressões, vazões, tempos, observações) tenham seus próprios campos tipados.
+
+Seja possível ter vários valores numéricos dentro de um mesmo “teste” (por exemplo, “Main Drain Test – Static psi, Residual psi, variação, obs”).
+
+Atualizar tipos em InspectionContext.tsx e adaptar a persistência em AsyncStorage, criando uma migração simples para que inspeções antigas continuem válidas (ex.: preencher novos campos com null se não existirem).
+
+Atualizar as telas:
+
+Ajustar InspectionFormScreen.tsx e InspectionDetailScreen.tsx para renderizar dinamicamente:
+
+Itens booleanos.
+
+Grupos de campos numéricos/texto relacionados a testes, com labels exatamente iguais aos do formulário NFPA 25.
+
+Campos de notas/observações por item (já existe notes?: string, usar isso na UI).
+
+Garantir que os novos campos sejam salvos/atualizados no contexto de inspeção e apareçam também no PDF gerado (se houver geração de relatório).
+
+Internacionalização:
+
+Manter a chave de tradução (checklistItems) como fonte da label e adicionar novas chaves necessárias para cobrir todos os campos do NFPA 25.
+
+Não quebrar o que já existe em português; manter pt-BR como idioma principal e, se possível, já deixar pronto para inglês.
+
+Critérios de aceite:
+
+Para cada formulário NFPA 25, deve existir no app a capacidade de registrar:
+
+Todos os itens de inspeção/tarefa com Yes/No/N/A.
+
+Todos os campos numéricos obrigatórios (pressões, tempos, vazões, temperaturas etc.).
+
+Campos de comentários/observações correlacionados.
+
+O código deve compilar sem erros e o formulário de inspeção deve funcionar em todas as frequências (daily, weekly, monthly, quarterly, annually, five_years).
+
+No final, gere um resumo das mudanças de código (arquivos alterados e principais tipos/props adicionados) para eu revisar.
