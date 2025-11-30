@@ -279,12 +279,16 @@ const generateInspectionPdfHtmlWithPhotos = (
     return nfLabels[labelKey as keyof typeof nfLabels] || labelKey;
   };
 
-  const getNumericFieldsHtml = (item: any): string => {
-    if (item.psiValue && !item.numericFields?.length) {
+  const getNumericFieldsHtml = (item: any, excludePsi: boolean = false): string => {
+    if (!excludePsi && item.psiValue && !item.numericFields?.length) {
       return `<div style="font-size: 11px; color: #6B7280; margin-top: 4px;">${t.staticPsi || "Pressure"}: ${sanitizeHtml(item.psiValue)} psi</div>`;
     }
     if (!item.numericFields?.length) return "";
-    const filledFields = item.numericFields.filter((f: any) => f.value);
+    const filledFields = item.numericFields.filter((f: any) => {
+      if (!f.value) return false;
+      if (excludePsi && f.unit === "psi") return false;
+      return true;
+    });
     if (!filledFields.length) return "";
     return `<div style="margin-top: 6px; font-size: 11px; color: #6B7280;">
       ${filledFields.map((f: any) => `<div>${getNumericFieldLabel(f.labelKey)}: ${sanitizeHtml(f.value)} ${sanitizeHtml(f.unit) || ""}</div>`).join("")}
@@ -302,16 +306,28 @@ const generateInspectionPdfHtmlWithPhotos = (
       item.numericFields?.some((f: any) => f.unit === "psi" && f.value)
   );
 
+  const getPsiCellValue = (item: any): string => {
+    if (item.psiValue) {
+      return sanitizeHtml(item.psiValue);
+    }
+    const psiFields = item.numericFields?.filter((f: any) => f.unit === "psi" && f.value) || [];
+    if (psiFields.length > 0) {
+      return psiFields.map((f: any) => sanitizeHtml(f.value)).join(", ");
+    }
+    return "";
+  };
+
   const checklistRows = inspection.checklist
     .map(
       (item) => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #E5E7EB;">
           ${sanitizeHtml(item.label)}
-          ${getNumericFieldsHtml(item)}
+          ${getNumericFieldsHtml(item, hasAnyPsi)}
           ${getNotesHtml(item.notes)}
         </td>
         <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getChecklistValueSymbol(item.value)}</td>
+        ${hasAnyPsi ? `<td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getPsiCellValue(item)}</td>` : ""}
       </tr>
     `
     )
@@ -644,11 +660,16 @@ const generateInspectionPdfHtmlWithPhotos = (
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
-        .checklist-table th:nth-child(2),
+        .checklist-table th:nth-child(2) {
+          text-align: center;
+          width: 80px;
+        }
+        ${hasAnyPsi ? `
         .checklist-table th:nth-child(3) {
           text-align: center;
           width: 80px;
         }
+        ` : ""}
         .checklist-table td {
           font-size: 12px;
         }
