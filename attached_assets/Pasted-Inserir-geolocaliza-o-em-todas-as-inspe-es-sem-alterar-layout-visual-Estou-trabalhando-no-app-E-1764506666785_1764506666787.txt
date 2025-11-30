@@ -1,0 +1,120 @@
+Inserir geolocalização em todas as inspeções (sem alterar layout visual)
+
+Estou trabalhando no app Expo React Native FireSafeMobile.
+O projeto já está carregado neste workspace.
+
+REGRAS IMPORTANTES:
+
+NÃO alterar o layout visual do app (cores, estilos, fontes, posições, componentes).
+
+NÃO alterar o layout geral do PDF (estilos, tabelas, cores, margens, fontes).
+
+Só posso adicionar lógica, campos e dados.
+
+O design deve permanecer exatamente igual.
+
+OBJETIVO: Inserir geolocalização em TODAS as inspeções
+
+Quero adicionar um geolocalizador (coordenadas GPS) para cada inspeção.
+
+Requisitos da implementação:
+
+1. Captura automática da localização
+
+Ao criar ou editar uma inspeção, o app deve solicitar permissão de localização usando expo-location.
+
+Após permissão concedida, deve obter:
+
+latitude
+
+longitude
+
+precisão
+
+data/hora da captura
+
+Esses valores devem ser salvos dentro do objeto Inspection, por exemplo:
+
+geoLocation?: {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  timestamp: number;
+}
+
+
+A captura deve ser automática, sem adicionar novos botões ou telas (não alterar layout).
+
+Caso o usuário negue permissão, salvar geoLocation: null.
+
+2. Ajustar o tipo Inspection
+
+Atualizar types/inspection.ts adicionando o campo geoLocation conforme modelo acima.
+
+Incluir isso também no processo de criação de inspeção dentro de InspectionContext.
+
+Garantir compatibilidade com migrações (dataVersion).
+
+3. Migrar inspeções existentes
+
+Atualizar mecanismo de migração de dados:
+
+Se a inspeção não tiver geoLocation, inserir:
+
+geoLocation: null
+
+
+Não alterar dados já existentes.
+
+4. Incluir geolocalização no PDF
+
+Sem alterar estilos, apenas inserir uma nova seção simples, igual ao estilo das outras seções.
+
+A seção deve aparecer somente se geoLocation existir.
+
+Inserir no PDF após o cabeçalho dos dados da inspeção ou antes da assinatura, por exemplo:
+
+<h3>Localização da Inspeção</h3>
+<p>Latitude: {latitude}</p>
+<p>Longitude: {longitude}</p>
+<p>Precisão: {accuracy} m</p>
+<p>Capturado em: {data formatada}</p>
+
+
+Manter exatamente o estilo das tags <h3> e <p> já usadas no PDF.
+
+NÃO criar novas classes CSS, NÃO modificar margens ou estilos existentes.
+
+5. Não alterar UI
+
+Nenhuma mudança visível nas telas, apenas execução automática da captura.
+
+Não adicionar botões.
+
+Não adicionar inputs novos.
+
+Apenas lógica.
+
+6. Resultado esperado
+
+Mostrar diff completo dos arquivos alterados:
+
+InspectionFormScreen.tsx
+
+types/inspection.ts
+
+InspectionContext.tsx
+
+migrations.ts (ou onde estiverem as migrações)
+
+pdfGenerator.ts
+
+Explicar:
+
+Onde a captura ocorre,
+
+Como salva no contexto,
+
+Como migrou inspeções antigas,
+
+Como a seção de localização aparece no PDF sem alterar estilos.

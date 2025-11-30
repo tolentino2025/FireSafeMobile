@@ -219,6 +219,13 @@ export interface SystemInfo {
   lastModified: string;
 }
 
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  timestamp: number;
+}
+
 export interface Inspection {
   id: string;
   type: InspectionType;
@@ -248,6 +255,7 @@ export interface Inspection {
   firePumpData?: FirePump;
   firePumpPanelId?: string;
   firePumpPanelData?: FirePumpControlPanel;
+  geoLocation?: GeoLocation | null;
   createdAt: string;
   updatedAt: string;
   version?: number;
@@ -269,6 +277,7 @@ export function migrateInspection(inspection: any): Inspection {
       yearInstalled: "",
       lastModified: "",
     },
+    geoLocation: inspection.geoLocation !== undefined ? inspection.geoLocation : null,
     version: inspection.version || 1,
     checklist: (inspection.checklist || []).map((item: any) => ({
       ...item,

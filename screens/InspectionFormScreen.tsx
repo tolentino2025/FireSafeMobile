@@ -3,6 +3,7 @@ import { View, StyleSheet, TextInput, Pressable, Alert, Platform } from "react-n
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as Location from "expo-location";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -21,7 +22,7 @@ import { SelectPicker } from "@/components/SelectPicker";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel } from "@/contexts/InspectionContext";
+import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel, GeoLocation } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
@@ -61,6 +62,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [observations, setObservations] = useState(existingInspection?.observations || "");
   const [signature, setSignature] = useState<string | null>(existingInspection?.signature || null);
   const [photos, setPhotos] = useState<InspectionPhoto[]>(existingInspection?.photos || []);
+  const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(existingInspection?.geoLocation || null);
   const [autoSaved, setAutoSaved] = useState(false);
   const [isNewInspection] = useState(!existingInspection);
 
@@ -100,6 +102,31 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       setChecklist(getChecklistForType(type, frequency, t.checklistItems));
     }
   }, [frequency, type, isNewInspection]);
+
+  useEffect(() => {
+    const captureLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setGeoLocation(null);
+          return;
+        }
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+        setGeoLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          accuracy: location.coords.accuracy ?? undefined,
+          timestamp: location.timestamp,
+        });
+      } catch (error) {
+        console.log("Error getting location:", error);
+        setGeoLocation(null);
+      }
+    };
+    captureLocation();
+  }, []);
 
   const handleCompanySelect = (companyId: string) => {
     setSelectedCompanyId(companyId);
@@ -236,6 +263,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       firePumpData: isPumpInspection ? selectedPump : undefined,
       firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
       firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
+      geoLocation,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
