@@ -1,0 +1,333 @@
+Você é um desenvolvedor React Native/Expo com TypeScript nível sênior.
+Analise TODO o código deste Repl (projeto FireSafeMobile) e implemente uma nova tela de Agenda de Inspeções, totalmente integrada com o que já existe no app, sem alterar o layout e o estilo dos componentes já existentes e sem modificar o layout dos relatórios em PDF.
+
+1. Contexto do app (LEIA O CÓDIGO ANTES DE IMPLEMENTAR)
+
+O app usa:
+
+Expo + React Native + TypeScript
+
+Navegação com @react-navigation/native e @react-navigation/native-stack
+
+Tabs em navigation/MainTabNavigator.tsx
+
+Stacks em:
+
+navigation/HomeStackNavigator.tsx
+
+navigation/InspectionsStackNavigator.tsx
+
+navigation/PropertiesStackNavigator.tsx
+
+navigation/ProfileStackNavigator.tsx
+
+Contexto principal de dados:
+
+contexts/InspectionContext.tsx
+
+Tipos em types/inspection.ts
+
+Notificações e agendamentos:
+
+utils/notifications.ts
+
+utils/scheduleUtils.ts
+
+O app já possui:
+
+Lista de inspeções: screens/InspectionsListScreen.tsx
+
+Tela inicial: screens/HomeScreen.tsx
+
+Criação de inspeções: screens/NewInspectionScreen.tsx
+
+Detalhes de inspeção: screens/InspectionDetailScreen.tsx
+
+Use os mesmos componentes e estilo já existentes:
+
+components/ScreenFlatList.tsx
+
+components/ScreenScrollView.tsx
+
+components/ThemedText.tsx
+
+components/ThemedView.tsx
+
+components/Spacer.tsx
+
+components/Card.tsx e/ou components/InspectionCard.tsx
+
+Hooks: useTheme, useLanguage, useInspections
+
+Constantes de tema: constants/theme.ts
+
+Traduções: constants/i18n.ts
+
+2. Estrutura de dados de agenda/schedule (JÁ EXISTE – REUTILIZAR)
+
+No projeto já existe o tipo InspectionSchedule em types/inspection.ts e o estado schedules dentro de InspectionContext:
+
+InspectionSchedule contém campos como:
+
+id
+
+companyId?
+
+propertyId?
+
+firePumpId?
+
+inspectionType
+
+frequency
+
+startDate
+
+lastInspectionDate?
+
+nextDueDate
+
+notificationId?
+
+isActive
+
+createdAt
+
+updatedAt
+
+Em InspectionContext:
+
+Já existe:
+
+schedules: InspectionSchedule[]
+
+Função createOrUpdateScheduleForInspection(inspection, language) que usa:
+
+addInterval, getFrequencyLabel, getInspectionTypeLabel de utils/scheduleUtils.ts
+
+scheduleNotificationForSchedule de utils/notifications.ts
+
+Não modifique a lógica existente de criação/atualização de schedules nem as funções de notificação, apenas consuma esses dados na nova tela.
+
+3. Objetivo da nova tela “Agenda de Inspeções”
+
+Criar uma nova tela que exiba uma agenda de inspeções futuras e atrasadas, baseada no array schedules do InspectionContext.
+
+Nome do arquivo e componente
+
+Criar um novo arquivo em screens/InspectionScheduleScreen.tsx (ou similar, mas padronize o nome).
+
+Exportar default um componente InspectionScheduleScreen.
+
+Requisitos de UI/UX
+
+Layout e estilo
+
+Seguir o mesmo padrão visual de:
+
+screens/InspectionsListScreen.tsx
+
+screens/HomeScreen.tsx
+
+Usar:
+
+ScreenFlatList ou ScreenScrollView + Spacer
+
+ThemedText / ThemedView
+
+useTheme() para pegar fullTheme.colors
+
+Spacing, BorderRadius de constants/theme.ts
+
+Não alterar tema global, nem os componentes existentes, apenas criar novos estilos locais na tela de agenda.
+
+Dados exibidos por item da agenda
+Para cada InspectionSchedule (somente isActive === true), exibir em um “card”:
+
+Título:
+
+Nome da propriedade (propertyName) ou da empresa (companyName).
+
+Você deve resolver companyName / propertyName usando companies e properties disponíveis dentro do InspectionContext (veja como outros screens fazem isso).
+
+Subtítulo:
+
+Tipo de inspeção (usar getInspectionTypeLabel(schedule.inspectionType, language)).
+
+Frequência (getFrequencyLabel(schedule.frequency, language)).
+
+Datas:
+
+nextDueDate formatada de forma amigável, usando a linguagem atual (useLanguage()).
+
+Status visual:
+
+Se new Date(schedule.nextDueDate) < hoje: marcar como “Atrasada” (por exemplo, um chip com cor de alerta, mas respeitando o tema).
+
+Se nextDueDate ainda no futuro: marcar como “Próxima”.
+
+Opcional: indicar lastInspectionDate se existir (ex.: “Última inspeção: dd/mm/aaaa”).
+
+Ordenação e filtros
+
+Ordenar a lista de schedules por nextDueDate ascendente (mais próximas primeiro).
+
+Criar filtros simples na parte superior da tela, semelhante aos chips de status em InspectionsListScreen.tsx, por exemplo:
+
+“Todas”
+
+“Atrasadas”
+
+“Próximas”
+
+Esses filtros DEVEM:
+
+Manter o mesmo estilo de chips de InspectionsListScreen (usar Pressable, BorderRadius.full, Spacing.sm, cores do tema).
+
+Comportamento ao tocar em um item
+
+Ao tocar em um item da agenda, por enquanto:
+
+Navegar para a tela de lista de inspeções ou de detalhe, porém sem alterar a assinatura dos tipos de navegação existentes.
+
+Implementação sugerida (sem quebrar nada):
+
+Ao tocar, navegar para "InspectionsList" dentro do stack de inspeções.
+
+No futuro podemos evoluir para pré-filtrar por propriedade e tipo, mas nesse primeiro momento não modifique a API das rotas existentes.
+
+Não alterar InspectionFormScreen nem NewInspectionScreen.
+
+4. Integração com a navegação
+
+Adicionar a tela ao stack de inspeções
+
+Editar navigation/InspectionsStackNavigator.tsx:
+
+Atualizar InspectionsStackParamList para incluir a nova rota, por exemplo:
+
+export type InspectionsStackParamList = {
+  InspectionsList: undefined;
+  InspectionSchedule: undefined;
+  InspectionDetail: { inspectionId: string };
+  InspectionForm: { type: InspectionType; inspectionId?: string };
+};
+
+
+Adicionar um novo <Stack.Screen />:
+
+<Stack.Screen
+  name="InspectionSchedule"
+  component={InspectionScheduleScreen}
+  options={{
+    ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+    headerTitle: t.inspections.agendaTitle, // ver passo de i18n
+  }}
+/>
+
+
+Importar InspectionScheduleScreen e usar useLanguage para pegar t.
+
+Acesso à agenda pela UI existente
+
+Em screens/InspectionsListScreen.tsx, adicionar um botão para abrir a “Agenda de Inspeções” sem alterar o layout geral.
+
+Sugestão:
+
+Reaproveitar o padrão de ícone/botão já usado em outros lugares (por exemplo, um pequeno botão com ícone de calendário na parte superior, próximo ao campo de busca).
+
+Ao clicar, chamar navigation.navigate("InspectionSchedule").
+
+Não modifique o comportamento atual de filtros, busca ou listagem de inspeções em InspectionsListScreen.
+
+5. Internacionalização (i18n)
+
+Atualizar constants/i18n.ts para incluir textos da nova tela, sem quebrar os existentes.
+
+Adicionar, no mínimo, as chaves:
+
+Em "pt-BR" (dentro de inspections ou criar um namespace específico, mas seja consistente com o padrão do arquivo):
+
+agendaTitle: "Agenda de Inspeções",
+agendaEmptyTitle: "Nenhuma inspeção agendada",
+agendaEmptySubtitle: "Crie inspeções para que os agendamentos apareçam aqui.",
+agendaFilters: {
+  all: "Todas",
+  overdue: "Atrasadas",
+  upcoming: "Próximas",
+},
+agendaLabels: {
+  overdue: "Atrasada",
+  upcoming: "Próxima",
+  nextDueDate: "Próxima data",
+  lastInspection: "Última inspeção",
+},
+
+
+Em "en" (traduções equivalentes):
+
+agendaTitle: "Inspection Schedule",
+agendaEmptyTitle: "No scheduled inspections",
+agendaEmptySubtitle: "Create inspections so schedules appear here.",
+agendaFilters: {
+  all: "All",
+  overdue: "Overdue",
+  upcoming: "Upcoming",
+},
+agendaLabels: {
+  overdue: "Overdue",
+  upcoming: "Upcoming",
+  nextDueDate: "Next due date",
+  lastInspection: "Last inspection",
+},
+
+
+Usar useLanguage() dentro de InspectionScheduleScreen para pegar t e exibir os textos corretos para "pt-BR" e "en".
+
+6. Empty state
+
+Se schedules estiver vazio ou, após filtro, não houver items:
+
+Mostrar um “empty state” visualmente coerente com o app, semelhante à emptyState de InspectionsListScreen.tsx.
+
+Usar agendaEmptyTitle e agendaEmptySubtitle.
+
+7. Regras importantes
+
+Não alterar:
+
+O layout dos relatórios em PDF (utils/pdfGenerator.ts e relacionados).
+
+A estrutura e layout das telas já existentes (HomeScreen, InspectionsListScreen, NewInspectionScreen, InspectionFormScreen, etc.), exceto pela inclusão do botão de acesso à agenda em InspectionsListScreen.
+
+A estrutura de dados de Inspection, InspectionSchedule ou outras interfaces em types/inspection.ts.
+
+A lógica de createOrUpdateScheduleForInspection em InspectionContext nem as funções de notifications.ts.
+
+Somente adicionar:
+
+A nova tela InspectionScheduleScreen.
+
+A nova rota no InspectionsStackNavigator.
+
+O botão de navegação para a agenda em InspectionsListScreen.
+
+Novas chaves de tradução em constants/i18n.ts.
+
+8. Revisão final
+
+Após implementar:
+
+Verificar se o app compila sem erros (tsc e expo start).
+
+Garantir que a nova tela:
+
+Carrega corretamente usando os dados de schedules do contexto.
+
+Respeita o tema claro/escuro já existente.
+
+Respeita a linguagem de acordo com useLanguage.
+
+Garantir que nenhuma tela ou fluxo existente foi quebrado.
+
+Implemente tudo isso AGORA diretamente neste Repl, seguindo os padrões de código e estilo já usados no projeto

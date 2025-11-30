@@ -31,6 +31,22 @@ export const translations = {
         pending: "Pendente",
         inProgress: "Em Andamento",
       },
+      agenda: {
+        title: "Agenda de Inspeções",
+        emptyTitle: "Nenhuma inspeção agendada",
+        emptySubtitle: "Crie inspeções para que os agendamentos apareçam aqui.",
+        filters: {
+          all: "Todas",
+          overdue: "Atrasadas",
+          upcoming: "Próximas",
+        },
+        labels: {
+          overdue: "Atrasada",
+          upcoming: "Próxima",
+          nextDueDate: "Próxima data",
+          lastInspection: "Última inspeção",
+        },
+      },
     },
     newInspection: {
       title: "Nova Inspeção",
@@ -459,6 +475,22 @@ export const translations = {
         completed: "Completed",
         pending: "Pending",
         inProgress: "In Progress",
+      },
+      agenda: {
+        title: "Inspection Schedule",
+        emptyTitle: "No scheduled inspections",
+        emptySubtitle: "Create inspections so schedules appear here.",
+        filters: {
+          all: "All",
+          overdue: "Overdue",
+          upcoming: "Upcoming",
+        },
+        labels: {
+          overdue: "Overdue",
+          upcoming: "Upcoming",
+          nextDueDate: "Next due date",
+          lastInspection: "Last inspection",
+        },
       },
     },
     newInspection: {
