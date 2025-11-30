@@ -168,6 +168,14 @@ npm run dev
 Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:8081
 
 ## Recent Changes (November 2025)
+- **Inspection Schedule Screen**:
+  - Created new InspectionScheduleScreen.tsx to display upcoming and overdue inspection schedules
+  - Added schedule filtering (All, Overdue, Upcoming) with chip-based UI matching existing patterns
+  - Displays schedule cards with property/company name, inspection type, frequency, next due date
+  - Color-coded status badges (red for overdue, green for upcoming)
+  - Added calendar button in InspectionsListScreen header for quick access to schedule view
+  - Full bilingual support (PT-BR/EN) with new translation keys in constants/i18n.ts
+  - Navigation integrated via InspectionsStackNavigator
 - **NFPA 25 Automated Scheduling System**:
   - Added InspectionSchedule interface for tracking recurring inspection schedules
   - Created utils/scheduleUtils.ts with date calculation functions (addInterval, generateScheduleId)
