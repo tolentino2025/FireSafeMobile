@@ -234,3 +234,140 @@ export async function sendTestNotification(language: "en" | "pt-BR"): Promise<vo
     trigger: null,
   });
 }
+
+interface ScheduleNotificationParams {
+  scheduleId: string;
+  inspectionType: string;
+  frequency: string;
+  nextDueDate: Date;
+  companyName?: string;
+  propertyName?: string;
+  language: "en" | "pt-BR";
+}
+
+const scheduleTranslations = {
+  en: {
+    title: "Scheduled Inspection",
+    body: "inspection is due today",
+    dueFor: "Due for",
+  },
+  "pt-BR": {
+    title: "Inspeção Programada",
+    body: "está programada para hoje",
+    dueFor: "Vence em",
+  },
+};
+
+export async function scheduleNotificationForSchedule(
+  params: ScheduleNotificationParams
+): Promise<string | null> {
+  const { scheduleId, inspectionType, frequency, nextDueDate, companyName, propertyName, language } = params;
+  const t = scheduleTranslations[language];
+
+  if (Platform.OS === "web") {
+    console.log("Notifications not supported on web");
+    return null;
+  }
+
+  const hasPermission = await checkNotificationPermissions();
+  if (!hasPermission) {
+    console.log("Notification permissions not granted");
+    return null;
+  }
+
+  const settings = await getNotificationSettings();
+  if (!settings.enabled) {
+    return null;
+  }
+
+  const reminderDate = new Date(nextDueDate);
+  reminderDate.setDate(reminderDate.getDate() - settings.reminderDaysBefore);
+  reminderDate.setHours(9, 0, 0, 0);
+
+  if (reminderDate <= new Date()) {
+    console.log("Reminder date is in the past, skipping schedule notification");
+    return null;
+  }
+
+  try {
+    await cancelScheduleNotification(scheduleId);
+
+    const locationInfo = propertyName || companyName || "";
+    const bodyText = locationInfo 
+      ? `${frequency} ${inspectionType} - ${locationInfo} ${t.body}`
+      : `${frequency} ${inspectionType} ${t.body}`;
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: t.title,
+        body: bodyText,
+        data: { scheduleId, type: "schedule_reminder" },
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: reminderDate,
+      },
+    });
+
+    return notificationId;
+  } catch (error) {
+    console.error("Error scheduling notification for schedule:", error);
+    return null;
+  }
+}
+
+export async function cancelScheduleNotification(scheduleId: string): Promise<void> {
+  if (Platform.OS === "web") {
+    return;
+  }
+
+  try {
+    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    const toCancel = scheduledNotifications.filter(
+      (n) => n.content.data?.scheduleId === scheduleId
+    );
+
+    for (const notification of toCancel) {
+      await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+    }
+  } catch (error) {
+    console.error("Error canceling schedule notification:", error);
+  }
+}
+
+export async function rescheduleAllScheduleNotifications(
+  schedules: Array<{
+    id: string;
+    inspectionType: string;
+    frequency: string;
+    nextDueDate: string;
+    companyId?: string;
+    propertyId?: string;
+    isActive: boolean;
+  }>,
+  companies: Array<{ id: string; name: string }>,
+  properties: Array<{ id: string; name: string }>,
+  language: "en" | "pt-BR"
+): Promise<void> {
+  if (Platform.OS === "web") {
+    return;
+  }
+
+  for (const schedule of schedules) {
+    if (!schedule.isActive) continue;
+
+    const company = schedule.companyId ? companies.find(c => c.id === schedule.companyId) : undefined;
+    const property = schedule.propertyId ? properties.find(p => p.id === schedule.propertyId) : undefined;
+
+    await scheduleNotificationForSchedule({
+      scheduleId: schedule.id,
+      inspectionType: schedule.inspectionType,
+      frequency: schedule.frequency,
+      nextDueDate: new Date(schedule.nextDueDate),
+      companyName: company?.name,
+      propertyName: property?.name,
+      language,
+    });
+  }
+}
