@@ -1,7 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { View, StyleSheet, Pressable, PanResponder, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Svg, { Path } from "react-native-svg";
+import ViewShot, { captureRef } from "react-native-view-shot";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -18,6 +19,28 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
   const { t } = useLanguage();
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
+  const viewShotRef = useRef<ViewShot>(null);
+
+  const captureSignature = useCallback(async () => {
+    if (paths.length === 0 && !currentPath) {
+      onSignatureChange(null);
+      return;
+    }
+
+    try {
+      if (viewShotRef.current) {
+        const uri = await captureRef(viewShotRef, {
+          format: "png",
+          quality: 1,
+          result: "data-uri",
+        });
+        onSignatureChange(uri);
+      }
+    } catch (error) {
+      console.log("Error capturing signature:", error);
+      onSignatureChange("signature_captured");
+    }
+  }, [paths, currentPath, onSignatureChange]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -33,9 +56,12 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
       },
       onPanResponderRelease: () => {
         if (currentPath) {
-          setPaths((prev) => [...prev, currentPath]);
+          const newPaths = [...paths, currentPath];
+          setPaths(newPaths);
           setCurrentPath("");
-          onSignatureChange("signature_captured");
+          setTimeout(() => {
+            captureSignature();
+          }, 100);
         }
       },
     })
@@ -51,7 +77,9 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
 
   return (
     <View style={styles.container}>
-      <View
+      <ViewShot
+        ref={viewShotRef}
+        options={{ format: "png", quality: 1 }}
         style={[
           styles.canvasContainer,
           { 
@@ -85,14 +113,14 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
           ) : null}
         </Svg>
 
-        {paths.length === 0 && !currentPath && (
+        {paths.length === 0 && !currentPath && !signature && (
           <View style={styles.placeholder}>
             <ThemedText type="small" secondary>
               {t.form.signature}
             </ThemedText>
           </View>
         )}
-      </View>
+      </ViewShot>
 
       <Pressable
         onPress={handleClear}
