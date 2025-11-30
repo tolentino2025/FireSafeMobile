@@ -1,0 +1,93 @@
+PROMPT 2 – Usar bombas cadastradas nas inspeções de bomba (dropdown + PDF)
+
+Agora quero integrar o cadastro de bombas e painéis com o fluxo de inspeção de bomba de incêndio.
+
+Objetivo
+
+Quando o usuário criar uma inspeção do tipo “bomba de incêndio” (fire pump), ele deve:
+
+Selecionar a bomba a partir de um dropdown que carrega os registros de FirePump daquele cliente.
+
+Selecionar o painel de comando a partir de um dropdown que carrega FirePumpControlPanel vinculados à bomba escolhida.
+
+Os campos firePumpId e firePumpPanelId devem ser salvos dentro da inspeção.
+
+Na geração do PDF do relatório de inspeção de bomba, os dados técnicos da bomba e do painel devem ser exibidos usando esse cadastro.
+
+Tarefas
+
+Integrar dropdowns na tela de criação/edição de inspeção
+
+Localizar a tela de formulário de inspeção (ex.: InspectionFormScreen.tsx ou similar).
+
+Detectar quando o InspectionType for o tipo de bomba (por exemplo fire_pump, pump_weekly, pump_monthly, pump_annual – use o tipo que já existe no projeto).
+
+Nesses casos, adicionar:
+
+Dropdown “Bomba de incêndio”:
+
+Carregar as bombas a partir do contexto/serviço (getFirePumpsByClient).
+
+Exibir no label algo como: TAG – tipo – fabricante/modelo.
+
+Ao selecionar, salvar firePumpId dentro do objeto Inspection.
+
+Dropdown “Painel de comando”:
+
+Só renderizar se firePumpId estiver definido.
+
+Carregar FirePumpControlPanel filtrando por pumpId.
+
+Salvar firePumpPanelId na inspeção.
+
+Persistência
+
+Garantir que firePumpId e firePumpPanelId estejam incluídos na estrutura de Inspection em:
+
+Tipo TypeScript.
+
+Local onde a inspeção é salva/carregada (AsyncStorage ou outro storage do app).
+
+Exibir dados na tela de detalhes
+
+Em InspectionDetailScreen.tsx (ou similar), quando a inspeção for de bomba:
+
+Buscar FirePump e FirePumpControlPanel pelos IDs salvos.
+
+Exibir um bloco “Dados da bomba de incêndio” com:
+
+TAG, tipo, fabricante, modelo, série, vazão nominal (gpm), pressão nominal (psi), potência, tensão, etc.
+
+Exibir um bloco “Dados do painel de comando” com:
+
+TAG, fabricante, modelo, tipo de partida, tensão, transferência automática, etc.
+
+Integração com PDF
+
+Localizar o código responsável por gerar o PDF do relatório de inspeção de bomba.
+
+Exemplo: um serviço ou função do tipo generateInspectionReportPdf ou similar.
+
+Incluir no relatório:
+
+Uma seção com os dados da bomba e do painel, usando os mesmos campos exibidos na tela de detalhes.
+
+Certificar-se de que:
+
+Se não houver firePumpId (por alguma inspeção antiga), o PDF simplesmente omita essa seção ou escreva “Não cadastrado”.
+
+Critérios de aceite
+
+Ao criar uma inspeção de bomba, devo conseguir:
+
+Escolher bomba e painel cadastrados.
+
+Ao abrir a inspeção:
+
+Ver, nos detalhes, os dados completos.
+
+Ao gerar o PDF:
+
+Ver esses dados impressos no relatório, fiéis ao cadastro.
+
+No final, faça um resumo das alterações realizadas nas telas de inspeção e no gerador de PDF, indicando onde estão as novas seções.

@@ -21,7 +21,7 @@ import { SelectPicker } from "@/components/SelectPicker";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser } from "@/contexts/InspectionContext";
+import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
@@ -36,7 +36,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const { type, inspectionId } = route.params;
   const { theme } = useTheme();
   const { t, language } = useLanguage();
-  const { inspections, addInspection, updateInspection, companies, appUsers } = useInspections();
+  const { inspections, addInspection, updateInspection, companies, appUsers, firePumps, firePumpPanels, getFirePumpsByCompany, getPanelsByPump } = useInspections();
 
   const existingInspection = inspectionId
     ? inspections.find((i) => i.id === inspectionId)
@@ -44,6 +44,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
 
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>(existingInspection?.companyId);
   const [selectedInspectorId, setSelectedInspectorId] = useState<string | undefined>(existingInspection?.inspectorId);
+  const [selectedFirePumpId, setSelectedFirePumpId] = useState<string | undefined>(existingInspection?.firePumpId);
+  const [selectedFirePumpPanelId, setSelectedFirePumpPanelId] = useState<string | undefined>(existingInspection?.firePumpPanelId);
   const [propertyName, setPropertyName] = useState(existingInspection?.propertyName || "");
   const [propertyAddress, setPropertyAddress] = useState(existingInspection?.propertyAddress || "");
   const [propertyPhone, setPropertyPhone] = useState(existingInspection?.propertyPhone || "");
@@ -123,6 +125,45 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }
   };
 
+  const isPumpInspection = type === "pump_weekly" || type === "pump_monthly" || type === "pump_annual";
+
+  const handleFirePumpSelect = (pumpId: string) => {
+    setSelectedFirePumpId(pumpId);
+    setSelectedFirePumpPanelId(undefined);
+  };
+
+  const handleFirePumpPanelSelect = (panelId: string) => {
+    setSelectedFirePumpPanelId(panelId);
+  };
+
+  const availablePumps = selectedCompanyId ? getFirePumpsByCompany(selectedCompanyId) : [];
+  const availablePanels = selectedFirePumpId ? getPanelsByPump(selectedFirePumpId) : [];
+
+  const getPumpTypeLabel = (pumpType: string) => {
+    switch (pumpType) {
+      case "electric_main":
+        return t.firePumps.electricMain;
+      case "diesel_main":
+        return t.firePumps.dieselMain;
+      case "jockey":
+        return t.firePumps.jockey;
+      default:
+        return pumpType;
+    }
+  };
+
+  const pumpOptions = availablePumps.map((pump) => ({
+    id: pump.id,
+    label: `${pump.tag} - ${getPumpTypeLabel(pump.type)}`,
+    sublabel: pump.manufacturer && pump.model ? `${pump.manufacturer} ${pump.model}` : pump.manufacturer || "",
+  }));
+
+  const panelOptions = availablePanels.map((panel) => ({
+    id: panel.id,
+    label: panel.tag,
+    sublabel: panel.manufacturer && panel.model ? `${panel.manufacturer} ${panel.model}` : panel.startingType || "",
+  }));
+
   const handleChecklistChange = (id: string, value: "yes" | "no" | "na" | null) => {
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
@@ -168,6 +209,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
 
     const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
     const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+    const selectedPump = selectedFirePumpId ? firePumps.find((p) => p.id === selectedFirePumpId) : undefined;
+    const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
 
     const inspectionData: Inspection = {
       id: existingInspection?.id || Date.now().toString(),
@@ -189,6 +232,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       companyData: selectedCompany,
       inspectorId: selectedInspectorId,
       inspectorData: selectedInspector,
+      firePumpId: isPumpInspection ? selectedFirePumpId : undefined,
+      firePumpData: isPumpInspection ? selectedPump : undefined,
+      firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
+      firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -332,6 +379,42 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         title={t.companies.selectCompany}
         emptyText={t.companies.noResults}
       />
+
+      {isPumpInspection ? (
+        <>
+          <Spacer height={Spacing.lg} />
+          <ThemedText type="h3">{t.firePumps.selectPump}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          {selectedCompanyId ? (
+            <SelectPicker
+              options={pumpOptions}
+              selectedId={selectedFirePumpId}
+              onSelect={handleFirePumpSelect}
+              placeholder={t.firePumps.noPumpSelected}
+              title={t.firePumps.selectPump}
+              emptyText={t.firePumps.noResults}
+            />
+          ) : (
+            <ThemedText type="small" secondary>{t.firePumps.selectCompanyFirst}</ThemedText>
+          )}
+
+          {selectedFirePumpId ? (
+            <>
+              <Spacer height={Spacing.lg} />
+              <ThemedText type="h3">{t.firePumps.selectPanel}</ThemedText>
+              <Spacer height={Spacing.sm} />
+              <SelectPicker
+                options={panelOptions}
+                selectedId={selectedFirePumpPanelId}
+                onSelect={handleFirePumpPanelSelect}
+                placeholder={t.firePumps.noPanelSelected}
+                title={t.firePumps.selectPanel}
+                emptyText={t.firePumps.noPanels}
+              />
+            </>
+          ) : null}
+        </>
+      ) : null}
 
       <Spacer height={Spacing.lg} />
 
