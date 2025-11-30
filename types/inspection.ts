@@ -244,6 +244,10 @@ export interface Inspection {
   companyData?: Company;
   inspectorId?: string;
   inspectorData?: AppUser;
+  firePumpId?: string;
+  firePumpData?: FirePump;
+  firePumpPanelId?: string;
+  firePumpPanelData?: FirePumpControlPanel;
   createdAt: string;
   updatedAt: string;
   version?: number;
