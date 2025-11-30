@@ -1,0 +1,132 @@
+PROMPT 1 – Cadastro de bombas de incêndio e painéis para uso em inspeções
+
+Você é um engenheiro de software sênior em React Native/Expo com TypeScript.
+Estou desenvolvendo um app de inspeções de sistemas de incêndio (projeto FireSafeMobile).
+Quero adicionar um cadastro de bombas de incêndio (bomba principal elétrica, bomba principal diesel, bomba jockey) e painéis de comando, que serão usados nos módulos de inspeção de bomba através de seleção por dropdown. Esses dados também devem aparecer depois no relatório PDF.
+
+Objetivo geral
+
+Criar uma camada de cadastro (CRUD) para:
+
+FirePump (bomba principal elétrica, principal diesel, jockey).
+
+FirePumpControlPanel (painéis de comando associados a uma bomba).
+
+Persistir esses dados junto com os demais cadastros (usando o mesmo padrão atual, provavelmente AsyncStorage ou storage já existente no projeto).
+
+Disponibilizar esses cadastros em telas próprias (lista + formulário).
+
+Estrutura sugerida (pode adaptar se fizer mais sentido no código atual)
+
+Crie tipos semelhantes a:
+
+export type PumpType = "electric_main" | "diesel_main" | "jockey";
+
+export interface FirePump {
+  id: string;
+  clientId: string;
+  locationId?: string;
+  tag: string;
+  type: PumpType;
+  manufacturer?: string;
+  model?: string;
+  serialNumber?: string;
+  ratedFlowGpm?: number;
+  ratedPressurePsi?: number;
+  ratedSpeedRpm?: number;
+  powerHP?: number;
+  voltage?: string;
+  phases?: number;
+  comments?: string;
+}
+
+export interface FirePumpControlPanel {
+  id: string;
+  pumpId: string;
+  tag: string;
+  manufacturer?: string;
+  model?: string;
+  serialNumber?: string;
+  supplyVoltage?: string;
+  startingType?: string;
+  hasAutomaticTransfer?: boolean;
+  comments?: string;
+}
+
+Tarefas detalhadas
+
+Criar contexto ou serviço de cadastro de bombas/painéis
+
+Criar um arquivo de contexto ou serviço, por exemplo:
+
+contexts/FirePumpContext.tsx ou
+
+services/firePumpStorage.ts
+
+Funções mínimas:
+
+getFirePumpsByClient(clientId: string): Promise<FirePump[]>
+
+createFirePump(pump: FirePump): Promise<void>
+
+updateFirePump(pump: FirePump): Promise<void>
+
+deleteFirePump(id: string): Promise<void>
+
+getPanelsByPump(pumpId: string): Promise<FirePumpControlPanel[]>
+
+createFirePumpPanel(panel: FirePumpControlPanel): Promise<void> etc.
+
+Implementar persistência usando o mesmo padrão já utilizado no app (provavelmente AsyncStorage com uma chave específica).
+
+Criar telas de UI para cadastro
+
+Criar uma tela de lista, por exemplo: screens/FirePumpListScreen.tsx:
+
+Listar bombas por cliente.
+
+Botão “Nova bomba”.
+
+Ação para editar/excluir.
+
+Criar uma tela de formulário, por exemplo: screens/FirePumpFormScreen.tsx:
+
+Campos para TAG, tipo (dropdown com principal elétrica, principal diesel, jockey), fabricante, modelo, série, vazão nominal (gpm), pressão nominal (psi), rotação (rpm), potência (HP), tensão (V), fases, comentários.
+
+Criar UI simples para painel:
+
+Pode ser na mesma tela da bomba (aba ou seção “Painéis de comando”), ou uma tela separada FirePumpPanelFormScreen.
+
+Campos: TAG, fabricante, modelo, série, tensão, tipo de partida, transferência automática (checkbox), comentários.
+
+Integração com cadastro de clientes
+
+Se já existir um cadastro de clientes/empresas, vincular FirePump.clientId a esse cadastro:
+
+Ao entrar na tela de bombas, filtrar pelo cliente selecionado anteriormente (ou permitir escolher o cliente).
+
+Se existir conceito de local/área, usar locationId.
+
+Preparar para uso nas inspeções
+
+Adicionar no tipo Inspection (arquivo onde o tipo de inspeção é definido) os campos:
+
+firePumpId?: string;
+
+firePumpPanelId?: string;
+
+Não precisa ainda integrar dropdown; isso será feito em um próximo passo.
+
+Critérios de aceite
+
+Devo conseguir:
+
+Cadastrar uma bomba com seus dados principais.
+
+Cadastrar (opcionalmente) um ou mais painéis associados a essa bomba.
+
+Listar, editar e excluir bombas e painéis.
+
+Os dados devem persistir ao fechar e abrir o app.
+
+No final, faça um resumo dos arquivos criados/alterados e dos tipos novos que foram incluídos.

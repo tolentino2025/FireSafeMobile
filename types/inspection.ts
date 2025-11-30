@@ -1,6 +1,43 @@
 export type InspectionStatus = "pending" | "in_progress" | "completed";
 export type InspectionFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "annually" | "five_years";
 
+export type PumpType = "electric_main" | "diesel_main" | "jockey";
+
+export interface FirePump {
+  id: string;
+  companyId: string;
+  propertyId?: string;
+  tag: string;
+  type: PumpType;
+  manufacturer?: string;
+  model?: string;
+  serialNumber?: string;
+  ratedFlowGpm?: number;
+  ratedPressurePsi?: number;
+  ratedSpeedRpm?: number;
+  powerHP?: number;
+  voltage?: string;
+  phases?: number;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FirePumpControlPanel {
+  id: string;
+  pumpId: string;
+  tag: string;
+  manufacturer?: string;
+  model?: string;
+  serialNumber?: string;
+  supplyVoltage?: string;
+  startingType?: string;
+  hasAutomaticTransfer?: boolean;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type InspectionType = 
   | "wet_pipe" | "dry_pipe" | "preaction_deluge" | "foam_water" | "water_spray" | "water_mist"
   | "pump_weekly" | "pump_monthly" | "pump_annual"
