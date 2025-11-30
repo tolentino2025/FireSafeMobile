@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { cancelInspectionReminder } from "@/utils/notifications";
+import { cancelInspectionReminder, scheduleNotificationForSchedule, cancelScheduleNotification } from "@/utils/notifications";
+import { addInterval, generateScheduleId, getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
 import { 
   Inspection, 
   Property, 
@@ -28,6 +29,7 @@ import {
   DryPipeTripTestData,
   PreactionDelugeTripTestData,
   WaterTankData,
+  InspectionSchedule,
   migrateInspections,
 } from "@/types/inspection";
 
@@ -58,6 +60,7 @@ export type {
   FirePump,
   FirePumpControlPanel,
   PumpType,
+  InspectionSchedule,
 };
 
 interface InspectionContextType {
@@ -67,6 +70,7 @@ interface InspectionContextType {
   appUsers: AppUser[];
   firePumps: FirePump[];
   firePumpPanels: FirePumpControlPanel[];
+  schedules: InspectionSchedule[];
   currentInspection: Partial<Inspection> | null;
   isLoading: boolean;
   addInspection: (inspection: Inspection) => Promise<void>;
@@ -95,6 +99,7 @@ interface InspectionContextType {
   getFirePumpsByCompany: (companyId: string) => FirePump[];
   getFirePumpPanelById: (id: string) => FirePumpControlPanel | undefined;
   getPanelsByPump: (pumpId: string) => FirePumpControlPanel[];
+  createOrUpdateScheduleForInspection: (inspection: Inspection, language: "en" | "pt-BR") => Promise<void>;
   refreshData: () => Promise<void>;
 }
 
@@ -106,8 +111,9 @@ const COMPANIES_KEY = "@firesafe_companies";
 const APP_USERS_KEY = "@firesafe_app_users";
 const FIRE_PUMPS_KEY = "@firesafe_fire_pumps";
 const FIRE_PUMP_PANELS_KEY = "@firesafe_fire_pump_panels";
+const SCHEDULES_KEY = "@firesafe_schedules";
 const DATA_VERSION_KEY = "@firesafe_data_version";
-const CURRENT_DATA_VERSION = 2;
+const CURRENT_DATA_VERSION = 3;
 
 interface InspectionProviderProps {
   children: ReactNode;
@@ -120,6 +126,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [firePumps, setFirePumps] = useState<FirePump[]>([]);
   const [firePumpPanels, setFirePumpPanels] = useState<FirePumpControlPanel[]>([]);
+  const [schedules, setSchedules] = useState<InspectionSchedule[]>([]);
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -134,13 +141,14 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
       const version = storedVersion ? parseInt(storedVersion, 10) : 1;
       
-      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels] = await Promise.all([
+      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels, storedSchedules] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
         AsyncStorage.getItem(COMPANIES_KEY),
         AsyncStorage.getItem(APP_USERS_KEY),
         AsyncStorage.getItem(FIRE_PUMPS_KEY),
         AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY),
+        AsyncStorage.getItem(SCHEDULES_KEY),
       ]);
 
       if (storedInspections) {
@@ -168,6 +176,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedFirePumpPanels) {
         setFirePumpPanels(JSON.parse(storedFirePumpPanels));
+      }
+      if (storedSchedules) {
+        setSchedules(JSON.parse(storedSchedules));
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -396,6 +407,95 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
     return firePumpPanels.filter((panel) => panel.pumpId === pumpId);
   };
 
+  const saveSchedules = async (newSchedules: InspectionSchedule[]) => {
+    try {
+      await AsyncStorage.setItem(SCHEDULES_KEY, JSON.stringify(newSchedules));
+      setSchedules(newSchedules);
+    } catch (error) {
+      console.error("Error saving schedules:", error);
+      throw error;
+    }
+  };
+
+  const createOrUpdateScheduleForInspection = async (inspection: Inspection, language: "en" | "pt-BR") => {
+    try {
+      const storedData = await AsyncStorage.getItem(SCHEDULES_KEY);
+      const currentSchedules: InspectionSchedule[] = storedData ? JSON.parse(storedData) : [];
+
+      const existingSchedule = currentSchedules.find(
+        (s) =>
+          s.isActive &&
+          s.inspectionType === inspection.type &&
+          s.frequency === inspection.frequency &&
+          (s.companyId || "") === (inspection.companyId || "") &&
+          (s.propertyId || "") === (inspection.propertyId || "") &&
+          (s.firePumpId || "") === (inspection.firePumpId || "")
+      );
+
+      const inspectionDate = new Date(inspection.date);
+      const nextDueDate = addInterval(inspectionDate, inspection.frequency);
+      const now = new Date().toISOString();
+
+      let newSchedules: InspectionSchedule[];
+      let scheduleId: string;
+
+      if (existingSchedule) {
+        scheduleId = existingSchedule.id;
+        newSchedules = currentSchedules.map((s) =>
+          s.id === existingSchedule.id
+            ? {
+                ...s,
+                lastInspectionDate: inspection.date,
+                nextDueDate: nextDueDate.toISOString(),
+                updatedAt: now,
+              }
+            : s
+        );
+      } else {
+        scheduleId = generateScheduleId();
+        const newSchedule: InspectionSchedule = {
+          id: scheduleId,
+          companyId: inspection.companyId,
+          propertyId: inspection.propertyId,
+          firePumpId: inspection.firePumpId,
+          inspectionType: inspection.type,
+          frequency: inspection.frequency,
+          startDate: inspection.date,
+          lastInspectionDate: inspection.date,
+          nextDueDate: nextDueDate.toISOString(),
+          isActive: true,
+          createdAt: now,
+          updatedAt: now,
+        };
+        newSchedules = [...currentSchedules, newSchedule];
+      }
+
+      await saveSchedules(newSchedules);
+
+      const company = inspection.companyId ? companies.find((c) => c.id === inspection.companyId) : undefined;
+      const property = inspection.propertyId ? properties.find((p) => p.id === inspection.propertyId) : undefined;
+
+      const notificationId = await scheduleNotificationForSchedule({
+        scheduleId,
+        inspectionType: getInspectionTypeLabel(inspection.type, language),
+        frequency: getFrequencyLabel(inspection.frequency, language),
+        nextDueDate,
+        companyName: company?.name,
+        propertyName: property?.name,
+        language,
+      });
+
+      if (notificationId) {
+        const updatedSchedules = newSchedules.map((s) =>
+          s.id === scheduleId ? { ...s, notificationId } : s
+        );
+        await saveSchedules(updatedSchedules);
+      }
+    } catch (error) {
+      console.error("Error creating/updating schedule:", error);
+    }
+  };
+
   return (
     <InspectionContext.Provider
       value={{
@@ -405,6 +505,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         appUsers,
         firePumps,
         firePumpPanels,
+        schedules,
         currentInspection,
         isLoading,
         addInspection,
@@ -433,6 +534,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         getFirePumpsByCompany,
         getFirePumpPanelById,
         getPanelsByPump,
+        createOrUpdateScheduleForInspection,
         refreshData,
       }}
     >
