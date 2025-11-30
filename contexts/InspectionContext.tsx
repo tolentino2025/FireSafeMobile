@@ -6,6 +6,9 @@ import {
   Property, 
   Company, 
   AppUser, 
+  FirePump,
+  FirePumpControlPanel,
+  PumpType,
   InspectionStatus,
   InspectionFrequency,
   InspectionType,
@@ -50,6 +53,9 @@ export type {
   DryPipeTripTestData,
   PreactionDelugeTripTestData,
   WaterTankData,
+  FirePump,
+  FirePumpControlPanel,
+  PumpType,
 };
 
 interface InspectionContextType {
@@ -57,6 +63,8 @@ interface InspectionContextType {
   properties: Property[];
   companies: Company[];
   appUsers: AppUser[];
+  firePumps: FirePump[];
+  firePumpPanels: FirePumpControlPanel[];
   currentInspection: Partial<Inspection> | null;
   isLoading: boolean;
   addInspection: (inspection: Inspection) => Promise<void>;
@@ -72,9 +80,19 @@ interface InspectionContextType {
   addAppUser: (user: AppUser) => Promise<void>;
   updateAppUser: (id: string, updates: Partial<AppUser>) => Promise<void>;
   deleteAppUser: (id: string) => Promise<void>;
+  addFirePump: (pump: FirePump) => Promise<void>;
+  updateFirePump: (id: string, updates: Partial<FirePump>) => Promise<void>;
+  deleteFirePump: (id: string) => Promise<void>;
+  addFirePumpPanel: (panel: FirePumpControlPanel) => Promise<void>;
+  updateFirePumpPanel: (id: string, updates: Partial<FirePumpControlPanel>) => Promise<void>;
+  deleteFirePumpPanel: (id: string) => Promise<void>;
   getPropertyById: (id: string) => Property | undefined;
   getCompanyById: (id: string) => Company | undefined;
   getAppUserById: (id: string) => AppUser | undefined;
+  getFirePumpById: (id: string) => FirePump | undefined;
+  getFirePumpsByCompany: (companyId: string) => FirePump[];
+  getFirePumpPanelById: (id: string) => FirePumpControlPanel | undefined;
+  getPanelsByPump: (pumpId: string) => FirePumpControlPanel[];
   refreshData: () => Promise<void>;
 }
 
@@ -84,6 +102,8 @@ const INSPECTIONS_KEY = "@firesafe_inspections";
 const PROPERTIES_KEY = "@firesafe_properties";
 const COMPANIES_KEY = "@firesafe_companies";
 const APP_USERS_KEY = "@firesafe_app_users";
+const FIRE_PUMPS_KEY = "@firesafe_fire_pumps";
+const FIRE_PUMP_PANELS_KEY = "@firesafe_fire_pump_panels";
 const DATA_VERSION_KEY = "@firesafe_data_version";
 const CURRENT_DATA_VERSION = 2;
 
@@ -96,6 +116,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [appUsers, setAppUsers] = useState<AppUser[]>([]);
+  const [firePumps, setFirePumps] = useState<FirePump[]>([]);
+  const [firePumpPanels, setFirePumpPanels] = useState<FirePumpControlPanel[]>([]);
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -110,11 +132,13 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
       const version = storedVersion ? parseInt(storedVersion, 10) : 1;
       
-      const [storedInspections, storedProperties, storedCompanies, storedAppUsers] = await Promise.all([
+      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
         AsyncStorage.getItem(COMPANIES_KEY),
         AsyncStorage.getItem(APP_USERS_KEY),
+        AsyncStorage.getItem(FIRE_PUMPS_KEY),
+        AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY),
       ]);
 
       if (storedInspections) {
@@ -136,6 +160,12 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedAppUsers) {
         setAppUsers(JSON.parse(storedAppUsers));
+      }
+      if (storedFirePumps) {
+        setFirePumps(JSON.parse(storedFirePumps));
+      }
+      if (storedFirePumpPanels) {
+        setFirePumpPanels(JSON.parse(storedFirePumpPanels));
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -286,6 +316,84 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
     return appUsers.find((user) => user.id === id);
   };
 
+  const saveFirePumps = async (newFirePumps: FirePump[]) => {
+    try {
+      await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(newFirePumps));
+      setFirePumps(newFirePumps);
+    } catch (error) {
+      console.error("Error saving fire pumps:", error);
+      throw error;
+    }
+  };
+
+  const addFirePump = async (pump: FirePump) => {
+    const newFirePumps = [...firePumps, pump];
+    await saveFirePumps(newFirePumps);
+  };
+
+  const updateFirePump = async (id: string, updates: Partial<FirePump>) => {
+    const storedData = await AsyncStorage.getItem(FIRE_PUMPS_KEY);
+    const currentFirePumps: FirePump[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newFirePumps = currentFirePumps.map((pump) =>
+      pump.id === id ? { ...pump, ...updates, updatedAt: new Date().toISOString() } : pump
+    );
+    await saveFirePumps(newFirePumps);
+  };
+
+  const deleteFirePump = async (id: string) => {
+    const newFirePumps = firePumps.filter((pump) => pump.id !== id);
+    await saveFirePumps(newFirePumps);
+    const newPanels = firePumpPanels.filter((panel) => panel.pumpId !== id);
+    await saveFirePumpPanels(newPanels);
+  };
+
+  const getFirePumpById = (id: string) => {
+    return firePumps.find((pump) => pump.id === id);
+  };
+
+  const getFirePumpsByCompany = (companyId: string) => {
+    return firePumps.filter((pump) => pump.companyId === companyId);
+  };
+
+  const saveFirePumpPanels = async (newPanels: FirePumpControlPanel[]) => {
+    try {
+      await AsyncStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(newPanels));
+      setFirePumpPanels(newPanels);
+    } catch (error) {
+      console.error("Error saving fire pump panels:", error);
+      throw error;
+    }
+  };
+
+  const addFirePumpPanel = async (panel: FirePumpControlPanel) => {
+    const newPanels = [...firePumpPanels, panel];
+    await saveFirePumpPanels(newPanels);
+  };
+
+  const updateFirePumpPanel = async (id: string, updates: Partial<FirePumpControlPanel>) => {
+    const storedData = await AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY);
+    const currentPanels: FirePumpControlPanel[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newPanels = currentPanels.map((panel) =>
+      panel.id === id ? { ...panel, ...updates, updatedAt: new Date().toISOString() } : panel
+    );
+    await saveFirePumpPanels(newPanels);
+  };
+
+  const deleteFirePumpPanel = async (id: string) => {
+    const newPanels = firePumpPanels.filter((panel) => panel.id !== id);
+    await saveFirePumpPanels(newPanels);
+  };
+
+  const getFirePumpPanelById = (id: string) => {
+    return firePumpPanels.find((panel) => panel.id === id);
+  };
+
+  const getPanelsByPump = (pumpId: string) => {
+    return firePumpPanels.filter((panel) => panel.pumpId === pumpId);
+  };
+
   return (
     <InspectionContext.Provider
       value={{
@@ -293,6 +401,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         properties,
         companies,
         appUsers,
+        firePumps,
+        firePumpPanels,
         currentInspection,
         isLoading,
         addInspection,
@@ -308,9 +418,19 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         addAppUser,
         updateAppUser,
         deleteAppUser,
+        addFirePump,
+        updateFirePump,
+        deleteFirePump,
+        addFirePumpPanel,
+        updateFirePumpPanel,
+        deleteFirePumpPanel,
         getPropertyById,
         getCompanyById,
         getAppUserById,
+        getFirePumpById,
+        getFirePumpsByCompany,
+        getFirePumpPanelById,
+        getPanelsByPump,
         refreshData,
       }}
     >
