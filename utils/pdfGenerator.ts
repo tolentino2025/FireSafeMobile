@@ -296,6 +296,12 @@ const generateInspectionPdfHtmlWithPhotos = (
     return `<div style="margin-top: 6px; font-size: 11px; color: #4B5563; background: #F3F4F6; padding: 6px 8px; border-radius: 4px; font-style: italic;">${sanitizeHtml(notes)}</div>`;
   };
 
+  const hasAnyPsi = inspection.checklist.some(
+    (item: any) =>
+      item.psiValue ||
+      item.numericFields?.some((f: any) => f.unit === "psi" && f.value)
+  );
+
   const checklistRows = inspection.checklist
     .map(
       (item) => `
@@ -722,7 +728,7 @@ const generateInspectionPdfHtmlWithPhotos = (
               <tr>
                 <th>${t.item}</th>
                 <th>${t.status}</th>
-                <th>${t.psi}</th>
+                ${hasAnyPsi ? `<th>${t.psi}</th>` : ""}
               </tr>
             </thead>
             <tbody>
