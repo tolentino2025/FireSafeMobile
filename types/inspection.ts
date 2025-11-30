@@ -261,6 +261,22 @@ export interface Inspection {
   version?: number;
 }
 
+export interface InspectionSchedule {
+  id: string;
+  companyId?: string;
+  propertyId?: string;
+  firePumpId?: string;
+  inspectionType: InspectionType;
+  frequency: InspectionFrequency;
+  startDate: string;
+  lastInspectionDate?: string;
+  nextDueDate: string;
+  notificationId?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export function migrateInspection(inspection: any): Inspection {
   const migrated: Inspection = {
     ...inspection,

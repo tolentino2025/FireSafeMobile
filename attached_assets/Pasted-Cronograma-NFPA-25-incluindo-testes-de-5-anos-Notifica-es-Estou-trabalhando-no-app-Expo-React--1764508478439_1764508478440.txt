@@ -1,0 +1,255 @@
+Cronograma NFPA 25 (incluindo testes de 5 anos) + Notificações
+
+Estou trabalhando no app Expo React Native FireSafeMobile.
+O projeto já está carregado neste workspace.
+
+REGRAS IMPORTANTES (NÃO QUEBRE ISSO):
+
+NÃO alterar o layout visual (UI) do app: nada de mudar cores, fontes, textos, componentes, tamanhos, botões ou ordem de elementos.
+
+NÃO alterar o layout geral do PDF (estrutura, estilos, seções, margens, tabelas).
+
+Pode APENAS adicionar lógica, tipos, estados, persistência (AsyncStorage) e notificações.
+
+Se precisar exibir novos dados no PDF, faça usando o mesmo padrão de tags e estilos já existentes.
+
+OBJETIVO GERAL
+
+Implementar um cronograma/calendário de inspeções conforme NFPA 25, com suporte às frequências:
+
+DIÁRIA
+
+SEMANAL
+
+MENSAL
+
+TRIMESTRAL
+
+ANUAL
+
+5 ANOS (testes de 5 anos, como inspeção interna de tubulação etc.)
+
+Toda vez que o usuário fizer uma inspeção de determinado tipo/frequência (ex.: teste semanal da casa de bombas), o app deve:
+
+Salvar a inspeção normalmente (como já faz hoje);
+
+Criar ou atualizar um registro de cronograma (InspectionSchedule) para aquele tipo/frequência/ativo;
+
+Calcular a próxima data de vencimento com base na frequência (incluindo a de 5 anos);
+
+Agendar uma notificação local lembrando o usuário na data correta.
+
+1. Garantir todas as frequências no tipo InspectionFrequency
+
+Localize onde o tipo InspectionFrequency é definido (types/inspection.ts ou equivalente).
+
+Garanta que ele contemple pelo menos estes valores (adapte para o formato já usado, por exemplo string literal type ou enum):
+
+DAILY (diária)
+
+WEEKLY (semanal)
+
+MONTHLY (mensal)
+
+QUARTERLY (trimestral)
+
+YEARLY (anual)
+
+FIVE_YEAR (testes de 5 anos)
+
+Se o projeto já usa nomes diferentes, normalize tudo internamente, mas sem quebrar o que já existe (respeitar os valores usados nas inspeções atuais).
+
+2. Garantir que os checklists usam as frequências corretas (incluindo 5 anos)
+
+No arquivo utils/checklistTemplates.ts (ou equivalente), verifique os templates de checklist.
+
+Para cada item de checklist relacionado à NFPA 25, revise o campo frequencies.
+
+Garanta que:
+
+Itens diários usem DAILY;
+
+Itens semanais usem WEEKLY;
+
+Itens mensais usem MONTHLY;
+
+Itens trimestrais usem QUARTERLY;
+
+Itens anuais usem YEARLY;
+
+Itens de testes de 5 anos usem FIVE_YEAR.
+
+Não remova frequências que já estejam corretas; apenas acrescente ou corrija onde necessário para aderir à NFPA 25.
+
+Não mude texto, layout ou forma de exibição dos checklists – apenas a configuração de frequências.
+
+3. Criar modelo de InspectionSchedule
+
+Quero uma estrutura de agenda de inspeções.
+
+Em types/inspection.ts (ou arquivo apropriado), crie:
+
+export interface InspectionSchedule {
+  id: string;
+  companyId?: string;
+  propertyId?: string;
+  firePumpId?: string;
+  inspectionType: InspectionType;
+  frequency: InspectionFrequency;
+  startDate: string;        // ISO
+  lastInspectionDate?: string;
+  nextDueDate: string;      // ISO
+  isActive: boolean;
+}
+
+
+Não remova nenhum tipo já existente; apenas adicione.
+
+4. Adicionar schedules no InspectionContext
+
+No InspectionContext (ou contexto equivalente que gerencia inspeções), adicione:
+
+estado schedules: InspectionSchedule[];
+
+métodos loadSchedules() e saveSchedules() usando AsyncStorage (mesmo padrão de inspeções, propriedades, bombas etc.);
+
+Persistir os schedules em uma chave própria do AsyncStorage.
+
+Garantir que o contexto exponha schedules e uma função:
+
+createOrUpdateScheduleForInspection(inspection: Inspection): void;
+
+5. Lógica de criação/atualização de cronograma por inspeção
+
+Em createOrUpdateScheduleForInspection(inspection):
+
+A partir da inspection, identificar:
+
+companyId (empresa ligada à inspeção),
+
+propertyId (imóvel, se aplicável),
+
+firePumpId (bomba, se aplicável),
+
+inspectionType,
+
+frequency (conforme NFPA 25: DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY, FIVE_YEAR).
+
+Procurar se já existe um InspectionSchedule ativo com essa combinação de:
+
+companyId, propertyId, firePumpId, inspectionType, frequency.
+
+Se não existir:
+
+criar um novo schedule:
+
+startDate = inspection.date
+
+lastInspectionDate = inspection.date
+
+nextDueDate = inspection.date + intervalo da frequência
+
+isActive = true
+
+Se já existir:
+
+atualizar:
+
+lastInspectionDate = inspection.date
+
+nextDueDate = inspection.date + intervalo da frequência
+
+Criar uma função utilitária para somar o intervalo:
+
+function addInterval(date: Date, frequency: InspectionFrequency): Date {
+  const d = new Date(date);
+
+  switch (frequency) {
+    case 'DAILY':
+      d.setDate(d.getDate() + 1);
+      break;
+    case 'WEEKLY':
+      d.setDate(d.getDate() + 7);
+      break;
+    case 'MONTHLY':
+      d.setMonth(d.getMonth() + 1);
+      break;
+    case 'QUARTERLY':
+      d.setMonth(d.getMonth() + 3);
+      break;
+    case 'YEARLY':
+      d.setFullYear(d.getFullYear() + 1);
+      break;
+    case 'FIVE_YEAR': // testes de 5 anos da NFPA 25
+      d.setFullYear(d.getFullYear() + 5);
+      break;
+  }
+
+  return d;
+}
+
+
+IMPORTANTE: não alterar a forma como as inspeções são salvas hoje; apenas chamar createOrUpdateScheduleForInspection(inspection) logo após o salvamento de uma inspeção.
+
+6. Integração com a tela de inspeção
+
+Localize a tela onde a inspeção é criada/salva (InspectionFormScreen.tsx ou equivalente).
+
+Depois de salvar a inspeção (função saveInspection / addInspection ou similar), chamar:
+
+createOrUpdateScheduleForInspection(savedInspection);
+
+
+Não adicionar novos botões, inputs ou elementos visuais nesta tela. Não alterar layout.
+
+7. Notificações locais com expo-notifications
+
+Se ainda não estiver configurado, use expo-notifications para agendar notificações locais.
+
+Criar um módulo utilitário, por exemplo:
+
+src/utils/notificationScheduler.ts
+
+Implementar funções:
+
+async function scheduleNotificationForSchedule(schedule: InspectionSchedule): Promise<void> { ... }
+async function rescheduleAllNotifications(schedules: InspectionSchedule[]): Promise<void> { ... }
+
+
+Para cada InspectionSchedule ativo, agendar notificação com base em nextDueDate.
+
+O conteúdo da notificação pode ser simples, por exemplo:
+
+título: “Inspeção programada”
+
+corpo: “Inspeção {frequency} - {inspectionType} está programada para hoje.”
+
+Não criar novas telas nem novos controles visuais para as notificações. Apenas lógica.
+
+Solicitar permissão de notificação de forma padrão (no início do app ou na primeira criação de schedule), reaproveitando padrões existentes se já houver.
+
+8. Migração de dados
+
+Se o projeto utiliza CURRENT_DATA_VERSION e migrações de dados:
+
+Atualizar a migração para incluir o novo campo schedules (por exemplo, inicializando com [] quando não existir).
+
+Garantir que inspeções antigas não sejam quebradas: se não houver schedule, o app deve continuar funcionando normalmente e criar os schedules conforme novas inspeções forem feitas.
+
+9. Resultado esperado
+
+Ao final, mostrar o diff completo de todos os arquivos modificados e novos.
+
+Explicar:
+
+Onde o tipo InspectionFrequency foi atualizado e como as frequências NFPA 25 foram mapeadas (incluindo FIVE_YEAR);
+
+Como InspectionSchedule foi integrado ao InspectionContext;
+
+Como createOrUpdateScheduleForInspection é chamado no fluxo de salvamento da inspeção;
+
+Como addInterval trata cada frequência, especialmente a de 5 anos;
+
+Como e onde as notificações estão sendo agendadas.
+
+Reforço: nenhuma alteração visual na UI nem no layout do PDF, apenas lógica de cronograma e notificações
