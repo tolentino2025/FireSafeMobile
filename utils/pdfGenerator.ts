@@ -174,6 +174,12 @@ const translations = {
     photos: "Inspection Photos",
     generatedOn: "Report generated on",
     page: "Page",
+    geolocation: "Geolocation",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    accuracy: "Accuracy",
+    meters: "meters",
+    notAvailable: "Not available",
     frequencies: {
       daily: "Daily",
       weekly: "Weekly",
@@ -236,6 +242,12 @@ const translations = {
     photos: "Fotos da Inspeção",
     generatedOn: "Relatório gerado em",
     page: "Página",
+    geolocation: "Geolocalização",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    accuracy: "Precisão",
+    meters: "metros",
+    notAvailable: "Não disponível",
     frequencies: {
       daily: "Diária",
       weekly: "Semanal",
@@ -490,26 +502,20 @@ const generateInspectionPdfHtmlWithPhotos = (
         </div>
         <div class="info-item">
           <div class="info-label">${t.flowRate}</div>
-          <div class="info-value">${firePumpData.flowRateGpm ? `${firePumpData.flowRateGpm} GPM` : "-"}</div>
+          <div class="info-value">${firePumpData.ratedFlowGpm ? `${firePumpData.ratedFlowGpm} GPM` : "-"}</div>
         </div>
         <div class="info-item">
           <div class="info-label">${t.pressure}</div>
-          <div class="info-value">${firePumpData.pressurePsi ? `${firePumpData.pressurePsi} PSI` : "-"}</div>
+          <div class="info-value">${firePumpData.ratedPressurePsi ? `${firePumpData.ratedPressurePsi} PSI` : "-"}</div>
         </div>
         <div class="info-item">
           <div class="info-label">${t.motorPower}</div>
-          <div class="info-value">${firePumpData.motorHp ? `${firePumpData.motorHp} HP` : "-"}</div>
+          <div class="info-value">${firePumpData.powerHP ? `${firePumpData.powerHP} HP` : "-"}</div>
         </div>
         <div class="info-item">
           <div class="info-label">${t.serialNumber}</div>
           <div class="info-value">${sanitizeHtml(firePumpData.serialNumber) || "-"}</div>
         </div>
-        ${firePumpData.installationDate ? `
-        <div class="info-item" style="grid-column: span 2;">
-          <div class="info-label">${t.installationDate}</div>
-          <div class="info-value">${formatDate(firePumpData.installationDate, language)}</div>
-        </div>
-        ` : ""}
       </div>
     </div>
     `
@@ -757,6 +763,36 @@ const generateInspectionPdfHtmlWithPhotos = (
             </tbody>
           </table>
         </div>
+
+        ${
+          inspection.geoLocation
+            ? `
+        <div class="section" style="page-break-inside: avoid;">
+          <h2 class="section-title">${t.geolocation}</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">${t.latitude}</div>
+              <div class="info-value">${inspection.geoLocation.latitude.toFixed(6)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.longitude}</div>
+              <div class="info-value">${inspection.geoLocation.longitude.toFixed(6)}</div>
+            </div>
+            ${
+              inspection.geoLocation.accuracy
+                ? `
+            <div class="info-item">
+              <div class="info-label">${t.accuracy}</div>
+              <div class="info-value">${inspection.geoLocation.accuracy.toFixed(1)} ${t.meters}</div>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        </div>
+        `
+            : ""
+        }
 
         ${
           inspection.observations
