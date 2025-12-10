@@ -391,6 +391,17 @@ export const translations = {
       // Exhaust System Section
       exhaustSystemLeaks: "Sistema de escapamento examinado para vazamentos",
       drainCondensateTrap: "Purgador de condensado drenado",
+      // Electric Pump Monthly Specific
+      nonFlowTest10Min: "Teste sem vazão - operar por 10 minutos",
+      adjustGlandNuts: "Ajustar porcas da gaxeta se necessário",
+      // Electrical System Monthly
+      exerciseIsolatingSwitchBreaker: "Exercitar chave seccionadora e disjuntor",
+      circuitBreakersOrFuses: "Disjuntores ou fusíveis inspecionados",
+      // Battery System Monthly
+      batteryCaseCleanDry: "Caixa da bateria limpa e seca",
+      specificGravityStateOfCharge: "Densidade específica ou estado de carga testado",
+      chargerAndChargeRate: "Carregador e taxa de carga inspecionados",
+      equalizeCharge: "Carga de equalização inspecionada",
       // Numeric Fields Labels
       highestPsi: "Pressão Máxima (psi)",
       lowestPsi: "Pressão Mínima (psi)",
@@ -908,6 +919,17 @@ export const translations = {
       // Exhaust System Section
       exhaustSystemLeaks: "Exhaust system examined for leaks",
       drainCondensateTrap: "Condensate trap drained",
+      // Electric Pump Monthly Specific
+      nonFlowTest10Min: "Non-flow test - operate 10 minutes",
+      adjustGlandNuts: "Adjust gland nuts if necessary",
+      // Electrical System Monthly
+      exerciseIsolatingSwitchBreaker: "Exercise isolating switch and circuit breaker",
+      circuitBreakersOrFuses: "Circuit breakers or fuses inspected",
+      // Battery System Monthly
+      batteryCaseCleanDry: "Battery case exterior clean and dry",
+      specificGravityStateOfCharge: "Specific gravity or state of charge tested",
+      chargerAndChargeRate: "Charger and charge rate inspected",
+      equalizeCharge: "Equalize charge inspected",
       // Numeric Fields Labels
       highestPsi: "Highest Pressure (psi)",
       lowestPsi: "Lowest Pressure (psi)",

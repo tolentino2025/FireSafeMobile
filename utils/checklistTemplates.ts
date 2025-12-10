@@ -385,11 +385,35 @@ const pumpWeeklyChecklist: ChecklistTemplate[] = [
 ];
 
 const pumpMonthlyChecklist: ChecklistTemplate[] = [
-  { labelKey: "pumpHouseConditions", frequencies: ["monthly"] },
+  // Electric Fire Pump Monthly Tests
+  { labelKey: "nonFlowTest10Min", frequencies: ["monthly"] },
+  { labelKey: "pumpStartingPressure", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "packingGlandTightness", frequencies: ["monthly"] },
   { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["monthly"], numericFields: [
     { labelKey: "suctionPsi", type: "psi", unit: "psi" },
     { labelKey: "dischargePsi", type: "psi", unit: "psi" },
   ]},
+  { labelKey: "adjustGlandNuts", frequencies: ["monthly"] },
+  { labelKey: "unusualNoiseVibration", frequencies: ["monthly"] },
+  { labelKey: "pressureSwitchTransducer", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "pumpHighLowPressure", hasPsi: true, frequencies: ["monthly"], numericFields: [
+    { labelKey: "highestPsi", type: "psi", unit: "psi" },
+    { labelKey: "lowestPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "circulationReliefValve", frequencies: ["monthly"] },
+  { labelKey: "reducedVoltageStartingTime", frequencies: ["monthly"], numericFields: [
+    { labelKey: "startingTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  // Electrical System Monthly
+  { labelKey: "exerciseIsolatingSwitchBreaker", frequencies: ["monthly"] },
+  { labelKey: "circuitBreakersOrFuses", frequencies: ["monthly"] },
+  // Battery System Monthly
+  { labelKey: "batteryCaseCleanDry", frequencies: ["monthly"] },
+  { labelKey: "specificGravityStateOfCharge", frequencies: ["monthly"] },
+  { labelKey: "chargerAndChargeRate", frequencies: ["monthly"] },
+  { labelKey: "equalizeCharge", frequencies: ["monthly"] },
+  // General Pump House Conditions
+  { labelKey: "pumpHouseConditions", frequencies: ["monthly"] },
   { labelKey: "pumpPackingGlands", frequencies: ["monthly"] },
   { labelKey: "systemValvesProperPosition", frequencies: ["monthly"] },
   { labelKey: "suctionReservoirFull", frequencies: ["monthly"] },
@@ -408,7 +432,6 @@ const pumpMonthlyChecklist: ChecklistTemplate[] = [
   ]},
   { labelKey: "pumpBearingTemp", frequencies: ["monthly"] },
   { labelKey: "packingGlandDripRate", frequencies: ["monthly"] },
-  { labelKey: "unusualNoiseVibration", frequencies: ["monthly"] },
   { labelKey: "dieselEngineCooling", frequencies: ["monthly"] },
 ];
 
