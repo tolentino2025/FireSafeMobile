@@ -404,6 +404,62 @@ const pumpWeeklyChecklist: ChecklistTemplate[] = [
   // Semiannual Diesel Engine System - Electrical
   { labelKey: "safetiesAlarmsOperation", frequencies: ["semiannually"] },
   { labelKey: "cleanBoxesPanelsCabinets", frequencies: ["semiannually"] },
+  // Annual Electric Fire Pump - Pump System
+  { labelKey: "lubricateBearings", frequencies: ["annually"] },
+  { labelKey: "powerTransferSwitchTest", frequencies: ["annually"] },
+  { labelKey: "parallelAngularAlignment", frequencies: ["annually"] },
+  { labelKey: "mainReliefValveTest", frequencies: ["annually"] },
+  { labelKey: "flexibleHosesConnections", frequencies: ["annually"] },
+  { labelKey: "plumbingPartsInsideOutside", frequencies: ["annually"] },
+  { labelKey: "pumpShaftEndPlay", frequencies: ["annually"] },
+  { labelKey: "pressureGaugesSensorsAccuracy", frequencies: ["annually"] },
+  { labelKey: "pumpCouplingAlignment", frequencies: ["annually"] },
+  // Annual Electric Fire Pump - Mechanical Transmission
+  { labelKey: "lubricateCoupling", frequencies: ["annually"] },
+  { labelKey: "lubricateRightAngleGearDrive", frequencies: ["annually"] },
+  // Annual Electric Fire Pump - Electrical System
+  { labelKey: "corrosionPrintedCircuitBoards", frequencies: ["annually"] },
+  { labelKey: "crackedCableWireInsulation", frequencies: ["annually"] },
+  { labelKey: "electronicControlModuleTest", frequencies: ["annually"] },
+  { labelKey: "sacrificialAnodeMaintenance", frequencies: ["annually"] },
+  { labelKey: "tripCircuitBreakerTest", frequencies: ["annually"] },
+  { labelKey: "emergencyManualStartingMeans", frequencies: ["annually"] },
+  { labelKey: "lubricateMechanicalMovingParts", frequencies: ["annually"] },
+  { labelKey: "calibratePressureSwitchSettings", frequencies: ["annually"] },
+  { labelKey: "lubricateMotorBearings", frequencies: ["annually"] },
+  { labelKey: "leaksPlumbingParts", frequencies: ["annually"] },
+  { labelKey: "signsWaterElectricalParts", frequencies: ["annually"] },
+  // Annual Diesel Engine - Pump System
+  { labelKey: "mainReliefValveTestDiesel", frequencies: ["annually"] },
+  // Annual Diesel Engine - Fuel System
+  { labelKey: "dieselFuelTest", frequencies: ["annually"] },
+  { labelKey: "fuelPumpAlarmSignals", frequencies: ["annually"] },
+  { labelKey: "activeFuelMaintenanceSystem", frequencies: ["annually"] },
+  { labelKey: "changeFuelFilter", frequencies: ["annually"] },
+  { labelKey: "waterForeignMaterialTank", frequencies: ["annually"] },
+  { labelKey: "tankVentsOverflowPiping", frequencies: ["annually"] },
+  { labelKey: "fuelTankPipingInspect", frequencies: ["annually"] },
+  // Annual Diesel Engine - Lubrication System
+  { labelKey: "oilChange50Hours", frequencies: ["annually"] },
+  { labelKey: "oilFilterChange", frequencies: ["annually"] },
+  // Annual Diesel Engine - Cooling System
+  { labelKey: "replaceCirculatingWaterFilter", frequencies: ["annually"] },
+  { labelKey: "highCoolingWaterTempSignal", frequencies: ["annually"] },
+  { labelKey: "antifreezeInspect", frequencies: ["annually"] },
+  { labelKey: "cleanHeatExchanger", frequencies: ["annually"] },
+  { labelKey: "ductWorkLouversInspect", frequencies: ["annually"] },
+  // Annual Diesel Engine - Exhaust System
+  { labelKey: "exhaustSystemDrainCondensate", frequencies: ["annually"] },
+  { labelKey: "excessiveBackpressureTest", frequencies: ["annually"] },
+  { labelKey: "hangersSupportsCondition", frequencies: ["annually"] },
+  // Annual Diesel Engine - Battery System
+  { labelKey: "specificGravityChargerRates", frequencies: ["annually"] },
+  { labelKey: "cleanBatteryTerminals", frequencies: ["annually"] },
+  { labelKey: "batteryCrankingVoltageCheck", frequencies: ["annually"] },
+  { labelKey: "distilledWaterOnly", frequencies: ["annually"] },
+  // Annual Electrical System
+  { labelKey: "tightenControlPowerWiring", frequencies: ["annually"] },
+  { labelKey: "voltmeterAmmeterAccuracy", frequencies: ["annually"] },
 ];
 
 const pumpMonthlyChecklist: ChecklistTemplate[] = [
