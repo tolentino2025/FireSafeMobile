@@ -409,6 +409,13 @@ export const translations = {
       exhaustInsulationFireHazards: "Inspecionar isolamento e riscos de incêndio do sistema de escapamento",
       batteryTerminalsCleanTight: "Terminais da bateria limpos e apertados",
       wireChafingInspect: "Inspecionar desgaste de fios onde sujeitos a movimento",
+      // Semiannual Electric Fire Pump System
+      operateManualStartingMeans: "Operar meio de partida manual",
+      // Semiannual Diesel Engine System
+      antifreezeProtectionLevel: "Testar nível de proteção anticongelante",
+      flexibleExhaustSection: "Inspecionar seção flexível do escapamento",
+      safetiesAlarmsOperation: "Inspecionar/testar operação de seguranças e alarmes",
+      cleanBoxesPanelsCabinets: "Limpar caixas, painéis e gabinetes",
       // Numeric Fields Labels
       highestPsi: "Pressão Máxima (psi)",
       lowestPsi: "Pressão Mínima (psi)",
@@ -944,6 +951,13 @@ export const translations = {
       exhaustInsulationFireHazards: "Inspect exhaust system insulation and fire hazards",
       batteryTerminalsCleanTight: "Battery terminals clean and tight",
       wireChafingInspect: "Inspect wire chafing where subject to movement",
+      // Semiannual Electric Fire Pump System
+      operateManualStartingMeans: "Operate manual starting means",
+      // Semiannual Diesel Engine System
+      antifreezeProtectionLevel: "Test antifreeze protection level",
+      flexibleExhaustSection: "Inspect flexible exhaust section",
+      safetiesAlarmsOperation: "Inspect/test operation of safeties and alarms",
+      cleanBoxesPanelsCabinets: "Clean boxes, panels, and cabinets",
       // Numeric Fields Labels
       highestPsi: "Highest Pressure (psi)",
       lowestPsi: "Lowest Pressure (psi)",

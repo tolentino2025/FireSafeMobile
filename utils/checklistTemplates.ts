@@ -395,6 +395,15 @@ const pumpWeeklyChecklist: ChecklistTemplate[] = [
   { labelKey: "batteryTerminalsCleanTight", frequencies: ["quarterly"] },
   // Electrical System Quarterly
   { labelKey: "wireChafingInspect", frequencies: ["quarterly"] },
+  // Semiannual Electric Fire Pump System
+  { labelKey: "operateManualStartingMeans", frequencies: ["semiannually"] },
+  // Semiannual Diesel Engine System - Cooling
+  { labelKey: "antifreezeProtectionLevel", frequencies: ["semiannually"] },
+  // Semiannual Diesel Engine System - Exhaust
+  { labelKey: "flexibleExhaustSection", frequencies: ["semiannually"] },
+  // Semiannual Diesel Engine System - Electrical
+  { labelKey: "safetiesAlarmsOperation", frequencies: ["semiannually"] },
+  { labelKey: "cleanBoxesPanelsCabinets", frequencies: ["semiannually"] },
 ];
 
 const pumpMonthlyChecklist: ChecklistTemplate[] = [
