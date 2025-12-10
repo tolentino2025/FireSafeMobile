@@ -607,23 +607,93 @@ const hydrantFlowChecklist: ChecklistTemplate[] = [
 ];
 
 const waterTankChecklist: ChecklistTemplate[] = [
-  { labelKey: "tankWaterLevelCorrect", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "tankTempGaugeOperational", frequencies: ["weekly", "monthly"] },
-  { labelKey: "waterTempAbove40", frequencies: ["weekly", "monthly"] },
-  { labelKey: "tankHeatingSystem", frequencies: ["weekly", "monthly"] },
-  { labelKey: "tankExteriorCondition", frequencies: ["quarterly", "annually"] },
-  { labelKey: "tankSupportsCondition", frequencies: ["quarterly", "annually"] },
-  { labelKey: "tankAccessoriesSecure", frequencies: ["annually"] },
-  { labelKey: "cathodicProtection", frequencies: ["annually"] },
-  { labelKey: "tankVentsUnobstructed", frequencies: ["quarterly", "annually"] },
-  { labelKey: "overflowPipeUnobstructed", frequencies: ["quarterly", "annually"] },
-  { labelKey: "tankInspection", frequencies: ["annually"], isTestSection: true, numericFields: [
-    { labelKey: "tankCapacity", type: "generic", unit: "gal" },
-    { labelKey: "waterLevelPercent", type: "percent", unit: "%" },
-    { labelKey: "waterTempF", type: "temperature_f", unit: "F" },
-  ]},
-  { labelKey: "tankInteriorInspection", frequencies: ["five_years"] },
-  { labelKey: "tankPaintingCondition", frequencies: ["five_years"] },
+  // Daily (Cold Weather/Heating Season Only)
+  { labelKey: "heatingSystemUnsupervised", frequencies: ["daily"] },
+  // Weekly - Control Valves
+  { labelKey: "valveCorrectPosition", frequencies: ["weekly"] },
+  { labelKey: "valveSealed", frequencies: ["weekly"] },
+  { labelKey: "valveAccessible", frequencies: ["weekly"] },
+  { labelKey: "pivCorrectWrenches", frequencies: ["weekly"] },
+  { labelKey: "valveFreeDamageLeaks", frequencies: ["weekly"] },
+  { labelKey: "valveProperSignage", frequencies: ["weekly"] },
+  // Weekly (Cold Weather)
+  { labelKey: "waterTempUnsupervised", frequencies: ["weekly"] },
+  { labelKey: "waterTempSupervised", frequencies: ["weekly"] },
+  // Monthly
+  { labelKey: "gaugesGoodConditionTank", frequencies: ["monthly"] },
+  // Monthly - Control Valves (Locked/Supervised)
+  { labelKey: "waterTempSupervisedMonthly", frequencies: ["monthly"] },
+  { labelKey: "valveCorrectPositionMonthly", frequencies: ["monthly"] },
+  { labelKey: "valveLockedSupervised", frequencies: ["monthly"] },
+  { labelKey: "valveAccessibleMonthly", frequencies: ["monthly"] },
+  { labelKey: "pivCorrectWrenchesMonthly", frequencies: ["monthly"] },
+  { labelKey: "valveFreeDamageLeaksMonthly", frequencies: ["monthly"] },
+  { labelKey: "valveProperSignageMonthly", frequencies: ["monthly"] },
+  // Monthly - Water Level
+  { labelKey: "waterLevelUnsupervisedFull", frequencies: ["monthly"] },
+  // Quarterly
+  { labelKey: "gaugesNormalPressure", frequencies: ["quarterly"] },
+  { labelKey: "waterLevelSupervisedFull", frequencies: ["quarterly"] },
+  // Quarterly - Tank Exterior Inspection
+  { labelKey: "tankExteriorStructureCondition", frequencies: ["quarterly"] },
+  { labelKey: "areaFreeCombustibleStorage", frequencies: ["quarterly"] },
+  { labelKey: "areaFreeAcceleratedCorrosion", frequencies: ["quarterly"] },
+  { labelKey: "tankFreeIceBuildup", frequencies: ["quarterly"] },
+  { labelKey: "embankmentsFreeErosion", frequencies: ["quarterly"] },
+  // Quarterly (Cold Weather)
+  { labelKey: "heatingSystemSupervised", frequencies: ["quarterly"] },
+  // Quarterly - Control Valves (Electronically Supervised)
+  { labelKey: "valveElectronicSupervised", frequencies: ["quarterly"] },
+  // Quarterly - Surrounding Area
+  { labelKey: "surroundingFreeCombustibles", frequencies: ["quarterly"] },
+  { labelKey: "surroundingFreeCorrosionMaterial", frequencies: ["quarterly"] },
+  { labelKey: "surroundingFreeIce", frequencies: ["quarterly"] },
+  { labelKey: "embankmentsFreeErosionQuarterly", frequencies: ["quarterly"] },
+  // Annual
+  { labelKey: "hoopsGrillageCondition", frequencies: ["annually"] },
+  { labelKey: "paintedCoatedSurfacesCondition", frequencies: ["annually"] },
+  { labelKey: "expansionJointsNotCrackedLeaking", frequencies: ["annually"] },
+  // Annual - Valve Status Test
+  { labelKey: "valveFullRangeMotion", frequencies: ["annually"] },
+  { labelKey: "valveStatusTestOpen", frequencies: ["annually"] },
+  // Annual - Automatic Tank Fill Valve Test
+  { labelKey: "fillValveActuatedLowLevel", frequencies: ["annually"] },
+  { labelKey: "measureRecordRefillRate", frequencies: ["annually"] },
+  // Three Years - Steel Tank Interior (Without Corrosion Protection)
+  { labelKey: "siltRemovedEvaluation", frequencies: ["three_years"] },
+  { labelKey: "interiorFreePittingCorrosion", frequencies: ["three_years"] },
+  { labelKey: "interiorFreeWasteDebris", frequencies: ["three_years"] },
+  { labelKey: "interiorCoatingIntact", frequencies: ["three_years"] },
+  { labelKey: "tankFloorFreeDents", frequencies: ["three_years"] },
+  { labelKey: "heatingSystemComponentsCondition", frequencies: ["three_years"] },
+  { labelKey: "antiVortexPlateCondition", frequencies: ["three_years"] },
+  // Five Years - Interior Inspection (All Other Tank Types)
+  { labelKey: "siltRemovedEvaluationFiveYear", frequencies: ["five_years"] },
+  { labelKey: "interiorFreePittingCorrosionFiveYear", frequencies: ["five_years"] },
+  { labelKey: "interiorFreeWasteDebrisFiveYear", frequencies: ["five_years"] },
+  { labelKey: "interiorCoatingIntactFiveYear", frequencies: ["five_years"] },
+  { labelKey: "tankFloorFreeDentsFiveYear", frequencies: ["five_years"] },
+  { labelKey: "heatingSystemConditionFiveYear", frequencies: ["five_years"] },
+  { labelKey: "antiVortexPlateConditionFiveYear", frequencies: ["five_years"] },
+  // Five Years - Check Valves
+  { labelKey: "checkValveInternalFreeCondition", frequencies: ["five_years"] },
+  // Five Years - Tests
+  { labelKey: "levelIndicatorsAccurateFree", frequencies: ["five_years"] },
+  { labelKey: "gaugesTestedReplaced", frequencies: ["five_years"] },
+  // Test Prior to Heating Season
+  { labelKey: "heatingSystemProperOrder", frequencies: ["annually"] },
+  { labelKey: "lowWaterTempSignals", frequencies: ["annually"] },
+  { labelKey: "highWaterTempSignals", frequencies: ["annually"] },
+  // Test Monthly - Water Temperature
+  { labelKey: "lowTempAlarmWorking", frequencies: ["monthly"] },
+  { labelKey: "highTempLimitSwitchWorking", frequencies: ["monthly"] },
+  // Test Semiannual
+  { labelKey: "highLowWaterLevelSignals", frequencies: ["semiannually"] },
+  // Maintenance
+  { labelKey: "tankMaintainedFull", frequencies: ["weekly", "monthly", "quarterly", "annually"] },
+  { labelKey: "hatchCoversFastened", frequencies: ["quarterly", "annually"] },
+  { labelKey: "wasteMaterialInOnTank", frequencies: ["quarterly", "annually"] },
+  { labelKey: "cleanStrainersQuarterly", frequencies: ["quarterly"] },
 ];
 
 const hazardEvalChecklist: ChecklistTemplate[] = [

@@ -261,18 +261,93 @@ export const translations = {
       mainDrainTest: "Teste de dreno principal realizado",
       flowTestPerformed: "Teste de vazão realizado",
       undergroundPipingCondition: "Condição da tubulação subterrânea verificada",
-      tankWaterLevelCorrect: "Nível de água do tanque correto",
-      tankTempGaugeOperational: "Medidor de temperatura do tanque operacional",
-      waterTempAbove40: "Temperatura da água acima de 40°F",
-      tankHeatingSystem: "Sistema de aquecimento do tanque operacional",
-      tankExteriorCondition: "Condição externa do tanque satisfatória",
-      tankSupportsCondition: "Condição dos suportes do tanque satisfatória",
-      tankAccessoriesSecure: "Acessórios/anexos do tanque seguros",
-      cathodicProtection: "Sistema de proteção catódica funcional",
-      tankVentsUnobstructed: "Ventilação do tanque desobstruída",
-      overflowPipeUnobstructed: "Tubo de transbordamento desobstruído",
-      tankInteriorInspection: "Inspeção interna do tanque realizada",
-      tankPaintingCondition: "Condição da pintura do tanque verificada",
+      // Water Tank - Daily
+      heatingSystemUnsupervised: "Sistema de aquecimento (quando não supervisionado)",
+      // Water Tank - Weekly Control Valves
+      valveCorrectPosition: "Na posição correta (aberta ou fechada)",
+      valveSealed: "Selada",
+      valveAccessible: "Acessível",
+      pivCorrectWrenches: "PIVs com chaves corretas disponíveis",
+      valveFreeDamageLeaks: "Livre de danos ou vazamentos",
+      valveProperSignage: "Sinalização adequada",
+      // Water Tank - Weekly (Cold Weather)
+      waterTempUnsupervised: "Registrar temperatura da água (não supervisionado)",
+      waterTempSupervised: "Registrar temperatura da água (sistemas supervisionados)",
+      // Water Tank - Monthly
+      gaugesGoodConditionTank: "Manômetros em boas condições de operação",
+      // Water Tank - Monthly Control Valves
+      waterTempSupervisedMonthly: "Temperatura da água (sistemas supervisionados)",
+      valveCorrectPositionMonthly: "Na posição correta (aberta ou fechada)",
+      valveLockedSupervised: "Travada ou supervisionada",
+      valveAccessibleMonthly: "Acessível",
+      pivCorrectWrenchesMonthly: "PIVs com chaves corretas disponíveis",
+      valveFreeDamageLeaksMonthly: "Livre de danos ou vazamentos",
+      valveProperSignageMonthly: "Sinalização adequada",
+      // Water Tank - Monthly Water Level
+      waterLevelUnsupervisedFull: "Nível de água (não supervisionado) cheio",
+      // Water Tank - Quarterly
+      gaugesNormalPressure: "Manômetros - pressão normal de água mantida",
+      waterLevelSupervisedFull: "Nível de água (supervisionado) cheio",
+      // Water Tank - Quarterly Tank Exterior
+      tankExteriorStructureCondition: "Exterior do tanque, estrutura de suporte, ventilações, fundação e passarelas ou escadas em boas condições",
+      areaFreeCombustibleStorage: "Área livre de armazenamento combustível, lixo, detritos, vegetação ou material que possa apresentar risco de incêndio",
+      areaFreeAcceleratedCorrosion: "Área livre de acúmulo de material sobre ou perto de peças que possa resultar em corrosão ou deterioração acelerada",
+      tankFreeIceBuildup: "Tanque e suporte livres de acúmulo de gelo",
+      embankmentsFreeErosion: "Laterais e topo de aterros de suporte de tanques de tecido revestido livres de erosão",
+      // Water Tank - Quarterly (Cold Weather)
+      heatingSystemSupervised: "Sistema de aquecimento (sistemas supervisionados)",
+      // Water Tank - Quarterly Control Valves (Electronic)
+      valveElectronicSupervised: "Supervisionada eletronicamente",
+      // Water Tank - Quarterly Surrounding Area
+      surroundingFreeCombustibles: "Livre de combustíveis",
+      surroundingFreeCorrosionMaterial: "Livre de material que possa acelerar corrosão",
+      surroundingFreeIce: "Livre de acúmulo de gelo",
+      embankmentsFreeErosionQuarterly: "Aterros (tanque de tecido revestido) livres de erosão",
+      // Water Tank - Annual
+      hoopsGrillageCondition: "Aros e grelha (tanques de madeira) em boas condições",
+      paintedCoatedSurfacesCondition: "Superfícies pintadas/revestidas em boas condições",
+      expansionJointsNotCrackedLeaking: "Juntas de expansão sem rachaduras ou vazamentos",
+      // Water Tank - Annual Valve Status Test
+      valveFullRangeMotion: "Operada em toda a sua amplitude de movimento",
+      valveStatusTestOpen: "Teste de status para verificar válvula(s) na posição aberta",
+      // Water Tank - Annual Fill Valve Test
+      fillValveActuatedLowLevel: "Válvula acionada por rebaixamento do nível de água",
+      measureRecordRefillRate: "Medir e registrar taxa de reabastecimento",
+      // Water Tank - Three Years Steel Tank Interior
+      siltRemovedEvaluation: "Sedimento removido para avaliação subaquática",
+      interiorFreePittingCorrosion: "Superfícies internas livres de pites, corrosão, descamação ou outras formas de deterioração",
+      interiorFreeWasteDebris: "Interior livre de resíduos, crescimento aquático e detritos",
+      interiorCoatingIntact: "Revestimento interno intacto",
+      tankFloorFreeDents: "Piso do tanque livre de amassados",
+      heatingSystemComponentsCondition: "Sistema de aquecimento e componentes em boas condições",
+      antiVortexPlateCondition: "Placa anti-vórtice em boas condições e não obstruída",
+      // Water Tank - Five Years Interior
+      siltRemovedEvaluationFiveYear: "Sedimento removido para avaliação subaquática",
+      interiorFreePittingCorrosionFiveYear: "Superfícies internas livres de pites, corrosão, descamação ou outras formas de deterioração",
+      interiorFreeWasteDebrisFiveYear: "Interior livre de resíduos, crescimento aquático e detritos",
+      interiorCoatingIntactFiveYear: "Revestimento interno intacto",
+      tankFloorFreeDentsFiveYear: "Piso do tanque livre de amassados",
+      heatingSystemConditionFiveYear: "Sistema de aquecimento e componentes em boas condições",
+      antiVortexPlateConditionFiveYear: "Placa anti-vórtice em boas condições e não obstruída",
+      // Water Tank - Five Years Check Valves
+      checkValveInternalFreeCondition: "Válvula de retenção - interno move livremente e em boas condições",
+      // Water Tank - Five Years Tests
+      levelIndicatorsAccurateFree: "Indicadores de nível precisos e movem livremente",
+      gaugesTestedReplaced: "Manômetros testados ou substituídos",
+      // Water Tank - Tests Prior to Heating Season
+      heatingSystemProperOrder: "Em funcionamento adequado",
+      lowWaterTempSignals: "Sinais de baixa temperatura da água",
+      highWaterTempSignals: "Sinais de alta temperatura da água",
+      // Water Tank - Monthly Water Temperature Test
+      lowTempAlarmWorking: "Alarme de baixa temperatura funcionando corretamente",
+      highTempLimitSwitchWorking: "Interruptor de limite de alta temperatura funcionando corretamente",
+      // Water Tank - Semiannual Test
+      highLowWaterLevelSignals: "Sinais de nível alto e baixo de água funcionam corretamente",
+      // Water Tank - Maintenance
+      tankMaintainedFull: "Tanque mantido cheio ou no nível de água designado",
+      hatchCoversFastened: "Tampas de escotilha no telhado e porta no topo de caixas anti-geada bem fixadas",
+      wasteMaterialInOnTank: "Resíduos dentro ou sobre o tanque",
+      cleanStrainersQuarterly: "Limpar filtros trimestralmente",
       occupancyClassification: "Classificação de ocupação verificada",
       hazardClassification: "Classificação de perigo verificada",
       storageArrangement: "Arranjo de armazenamento verificado",
@@ -859,18 +934,93 @@ export const translations = {
       mainDrainTest: "Main drain test performed",
       flowTestPerformed: "Flow test performed",
       undergroundPipingCondition: "Underground piping condition verified",
-      tankWaterLevelCorrect: "Tank water level correct",
-      tankTempGaugeOperational: "Tank temperature gauge operational",
-      waterTempAbove40: "Water temperature above 40°F",
-      tankHeatingSystem: "Tank heating system operational",
-      tankExteriorCondition: "Tank exterior condition satisfactory",
-      tankSupportsCondition: "Tank supports condition satisfactory",
-      tankAccessoriesSecure: "Tank accessories/attachments secure",
-      cathodicProtection: "Cathodic protection system functional",
-      tankVentsUnobstructed: "Tank vents unobstructed",
-      overflowPipeUnobstructed: "Overflow pipe unobstructed",
-      tankInteriorInspection: "Tank interior inspection performed",
-      tankPaintingCondition: "Tank painting condition verified",
+      // Water Tank - Daily
+      heatingSystemUnsupervised: "Heating system (when not supervised)",
+      // Water Tank - Weekly Control Valves
+      valveCorrectPosition: "In the correct (open or closed) position",
+      valveSealed: "Sealed",
+      valveAccessible: "Accessible",
+      pivCorrectWrenches: "PIVs provided with correct wrenches",
+      valveFreeDamageLeaks: "Free from damage or leaks",
+      valveProperSignage: "Proper signage",
+      // Water Tank - Weekly (Cold Weather)
+      waterTempUnsupervised: "Record water temperature (when not supervised)",
+      waterTempSupervised: "Record water temperature (supervised systems)",
+      // Water Tank - Monthly
+      gaugesGoodConditionTank: "Gauges are in good operating condition",
+      // Water Tank - Monthly Control Valves
+      waterTempSupervisedMonthly: "Water temperature (supervised systems)",
+      valveCorrectPositionMonthly: "In the correct (open or closed) position",
+      valveLockedSupervised: "Locked or supervised",
+      valveAccessibleMonthly: "Accessible",
+      pivCorrectWrenchesMonthly: "PIVs provided with correct wrenches",
+      valveFreeDamageLeaksMonthly: "Free from damage or leaks",
+      valveProperSignageMonthly: "Proper signage",
+      // Water Tank - Monthly Water Level
+      waterLevelUnsupervisedFull: "Water level (unsupervised) full",
+      // Water Tank - Quarterly
+      gaugesNormalPressure: "Gauges - normal water pressure maintained",
+      waterLevelSupervisedFull: "Water level (supervised) full",
+      // Water Tank - Quarterly Tank Exterior
+      tankExteriorStructureCondition: "Exterior of tank, supporting structure, vents, foundation, and catwalks or ladders are in good condition",
+      areaFreeCombustibleStorage: "Area is free of combustible storage, trash, debris, brush, or material that could present a fire exposure hazard",
+      areaFreeAcceleratedCorrosion: "Area is free of accumulation of material on or near parts that could result in accelerated corrosion or rot",
+      tankFreeIceBuildup: "Tank and support are free of ice buildup",
+      embankmentsFreeErosion: "Exterior sides and top of embankments supporting coated fabric tanks are free of erosion",
+      // Water Tank - Quarterly (Cold Weather)
+      heatingSystemSupervised: "Heating system (supervised systems)",
+      // Water Tank - Quarterly Control Valves (Electronic)
+      valveElectronicSupervised: "Electronically supervised",
+      // Water Tank - Quarterly Surrounding Area
+      surroundingFreeCombustibles: "Free of combustibles",
+      surroundingFreeCorrosionMaterial: "Free of material that could accelerate corrosion or rot",
+      surroundingFreeIce: "Free of ice buildup",
+      embankmentsFreeErosionQuarterly: "Embankments (for coated fabric tank) free of erosion",
+      // Water Tank - Annual
+      hoopsGrillageCondition: "Hoops and grillage (wooden tanks) are in good condition",
+      paintedCoatedSurfacesCondition: "Painted/coated surfaces are in good condition",
+      expansionJointsNotCrackedLeaking: "Expansion joints are not cracked or leaking",
+      // Water Tank - Annual Valve Status Test
+      valveFullRangeMotion: "Operated through its full range of motion",
+      valveStatusTestOpen: "Status test to verify valve(s) is in the open position",
+      // Water Tank - Annual Fill Valve Test
+      fillValveActuatedLowLevel: "Valve actuated by lowering water level",
+      measureRecordRefillRate: "Measure and record refill rate",
+      // Water Tank - Three Years Steel Tank Interior
+      siltRemovedEvaluation: "Silt has been removed for underwater evaluation",
+      interiorFreePittingCorrosion: "Interior surfaces are free of pitting, corrosion, spalling, or other forms of deterioration",
+      interiorFreeWasteDebris: "Interior is free of waste material, aquatic growth, and debris",
+      interiorCoatingIntact: "Interior coating is intact",
+      tankFloorFreeDents: "Tank floor is free of dents",
+      heatingSystemComponentsCondition: "Heating system and components are in good condition",
+      antiVortexPlateCondition: "Anti-vortex plate is in good condition and is not obstructed",
+      // Water Tank - Five Years Interior
+      siltRemovedEvaluationFiveYear: "Silt has been removed for underwater evaluation",
+      interiorFreePittingCorrosionFiveYear: "Interior surfaces are free of pitting, corrosion, spalling, or other forms of deterioration",
+      interiorFreeWasteDebrisFiveYear: "Interior is free of waste material, aquatic growth, and debris",
+      interiorCoatingIntactFiveYear: "Interior coating is intact",
+      tankFloorFreeDentsFiveYear: "Tank floor is free of dents",
+      heatingSystemConditionFiveYear: "Heating system and components are in good condition",
+      antiVortexPlateConditionFiveYear: "Anti-vortex plate is in good condition and is not obstructed",
+      // Water Tank - Five Years Check Valves
+      checkValveInternalFreeCondition: "Check valve - internal moves freely and in good condition",
+      // Water Tank - Five Years Tests
+      levelIndicatorsAccurateFree: "Level indicators are accurate and move freely",
+      gaugesTestedReplaced: "Gauges tested or replaced",
+      // Water Tank - Tests Prior to Heating Season
+      heatingSystemProperOrder: "In proper working order",
+      lowWaterTempSignals: "Low water temperature signals",
+      highWaterTempSignals: "High water temperature signals",
+      // Water Tank - Monthly Water Temperature Test
+      lowTempAlarmWorking: "Low temperature alarm is working correctly",
+      highTempLimitSwitchWorking: "High temperature limit switch is working correctly",
+      // Water Tank - Semiannual Test
+      highLowWaterLevelSignals: "High and low water level signals work correctly",
+      // Water Tank - Maintenance
+      tankMaintainedFull: "Tank maintained full or at designated water level",
+      hatchCoversFastened: "Hatch covers in the roofs and the door at the top of frost-proof castings kept securely fastened",
+      wasteMaterialInOnTank: "Waste material in or on the tank",
+      cleanStrainersQuarterly: "Clean strainers quarterly",
       occupancyClassification: "Occupancy classification verified",
       hazardClassification: "Hazard classification verified",
       storageArrangement: "Storage arrangement verified",
