@@ -212,6 +212,164 @@ export const translations = {
       lowTempAlarmFreeFromDamage: "Alarme de baixa temperatura livre de danos físicos",
       foamConcentrateLevel: "Nível de concentrado de espuma adequado",
       foamConcentrateCondition: "Condição do concentrado de espuma satisfatória",
+      // Foam-Water - Weekly Backflow
+      fwIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
+      fwRpaReliefValveOperating: "RPA e RPDA - válvula de alívio diferencial operando corretamente",
+      // Foam-Water - Weekly Control Valves
+      fwControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta ou fechada)",
+      fwControlValvesSealed: "Válvulas de controle seladas",
+      fwControlValvesAccessible: "Válvulas de controle acessíveis",
+      fwPivsCorrectWrenches: "PIVs com chaves corretas disponíveis",
+      fwControlValvesFreeFromDamage: "Válvulas de controle livres de danos ou vazamentos",
+      fwControlValvesProperSignage: "Válvulas de controle com sinalização adequada",
+      // Foam-Water - Weekly Deluge/Preaction Valve
+      fwDelugeEnclosureMinTemp: "Compartimento da válvula dilúvio/pré-ação com temperatura mínima de 4°C (40°F)",
+      // Foam-Water - Weekly Master Pressure-Regulating
+      fwMasterPrdDownstreamPressure: "Dispositivo regulador de pressão mestre - pressão a jusante conforme projeto",
+      fwMasterPrdSupplyPressure: "Dispositivo regulador de pressão mestre - pressão de suprimento conforme projeto",
+      fwMasterPrdFreeDamageLeaks: "Dispositivo regulador de pressão mestre - livre de danos ou vazamentos",
+      fwMasterPrdTrimCondition: "Dispositivo regulador de pressão mestre - acabamento em boas condições",
+      // Foam-Water - Monthly Gauges
+      fwGaugesGoodCondition: "Manômetros em boas condições de operação",
+      fwAirPressureMaintainedUnsupervised: "Pressão de ar/nitrogênio normal mantida (quando não supervisionado)",
+      fwDryValveRatioUnsupervised: "Manômetro no lado do sistema da válvula seca lê proporção adequada (quando não supervisionado)",
+      fwQuickOpeningGaugeUnsupervised: "Manômetro do dispositivo de abertura rápida lê igual ao da válvula seca (quando não supervisionado)",
+      // Foam-Water - Monthly Control Valves (locked/supervised)
+      fwMonthlyValvesCorrectPosition: "Válvulas na posição correta (aberta ou fechada)",
+      fwMonthlyValvesLockedSupervised: "Válvulas travadas ou supervisionadas",
+      fwMonthlyValvesAccessible: "Válvulas acessíveis",
+      fwMonthlyPivsWrenches: "PIVs com chaves corretas",
+      fwMonthlyValvesFreeDamage: "Válvulas livres de danos ou vazamentos",
+      fwMonthlyValvesSignage: "Válvulas com sinalização adequada",
+      // Foam-Water - Monthly Deluge/Preaction Valve
+      fwDelugeFreeDamageLeaks: "Válvula dilúvio/pré-ação livre de danos ou vazamentos",
+      fwDelugeElectricalInService: "Componentes elétricos em serviço",
+      fwDelugeSealNotLeaking: "Selo da válvula não vaza",
+      fwDelugeTrimValvesPosition: "Válvulas de acabamento na posição correta",
+      // Foam-Water - Monthly Proportioning System
+      fwProportionerConcentrateQty: "Quantidade de concentrado de espuma atende requisitos do projeto",
+      fwProportionerStrainers: "Filtros do proporcionador inspecionados",
+      fwProportionerVacuumVent: "Respiro de vácuo de pressão operando livremente",
+      fwProportionerGauges: "Manômetros do proporcionador em boas condições",
+      fwProportionerSensingLines: "Válvulas das linhas de sensoriamento abertas",
+      fwProportionerPumpPower: "Bomba de líquido de espuma com energia",
+      fwProportionerFreeCorrosion: "Proporcionador livre de corrosão",
+      fwProportionerDrainValves: "Válvulas de drenagem automáticas livres e abertas",
+      fwProportionerValvesPosition: "Válvulas do proporcionador na posição correta",
+      // Foam-Water - Monthly Nozzles
+      fwNozzlesInPlaceAimed: "Bicos no lugar, direcionados e apontando na direção pretendida",
+      fwNozzlesFreeLoading: "Bicos livres de carga externa e corrosão",
+      fwNozzlesCapPlugs: "Tampas ou plugues nos bicos (onde necessário)",
+      // Foam-Water - Quarterly Gauges (supervised)
+      fwAirPressureSupervised: "Pressão de ar/nitrogênio normal mantida (quando supervisionado)",
+      fwDryValveRatioSupervised: "Manômetro no lado do sistema da válvula seca lê proporção adequada (quando supervisionado)",
+      fwQuickOpeningGaugeSupervised: "Manômetro do dispositivo de abertura rápida lê igual ao da válvula seca (quando supervisionado)",
+      fwSupplyGaugeNormal: "Manômetro no lado do suprimento da válvula lê normal",
+      fwAlarmDevicesFreeDamage: "Dispositivos de alarme livres de danos",
+      fwHydraulicSignAttached: "Placa de projeto hidráulico fixada ao riser e legível",
+      // Foam-Water - Quarterly Alarm Valves
+      fwAlarmValvesPosition: "Válvulas de alarme/verificação do riser na posição correta",
+      fwAlarmValvesFreeDamage: "Válvulas de alarme livres de danos",
+      fwAlarmValvesAccessible: "Válvulas de alarme acessíveis",
+      fwRetardChamberNotLeaking: "Câmara retardadora/drenos de alarme não vazando",
+      // Foam-Water - Quarterly Pressure-Reducing Valve
+      fwPrvOpenNotLeaking: "Válvula redutora de pressão aberta e sem vazamento",
+      fwPrvMaintainingPressure: "Válvula redutora mantendo pressão a jusante",
+      fwPrvGoodCondition: "Válvula redutora em boas condições com volantes instalados",
+      // Foam-Water - Quarterly Foam Concentrate Strainer
+      fwStrainerBlowdownClosed: "Válvula de purga do filtro fechada e plugada",
+      // Foam-Water - Quarterly Drainage
+      fwDrainageGoodCondition: "Sistema de drenagem em boas condições de operação",
+      fwRetentionDikesGoodCondition: "Diques de contenção em boas condições",
+      // Foam-Water - Quarterly Control Valves (electronically supervised)
+      fwElectronicValvesPosition: "Válvulas eletronicamente supervisionadas na posição correta",
+      fwElectronicValvesSupervised: "Válvulas eletronicamente supervisionadas",
+      fwElectronicValvesAccessible: "Válvulas eletronicamente supervisionadas acessíveis",
+      fwElectronicPivsWrenches: "PIVs eletronicamente supervisionados com chaves corretas",
+      fwElectronicValvesFreeDamage: "Válvulas eletronicamente supervisionadas livres de danos",
+      fwElectronicValvesSignage: "Válvulas eletronicamente supervisionadas com sinalização",
+      // Foam-Water - Annual
+      fwLowTempAlarmFreeDamage: "Alarme de baixa temperatura livre de danos",
+      // Foam-Water - Annual Support/Hangers
+      fwHangersGoodCondition: "Suportes em boas condições (sem tinta/revestimento faltando, ferrugem ou corrosão)",
+      fwHangersNoDamageMissing: "Suportes sem danos ou faltando",
+      fwHangersSecurelyAttached: "Suportes firmemente fixados à estrutura e tubulação",
+      // Foam-Water - Annual Pipes and Fittings
+      fwPipesGoodCondition: "Tubos e conexões em boas condições sem corrosão externa",
+      fwPipesNoLeaksDamage: "Tubos sem vazamentos ou danos mecânicos",
+      fwPipesCorrectAlignment: "Tubos com alinhamento correto sem cargas externas",
+      fwLowPointDrains: "Drenos de ponto baixo mantidos e funcionando",
+      fwRubberGaskets: "Conexões com juntas de borracha em boas condições",
+      // Foam-Water - Annual Sprinklers
+      fwSprinklersNoDamageLeaks: "Sprinklers sem danos ou vazamentos",
+      fwSprinklersFreeCorrosion: "Sprinklers livres de corrosão, material estranho ou tinta",
+      fwSprinklersFluidInBulbs: "Fluido presente nos bulbos de vidro",
+      fwSpareSprinklers: "Sprinklers reserva - número e tipo corretos com chave de instalação",
+      fwSprinklersFreeOfDust: "Sprinklers livres de poeira",
+      fwEscutcheonsInstalled: "Escudos/tampas decorativas presentes e instalados corretamente",
+      fwSprinklersClearance: "Espaço mínimo entre sprinklers e armazenamento mantido",
+      // Foam-Water - Annual Bladder Tank
+      fwBladderTankFoamInWater: "Presença de espuma na água ao redor da bexiga",
+      // Foam-Water - Annual Deluge Valve
+      fwDelugeInteriorCondition: "Interior da válvula dilúvio em boas condições de operação",
+      fwDelugeDetectionDevice: "Dispositivo de detecção em boas condições",
+      // Foam-Water - Five Years Inspection
+      fwStrainersPerManufacturer: "Filtros conforme instruções do fabricante",
+      fwAlarmValveInterior: "Interior da válvula de alarme em boas condições",
+      fwCheckValveInternal: "Válvula de retenção - interno move livremente e em boas condições",
+      fwObstructionInspection: "Inspeção de obstrução - sem material estranho ou obstrutor",
+      fwBackflowInternal: "Prevenção de refluxo - inspeção interna",
+      fwDelugeInternalStrainers: "Inspeção interna de filtros, orifícios e câmaras de diafragma da válvula dilúvio",
+      // Foam-Water - Test Quarterly
+      fwTestAlarmWaterMotorGong: "Teste de dispositivos de alarme - gongo de motor de água",
+      fwTestPrimingWaterLevel: "Nível de água de escorva testado",
+      fwTestLowAirAlarm: "Alarme de ar baixo testado conforme instruções do fabricante",
+      fwTestMainDrainBackflow: "Teste de dreno principal (se suprimento único através de backflow ou PRV)",
+      fwTestMainDrainDiffers10: "Resultados do teste de dreno principal diferem mais de 10% do teste anterior?",
+      fwTestMasterPrdPartialFlow: "Teste de fluxo parcial do dispositivo regulador de pressão mestre",
+      // Foam-Water - Test Semiannual
+      fwTestValveSupervisorySwitch: "Chave(s) supervisória(s) de válvula funcionam",
+      fwTestAlarmDevicesVanePressure: "Dispositivos de alarme (tipo palheta e pressostato) testados e funcionando",
+      // Foam-Water - Test Annual
+      fwTestControlValvesFullRange: "Válvulas de controle operadas em toda amplitude e retornadas à posição normal",
+      fwTestValveStatusTest: "Teste de status de válvula realizado",
+      fwTestSupervisorySwitches: "Chave(s) supervisória(s) funcionam",
+      fwTestLowTempAlarmHeating: "Alarme de baixa temperatura testado (início da temporada de aquecimento)",
+      fwTestMainDrainAnnual: "Teste de dreno principal anual",
+      fwTestMainDrainAnnualDiffers: "Resultados do teste de dreno principal diferem mais de 10% do teste anterior?",
+      fwTestBackflowForwardFlow: "Teste de fluxo direto do backflow na vazão mínima da demanda do sistema",
+      fwTestMasterPrdFullFlow: "Teste de fluxo total do dispositivo regulador de pressão mestre",
+      // Foam-Water - Test Annual Full Flow (Deluge)
+      fwTestDelugeNozzlesDischarge: "Descarga desobstruída de todos os bicos/posicionados corretamente",
+      fwTestDelugePressureAtValve: "Leitura de pressão na válvula dilúvio",
+      fwTestDelugePressureRemote: "Leitura de pressão no bico/sprinkler mais remoto",
+      fwTestDelugeAirMaintenance: "Manutenção de ar funciona corretamente (se fornecido)",
+      // Foam-Water - Test Annual Preaction Partial Trip
+      fwTestPreactionPartialTrip: "Teste de disparo parcial da pré-ação",
+      // Foam-Water - Test Annual Foam Strainer
+      fwTestFoamStrainerCondition: "Filtro de concentrado de espuma em boas condições de operação",
+      // Foam-Water - Test Annual Operational
+      fwTestOperationalResponse: "Sistema de espuma-água respondeu conforme projetado",
+      fwTestManualActuation: "Dispositivo de atuação manual funciona conforme pretendido",
+      // Foam-Water - Test Annual Concentration
+      fwTestFoamSampleMeasured: "Amostra de espuma medida",
+      fwTestConcentrationWithin10: "Concentração de espuma dentro de 10% dos resultados do teste de aceitação",
+      fwTestConcentrationNotBelow10: "Concentrado de espuma não mais de 10% abaixo do padrão mínimo de projeto",
+      // Foam-Water - Test Three Years
+      fwTestPreactionTripOpen: "Teste de disparo da válvula pré-ação - abrir válvula de controle",
+      fwTestPreactionResultsCompared: "Resultados comparados com resultados anteriores",
+      fwTestPreactionAirLeakage: "Sistema de pré-ação testado para vazamento de ar",
+      // Foam-Water - Test Five Years
+      fwTestGaugesTestedReplaced: "Manômetros testados ou substituídos",
+      // Foam-Water - Maintenance
+      fwMaintOsyStemsLubricated: "Hastes OS&Y lubrificadas anualmente",
+      fwMaintProportionerBallDrip: "Gotejador de esfera do proporcionador desmontado, limpo e remontado (5 anos)",
+      fwMaintFoamTankDrained: "Tanque de concentrado de espuma drenado e lavado (10 anos)",
+      fwMaintFoamTankInspected: "Tanque inspecionado interna e externamente para corrosão (10 anos)",
+      fwMaintFoamTankHydrotest: "Tanque de concentrado de espuma testado hidrostaticamente (10 anos)",
+      fwMaintBladderSightGlass: "Visor do proporcionador de tanque de bexiga limpo (10 anos)",
+      fwMaintBalancingDiaphragm: "Diafragma da válvula de balanceamento lavado (5 anos)",
+      fwMaintVacuumVentsServiced: "Respiros de vácuo de pressão revisados (5 anos)",
       proportionerInspection: "Proporcionador inspecionado",
       nozzlesNoDamage: "Bicos sem danos",
       nozzlesFreeCorrosion: "Bicos livres de corrosão",
