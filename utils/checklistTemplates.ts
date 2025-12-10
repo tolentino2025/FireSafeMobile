@@ -1114,30 +1114,209 @@ const hazardEvalChecklist: ChecklistTemplate[] = [
 ];
 
 const standpipeChecklist: ChecklistTemplate[] = [
-  { labelKey: "hoseConnectionsAccessible", frequencies: ["quarterly", "annually"] },
-  { labelKey: "hoseConnectionsNotObstructed", frequencies: ["quarterly", "annually"] },
-  { labelKey: "threadsGoodCondition", frequencies: ["quarterly", "annually"] },
-  { labelKey: "pressureReducingValves", frequencies: ["quarterly", "annually"] },
-  { labelKey: "hoseAvailable", frequencies: ["annually"] },
-  { labelKey: "hoseGoodCondition", frequencies: ["annually"] },
-  { labelKey: "hoseRackGoodCondition", frequencies: ["annually"] },
-  { labelKey: "cabinetDoorsOperate", frequencies: ["annually"] },
-  { labelKey: "fdcAccessible", frequencies: ["quarterly"] },
-  { labelKey: "fdcCapsInPlace", frequencies: ["quarterly"] },
-  { labelKey: "fdcCheckValve", frequencies: ["quarterly", "annually"] },
-  { labelKey: "controlValvesCorrectPosition", frequencies: ["quarterly"] },
-  { labelKey: "controlValvesAccessible", frequencies: ["quarterly"] },
-  { labelKey: "properSignage", frequencies: ["quarterly"] },
-  { labelKey: "standpipeFlowTest", frequencies: ["annually", "five_years"], isTestSection: true, numericFields: [
+  // Daily - Dry/Deluge Valve (Cold Weather)
+  { labelKey: "shDelugeEnclosureMinTemp", frequencies: ["daily"] },
+  // Weekly - Backflow
+  { labelKey: "shIsolationValvesOpenLocked", frequencies: ["weekly"] },
+  { labelKey: "shRpaReliefValveOperating", frequencies: ["weekly"] },
+  // Weekly - Control Valves
+  { labelKey: "shControlValvesCorrectPosition", frequencies: ["weekly"] },
+  { labelKey: "shControlValvesSealed", frequencies: ["weekly"] },
+  { labelKey: "shControlValvesAccessible", frequencies: ["weekly"] },
+  { labelKey: "shPivsCorrectWrenches", frequencies: ["weekly"] },
+  { labelKey: "shControlValvesFreeFromDamage", frequencies: ["weekly"] },
+  { labelKey: "shControlValvesProperSignage", frequencies: ["weekly"] },
+  // Weekly - Dry/Deluge Valve
+  { labelKey: "shDelugeValveEnclosureTemp", frequencies: ["weekly"] },
+  // Weekly - Master PRD
+  { labelKey: "shMasterPrdDownstreamPressure", hasPsi: true, frequencies: ["weekly"] },
+  { labelKey: "shMasterPrdSupplyPressure", hasPsi: true, frequencies: ["weekly"] },
+  { labelKey: "shMasterPrdFreeDamageLeaks", frequencies: ["weekly"] },
+  { labelKey: "shMasterPrdTrimCondition", frequencies: ["weekly"] },
+  // Monthly - Gauges
+  { labelKey: "shGaugesOperableNotDamaged", frequencies: ["monthly"] },
+  { labelKey: "shGaugesAirPressureUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "shDryValveRatioUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "shQuickOpeningGaugeUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  // Monthly - Control Valves (Locked/Supervised)
+  { labelKey: "shMonthlyValvesCorrectPosition", frequencies: ["monthly"] },
+  { labelKey: "shMonthlyValvesLockedSupervised", frequencies: ["monthly"] },
+  { labelKey: "shMonthlyValvesAccessible", frequencies: ["monthly"] },
+  { labelKey: "shMonthlyPivsWrenches", frequencies: ["monthly"] },
+  { labelKey: "shMonthlyValvesFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "shMonthlyValvesSignage", frequencies: ["monthly"] },
+  // Monthly - Dry Pipe Valve
+  { labelKey: "shDryValveExteriorFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "shDryValveTrimPosition", frequencies: ["monthly"] },
+  { labelKey: "shDryValveChamberNotLeaking", frequencies: ["monthly"] },
+  // Monthly - Deluge Valve
+  { labelKey: "shDelugeValveFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "shDelugeValveElectricalInService", frequencies: ["monthly"] },
+  { labelKey: "shDelugeValveTrimPosition", frequencies: ["monthly"] },
+  { labelKey: "shDelugeValveSeatNotLeaking", frequencies: ["monthly"] },
+  // Quarterly
+  { labelKey: "shWaterflowAlarmFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "shGaugesAirPressureSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "shDryValveRatioSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "shQuickOpeningGaugeSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "shSupplyGaugeNormal", hasPsi: true, frequencies: ["quarterly"] },
+  // Quarterly - Control Valves (Electronically Supervised)
+  { labelKey: "shElectronicValvesPosition", frequencies: ["quarterly"] },
+  { labelKey: "shElectronicValvesSupervised", frequencies: ["quarterly"] },
+  { labelKey: "shElectronicValvesAccessible", frequencies: ["quarterly"] },
+  { labelKey: "shElectronicPivsWrenches", frequencies: ["quarterly"] },
+  { labelKey: "shElectronicValvesFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "shElectronicValvesSignage", frequencies: ["quarterly"] },
+  // Quarterly - Hose Valves
+  { labelKey: "shHoseValveCapsInPlace", frequencies: ["quarterly"] },
+  { labelKey: "shHoseValveThreadsNotDamaged", frequencies: ["quarterly"] },
+  { labelKey: "shHoseValveHandlesPresent", frequencies: ["quarterly"] },
+  { labelKey: "shHoseValveGasketsNotDamaged", frequencies: ["quarterly"] },
+  { labelKey: "shHoseValveNotLeaking", frequencies: ["quarterly"] },
+  { labelKey: "shHoseValveNotObstructed", frequencies: ["quarterly"] },
+  { labelKey: "shHoseValveNormalOperation", frequencies: ["quarterly"] },
+  // Quarterly - FDC
+  { labelKey: "shFdcVisibleAccessible", frequencies: ["quarterly"] },
+  { labelKey: "shFdcCouplingsSwivelsOperate", frequencies: ["quarterly"] },
+  { labelKey: "shFdcPlugsCapsInPlace", frequencies: ["quarterly"] },
+  { labelKey: "shFdcGasketsNotDamaged", frequencies: ["quarterly"] },
+  { labelKey: "shFdcSignsInPlace", frequencies: ["quarterly"] },
+  { labelKey: "shFdcCheckValveNotLeaking", frequencies: ["quarterly"] },
+  { labelKey: "shFdcAutoDrainOperating", frequencies: ["quarterly"] },
+  { labelKey: "shFdcClapperFunctional", frequencies: ["quarterly"] },
+  { labelKey: "shFdcInteriorClearObstructions", frequencies: ["quarterly"] },
+  { labelKey: "shFdcPipingUndamaged", frequencies: ["quarterly"] },
+  // Annual
+  { labelKey: "shDryValveInteriorAfterTrip", frequencies: ["annually"] },
+  { labelKey: "shDelugeValveInteriorAfterTrip", frequencies: ["annually"] },
+  { labelKey: "shHydraulicDesignInfoAttached", frequencies: ["annually"] },
+  // Annual - Hose Cabinet
+  { labelKey: "shCabinetVisibleAccessible", frequencies: ["annually"] },
+  { labelKey: "shCabinetNoDamagedComponents", frequencies: ["annually"] },
+  { labelKey: "shCabinetDoorOpensfully", frequencies: ["annually"] },
+  { labelKey: "shCabinetGlassNotBroken", frequencies: ["annually"] },
+  { labelKey: "shCabinetGlassBreakDevice", frequencies: ["annually"] },
+  { labelKey: "shCabinetProperlyIdentified", frequencies: ["annually"] },
+  { labelKey: "shCabinetLockFunctional", frequencies: ["annually"] },
+  { labelKey: "shCabinetContentsPresentAccessible", frequencies: ["annually"] },
+  // Annual - FDC
+  { labelKey: "shFdcInteriorLockedFreeObstructions", frequencies: ["annually"] },
+  // Annual - Nozzle
+  { labelKey: "shNozzlePresent", frequencies: ["annually"] },
+  { labelKey: "shNozzleGasketNotMissing", frequencies: ["annually"] },
+  { labelKey: "shNozzleNotObstructed", frequencies: ["annually"] },
+  { labelKey: "shNozzleOperatesSmoothly", frequencies: ["annually"] },
+  // Annual - Hose
+  { labelKey: "shHoseNoMildewCutsAbrasions", frequencies: ["annually"] },
+  { labelKey: "shHoseGasketsNotMissing", frequencies: ["annually"] },
+  { labelKey: "shHoseThreadsCompatible", frequencies: ["annually"] },
+  { labelKey: "shHoseConnectedToRack", frequencies: ["annually"] },
+  { labelKey: "shHoseTestToDate", frequencies: ["annually"] },
+  { labelKey: "shHoseRerackedRerolled", frequencies: ["annually"] },
+  // Annual - Hose Storage Device
+  { labelKey: "shStorageVisibleAccessible", frequencies: ["annually"] },
+  { labelKey: "shStorageNotDamagedOperates", frequencies: ["annually"] },
+  { labelKey: "shStorageHoseProperlyRacked", frequencies: ["annually"] },
+  { labelKey: "shStorageNozzleClipInPlace", frequencies: ["annually"] },
+  { labelKey: "shStorageCabinetSwings90", frequencies: ["annually"] },
+  // Annual - Hose Connections
+  { labelKey: "shHoseConnValveCapsNotMissing", frequencies: ["annually"] },
+  { labelKey: "shHoseConnFireHoseNotDamaged", frequencies: ["annually"] },
+  { labelKey: "shHoseConnValveHandlesNotMissing", frequencies: ["annually"] },
+  { labelKey: "shHoseConnCapGasketsNotMissing", frequencies: ["annually"] },
+  { labelKey: "shHoseConnValveNotLeaking", frequencies: ["annually"] },
+  { labelKey: "shHoseConnValveNoObstruction", frequencies: ["annually"] },
+  { labelKey: "shHoseConnPrdNotMissing", frequencies: ["annually"] },
+  { labelKey: "shHoseConnValveOperatesSmoothly", frequencies: ["annually"] },
+  { labelKey: "shHoseConnValveNotDamaged", frequencies: ["annually"] },
+  // Annual - Pipe and Fittings
+  { labelKey: "shPipesNoCorrosion", frequencies: ["annually"] },
+  { labelKey: "shPipesNoLeaksDamage", frequencies: ["annually"] },
+  { labelKey: "shPipesCorrectAlignment", frequencies: ["annually"] },
+  { labelKey: "shPipesControlValvesNotDamaged", frequencies: ["annually"] },
+  { labelKey: "shPipesNoMissingSupportDevices", frequencies: ["annually"] },
+  // Annual - Building
+  { labelKey: "shBuildingOpeningsClosed", frequencies: ["annually"] },
+  { labelKey: "shHeatTracePerManufacturer", frequencies: ["annually"] },
+  { labelKey: "shLowTempAlarmFreeDamage", frequencies: ["annually"] },
+  // Five Years
+  { labelKey: "shObstructionInspection", frequencies: ["five_years"] },
+  { labelKey: "shCheckValveInternal", frequencies: ["five_years"] },
+  { labelKey: "shBackflowInternal", frequencies: ["five_years"] },
+  { labelKey: "shDryValveStrainersFilters", frequencies: ["five_years"] },
+  // Test - Quarterly
+  { labelKey: "shTestAlarmWaterMotorGong", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "shTestMainDrainQuarterly", frequencies: ["quarterly"], isTestSection: true, numericFields: [
     { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
     { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+  ]},
+  { labelKey: "shTestMainDrainResultsDiffer", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "shTestPrimingWaterLevel", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "shTestQuickOpeningDevice", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "shTestMasterPrdPartialFlow", frequencies: ["quarterly"], isTestSection: true },
+  // Test - Semiannual
+  { labelKey: "shTestValveSupervisorySwitch", frequencies: ["semiannually"], isTestSection: true },
+  { labelKey: "shTestAlarmInspectorTest", frequencies: ["semiannually"], isTestSection: true },
+  // Test - Annual
+  { labelKey: "shTestSupervisorySwitches", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestAirMaintenanceDevice", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestBackflowForwardFlow", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestValveStatus", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestLowTempAlarm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestLowAirAlarm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestHoseConnPrdPartialFlow", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestHoseValvesClass1Class3", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestNozzlePerNFPA1962", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestMainDrainAnnual", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+  ]},
+  { labelKey: "shTestMainDrainAnnualDiffer", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestControlValvesFullRange", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Dry Pipe Valve Trip Test
+  { labelKey: "shTestDryPipeTripPartial", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "waterPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "airPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "trippingAirPsi", type: "psi", unit: "psi" },
+    { labelKey: "tripTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "shTestDryPipeTripResultsCompared", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Deluge Valve Trip Test
+  { labelKey: "shTestDelugeTripPressure", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "operatingPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "shTestDelugeTripCompareDesign", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "shTestDelugeTripAirMaintDevice", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Master PRD
+  { labelKey: "shTestMasterPrdFullFlow", frequencies: ["annually"], isTestSection: true },
+  // Test - Three Years
+  { labelKey: "shTestHoseHydrostatic", frequencies: ["three_years"], isTestSection: true },
+  { labelKey: "shTestHoseValvesClass2", frequencies: ["three_years"], isTestSection: true },
+  { labelKey: "shTestDryPipeTripFull", frequencies: ["three_years"], isTestSection: true, numericFields: [
+    { labelKey: "waterPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "airPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "trippingAirPsi", type: "psi", unit: "psi" },
+    { labelKey: "tripTimeSec", type: "seconds", unit: "sec" },
+    { labelKey: "waterDeliveryTimeMin", type: "minutes", unit: "min" },
+    { labelKey: "waterDeliveryTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "shTestDryPipeTripFullResults", frequencies: ["three_years"], isTestSection: true },
+  { labelKey: "shTestDryPipeLeakage", frequencies: ["three_years"], isTestSection: true },
+  // Test - Five Years
+  { labelKey: "shTestGaugesTestedReplaced", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "shTestHydrostaticManualDry", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "shTestFlowAutomatic", frequencies: ["five_years"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
     { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+    { labelKey: "pressureTopOutletPsi", type: "psi", unit: "psi" },
   ]},
-  { labelKey: "mainDrainTest", frequencies: ["annually"], isTestSection: true, numericFields: [
-    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
-    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
-    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
-  ]},
+  { labelKey: "shTestHoseConnPrdFlowTest", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "shTestFdcHydrostatic", frequencies: ["five_years"], isTestSection: true },
+  // Maintenance
+  { labelKey: "shMaintReRackHose", frequencies: ["annually"] },
+  { labelKey: "shMaintDrainLowPoints", frequencies: ["annually"] },
+  { labelKey: "shMaintOsyStemsLubricated", frequencies: ["annually"] },
+  { labelKey: "shMaintLubricateRepairHoseValves", frequencies: ["annually"] },
 ];
 
 const fireServiceMainsChecklist: ChecklistTemplate[] = [
