@@ -393,26 +393,127 @@ const foamWaterChecklist: ChecklistTemplate[] = [
 ];
 
 const waterSprayChecklist: ChecklistTemplate[] = [
-  { labelKey: "systemControlValvesCorrectPosition", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "valvesSealedLockedSupervised", frequencies: ["weekly", "monthly"] },
-  { labelKey: "systemFreeFromDamageLeaks", frequencies: ["weekly", "monthly", "quarterly", "annually"] },
-  { labelKey: "gaugesGoodCondition", frequencies: ["monthly"] },
-  { labelKey: "systemPressureNormal", hasPsi: true, frequencies: ["monthly", "quarterly"] },
-  { labelKey: "allComponentsAccessible", frequencies: ["monthly", "quarterly", "annually"] },
-  { labelKey: "properSignageInPlace", frequencies: ["monthly", "quarterly"] },
-  { labelKey: "systemEnclosureConditions", frequencies: ["monthly", "quarterly"] },
-  { labelKey: "nozzlesNoDamage", frequencies: ["annually"] },
-  { labelKey: "nozzlesFreeCorrosion", frequencies: ["annually"] },
-  { labelKey: "strainersInspected", frequencies: ["annually"] },
-  { labelKey: "hangersNotDamagedLoose", frequencies: ["annually"] },
-  { labelKey: "pipesGoodCondition", frequencies: ["annually"] },
-  { labelKey: "detectionSystemOperational", frequencies: ["annually"] },
-  { labelKey: "waterSprayTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+  // Daily - Deluge Valve (Cold Weather)
+  { labelKey: "wsDelugeEnclosureMinTemp", frequencies: ["daily"] },
+  // Weekly - Backflow
+  { labelKey: "wsIsolationValvesOpenLocked", frequencies: ["weekly"] },
+  { labelKey: "wsRpaReliefValveOperating", frequencies: ["weekly"] },
+  // Weekly - Control Valves
+  { labelKey: "wsControlValvesCorrectPosition", frequencies: ["weekly"] },
+  { labelKey: "wsControlValvesSealed", frequencies: ["weekly"] },
+  { labelKey: "wsControlValvesAccessible", frequencies: ["weekly"] },
+  { labelKey: "wsPivsCorrectWrenches", frequencies: ["weekly"] },
+  { labelKey: "wsControlValvesFreeFromDamage", frequencies: ["weekly"] },
+  { labelKey: "wsControlValvesProperSignage", frequencies: ["weekly"] },
+  // Weekly - Deluge Valve
+  { labelKey: "wsDelugeValveEnclosureTemp", frequencies: ["weekly"] },
+  // Monthly - Gauges
+  { labelKey: "wsGaugesOperableNotDamaged", frequencies: ["monthly"] },
+  { labelKey: "wsGaugesAirPressureUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  // Monthly - Control Valves (Locked/Supervised)
+  { labelKey: "wsMonthlyValvesCorrectPosition", frequencies: ["monthly"] },
+  { labelKey: "wsMonthlyValvesLockedSupervised", frequencies: ["monthly"] },
+  { labelKey: "wsMonthlyValvesAccessible", frequencies: ["monthly"] },
+  { labelKey: "wsMonthlyPivsWrenches", frequencies: ["monthly"] },
+  { labelKey: "wsMonthlyValvesFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "wsMonthlyValvesSignage", frequencies: ["monthly"] },
+  // Monthly - Deluge Valve
+  { labelKey: "wsDelugeValveFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "wsDelugeValveElectricalInService", frequencies: ["monthly"] },
+  { labelKey: "wsDelugeValveTrimPosition", frequencies: ["monthly"] },
+  { labelKey: "wsDelugeValveSeatNotLeaking", frequencies: ["monthly"] },
+  { labelKey: "wsDetectionSystemGaugeNormal", frequencies: ["monthly"] },
+  // Monthly - UHSWSS Detectors
+  { labelKey: "wsUhswssDetectorsFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "wsOpticalDetectorsLensesClean", frequencies: ["monthly"] },
+  // Quarterly - Gauges
+  { labelKey: "wsGaugesSupplyPressure", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "wsGaugesAirPressureSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  // Quarterly - Control Valves (Electronically Supervised)
+  { labelKey: "wsElectronicValvesPosition", frequencies: ["quarterly"] },
+  { labelKey: "wsElectronicValvesSupervised", frequencies: ["quarterly"] },
+  { labelKey: "wsElectronicValvesAccessible", frequencies: ["quarterly"] },
+  { labelKey: "wsElectronicPivsWrenches", frequencies: ["quarterly"] },
+  { labelKey: "wsElectronicValvesFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "wsElectronicValvesSignage", frequencies: ["quarterly"] },
+  // Quarterly - Drainage
+  { labelKey: "wsDrainageMethodCondition", frequencies: ["quarterly"] },
+  { labelKey: "wsRetentionDikesCondition", frequencies: ["quarterly"] },
+  // Annual - Support/Hangers
+  { labelKey: "wsHangersGoodCondition", frequencies: ["annually"] },
+  { labelKey: "wsHangersSecurelyAttached", frequencies: ["annually"] },
+  { labelKey: "wsHangersNoDamagedMissing", frequencies: ["annually"] },
+  // Annual - Pipes and Fittings
+  { labelKey: "wsPipesNoCorrosion", frequencies: ["annually"] },
+  { labelKey: "wsPipesNoLeaksDamage", frequencies: ["annually"] },
+  { labelKey: "wsPipesCorrectAlignment", frequencies: ["annually"] },
+  { labelKey: "wsLowPointDrainsMaintained", frequencies: ["annually"] },
+  { labelKey: "wsRubberGasketedFittings", frequencies: ["annually"] },
+  // Annual - Nozzles
+  { labelKey: "wsNozzlesInPlaceAimed", frequencies: ["annually"] },
+  { labelKey: "wsNozzlesFreeLoadingCorrosion", frequencies: ["annually"] },
+  { labelKey: "wsNozzlesCapsPlugsInPlace", frequencies: ["annually"] },
+  // Annual - Deluge Valve
+  { labelKey: "wsDelugeValveAfterTripTest", frequencies: ["annually"] },
+  { labelKey: "wsDetectionDeviceGoodCondition", frequencies: ["annually"] },
+  // Annual - Building
+  { labelKey: "wsBuildingOpeningsClosed", frequencies: ["annually"] },
+  { labelKey: "wsHeatTracePerManufacturer", frequencies: ["annually"] },
+  { labelKey: "wsLowTempAlarmFreeDamage", frequencies: ["annually"] },
+  // Five Years
+  { labelKey: "wsCheckValveInternal", frequencies: ["five_years"] },
+  { labelKey: "wsBackflowInternal", frequencies: ["five_years"] },
+  { labelKey: "wsDelugeValveInterior", frequencies: ["five_years"] },
+  // Test - Quarterly
+  { labelKey: "wsTestAlarmWaterMotorGong", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "wsTestMainDrainQuarterly", frequencies: ["quarterly"], isTestSection: true, numericFields: [
     { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
-    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
-    { labelKey: "operationTimeSec", type: "seconds", unit: "sec" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
   ]},
-  { labelKey: "obstructionInspection", frequencies: ["five_years"] },
+  { labelKey: "wsTestMainDrainResultsDiffer", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "wsTestDelugePrimingLevel", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "wsTestLowAirAlarm", frequencies: ["quarterly"], isTestSection: true },
+  // Test - Semiannual
+  { labelKey: "wsTestValveSupervisorySwitch", frequencies: ["semiannually"], isTestSection: true },
+  { labelKey: "wsTestAlarmInspectorTest", frequencies: ["semiannually"], isTestSection: true },
+  // Test - Annual
+  { labelKey: "wsTestSupervisorySwitches", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestLowTempAlarm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestMainDrainAnnual", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+  ]},
+  { labelKey: "wsTestMainDrainAnnualDiffer", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestControlValvesFullRange", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Full Flow Trip Test
+  { labelKey: "wsTestUnobstructedDischarge", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestPressureRemoteNozzle", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "operatingPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "wsTestPressureDelugeValve", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "operatingPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "wsTestCompareHydraulicDesign", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestManualRelease", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestValveStatus", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestNozzleSprayPatterns", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestAirMaintenanceDevice", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestMainlineStrainerFlush", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestBackflowForwardFlow", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wsTestDetectionNFPA72", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual System Response Time
+  { labelKey: "wsTestHeatDetectionResponse", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "responseTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "wsTestFlammableGasResponse", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "responseTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "wsTestDischargeTime", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "dischargeTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "wsTestUhswssResponseTime", frequencies: ["annually"], isTestSection: true },
+  // Maintenance - Annual
+  { labelKey: "wsMaintOsyStemsLubricated", frequencies: ["annually"] },
 ];
 
 const waterMistChecklist: ChecklistTemplate[] = [

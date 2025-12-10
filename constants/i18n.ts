@@ -526,6 +526,111 @@ export const translations = {
       wmMaintDrainRefillTank: "Drenar e reabastecer tanque de água anualmente",
       wmMaintRebuildPneumaticPump: "Reconstruir bomba de reserva operada pneumaticamente a cada 5 anos",
       wmMaintInspectNozzlesAfterActivation: "Inspecionar amostra representativa de bicos de neblina operados após ativação",
+      // Water Spray - Daily
+      wsDelugeEnclosureMinTemp: "Invólucro (sem alarme de baixa temp.) - temperatura mínima 40°F (4°C)",
+      // Water Spray - Weekly Backflow
+      wsIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
+      wsRpaReliefValveOperating: "RPA e RPDA - válvula de alívio com sensor diferencial operando corretamente",
+      // Water Spray - Weekly Control Valves
+      wsControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta ou fechada)",
+      wsControlValvesSealed: "Válvulas de controle seladas",
+      wsControlValvesAccessible: "Válvulas de controle acessíveis",
+      wsPivsCorrectWrenches: "PIVs equipados com chaves corretas",
+      wsControlValvesFreeFromDamage: "Válvulas de controle livres de danos ou vazamentos",
+      wsControlValvesProperSignage: "Válvulas de controle com sinalização adequada",
+      // Water Spray - Weekly Deluge Valve
+      wsDelugeValveEnclosureTemp: "Invólucro (com alarme de baixa temp.) - temperatura mínima 40°F (4°C)",
+      // Water Spray - Monthly Gauges
+      wsGaugesOperableNotDamaged: "Manômetros operáveis e sem danos físicos",
+      wsGaugesAirPressureUnsupervised: "Manômetros - pressão de ar/nitrogênio normal mantida (não supervisionado)",
+      // Water Spray - Monthly Control Valves (Locked/Supervised)
+      wsMonthlyValvesCorrectPosition: "Válvulas na posição correta (aberta ou fechada)",
+      wsMonthlyValvesLockedSupervised: "Válvulas travadas ou supervisionadas",
+      wsMonthlyValvesAccessible: "Válvulas acessíveis",
+      wsMonthlyPivsWrenches: "PIVs equipados com chaves corretas",
+      wsMonthlyValvesFreeDamage: "Válvulas livres de danos ou vazamentos",
+      wsMonthlyValvesSignage: "Válvulas com sinalização adequada",
+      // Water Spray - Monthly Deluge Valve
+      wsDelugeValveFreeDamage: "Válvula dilúvio livre de danos físicos ou vazamentos",
+      wsDelugeValveElectricalInService: "Componentes elétricos em serviço",
+      wsDelugeValveTrimPosition: "Válvulas de acabamento na posição correta (aberta ou fechada)",
+      wsDelugeValveSeatNotLeaking: "Sede da válvula não está vazando",
+      wsDetectionSystemGaugeNormal: "Manômetro do sistema de detecção (se fornecido) - pressão normal mantida",
+      // Water Spray - Monthly UHSWSS Detectors
+      wsUhswssDetectorsFreeDamage: "Detectores UHSWSS livres de danos físicos",
+      wsOpticalDetectorsLensesClean: "Detectores ópticos (se usados) - lentes limpas",
+      // Water Spray - Quarterly Gauges
+      wsGaugesSupplyPressure: "Manômetros - pressão normal de fornecimento de água mantida",
+      wsGaugesAirPressureSupervised: "Manômetros - pressão de ar/nitrogênio mantida (supervisionado em local constantemente atendido)",
+      // Water Spray - Quarterly Control Valves (Electronically Supervised)
+      wsElectronicValvesPosition: "Válvulas supervisionadas eletronicamente na posição correta",
+      wsElectronicValvesSupervised: "Válvulas supervisionadas eletronicamente",
+      wsElectronicValvesAccessible: "Válvulas supervisionadas eletronicamente acessíveis",
+      wsElectronicPivsWrenches: "PIVs supervisionados eletronicamente com chaves corretas",
+      wsElectronicValvesFreeDamage: "Válvulas supervisionadas eletronicamente livres de danos ou vazamentos",
+      wsElectronicValvesSignage: "Válvulas supervisionadas eletronicamente com sinalização adequada",
+      // Water Spray - Quarterly Drainage
+      wsDrainageMethodCondition: "Método de drenagem em boas condições de operação",
+      wsRetentionDikesCondition: "Aterros ou diques de retenção em boas condições",
+      // Water Spray - Annual Support/Hangers
+      wsHangersGoodCondition: "Suportes em boas condições (sem tinta/revestimento danificado, ferrugem ou corrosão)",
+      wsHangersSecurelyAttached: "Fixados com segurança à estrutura e tubulação",
+      wsHangersNoDamagedMissing: "Sem suportes, braçadeiras ou apoios danificados ou faltando",
+      // Water Spray - Annual Pipes and Fittings
+      wsPipesNoCorrosion: "Em boas condições sem corrosão externa",
+      wsPipesNoLeaksDamage: "Sem vazamentos ou danos mecânicos",
+      wsPipesCorrectAlignment: "Alinhamento correto sem cargas externas",
+      wsLowPointDrainsMaintained: "Drenos de ponto baixo mantidos e em funcionamento adequado",
+      wsRubberGasketedFittings: "Conexões com gaxeta de borracha em boas condições",
+      // Water Spray - Annual Nozzles
+      wsNozzlesInPlaceAimed: "Bicos no lugar, apontados e direcionados conforme pretendido",
+      wsNozzlesFreeLoadingCorrosion: "Livres de carga externa e corrosão",
+      wsNozzlesCapsPlugsInPlace: "Tampas ou plugues no lugar (quando necessário)",
+      // Water Spray - Annual Deluge Valve
+      wsDelugeValveAfterTripTest: "Inspeção após teste de disparo",
+      wsDetectionDeviceGoodCondition: "Dispositivo de detecção em boas condições",
+      // Water Spray - Annual Building
+      wsBuildingOpeningsClosed: "Antes do clima de congelamento - todas as aberturas fechadas e tubulação não exposta a temperaturas de congelamento",
+      wsHeatTracePerManufacturer: "Traçador de calor conforme instruções do fabricante",
+      wsLowTempAlarmFreeDamage: "Alarme de baixa temperatura livre de danos físicos",
+      // Water Spray - Five Years
+      wsCheckValveInternal: "Válvula de retenção - interno move livremente e em boas condições",
+      wsBackflowInternal: "Contrafluxo - inspeção interna",
+      wsDelugeValveInterior: "Inspeção interna dos filtros, peneiras, orifícios restritos e câmaras de diafragma da válvula dilúvio",
+      // Water Spray - Test Quarterly
+      wsTestAlarmWaterMotorGong: "Dispositivos de alarme - gongo de motor de água",
+      wsTestMainDrainQuarterly: "Teste de dreno principal (se fornecimento único através de preventor de refluxo ou válvula redutora)",
+      wsTestMainDrainResultsDiffer: "Resultados diferem mais de 10% do teste anterior?",
+      wsTestDelugePrimingLevel: "Nível de água de preparação da válvula dilúvio testado",
+      wsTestLowAirAlarm: "Alarme de baixo ar testado conforme instruções do fabricante (se fornecido)",
+      // Water Spray - Test Semiannual
+      wsTestValveSupervisorySwitch: "Interruptor(es) supervisório(s) de válvula funcionam",
+      wsTestAlarmInspectorTest: "Dispositivos de alarme - teste do inspetor ou bypass aberto e fluxo de água observado",
+      // Water Spray - Test Annual
+      wsTestSupervisorySwitches: "Interruptor(es) supervisório(s) funcionam",
+      wsTestLowTempAlarm: "Alarme de baixa temperatura (se instalado) no início da temporada de aquecimento",
+      wsTestMainDrainAnnual: "Teste de dreno principal anual",
+      wsTestMainDrainAnnualDiffer: "Resultados diferem mais de 10% do teste anterior?",
+      wsTestControlValvesFullRange: "Todas as válvulas de controle operadas através da faixa completa e retornadas à posição normal",
+      // Water Spray - Test Annual Full Flow Trip Test
+      wsTestUnobstructedDischarge: "Descarga desobstruída de todos os bicos",
+      wsTestPressureRemoteNozzle: "Leitura de pressão no bico mais remoto",
+      wsTestPressureDelugeValve: "Leitura de pressão na válvula dilúvio",
+      wsTestCompareHydraulicDesign: "Comparar leituras de pressão com projeto hidráulico - suprimento de água atende requisitos",
+      wsTestManualRelease: "Liberação manual funciona corretamente",
+      wsTestValveStatus: "Teste de status da válvula realizado",
+      wsTestNozzleSprayPatterns: "Padrões e direção de spray dos bicos verificados",
+      wsTestAirMaintenanceDevice: "Dispositivo de manutenção de ar funciona corretamente",
+      wsTestMainlineStrainerFlush: "Peneira da linha principal lavada após teste de disparo",
+      wsTestBackflowForwardFlow: "Contrafluxo - teste de fluxo direto na taxa mínima de demanda do sistema",
+      wsTestDetectionNFPA72: "Sistema de detecção testado de acordo com NFPA 72",
+      // Water Spray - Test Annual System Response Time
+      wsTestHeatDetectionResponse: "Detecção de calor respondeu em (seg)",
+      wsTestFlammableGasResponse: "Detecção de gás inflamável respondeu em (seg)",
+      wsTestDischargeTime: "Tempo entre operação dos sistemas de detecção e tempo de entrega de água à área protegida (seg)",
+      wsTestUhswssResponseTime: "UHSWSS - tempo de resposta não excede 100 milissegundos",
+      // Water Spray - Maintenance
+      wsMaintOsyStemsLubricated: "Hastes OS&Y lubrificadas anualmente",
       proportionerInspection: "Proporcionador inspecionado",
       nozzlesNoDamage: "Bicos sem danos",
       nozzlesFreeCorrosion: "Bicos livres de corrosão",
@@ -1613,6 +1718,111 @@ export const translations = {
       wmMaintDrainRefillTank: "Drain and refill water tank annually",
       wmMaintRebuildPneumaticPump: "Rebuild pneumatically operated standby pump every 5 years",
       wmMaintInspectNozzlesAfterActivation: "Inspect representative sample of operated water mist nozzles after activation",
+      // Water Spray - Daily
+      wsDelugeEnclosureMinTemp: "Enclosure (without low temp alarm) minimum temperature 40°F (4°C)",
+      // Water Spray - Weekly Backflow
+      wsIsolationValvesOpenLocked: "Isolation valves in open position and locked or supervised",
+      wsRpaReliefValveOperating: "RPA and RPDA differential-sensing relief valve operating correctly",
+      // Water Spray - Weekly Control Valves
+      wsControlValvesCorrectPosition: "Control valves in correct (open or closed) position",
+      wsControlValvesSealed: "Control valves sealed",
+      wsControlValvesAccessible: "Control valves accessible",
+      wsPivsCorrectWrenches: "PIVs provided with correct wrenches",
+      wsControlValvesFreeFromDamage: "Control valves free from damage or leaks",
+      wsControlValvesProperSignage: "Control valves with proper signage",
+      // Water Spray - Weekly Deluge Valve
+      wsDelugeValveEnclosureTemp: "Enclosure (with low temp alarm) minimum temperature 40°F (4°C)",
+      // Water Spray - Monthly Gauges
+      wsGaugesOperableNotDamaged: "Gauges operable and not physically damaged",
+      wsGaugesAirPressureUnsupervised: "Gauges normal air or nitrogen pressure maintained (unsupervised)",
+      // Water Spray - Monthly Control Valves (Locked/Supervised)
+      wsMonthlyValvesCorrectPosition: "Valves in correct (open or closed) position",
+      wsMonthlyValvesLockedSupervised: "Valves locked or supervised",
+      wsMonthlyValvesAccessible: "Valves accessible",
+      wsMonthlyPivsWrenches: "PIVs provided with correct wrenches",
+      wsMonthlyValvesFreeDamage: "Valves free from damage or leaks",
+      wsMonthlyValvesSignage: "Valves with proper signage",
+      // Water Spray - Monthly Deluge Valve
+      wsDelugeValveFreeDamage: "Deluge valve free from physical damage or leaks",
+      wsDelugeValveElectricalInService: "Electrical components are in service",
+      wsDelugeValveTrimPosition: "Trim valves are in correct (open or closed) position",
+      wsDelugeValveSeatNotLeaking: "Valve seat is not leaking",
+      wsDetectionSystemGaugeNormal: "Detection system gauge (if provided) normal pressure maintained",
+      // Water Spray - Monthly UHSWSS Detectors
+      wsUhswssDetectorsFreeDamage: "UHSWSS detectors free of physical damage",
+      wsOpticalDetectorsLensesClean: "Optical detectors (where used) lenses clean",
+      // Water Spray - Quarterly Gauges
+      wsGaugesSupplyPressure: "Gauges normal supply water pressure maintained",
+      wsGaugesAirPressureSupervised: "Gauges normal air or nitrogen pressure maintained (supervised at constantly attended location)",
+      // Water Spray - Quarterly Control Valves (Electronically Supervised)
+      wsElectronicValvesPosition: "Electronically supervised valves in correct position",
+      wsElectronicValvesSupervised: "Valves electronically supervised",
+      wsElectronicValvesAccessible: "Electronically supervised valves accessible",
+      wsElectronicPivsWrenches: "Electronically supervised PIVs with correct wrenches",
+      wsElectronicValvesFreeDamage: "Electronically supervised valves free from damage or leaks",
+      wsElectronicValvesSignage: "Electronically supervised valves with proper signage",
+      // Water Spray - Quarterly Drainage
+      wsDrainageMethodCondition: "Drainage method in good operating condition",
+      wsRetentionDikesCondition: "Retention embankments or dikes in good condition",
+      // Water Spray - Annual Support/Hangers
+      wsHangersGoodCondition: "Hangers in good condition (no missing or damaged paint/coating, rust, or corrosion)",
+      wsHangersSecurelyAttached: "Securely attached to structure and piping",
+      wsHangersNoDamagedMissing: "No damaged or missing hangers, braces, and support",
+      // Water Spray - Annual Pipes and Fittings
+      wsPipesNoCorrosion: "In good condition with no external corrosion",
+      wsPipesNoLeaksDamage: "No leaks or mechanical damage",
+      wsPipesCorrectAlignment: "Correct alignment with no external loads",
+      wsLowPointDrainsMaintained: "Low point drains maintained and in proper working order",
+      wsRubberGasketedFittings: "Rubber-gasketed fittings in good condition",
+      // Water Spray - Annual Nozzles
+      wsNozzlesInPlaceAimed: "Nozzles in place, aimed, and pointed in the direction intended",
+      wsNozzlesFreeLoadingCorrosion: "Free from external loading and corrosion",
+      wsNozzlesCapsPlugsInPlace: "Caps or plugs are in place (where required)",
+      // Water Spray - Annual Deluge Valve
+      wsDelugeValveAfterTripTest: "Inspection following trip test",
+      wsDetectionDeviceGoodCondition: "Detection device in good condition",
+      // Water Spray - Annual Building
+      wsBuildingOpeningsClosed: "Prior to freezing weather all openings closed and water-filled pipe not exposed to freezing temperatures",
+      wsHeatTracePerManufacturer: "Heat trace per manufacturer's instructions",
+      wsLowTempAlarmFreeDamage: "Low temp alarm free of physical damage",
+      // Water Spray - Five Years
+      wsCheckValveInternal: "Check valve internal moves freely and in good condition",
+      wsBackflowInternal: "Backflow internal inspection",
+      wsDelugeValveInterior: "Internal inspection of deluge valve strainers, filters, restricted orifices, and diaphragm chambers",
+      // Water Spray - Test Quarterly
+      wsTestAlarmWaterMotorGong: "Alarm devices water motor gong",
+      wsTestMainDrainQuarterly: "Main drain test (if sole supply through backflow preventer or pressure-reducing valve)",
+      wsTestMainDrainResultsDiffer: "Results differ by more than 10% from previous test?",
+      wsTestDelugePrimingLevel: "Deluge valve priming water level tested",
+      wsTestLowAirAlarm: "Low air alarm tested per manufacturer's instructions (if provided)",
+      // Water Spray - Test Semiannual
+      wsTestValveSupervisorySwitch: "Valve supervisory switch(es) function",
+      wsTestAlarmInspectorTest: "Alarm devices inspector's test or bypass opened and observed waterflow",
+      // Water Spray - Test Annual
+      wsTestSupervisorySwitches: "Supervisory switch(es) function",
+      wsTestLowTempAlarm: "Low temp alarm (if installed) at beginning of heating season",
+      wsTestMainDrainAnnual: "Main drain test annual",
+      wsTestMainDrainAnnualDiffer: "Results differ by more than 10% from previous test?",
+      wsTestControlValvesFullRange: "All control valves operated through full range of motion and returned to normal position",
+      // Water Spray - Test Annual Full Flow Trip Test
+      wsTestUnobstructedDischarge: "Unobstructed discharge from all nozzles",
+      wsTestPressureRemoteNozzle: "Pressure reading at most remote nozzle",
+      wsTestPressureDelugeValve: "Pressure reading at deluge valve",
+      wsTestCompareHydraulicDesign: "Compare pressure readings to hydraulic design water supply meets requirements",
+      wsTestManualRelease: "Manual release functions correctly",
+      wsTestValveStatus: "Valve status test performed",
+      wsTestNozzleSprayPatterns: "Nozzle spray patterns and direction verified",
+      wsTestAirMaintenanceDevice: "Air maintenance device functions correctly",
+      wsTestMainlineStrainerFlush: "Mainline strainer flushed after trip test",
+      wsTestBackflowForwardFlow: "Backflow forward flow test at minimum flow rate of system demand",
+      wsTestDetectionNFPA72: "Detection system tested in accordance with NFPA 72",
+      // Water Spray - Test Annual System Response Time
+      wsTestHeatDetectionResponse: "Heat detection responded in (sec)",
+      wsTestFlammableGasResponse: "Flammable gas detection responded in (sec)",
+      wsTestDischargeTime: "Time lapse between operation of detection systems and water delivery time to protected area (sec)",
+      wsTestUhswssResponseTime: "UHSWSS response time does not exceed 100 milliseconds",
+      // Water Spray - Maintenance
+      wsMaintOsyStemsLubricated: "OS&Y stems lubricated annually",
       proportionerInspection: "Proportioner inspected",
       nozzlesNoDamage: "Nozzles no damage",
       nozzlesFreeCorrosion: "Nozzles free of corrosion",
