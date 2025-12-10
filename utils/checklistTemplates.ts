@@ -382,6 +382,19 @@ const pumpWeeklyChecklist: ChecklistTemplate[] = [
   // Exhaust System Section
   { labelKey: "exhaustSystemLeaks", frequencies: ["weekly", "monthly"] },
   { labelKey: "drainCondensateTrap", frequencies: ["weekly", "monthly"] },
+  // Quarterly Diesel Engine System Items
+  // Fuel System Quarterly
+  { labelKey: "fuelStrainerFilterClean", frequencies: ["quarterly"] },
+  // Lubrication System Quarterly
+  { labelKey: "crankcaseBreatherInspect", frequencies: ["quarterly"] },
+  // Cooling System Quarterly
+  { labelKey: "waterStrainerClean", frequencies: ["quarterly"] },
+  // Exhaust System Quarterly
+  { labelKey: "exhaustInsulationFireHazards", frequencies: ["quarterly"] },
+  // Battery System Quarterly
+  { labelKey: "batteryTerminalsCleanTight", frequencies: ["quarterly"] },
+  // Electrical System Quarterly
+  { labelKey: "wireChafingInspect", frequencies: ["quarterly"] },
 ];
 
 const pumpMonthlyChecklist: ChecklistTemplate[] = [

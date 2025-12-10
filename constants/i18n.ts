@@ -402,6 +402,13 @@ export const translations = {
       specificGravityStateOfCharge: "Densidade específica ou estado de carga testado",
       chargerAndChargeRate: "Carregador e taxa de carga inspecionados",
       equalizeCharge: "Carga de equalização inspecionada",
+      // Quarterly Diesel Engine System
+      fuelStrainerFilterClean: "Limpar filtro de combustível, filtro ou perna de sujeira",
+      crankcaseBreatherInspect: "Inspecionar/trocar/testar respiro do cárter",
+      waterStrainerClean: "Limpar filtro de água do sistema de arrefecimento",
+      exhaustInsulationFireHazards: "Inspecionar isolamento e riscos de incêndio do sistema de escapamento",
+      batteryTerminalsCleanTight: "Terminais da bateria limpos e apertados",
+      wireChafingInspect: "Inspecionar desgaste de fios onde sujeitos a movimento",
       // Numeric Fields Labels
       highestPsi: "Pressão Máxima (psi)",
       lowestPsi: "Pressão Mínima (psi)",
@@ -930,6 +937,13 @@ export const translations = {
       specificGravityStateOfCharge: "Specific gravity or state of charge tested",
       chargerAndChargeRate: "Charger and charge rate inspected",
       equalizeCharge: "Equalize charge inspected",
+      // Quarterly Diesel Engine System
+      fuelStrainerFilterClean: "Clean strainer, filter, or dirt leg",
+      crankcaseBreatherInspect: "Inspect/change/test crankcase breather",
+      waterStrainerClean: "Clean water strainer in cooling system",
+      exhaustInsulationFireHazards: "Inspect exhaust system insulation and fire hazards",
+      batteryTerminalsCleanTight: "Battery terminals clean and tight",
+      wireChafingInspect: "Inspect wire chafing where subject to movement",
       // Numeric Fields Labels
       highestPsi: "Highest Pressure (psi)",
       lowestPsi: "Lowest Pressure (psi)",
