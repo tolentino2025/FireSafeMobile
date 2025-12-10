@@ -1143,6 +1143,164 @@ export const translations = {
       lowTempAlarmFreeFromDamage: "Low temperature alarm free from physical damage",
       foamConcentrateLevel: "Foam concentrate level adequate",
       foamConcentrateCondition: "Foam concentrate condition satisfactory",
+      // Foam-Water - Weekly Backflow
+      fwIsolationValvesOpenLocked: "Isolation valves in open position and locked or supervised",
+      fwRpaReliefValveOperating: "RPA and RPDA differential-sensing relief valve operating correctly",
+      // Foam-Water - Weekly Control Valves
+      fwControlValvesCorrectPosition: "Control valves in correct (open or closed) position",
+      fwControlValvesSealed: "Control valves sealed",
+      fwControlValvesAccessible: "Control valves accessible",
+      fwPivsCorrectWrenches: "PIVs provided with correct wrenches",
+      fwControlValvesFreeFromDamage: "Control valves free from damage or leaks",
+      fwControlValvesProperSignage: "Control valves with proper signage",
+      // Foam-Water - Weekly Deluge/Preaction Valve
+      fwDelugeEnclosureMinTemp: "Deluge/preaction valve enclosure minimum temperature 40°F (4°C)",
+      // Foam-Water - Weekly Master Pressure-Regulating
+      fwMasterPrdDownstreamPressure: "Master pressure-regulating device downstream pressure per design",
+      fwMasterPrdSupplyPressure: "Master pressure-regulating device supply pressure per design",
+      fwMasterPrdFreeDamageLeaks: "Master pressure-regulating device free of damage or leaks",
+      fwMasterPrdTrimCondition: "Master pressure-regulating device trim in good operating condition",
+      // Foam-Water - Monthly Gauges
+      fwGaugesGoodCondition: "Gauges in good operating condition",
+      fwAirPressureMaintainedUnsupervised: "Normal air/nitrogen pressure maintained (when not supervised)",
+      fwDryValveRatioUnsupervised: "Gauge on system side of dry valve reads proper ratio (when not supervised)",
+      fwQuickOpeningGaugeUnsupervised: "Gauge on quick-opening device reads same as dry valve gauge (when not supervised)",
+      // Foam-Water - Monthly Control Valves (locked/supervised)
+      fwMonthlyValvesCorrectPosition: "Valves in correct (open or closed) position",
+      fwMonthlyValvesLockedSupervised: "Valves locked or supervised",
+      fwMonthlyValvesAccessible: "Valves accessible",
+      fwMonthlyPivsWrenches: "PIVs provided with correct wrenches",
+      fwMonthlyValvesFreeDamage: "Valves free from damage or leaks",
+      fwMonthlyValvesSignage: "Valves with proper signage",
+      // Foam-Water - Monthly Deluge/Preaction Valve
+      fwDelugeFreeDamageLeaks: "Deluge/preaction valve free from physical damage or leaks",
+      fwDelugeElectricalInService: "Electrical components in service",
+      fwDelugeSealNotLeaking: "Valve seal not leaking",
+      fwDelugeTrimValvesPosition: "Trim valves in correct (open or closed) position",
+      // Foam-Water - Monthly Proportioning System
+      fwProportionerConcentrateQty: "Foam concentrate quantity meets original design requirements",
+      fwProportionerStrainers: "Proportioner strainers inspected",
+      fwProportionerVacuumVent: "Pressure vacuum vent operating freely",
+      fwProportionerGauges: "Proportioner gauges in good operating condition",
+      fwProportionerSensingLines: "Sensing line valves are open",
+      fwProportionerPumpPower: "Foam liquid pump provided with power",
+      fwProportionerFreeCorrosion: "Proportioner free of corrosion",
+      fwProportionerDrainValves: "Automatic drain valves free and opened",
+      fwProportionerValvesPosition: "Proportioner valves in correct position",
+      // Foam-Water - Monthly Nozzles
+      fwNozzlesInPlaceAimed: "Nozzles in place, aimed, and pointed in the direction intended",
+      fwNozzlesFreeLoading: "Nozzles free from external loading and corrosion",
+      fwNozzlesCapPlugs: "Caps or plugs in place (where required)",
+      // Foam-Water - Quarterly Gauges (supervised)
+      fwAirPressureSupervised: "Normal air/nitrogen pressure maintained (when supervised)",
+      fwDryValveRatioSupervised: "Gauge on system side of dry valve reads proper ratio (when supervised)",
+      fwQuickOpeningGaugeSupervised: "Gauge on quick-opening device reads same as dry valve gauge (when supervised)",
+      fwSupplyGaugeNormal: "Gauge on supply side of valve reads normal",
+      fwAlarmDevicesFreeDamage: "Alarm devices free of damage",
+      fwHydraulicSignAttached: "Hydraulic design information sign securely attached to riser and legible",
+      // Foam-Water - Quarterly Alarm Valves
+      fwAlarmValvesPosition: "Alarm valves/riser check in appropriate open or closed position",
+      fwAlarmValvesFreeDamage: "Alarm valves free of damage",
+      fwAlarmValvesAccessible: "Alarm valves accessible",
+      fwRetardChamberNotLeaking: "Retard chamber/alarm drains not leaking",
+      // Foam-Water - Quarterly Pressure-Reducing Valve
+      fwPrvOpenNotLeaking: "Pressure-reducing valve in open position and not leaking",
+      fwPrvMaintainingPressure: "Pressure-reducing valve maintaining downstream pressure",
+      fwPrvGoodCondition: "Pressure-reducing valve in good condition with handwheels installed",
+      // Foam-Water - Quarterly Foam Concentrate Strainer
+      fwStrainerBlowdownClosed: "Strainer blow-down valve closed and plugged",
+      // Foam-Water - Quarterly Drainage
+      fwDrainageGoodCondition: "Drainage method in good operating condition",
+      fwRetentionDikesGoodCondition: "Retention embankments or dikes in good condition",
+      // Foam-Water - Quarterly Control Valves (electronically supervised)
+      fwElectronicValvesPosition: "Electronically supervised valves in correct position",
+      fwElectronicValvesSupervised: "Valves electronically supervised",
+      fwElectronicValvesAccessible: "Electronically supervised valves accessible",
+      fwElectronicPivsWrenches: "Electronically supervised PIVs with correct wrenches",
+      fwElectronicValvesFreeDamage: "Electronically supervised valves free from damage",
+      fwElectronicValvesSignage: "Electronically supervised valves with proper signage",
+      // Foam-Water - Annual
+      fwLowTempAlarmFreeDamage: "Low temperature alarm free of damage",
+      // Foam-Water - Annual Support/Hangers
+      fwHangersGoodCondition: "Hangers in good condition (no missing/damaged paint or coating, rust, corrosion)",
+      fwHangersNoDamageMissing: "No damaged or missing hangers bracing and support",
+      fwHangersSecurelyAttached: "Hangers securely attached to structure and piping",
+      // Foam-Water - Annual Pipes and Fittings
+      fwPipesGoodCondition: "Pipes and fittings in good condition no external corrosion",
+      fwPipesNoLeaksDamage: "Pipes no leaks or mechanical damage",
+      fwPipesCorrectAlignment: "Pipes correct alignment no external loads",
+      fwLowPointDrains: "Low point drains maintained and in proper working order",
+      fwRubberGaskets: "Rubber-gasketed fittings in good condition",
+      // Foam-Water - Annual Sprinklers
+      fwSprinklersNoDamageLeaks: "Sprinklers no damage or leaks",
+      fwSprinklersFreeCorrosion: "Sprinklers free of corrosion, foreign material, or paint",
+      fwSprinklersFluidInBulbs: "Fluid in glass bulbs",
+      fwSpareSprinklers: "Spare sprinklers proper number and type including installation wrench",
+      fwSprinklersFreeOfDust: "Sprinklers free of dust",
+      fwEscutcheonsInstalled: "Escutcheons/cover plates present and installed correctly",
+      fwSprinklersClearance: "Minimum clearance between sprinklers and storage",
+      // Foam-Water - Annual Bladder Tank
+      fwBladderTankFoamInWater: "Presence of foam in water surrounding bladder",
+      // Foam-Water - Annual Deluge Valve
+      fwDelugeInteriorCondition: "Deluge valve interior in good working condition",
+      fwDelugeDetectionDevice: "Detection device in good condition",
+      // Foam-Water - Five Years Inspection
+      fwStrainersPerManufacturer: "Strainers per manufacturer's instructions",
+      fwAlarmValveInterior: "Alarm valve interior in good condition",
+      fwCheckValveInternal: "Check valve internal moves freely and in good condition",
+      fwObstructionInspection: "Obstruction inspection - no foreign or obstructing material found",
+      fwBackflowInternal: "Backflow internal inspection",
+      fwDelugeInternalStrainers: "Internal inspection of deluge valve strainers, filters, orifices, diaphragm chambers",
+      // Foam-Water - Test Quarterly
+      fwTestAlarmWaterMotorGong: "Alarm devices test - water motor gong",
+      fwTestPrimingWaterLevel: "Priming water level tested",
+      fwTestLowAirAlarm: "Low air alarm tested per manufacturer's instructions",
+      fwTestMainDrainBackflow: "Main drain tested (if sole supply through backflow or PRV)",
+      fwTestMainDrainDiffers10: "Do main drain test results differ more than 10% from previous test?",
+      fwTestMasterPrdPartialFlow: "Master pressure-regulating device partial flow test performed",
+      // Foam-Water - Test Semiannual
+      fwTestValveSupervisorySwitch: "Valve supervisory switch(es) function",
+      fwTestAlarmDevicesVanePressure: "Alarm devices (vane and pressure switch type) tested and functioning",
+      // Foam-Water - Test Annual
+      fwTestControlValvesFullRange: "Control valves operated through full range and returned to normal position",
+      fwTestValveStatusTest: "Valve status test performed",
+      fwTestSupervisorySwitches: "Supervisory switch(es) function",
+      fwTestLowTempAlarmHeating: "Low temp alarm tested (beginning of heating season)",
+      fwTestMainDrainAnnual: "Main drain test annual",
+      fwTestMainDrainAnnualDiffers: "Do main drain test results differ more than 10% from previous test?",
+      fwTestBackflowForwardFlow: "Backflow forward flow test at minimum flow rate of system demand",
+      fwTestMasterPrdFullFlow: "Master pressure-regulating device full flow test compared to previous",
+      // Foam-Water - Test Annual Full Flow (Deluge)
+      fwTestDelugeNozzlesDischarge: "Unobstructed discharge from all nozzles/positioned correctly",
+      fwTestDelugePressureAtValve: "Pressure reading at deluge valve",
+      fwTestDelugePressureRemote: "Pressure reading at most remote nozzle/sprinkler",
+      fwTestDelugeAirMaintenance: "Air maintenance functions correctly (if provided)",
+      // Foam-Water - Test Annual Preaction Partial Trip
+      fwTestPreactionPartialTrip: "Preaction partial trip test",
+      // Foam-Water - Test Annual Foam Strainer
+      fwTestFoamStrainerCondition: "Foam concentrate strainer in proper working condition",
+      // Foam-Water - Test Annual Operational
+      fwTestOperationalResponse: "Foam-water system(s) responded as designed",
+      fwTestManualActuation: "Manual actuation device functions as intended",
+      // Foam-Water - Test Annual Concentration
+      fwTestFoamSampleMeasured: "Foam sample measured",
+      fwTestConcentrationWithin10: "Foam concentration within 10% of acceptance test results",
+      fwTestConcentrationNotBelow10: "Foam concentrate not more than 10% below minimum design standard",
+      // Foam-Water - Test Three Years
+      fwTestPreactionTripOpen: "Preaction valve trip test - open control valve",
+      fwTestPreactionResultsCompared: "Results compared to previous results",
+      fwTestPreactionAirLeakage: "Preaction system tested for air leakage",
+      // Foam-Water - Test Five Years
+      fwTestGaugesTestedReplaced: "Gauges tested or replaced",
+      // Foam-Water - Maintenance
+      fwMaintOsyStemsLubricated: "OS&Y stems lubricated annually",
+      fwMaintProportionerBallDrip: "Proportioner ball drip disassembled, cleaned, reassembled (5 years)",
+      fwMaintFoamTankDrained: "Foam concentrate tank drained and flushed (10 years)",
+      fwMaintFoamTankInspected: "Tank inspected internally and externally for corrosion (10 years)",
+      fwMaintFoamTankHydrotest: "Foam concentrate tank hydrostatically tested (10 years)",
+      fwMaintBladderSightGlass: "Bladder tank proportioner sight glass cleaned (10 years)",
+      fwMaintBalancingDiaphragm: "Balancing valve diaphragm flushed (5 years)",
+      fwMaintVacuumVentsServiced: "Pressure vacuum vents serviced (5 years)",
       proportionerInspection: "Proportioner inspected",
       nozzlesNoDamage: "Nozzles no damage",
       nozzlesFreeCorrosion: "Nozzles free of corrosion",
