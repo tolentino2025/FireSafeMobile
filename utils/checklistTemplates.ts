@@ -81,65 +81,153 @@ const wetPipeChecklist: ChecklistTemplate[] = [
 ];
 
 const dryPipeChecklist: ChecklistTemplate[] = [
-  { labelKey: "dryPipeValveEnclosureTemp", frequencies: ["daily"] },
-  { labelKey: "isolationValvesOpen", frequencies: ["weekly"] },
-  { labelKey: "rpaReliefValve", frequencies: ["weekly"] },
-  { labelKey: "controlValvesCorrectPosition", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "controlValvesSealed", frequencies: ["weekly", "monthly"] },
-  { labelKey: "controlValvesAccessible", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "pivsWithWrenches", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "freeFromDamageLeaks", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "properSignage", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "gaugesGoodCondition", frequencies: ["monthly"] },
-  { labelKey: "airPressureMaintained", hasPsi: true, frequencies: ["monthly"] },
-  { labelKey: "systemWaterPressureMaintained", hasPsi: true, frequencies: ["monthly"] },
-  { labelKey: "lowAirPressureAlarm", frequencies: ["monthly"] },
-  { labelKey: "quickOpeningDevice", frequencies: ["monthly"] },
-  { labelKey: "intermediateDryPendentSprinklers", frequencies: ["monthly"] },
-  { labelKey: "controlValvesLockedSupervised", frequencies: ["monthly"] },
-  { labelKey: "waterflowAlarmDevicesFree", frequencies: ["quarterly"] },
-  { labelKey: "fdcVisibleAccessible", frequencies: ["quarterly"] },
-  { labelKey: "fdcCouplingsOperate", frequencies: ["quarterly"] },
-  { labelKey: "fdcPlugsCapsInPlace", frequencies: ["quarterly"] },
-  { labelKey: "fdcGasketsNotDamaged", frequencies: ["quarterly"] },
-  { labelKey: "fdcSignsInPlace", frequencies: ["quarterly"] },
-  { labelKey: "fdcCheckValveNotLeaking", frequencies: ["quarterly"] },
-  { labelKey: "fdcAutoDrainOperating", frequencies: ["quarterly"] },
-  { labelKey: "fdcClapperOperates", frequencies: ["quarterly"] },
-  { labelKey: "fdcInteriorClear", frequencies: ["quarterly", "annually"] },
-  { labelKey: "fdcPipingUndamaged", frequencies: ["quarterly"] },
-  { labelKey: "pressureReducingValveOpen", frequencies: ["quarterly"] },
-  { labelKey: "pressureReducingValveMaintaining", frequencies: ["quarterly"] },
-  { labelKey: "pressureReducingValveGoodCondition", frequencies: ["quarterly"] },
-  { labelKey: "dryPipeTripTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
+  // Daily - Dry Pipe Valve (Cold Weather)
+  { labelKey: "dpEnclosureMinTemp", frequencies: ["daily"] },
+  // Weekly - Backflow
+  { labelKey: "dpIsolationValvesOpenLocked", frequencies: ["weekly"] },
+  { labelKey: "dpRpaReliefValveOperating", frequencies: ["weekly"] },
+  // Weekly - Control Valves
+  { labelKey: "dpControlValvesCorrectPosition", frequencies: ["weekly"] },
+  { labelKey: "dpControlValvesSealed", frequencies: ["weekly"] },
+  { labelKey: "dpControlValvesAccessible", frequencies: ["weekly"] },
+  { labelKey: "dpPivsCorrectWrenches", frequencies: ["weekly"] },
+  { labelKey: "dpControlValvesFreeFromDamage", frequencies: ["weekly"] },
+  { labelKey: "dpControlValvesProperSignage", frequencies: ["weekly"] },
+  // Weekly - Dry Pipe Valve
+  { labelKey: "dpValveEnclosureTemp", frequencies: ["weekly"] },
+  // Weekly - Master PRD
+  { labelKey: "dpMasterPrdDownstreamPressure", hasPsi: true, frequencies: ["weekly"] },
+  { labelKey: "dpMasterPrdSupplyPressure", hasPsi: true, frequencies: ["weekly"] },
+  { labelKey: "dpMasterPrdFreeDamageLeaks", frequencies: ["weekly"] },
+  { labelKey: "dpMasterPrdTrimCondition", frequencies: ["weekly"] },
+  // Monthly - Gauges
+  { labelKey: "dpGaugesGoodCondition", frequencies: ["monthly"] },
+  { labelKey: "dpDryValveRatioUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "dpQuickOpeningGaugeUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  // Monthly - Control Valves (Locked/Supervised)
+  { labelKey: "dpMonthlyValvesCorrectPosition", frequencies: ["monthly"] },
+  { labelKey: "dpMonthlyValvesLockedSupervised", frequencies: ["monthly"] },
+  { labelKey: "dpMonthlyValvesAccessible", frequencies: ["monthly"] },
+  { labelKey: "dpMonthlyPivsWrenches", frequencies: ["monthly"] },
+  { labelKey: "dpMonthlyValvesFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "dpMonthlyValvesSignage", frequencies: ["monthly"] },
+  // Monthly - Dry Pipe Valve
+  { labelKey: "dpValveExteriorFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "dpValveTrimPosition", frequencies: ["monthly"] },
+  { labelKey: "dpValveChamberNotLeaking", frequencies: ["monthly"] },
+  // Quarterly
+  { labelKey: "dpWaterflowAlarmFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "dpSupplyGaugeNormal", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "dpDryValveRatioSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "dpQuickOpeningGaugeSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  // Quarterly - FDC
+  { labelKey: "dpFdcVisibleAccessible", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcCouplingsSwivelsOperate", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcPlugsCapsInPlace", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcGasketsNotDamaged", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcSignsInPlace", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcAutoDrainOperating", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcClapperFunctional", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcInteriorClearObstructions", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcCheckValveNotLeaking", frequencies: ["quarterly"] },
+  { labelKey: "dpFdcPipingUndamaged", frequencies: ["quarterly"] },
+  // Quarterly - PRV
+  { labelKey: "dpPrvOpenNotLeaking", frequencies: ["quarterly"] },
+  { labelKey: "dpPrvMaintainingDownstream", frequencies: ["quarterly"] },
+  { labelKey: "dpPrvGoodConditionHandwheel", frequencies: ["quarterly"] },
+  // Quarterly - Control Valves (Electronically Supervised)
+  { labelKey: "dpElectronicValvesPosition", frequencies: ["quarterly"] },
+  { labelKey: "dpElectronicValvesSupervised", frequencies: ["quarterly"] },
+  { labelKey: "dpElectronicValvesAccessible", frequencies: ["quarterly"] },
+  { labelKey: "dpElectronicPivsWrenches", frequencies: ["quarterly"] },
+  { labelKey: "dpElectronicValvesFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "dpElectronicValvesSignage", frequencies: ["quarterly"] },
+  // Annual
+  { labelKey: "dpHydraulicDesignInfoAttached", frequencies: ["annually"] },
+  // Annual - Sprinklers
+  { labelKey: "dpSprinklersNoDamageLeaks", frequencies: ["annually"] },
+  { labelKey: "dpSprinklersFreeCorrosion", frequencies: ["annually"] },
+  { labelKey: "dpSprinklersProperOrientation", frequencies: ["annually"] },
+  { labelKey: "dpSprinklersFluidInBulbs", frequencies: ["annually"] },
+  { labelKey: "dpSpareSprinklersAvailable", frequencies: ["annually"] },
+  { labelKey: "dpSprinklersNoUnauthorizedPaint", frequencies: ["annually"] },
+  { labelKey: "dpSprinklersFreeOfDust", frequencies: ["annually"] },
+  { labelKey: "dpEscutcheonsInstalled", frequencies: ["annually"] },
+  { labelKey: "dpSprinklersClearanceFromStorage", frequencies: ["annually"] },
+  // Annual - Hangers/Seismic
+  { labelKey: "dpHangersNotDamagedLoose", frequencies: ["annually"] },
+  // Annual - Pipes and Fittings
+  { labelKey: "dpPipesGoodCondition", frequencies: ["annually"] },
+  { labelKey: "dpPipesNoLeaksDamage", frequencies: ["annually"] },
+  { labelKey: "dpPipesCorrectAlignment", frequencies: ["annually"] },
+  // Annual - FDC
+  { labelKey: "dpFdcInteriorLockedFreeObstructions", frequencies: ["annually"] },
+  // Annual - Dry Pipe Valve
+  { labelKey: "dpValveInteriorAfterTrip", frequencies: ["annually"] },
+  // Annual - Building
+  { labelKey: "dpBuildingOpeningsClosed", frequencies: ["annually"] },
+  { labelKey: "dpHeatTracePerManufacturer", frequencies: ["annually"] },
+  { labelKey: "dpLowTempAlarmFreeDamage", frequencies: ["annually"] },
+  // Five Years
+  { labelKey: "dpObstructionInspection", frequencies: ["five_years"] },
+  { labelKey: "dpCheckValveInternal", frequencies: ["five_years"] },
+  { labelKey: "dpStrainersFiltersInternal", frequencies: ["five_years"] },
+  { labelKey: "dpBackflowInternal", frequencies: ["five_years"] },
+  // Test - Quarterly
+  { labelKey: "dpTestAlarmWaterMotorGong", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "dpTestMainDrainQuarterly", frequencies: ["quarterly"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+  ]},
+  { labelKey: "dpTestMainDrainResultsDiffer", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "dpTestPrimingWaterLevel", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "dpTestQuickOpeningDevice", frequencies: ["quarterly"], isTestSection: true },
+  { labelKey: "dpTestMasterPrdPartialFlow", frequencies: ["quarterly"], isTestSection: true },
+  // Test - Semiannual
+  { labelKey: "dpTestValveSupervisorySwitch", frequencies: ["semiannually"], isTestSection: true },
+  { labelKey: "dpTestAlarmInspectorTest", frequencies: ["semiannually"], isTestSection: true },
+  // Test - Annual
+  { labelKey: "dpTestSupervisorySwitches", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestLowTempAlarm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestLowAirAlarm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestAirMaintenanceDevice", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestControlValvesFullRange", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestBackflowForwardFlow", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestValveStatus", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestPrvPartialFlow", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestMainDrainAnnual", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
+    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
+  ]},
+  { labelKey: "dpTestMainDrainAnnualDiffer", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Dry Pipe Valve Trip Test (Partial Flow)
+  { labelKey: "dpTestDryPipeTripPartial", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "waterPressurePsi", type: "psi", unit: "psi" },
     { labelKey: "airPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "trippingAirPsi", type: "psi", unit: "psi" },
+    { labelKey: "tripTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "dpTestDryPipeTripPartialResults", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Master PRD
+  { labelKey: "dpTestMasterPrdFullFlow", frequencies: ["annually"], isTestSection: true },
+  // Test - Three Years
+  { labelKey: "dpTestDryPipeTripFull", frequencies: ["three_years"], isTestSection: true, numericFields: [
+    { labelKey: "waterPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "airPressurePsi", type: "psi", unit: "psi" },
+    { labelKey: "trippingAirPsi", type: "psi", unit: "psi" },
     { labelKey: "tripTimeSec", type: "seconds", unit: "sec" },
     { labelKey: "waterDeliveryTimeMin", type: "minutes", unit: "min" },
   ]},
-  { labelKey: "mainDrainTest", frequencies: ["quarterly", "annually"], isTestSection: true, numericFields: [
-    { labelKey: "staticPsi", type: "static_psi", unit: "psi" },
-    { labelKey: "residualPsi", type: "residual_psi", unit: "psi" },
-    { labelKey: "pressureDrop", type: "psi", unit: "psi" },
-  ]},
-  { labelKey: "hydraulicDesignSignAttached", frequencies: ["annually"] },
-  { labelKey: "sprinklersNoDamageLeaks", frequencies: ["annually"] },
-  { labelKey: "sprinklersFreeCorrosion", frequencies: ["annually"] },
-  { labelKey: "sprinklersProperOrientation", frequencies: ["annually"] },
-  { labelKey: "sprinklersFluidInBulbs", frequencies: ["annually"] },
-  { labelKey: "spareSprinklersAvailable", frequencies: ["annually"] },
-  { labelKey: "sprinklersNoUnauthorizedPaint", frequencies: ["annually"] },
-  { labelKey: "sprinklersFreeOfDust", frequencies: ["annually"] },
-  { labelKey: "escutcheonsInstalled", frequencies: ["annually"] },
-  { labelKey: "sprinklersClearanceFromStorage", frequencies: ["annually"] },
-  { labelKey: "hangersNotDamagedLoose", frequencies: ["annually"] },
-  { labelKey: "pipesGoodCondition", frequencies: ["annually"] },
-  { labelKey: "pipesNoLeaksDamage", frequencies: ["annually"] },
-  { labelKey: "pipesCorrectAlignment", frequencies: ["annually"] },
-  { labelKey: "heatTracePerManufacturer", frequencies: ["annually"] },
-  { labelKey: "dryPipeInteriorInspection", frequencies: ["five_years"] },
-  { labelKey: "checkValveInternal", frequencies: ["five_years"] },
-  { labelKey: "obstructionInspection", frequencies: ["five_years"] },
-  { labelKey: "backflowInternalInspection", frequencies: ["five_years"] },
+  { labelKey: "dpTestDryPipeTripFullResults", frequencies: ["three_years"], isTestSection: true },
+  { labelKey: "dpTestDryPipeLeakage", frequencies: ["three_years"], isTestSection: true },
+  // Test - Five Years
+  { labelKey: "dpTestGaugesTestedReplaced", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "dpTestPrvFlowTest", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "dpTestFdcHydrostatic", frequencies: ["five_years"], isTestSection: true },
+  // Maintenance
+  { labelKey: "dpMaintSprinklersTested", frequencies: ["annually"] },
+  { labelKey: "dpMaintOsyStemsLubricated", frequencies: ["annually"] },
+  { labelKey: "dpMaintAuxiliaryDrains", frequencies: ["annually"] },
 ];
 
 const preactionDelugeChecklist: ChecklistTemplate[] = [
