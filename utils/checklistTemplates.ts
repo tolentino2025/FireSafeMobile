@@ -416,25 +416,175 @@ const waterSprayChecklist: ChecklistTemplate[] = [
 ];
 
 const waterMistChecklist: ChecklistTemplate[] = [
-  { labelKey: "systemControlValvesCorrectPosition", frequencies: ["weekly", "monthly", "quarterly"] },
-  { labelKey: "valvesSealedLockedSupervised", frequencies: ["weekly", "monthly"] },
-  { labelKey: "systemFreeFromDamageLeaks", frequencies: ["weekly", "monthly", "quarterly", "annually"] },
-  { labelKey: "gaugesGoodCondition", frequencies: ["monthly"] },
-  { labelKey: "systemPressureNormal", hasPsi: true, frequencies: ["monthly", "quarterly"] },
-  { labelKey: "allComponentsAccessible", frequencies: ["monthly", "quarterly", "annually"] },
-  { labelKey: "properSignageInPlace", frequencies: ["monthly", "quarterly"] },
-  { labelKey: "systemEnclosureConditions", frequencies: ["monthly", "quarterly"] },
-  { labelKey: "nozzlesNoDamage", frequencies: ["annually"] },
-  { labelKey: "nozzlesFreeCorrosion", frequencies: ["annually"] },
-  { labelKey: "filtersInspected", frequencies: ["annually"] },
-  { labelKey: "pumpUnitInspection", frequencies: ["annually"] },
-  { labelKey: "cylindersInspected", frequencies: ["annually"] },
-  { labelKey: "actuatorsInspected", frequencies: ["annually"] },
-  { labelKey: "waterMistTest", frequencies: ["annually"], isTestSection: true, numericFields: [
+  // Daily - Valve Enclosure (Cold Weather)
+  { labelKey: "enclosureMinTemp", frequencies: ["daily"] },
+  // Weekly - Backflow
+  { labelKey: "wmIsolationValvesOpenLocked", frequencies: ["weekly"] },
+  { labelKey: "wmRpaReliefValveOperating", frequencies: ["weekly"] },
+  // Weekly - Control Valves
+  { labelKey: "wmControlValvesCorrectPosition", frequencies: ["weekly"] },
+  { labelKey: "wmControlValvesSealed", frequencies: ["weekly"] },
+  { labelKey: "wmControlValvesAccessible", frequencies: ["weekly"] },
+  { labelKey: "wmPivsCorrectWrenches", frequencies: ["weekly"] },
+  { labelKey: "wmControlValvesFreeFromDamage", frequencies: ["weekly"] },
+  { labelKey: "wmControlValvesProperSignage", frequencies: ["weekly"] },
+  // Weekly - Deluge/Preaction Valve
+  { labelKey: "wmDelugeEnclosureMinTemp", frequencies: ["weekly"] },
+  // Weekly - Master Pressure-Regulating Device
+  { labelKey: "wmMasterPrdDownstreamPressure", hasPsi: true, frequencies: ["weekly"] },
+  { labelKey: "wmMasterPrdSupplyPressure", hasPsi: true, frequencies: ["weekly"] },
+  { labelKey: "wmMasterPrdFreeDamageLeaks", frequencies: ["weekly"] },
+  { labelKey: "wmMasterPrdTrimCondition", frequencies: ["weekly"] },
+  // Monthly - Gauges
+  { labelKey: "wmGaugesGoodCondition", frequencies: ["monthly"] },
+  { labelKey: "wmAirPressureUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "wmDryValveRatioUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "wmQuickOpeningGaugeUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "wmWaterCirculationTankLevel", frequencies: ["monthly"] },
+  // Monthly - Compressed Gas Cylinders
+  { labelKey: "wmCylinderPressureUnsupervised", hasPsi: true, frequencies: ["monthly"] },
+  // Monthly - Standby Pump
+  { labelKey: "wmStandbyPumpInletPressure", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "wmStandbyPumpOutletPressure", hasPsi: true, frequencies: ["monthly"] },
+  { labelKey: "wmMoistureTrapOilInjection", frequencies: ["monthly"] },
+  { labelKey: "wmOilLevelAirRegulator", frequencies: ["monthly"] },
+  // Monthly - Control Valves (Locked/Supervised)
+  { labelKey: "wmMonthlyValvesCorrectPosition", frequencies: ["monthly"] },
+  { labelKey: "wmMonthlyValvesLockedSupervised", frequencies: ["monthly"] },
+  { labelKey: "wmMonthlyValvesAccessible", frequencies: ["monthly"] },
+  { labelKey: "wmMonthlyPivsWrenches", frequencies: ["monthly"] },
+  { labelKey: "wmMonthlyValvesFreeDamage", frequencies: ["monthly"] },
+  { labelKey: "wmMonthlyValvesSignage", frequencies: ["monthly"] },
+  // Quarterly - Gauges (Supervised)
+  { labelKey: "wmAirPressureSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "wmDryValveRatioSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "wmQuickOpeningGaugeSupervised", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "wmSupplyGaugeNormal", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "wmWaterSupplyPressure", hasPsi: true, frequencies: ["quarterly"] },
+  { labelKey: "wmWaterStorageCylinderUnsupervised", frequencies: ["quarterly"] },
+  { labelKey: "wmAdditiveStorageCylinder", frequencies: ["quarterly"] },
+  { labelKey: "wmWaterRecirculationTankSupervised", frequencies: ["quarterly"] },
+  { labelKey: "wmCompressedGasSecured", frequencies: ["quarterly"] },
+  { labelKey: "wmWaterflowAlarmDevice", frequencies: ["quarterly"] },
+  { labelKey: "wmHydraulicSignAttached", frequencies: ["quarterly"] },
+  // Quarterly - Alarm Valves/Riser Check
+  { labelKey: "wmAlarmValvesGaugesNormal", frequencies: ["quarterly"] },
+  { labelKey: "wmAlarmValvesFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "wmAlarmValvesPosition", frequencies: ["quarterly"] },
+  { labelKey: "wmAlarmValvesAccessible", frequencies: ["quarterly"] },
+  { labelKey: "wmRetardChamberNotLeaking", frequencies: ["quarterly"] },
+  // Quarterly - Control Valves (Electronically Supervised)
+  { labelKey: "wmElectronicValvesPosition", frequencies: ["quarterly"] },
+  { labelKey: "wmElectronicValvesSupervised", frequencies: ["quarterly"] },
+  { labelKey: "wmElectronicValvesAccessible", frequencies: ["quarterly"] },
+  { labelKey: "wmElectronicPivsWrenches", frequencies: ["quarterly"] },
+  { labelKey: "wmElectronicValvesFreeDamage", frequencies: ["quarterly"] },
+  { labelKey: "wmElectronicValvesSignage", frequencies: ["quarterly"] },
+  // Quarterly - Pressure-Reducing Valve
+  { labelKey: "wmPrvOpenNotLeaking", frequencies: ["quarterly"] },
+  { labelKey: "wmPrvMaintainingPressure", frequencies: ["quarterly"] },
+  { labelKey: "wmPrvGoodCondition", frequencies: ["quarterly"] },
+  // Semiannual
+  { labelKey: "wmManualIndicatingValvesPosition", frequencies: ["semiannually"] },
+  { labelKey: "wmGasCylinderPressureSupervised", hasPsi: true, frequencies: ["semiannually"] },
+  { labelKey: "wmWaterStorageCylinderSupervised", frequencies: ["semiannually"] },
+  { labelKey: "wmPneumaticValvesTubing", frequencies: ["semiannually"] },
+  { labelKey: "wmWaterQualityFirstYear", frequencies: ["semiannually"] },
+  { labelKey: "wmAdditiveAgentLevel", frequencies: ["semiannually"] },
+  { labelKey: "wmEnclosureIntegrity", frequencies: ["semiannually"] },
+  // Annual
+  { labelKey: "wmHosesNotDamaged", frequencies: ["annually"] },
+  { labelKey: "wmWaterQualityAfterFirstYear", frequencies: ["annually"] },
+  { labelKey: "wmLowTempAlarmCondition", frequencies: ["annually"] },
+  // Annual - Nozzles
+  { labelKey: "wmNozzlesNoDamageCorrosion", frequencies: ["annually"] },
+  { labelKey: "wmNozzlesFluidInBulb", frequencies: ["annually"] },
+  { labelKey: "wmNozzlesFreeOfDust", frequencies: ["annually"] },
+  { labelKey: "wmNozzlesNoPaintCoating", frequencies: ["annually"] },
+  { labelKey: "wmNozzlesCorrectOrientation", frequencies: ["annually"] },
+  { labelKey: "wmSpareNozzlesCorrectType", frequencies: ["annually"] },
+  // Annual - Hangers/Braces/Support
+  { labelKey: "wmHangersNotDamagedLoose", frequencies: ["annually"] },
+  // Annual - High-Pressure Water Storage Cylinder
+  { labelKey: "wmCylinderSecured", frequencies: ["annually"] },
+  { labelKey: "wmCylinderVentPlugNotRuptured", frequencies: ["annually"] },
+  { labelKey: "wmCylinderFiltersClean", frequencies: ["annually"] },
+  { labelKey: "wmCylinderCapacityRating", frequencies: ["annually"] },
+  { labelKey: "wmCylinderComplianceSpec", frequencies: ["annually"] },
+  { labelKey: "wmCylinderDischargePressure", hasPsi: true, frequencies: ["annually"] },
+  { labelKey: "wmRecirculationTankSupports", frequencies: ["annually"] },
+  { labelKey: "wmRecirculationTankFilters", frequencies: ["annually"] },
+  // Annual - Piping/Tubing/Fittings
+  { labelKey: "wmPipingFreeMechanicalDamage", frequencies: ["annually"] },
+  { labelKey: "wmPipingFreeLeakage", frequencies: ["annually"] },
+  { labelKey: "wmPipingFreeExternalLoads", frequencies: ["annually"] },
+  { labelKey: "wmPipingMissingDamagedPaint", frequencies: ["annually"] },
+  { labelKey: "wmPipingFreeCorrosionRust", frequencies: ["annually"] },
+  { labelKey: "wmPipingMisalignmentTrapped", frequencies: ["annually"] },
+  { labelKey: "wmLowPointDrainsCondition", frequencies: ["annually"] },
+  // Annual - Compressed Gas Cylinders
+  { labelKey: "wmCompressedGasCylinderCapacity", frequencies: ["annually"] },
+  { labelKey: "wmCompressedGasCylinderCompliance", frequencies: ["annually"] },
+  { labelKey: "wmCompressedGasMeetsSpecs", frequencies: ["annually"] },
+  // Five Years - Inspection
+  { labelKey: "wmAlarmValveInterior", frequencies: ["five_years"] },
+  { labelKey: "wmObstructionInspection", frequencies: ["five_years"] },
+  { labelKey: "wmCheckValveInternal", frequencies: ["five_years"] },
+  { labelKey: "wmBackflowInternal", frequencies: ["five_years"] },
+  { labelKey: "wmCompressedGasCylinderExterior", frequencies: ["five_years"] },
+  // Test - Quarterly
+  { labelKey: "wmTestNozzlesFlowOperation", frequencies: ["quarterly"], isTestSection: true },
+  // Test - Semiannual
+  { labelKey: "wmTestAlarmDeviceVanePressure", frequencies: ["semiannually"], isTestSection: true },
+  { labelKey: "wmTestValveSupervisorySwitch", frequencies: ["semiannually"], isTestSection: true },
+  { labelKey: "wmTestPneumaticSlaveValve", frequencies: ["semiannually"], isTestSection: true },
+  // Test - Annual
+  { labelKey: "wmTestSupervisorySwitches", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestWaterSupply", frequencies: ["annually"], isTestSection: true, numericFields: [
     { labelKey: "operatingPsi", type: "psi", unit: "psi" },
-    { labelKey: "operationTimeSec", type: "seconds", unit: "sec" },
+    { labelKey: "flowGpm", type: "gpm", unit: "gpm" },
+    { labelKey: "durationMin", type: "minutes", unit: "min" },
   ]},
-  { labelKey: "obstructionInspection", frequencies: ["five_years"] },
+  { labelKey: "wmTestAdditiveAgentQuality", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestAdditiveInjectionFull", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestValveStatus", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestStandbyPumpOperated", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestControlValvesFullRange", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestBackflowForwardFlow", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestMasterPrvFullFlow", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Water Recirculation Tank
+  { labelKey: "wmTestRecirculationOperational", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestFloatValveFunctions", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestOutletDischargePressure", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "operatingPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "wmTestBackflowPreventerFunctions", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Pneumatic Valves
+  { labelKey: "wmTestSolenoidRelease", frequencies: ["annually"], isTestSection: true },
+  // Test - Annual Full Flow Trip Test
+  { labelKey: "wmTestUnobstructedDischarge", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestPressureAtControlValve", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "operatingPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "wmTestDetectionResponseTime", frequencies: ["annually"], isTestSection: true, numericFields: [
+    { labelKey: "responseTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "wmTestDetectionNFPA72", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestVentilationInterlocks", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "wmTestFuelLubricationInterlocks", frequencies: ["annually"], isTestSection: true },
+  // Test - Five Years
+  { labelKey: "wmTestGaugesTestedReplaced", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "wmTestCylinderRetesting", frequencies: ["five_years"], isTestSection: true },
+  { labelKey: "wmTestHoseHydrostatic", frequencies: ["five_years"], isTestSection: true },
+  // Maintenance - Annual
+  { labelKey: "wmMaintOsyStemsLubricated", frequencies: ["annually"] },
+  { labelKey: "wmMaintFlushStrainerAfterTest", frequencies: ["annually"] },
+  { labelKey: "wmMaintEvaluateAdditives", frequencies: ["annually"] },
+  { labelKey: "wmMaintDrainRefillTank", frequencies: ["annually"] },
+  // Maintenance - Five Years
+  { labelKey: "wmMaintRebuildPneumaticPump", frequencies: ["five_years"] },
+  // Maintenance - After Activation
+  { labelKey: "wmMaintInspectNozzlesAfterActivation", frequencies: ["annually"] },
 ];
 
 const pumpWeeklyChecklist: ChecklistTemplate[] = [
