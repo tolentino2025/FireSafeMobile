@@ -283,21 +283,105 @@ const waterMistChecklist: ChecklistTemplate[] = [
 ];
 
 const pumpWeeklyChecklist: ChecklistTemplate[] = [
+  // Pump House Section
+  { labelKey: "pumpRoomTemp", frequencies: ["weekly", "monthly"] },
+  { labelKey: "ventilationLouversFree", frequencies: ["weekly", "monthly"] },
+  { labelKey: "excessiveWaterOnFloor", frequencies: ["weekly", "monthly"] },
+  { labelKey: "couplingGuardInPlace", frequencies: ["weekly", "monthly"] },
+  { labelKey: "dieselPumpRoomTemp70F", frequencies: ["weekly", "monthly"] },
   { labelKey: "pumpHouseConditions", frequencies: ["weekly", "monthly"] },
+  // Pump Systems Section
+  { labelKey: "systemValvesProperPosition", frequencies: ["weekly", "monthly"] },
+  { labelKey: "pipingHosesNoLeak", frequencies: ["weekly", "monthly"] },
+  { labelKey: "pumpPackingGlands", frequencies: ["weekly", "monthly"] },
   { labelKey: "pumpSuctionDischargePressure", hasPsi: true, frequencies: ["weekly", "monthly"], numericFields: [
     { labelKey: "suctionPsi", type: "psi", unit: "psi" },
     { labelKey: "dischargePsi", type: "psi", unit: "psi" },
   ]},
-  { labelKey: "pumpPackingGlands", frequencies: ["weekly", "monthly"] },
-  { labelKey: "systemValvesProperPosition", frequencies: ["weekly", "monthly"] },
   { labelKey: "suctionReservoirFull", frequencies: ["weekly", "monthly"] },
   { labelKey: "wetPitSuctionScreen", frequencies: ["weekly", "monthly"] },
-  { labelKey: "controllerSelectorSwitch", frequencies: ["weekly", "monthly"] },
+  { labelKey: "waterflowTestValvesClosed", frequencies: ["weekly", "monthly"] },
+  { labelKey: "pumpStartingPressure", hasPsi: true, frequencies: ["weekly", "monthly"] },
+  { labelKey: "pumpOperate10Min", frequencies: ["weekly"] },
+  { labelKey: "packingGlandTightness", frequencies: ["weekly", "monthly"] },
+  { labelKey: "unusualNoiseVibration", frequencies: ["weekly", "monthly"] },
+  { labelKey: "packingBearingOverheating", frequencies: ["weekly", "monthly"] },
+  { labelKey: "pressureSwitchTransducer", hasPsi: true, frequencies: ["weekly", "monthly"] },
+  { labelKey: "pumpHighLowPressure", hasPsi: true, frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "highestPsi", type: "psi", unit: "psi" },
+    { labelKey: "lowestPsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "circulationReliefValve", frequencies: ["weekly", "monthly"] },
+  // Electrical Systems Section
   { labelKey: "controllerPilotLights", frequencies: ["weekly", "monthly"] },
+  { labelKey: "transferSwitchNormalLight", frequencies: ["weekly", "monthly"] },
+  { labelKey: "standbyPowerIsolatingSwitch", frequencies: ["weekly", "monthly"] },
+  { labelKey: "reversePhaseAlarmOff", frequencies: ["weekly", "monthly"] },
+  { labelKey: "normalPhaseRotationOn", frequencies: ["weekly", "monthly"] },
+  { labelKey: "verticalMotorOilLevel", frequencies: ["weekly", "monthly"] },
+  { labelKey: "jockeyPumpHasPower", frequencies: ["weekly", "monthly"] },
+  { labelKey: "reducedVoltageStartingTime", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "startingTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "motorAccelerationTime", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "accelerationTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "autoStopRunTime", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "runTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  // Diesel Engine Systems Section
   { labelKey: "dieselFuelTank", frequencies: ["weekly", "monthly"] },
+  { labelKey: "controllerSelectorSwitch", frequencies: ["weekly", "monthly"] },
+  { labelKey: "batteryVoltageReading", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "battery1Voltage", type: "voltage", unit: "V" },
+    { labelKey: "battery2Voltage", type: "voltage", unit: "V" },
+  ]},
+  { labelKey: "chargingCurrentReading", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "chargingAmperage", type: "amperage", unit: "A" },
+  ]},
+  { labelKey: "batteryPilotLightsOn", frequencies: ["weekly", "monthly"] },
+  { labelKey: "allAlarmPilotLightsOff", frequencies: ["weekly", "monthly"] },
+  { labelKey: "engineRunningTimeMeter", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "runningTimeHours", type: "minutes", unit: "hrs" },
+  ]},
+  { labelKey: "rightAngleGearDriveOil", frequencies: ["weekly", "monthly"] },
+  { labelKey: "crankcaseOilLevel", frequencies: ["weekly", "monthly"] },
+  { labelKey: "coolingWaterLevel", frequencies: ["weekly", "monthly"] },
+  { labelKey: "electrolyteLevelBatteries", frequencies: ["weekly", "monthly"] },
   { labelKey: "batteryTerminals", frequencies: ["weekly", "monthly"] },
+  { labelKey: "waterJacketHeaterOperational", frequencies: ["weekly", "monthly"] },
   { labelKey: "batteryChargerOperating", frequencies: ["weekly", "monthly"] },
-  { labelKey: "pumpRoomTemp", frequencies: ["weekly", "monthly"] },
+  { labelKey: "batteryCrankingVoltage", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "crankingVoltage", type: "voltage", unit: "V" },
+  ]},
+  { labelKey: "dieselWaterPumpNotLeaking", frequencies: ["weekly", "monthly"] },
+  { labelKey: "flexibleHoseConnections", frequencies: ["weekly", "monthly"] },
+  { labelKey: "lubricatingOilHeater", frequencies: ["weekly", "monthly"] },
+  { labelKey: "lubricatingOilLevel", frequencies: ["weekly", "monthly"] },
+  { labelKey: "waterInDieselFuelTank", frequencies: ["weekly", "monthly"] },
+  { labelKey: "dieselCrankingTime", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "crankingTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "dieselRunningSpeedTime", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "runningSpeedTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "dieselEngineGauges", frequencies: ["weekly", "monthly"] },
+  { labelKey: "heatExchangerCoolingWater", frequencies: ["weekly", "monthly"] },
+  { labelKey: "speedGovernorOperation", frequencies: ["weekly", "monthly"] },
+  { labelKey: "fuelSystemSolenoids", frequencies: ["weekly", "monthly"] },
+  { labelKey: "tankFloatSwitch", frequencies: ["weekly", "monthly"] },
+  // Steam System Section
+  { labelKey: "steamPressureRange", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "steamPressurePsi", type: "psi", unit: "psi" },
+  ]},
+  { labelKey: "turbineRunningSpeedTime", frequencies: ["weekly", "monthly"], numericFields: [
+    { labelKey: "turbineSpeedTimeSec", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "steamTrapCheck", frequencies: ["weekly", "monthly"] },
+  { labelKey: "steamReliefValve", frequencies: ["weekly", "monthly"] },
+  // Exhaust System Section
+  { labelKey: "exhaustSystemLeaks", frequencies: ["weekly", "monthly"] },
+  { labelKey: "drainCondensateTrap", frequencies: ["weekly", "monthly"] },
 ];
 
 const pumpMonthlyChecklist: ChecklistTemplate[] = [
