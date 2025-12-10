@@ -734,6 +734,111 @@ const standpipeChecklist: ChecklistTemplate[] = [
   ]},
 ];
 
+const fireServiceMainsChecklist: ChecklistTemplate[] = [
+  // Weekly - Control Valves
+  { labelKey: "fsmValveCorrectPosition", frequencies: ["weekly"] },
+  { labelKey: "fsmValveSealed", frequencies: ["weekly"] },
+  { labelKey: "fsmValveAccessible", frequencies: ["weekly"] },
+  { labelKey: "fsmPivCorrectWrenches", frequencies: ["weekly"] },
+  { labelKey: "fsmValveFreeDamageLeaks", frequencies: ["weekly"] },
+  { labelKey: "fsmValveProperSignage", frequencies: ["weekly"] },
+  // Weekly - Backflow
+  { labelKey: "backflowIsolationValvesOpen", frequencies: ["weekly"] },
+  { labelKey: "rpaRpdaReliefValveOperating", frequencies: ["weekly"] },
+  // Monthly - Control Valves (Locked/Supervised)
+  { labelKey: "fsmValveCorrectPositionMonthly", frequencies: ["monthly"] },
+  { labelKey: "fsmValveLockedSupervised", frequencies: ["monthly"] },
+  { labelKey: "fsmValveAccessibleMonthly", frequencies: ["monthly"] },
+  { labelKey: "fsmPivCorrectWrenchesMonthly", frequencies: ["monthly"] },
+  { labelKey: "fsmValveFreeDamageLeaksMonthly", frequencies: ["monthly"] },
+  { labelKey: "fsmValveProperSignageMonthly", frequencies: ["monthly"] },
+  // Quarterly - Control Valves (Electronically Supervised)
+  { labelKey: "fsmValveCorrectPositionQuarterly", frequencies: ["quarterly"] },
+  { labelKey: "fsmValveElectronicSupervised", frequencies: ["quarterly"] },
+  { labelKey: "fsmValveAccessibleQuarterly", frequencies: ["quarterly"] },
+  { labelKey: "fsmPivCorrectWrenchesQuarterly", frequencies: ["quarterly"] },
+  { labelKey: "fsmValveFreeDamageLeaksQuarterly", frequencies: ["quarterly"] },
+  { labelKey: "fsmValveProperSignageQuarterly", frequencies: ["quarterly"] },
+  // Quarterly - Fire Department Connections
+  { labelKey: "fdcVisibleAccessible", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcCouplingSwivelsOperate", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcPlugsCapsInPlace", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcGasketsNotDamaged", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcAutoDrainValveOperating", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcIdentificationSigns", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcInteriorClearObstructions", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcClappersOperateCorrectly", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcCheckValveNotLeaking", frequencies: ["quarterly"] },
+  { labelKey: "fsmFdcVisiblePipingUndamaged", frequencies: ["quarterly"] },
+  // Quarterly - Hose Houses
+  { labelKey: "hoseHousesAccessible", frequencies: ["quarterly"] },
+  { labelKey: "hoseHousesFreeDamageLeaks", frequencies: ["quarterly"] },
+  { labelKey: "hoseHousesNoMissingEquipment", frequencies: ["quarterly"] },
+  // Quarterly - Dry Hydrant
+  { labelKey: "dryHydrantWaterSupplyNotDeteriorated", frequencies: ["quarterly"] },
+  { labelKey: "dryHydrantVegetationCleared", frequencies: ["quarterly"] },
+  // Semiannual - Monitor Nozzles
+  { labelKey: "monitorNozzlesNotLeaking", frequencies: ["semiannually"] },
+  { labelKey: "monitorNozzlesFreeOfDamage", frequencies: ["semiannually"] },
+  { labelKey: "monitorNozzlesFreeOfCorrosion", frequencies: ["semiannually"] },
+  // Semiannual - Dry Hydrants
+  { labelKey: "dryHydrantReflectiveMaterial", frequencies: ["semiannually"] },
+  // Annual - Hydrants (Dry Barrel and Wall Type)
+  { labelKey: "dryBarrelHydrantAccessible", frequencies: ["annually"] },
+  { labelKey: "dryBarrelFreeWaterIce", frequencies: ["annually"] },
+  { labelKey: "dryBarrelDrainsProperly", frequencies: ["annually"] },
+  { labelKey: "dryBarrelNotLeaking", frequencies: ["annually"] },
+  { labelKey: "dryBarrelFreeCracks", frequencies: ["annually"] },
+  { labelKey: "dryBarrelOutletsLubricated", frequencies: ["annually"] },
+  { labelKey: "dryBarrelNozzleThreadsNotWorn", frequencies: ["annually"] },
+  { labelKey: "dryBarrelOperatingNutNotWorn", frequencies: ["annually"] },
+  { labelKey: "dryBarrelOperatingWrenchAvailable", frequencies: ["annually"] },
+  { labelKey: "dryBarrelFreeDetrimentalCorrosion", frequencies: ["annually"] },
+  // Annual - Hydrants (Wet Barrel)
+  { labelKey: "wetBarrelHydrantAccessible", frequencies: ["annually"] },
+  { labelKey: "wetBarrelNotLeaking", frequencies: ["annually"] },
+  { labelKey: "wetBarrelFreeCracks", frequencies: ["annually"] },
+  { labelKey: "wetBarrelOutletsLubricated", frequencies: ["annually"] },
+  { labelKey: "wetBarrelNozzleThreadsNotWorn", frequencies: ["annually"] },
+  { labelKey: "wetBarrelOperatingNutNotWorn", frequencies: ["annually"] },
+  { labelKey: "wetBarrelOperatingWrenchAvailable", frequencies: ["annually"] },
+  // Annual - FDC
+  { labelKey: "fdcInteriorLockedPlugsFree", frequencies: ["annually"] },
+  // Annual - Mainline Strainers
+  { labelKey: "mainlineStrainersNotPlugged", frequencies: ["annually"] },
+  { labelKey: "mainlineStrainersFreeCorrosion", frequencies: ["annually"] },
+  { labelKey: "mainlineStrainersNoDamagedParts", frequencies: ["annually"] },
+  // Annual - Pipe and Fittings (exposed)
+  { labelKey: "fsmPipeFittingsNotLeaking", frequencies: ["annually"] },
+  { labelKey: "fsmPipeFittingsHangersIntact", frequencies: ["annually"] },
+  // Five Years - Backflow and Check Valves
+  { labelKey: "backflowInternalInspection", frequencies: ["five_years"] },
+  { labelKey: "fsmCheckValveInternalCondition", frequencies: ["five_years"] },
+  { labelKey: "fsmBackflowForwardFlowTest", frequencies: ["five_years"] },
+  // Test - Annual Monitor Nozzles
+  { labelKey: "monitorNozzlesFlowTest", frequencies: ["annually"] },
+  { labelKey: "monitorNozzlesFullRangeMotion", frequencies: ["annually"] },
+  // Test - Annual Dry Hydrant
+  { labelKey: "dryHydrantFlowTest", frequencies: ["annually"] },
+  // Test - Annual Hydrants
+  { labelKey: "hydrantsFlowTestOneMinute", frequencies: ["annually"] },
+  { labelKey: "hydrantsBarrelDrains60Min", frequencies: ["annually"] },
+  // Test - Annual Hydrant Isolation Valve
+  { labelKey: "hydrantIsolationValveFullRange", frequencies: ["annually"] },
+  { labelKey: "hydrantIsolationValveStatusTest", frequencies: ["annually"] },
+  // Test - Five Years Piping
+  { labelKey: "pipingFlowTestFireRate", frequencies: ["five_years"] },
+  { labelKey: "pipingFlowTestComparable", frequencies: ["five_years"] },
+  // Test - Five Years FDC
+  { labelKey: "fdcHydrostaticTest150psi", frequencies: ["five_years"] },
+  // Maintenance - Annual
+  { labelKey: "mainlineStrainersCleanedInspected", frequencies: ["annually"] },
+  { labelKey: "hydrantsLubricate", frequencies: ["annually"] },
+  { labelKey: "hydrantsAccessibleMaintenance", frequencies: ["annually"] },
+  { labelKey: "hydrantsProtectedFromDamage", frequencies: ["annually"] },
+  { labelKey: "monitorNozzlesLubricate", frequencies: ["annually"] },
+];
+
 const checklistsByType: Record<InspectionType, ChecklistTemplate[]> = {
   wet_pipe: wetPipeChecklist,
   dry_pipe: dryPipeChecklist,
@@ -750,6 +855,7 @@ const checklistsByType: Record<InspectionType, ChecklistTemplate[]> = {
   water_tank: waterTankChecklist,
   hazard_eval: hazardEvalChecklist,
   standpipe: standpipeChecklist,
+  fire_service_mains: fireServiceMainsChecklist,
 };
 
 export function getChecklistForType(

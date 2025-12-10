@@ -348,6 +348,106 @@ export const translations = {
       hatchCoversFastened: "Tampas de escotilha no telhado e porta no topo de caixas anti-geada bem fixadas",
       wasteMaterialInOnTank: "Resíduos dentro ou sobre o tanque",
       cleanStrainersQuarterly: "Limpar filtros trimestralmente",
+      // Fire Service Mains - Weekly Control Valves
+      fsmValveCorrectPosition: "Na posição correta (aberta ou fechada)",
+      fsmValveSealed: "Selada",
+      fsmValveAccessible: "Acessível",
+      fsmPivCorrectWrenches: "PIVs com chaves corretas disponíveis",
+      fsmValveFreeDamageLeaks: "Livre de danos ou vazamentos",
+      fsmValveProperSignage: "Sinalização adequada",
+      // Fire Service Mains - Weekly Backflow
+      backflowIsolationValvesOpen: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
+      rpaRpdaReliefValveOperating: "RPA e RPDA - válvula de alívio com sensor diferencial operando corretamente",
+      // Fire Service Mains - Monthly Control Valves
+      fsmValveCorrectPositionMonthly: "Na posição correta (aberta ou fechada)",
+      fsmValveLockedSupervised: "Travada ou supervisionada",
+      fsmValveAccessibleMonthly: "Acessível",
+      fsmPivCorrectWrenchesMonthly: "PIVs com chaves corretas disponíveis",
+      fsmValveFreeDamageLeaksMonthly: "Livre de danos ou vazamentos",
+      fsmValveProperSignageMonthly: "Sinalização adequada",
+      // Fire Service Mains - Quarterly Control Valves
+      fsmValveCorrectPositionQuarterly: "Na posição correta (aberta ou fechada)",
+      fsmValveElectronicSupervised: "Supervisionada eletronicamente",
+      fsmValveAccessibleQuarterly: "Acessível",
+      fsmPivCorrectWrenchesQuarterly: "PIVs com chaves corretas disponíveis",
+      fsmValveFreeDamageLeaksQuarterly: "Livre de danos ou vazamentos",
+      fsmValveProperSignageQuarterly: "Sinalização adequada",
+      // Fire Service Mains - Quarterly FDC
+      fsmFdcCouplingSwivelsOperate: "Acoplamentos/giratórios operam corretamente",
+      fsmFdcPlugsCapsInPlace: "Plugues/tampas no lugar",
+      fsmFdcGasketsNotDamaged: "Juntas não estão danificadas",
+      fsmFdcAutoDrainValveOperating: "Válvula de drenagem automática no lugar e operando corretamente",
+      fsmFdcIdentificationSigns: "Placas de identificação no lugar",
+      fsmFdcInteriorClearObstructions: "Interior livre de obstruções (a menos que travado)",
+      fsmFdcClappersOperateCorrectly: "Válvula(s) de retenção opera(m) corretamente",
+      fsmFdcCheckValveNotLeaking: "Válvula de retenção não vaza",
+      fsmFdcVisiblePipingUndamaged: "Tubulação visível fornecendo conexão do corpo de bombeiros não está danificada",
+      // Fire Service Mains - Quarterly Hose Houses
+      hoseHousesAccessible: "Acessível",
+      hoseHousesFreeDamageLeaks: "Livre de danos ou vazamentos",
+      hoseHousesNoMissingEquipment: "Sem equipamento faltando",
+      // Fire Service Mains - Quarterly Dry Hydrant
+      dryHydrantWaterSupplyNotDeteriorated: "Suprimento de água não deteriorado em lagoa, riacho ou cisterna",
+      dryHydrantVegetationCleared: "Vegetação limpa em raio de 0,9 m do hidrante",
+      // Fire Service Mains - Semiannual Monitor Nozzles
+      monitorNozzlesNotLeaking: "Sem vazamentos",
+      monitorNozzlesFreeOfDamage: "Livre de danos",
+      monitorNozzlesFreeOfCorrosion: "Livre de corrosão",
+      // Fire Service Mains - Semiannual Dry Hydrants
+      dryHydrantReflectiveMaterial: "Material refletivo e sinalização conforme NFPA 1142 seção 8.4.7",
+      // Fire Service Mains - Annual Dry Barrel Hydrants
+      dryBarrelHydrantAccessible: "Acessível",
+      dryBarrelFreeWaterIce: "Barril livre de água e gelo",
+      dryBarrelDrainsProperly: "Barril drena corretamente",
+      dryBarrelNotLeaking: "Sem vazamentos",
+      dryBarrelFreeCracks: "Barril livre de rachaduras",
+      dryBarrelOutletsLubricated: "Saídas não excessivamente apertadas e lubrificadas",
+      dryBarrelNozzleThreadsNotWorn: "Roscas dos bicos não desgastadas",
+      dryBarrelOperatingNutNotWorn: "Porca de operação não desgastada",
+      dryBarrelOperatingWrenchAvailable: "Chave de operação disponível",
+      dryBarrelFreeDetrimentalCorrosion: "Livre de corrosão prejudicial",
+      // Fire Service Mains - Annual Wet Barrel Hydrants
+      wetBarrelHydrantAccessible: "Acessível",
+      wetBarrelNotLeaking: "Sem vazamentos",
+      wetBarrelFreeCracks: "Barril livre de rachaduras",
+      wetBarrelOutletsLubricated: "Saídas não excessivamente apertadas e lubrificadas",
+      wetBarrelNozzleThreadsNotWorn: "Roscas dos bicos não desgastadas",
+      wetBarrelOperatingNutNotWorn: "Porca de operação não desgastada",
+      wetBarrelOperatingWrenchAvailable: "Chave de operação disponível",
+      // Fire Service Mains - Annual FDC
+      fdcInteriorLockedPlugsFree: "Interior da conexão com plugues travados livre de obstruções",
+      // Fire Service Mains - Annual Mainline Strainers
+      mainlineStrainersNotPlugged: "Não entupidos ou obstruídos",
+      mainlineStrainersFreeCorrosion: "Livre de corrosão",
+      mainlineStrainersNoDamagedParts: "Sem partes danificadas",
+      // Fire Service Mains - Annual Pipe and Fittings
+      fsmPipeFittingsNotLeaking: "Sem vazamentos",
+      fsmPipeFittingsHangersIntact: "Suportes intactos e não danificados",
+      // Fire Service Mains - Five Years
+      fsmCheckValveInternalCondition: "Válvula de retenção - interno move livremente e em boas condições",
+      fsmBackflowForwardFlowTest: "Backflow - teste de fluxo direto na vazão mínima da demanda do sistema",
+      // Fire Service Mains - Annual Tests Monitor Nozzles
+      monitorNozzlesFlowTest: "Teste de vazão até todo material estranho ser eliminado (mínimo um minuto)",
+      monitorNozzlesFullRangeMotion: "Operado em toda amplitude de movimento",
+      // Fire Service Mains - Annual Tests Dry Hydrant
+      dryHydrantFlowTest: "Teste de vazão",
+      // Fire Service Mains - Annual Tests Hydrants
+      hydrantsFlowTestOneMinute: "Teste de vazão até todo material estranho ser eliminado (mínimo um minuto)",
+      hydrantsBarrelDrains60Min: "Barril drena em 60 minutos",
+      // Fire Service Mains - Annual Tests Hydrant Isolation Valve
+      hydrantIsolationValveFullRange: "Operada em toda amplitude de movimento",
+      hydrantIsolationValveStatusTest: "Teste de status (verificar válvula na posição aberta)",
+      // Fire Service Mains - Five Years Tests Piping
+      pipingFlowTestFireRate: "Teste de vazão na taxa antecipada durante incêndio",
+      pipingFlowTestComparable: "Resultados do teste de vazão comparáveis ao teste anterior",
+      // Fire Service Mains - Five Years Tests FDC
+      fdcHydrostaticTest150psi: "Tubulação da conexão do corpo de bombeiros testada hidrostaticamente a 150 psi por pelo menos 2 horas",
+      // Fire Service Mains - Annual Maintenance
+      mainlineStrainersCleanedInspected: "Removido, inspecionado e limpo",
+      hydrantsLubricate: "Lubrificar hastes, tampas, plugues e roscas",
+      hydrantsAccessibleMaintenance: "Acessível (sem neve, gelo ou outro material)",
+      hydrantsProtectedFromDamage: "Protegido contra danos",
+      monitorNozzlesLubricate: "Lubrificar conforme recomendações do fabricante",
       occupancyClassification: "Classificação de ocupação verificada",
       hazardClassification: "Classificação de perigo verificada",
       storageArrangement: "Arranjo de armazenamento verificado",
@@ -1021,6 +1121,106 @@ export const translations = {
       hatchCoversFastened: "Hatch covers in the roofs and the door at the top of frost-proof castings kept securely fastened",
       wasteMaterialInOnTank: "Waste material in or on the tank",
       cleanStrainersQuarterly: "Clean strainers quarterly",
+      // Fire Service Mains - Weekly Control Valves
+      fsmValveCorrectPosition: "In the correct (open or closed) position",
+      fsmValveSealed: "Sealed",
+      fsmValveAccessible: "Accessible",
+      fsmPivCorrectWrenches: "PIVs provided with correct wrenches",
+      fsmValveFreeDamageLeaks: "Free from damage or leaks",
+      fsmValveProperSignage: "Proper signage",
+      // Fire Service Mains - Weekly Backflow
+      backflowIsolationValvesOpen: "Isolation valves are in open position and locked or supervised",
+      rpaRpdaReliefValveOperating: "RPA and RPDA - differential-sensing relief valve operating correctly",
+      // Fire Service Mains - Monthly Control Valves
+      fsmValveCorrectPositionMonthly: "In the correct (open or closed) position",
+      fsmValveLockedSupervised: "Locked or supervised",
+      fsmValveAccessibleMonthly: "Accessible",
+      fsmPivCorrectWrenchesMonthly: "PIVs provided with correct wrenches",
+      fsmValveFreeDamageLeaksMonthly: "Free from damage or leaks",
+      fsmValveProperSignageMonthly: "Proper signage",
+      // Fire Service Mains - Quarterly Control Valves
+      fsmValveCorrectPositionQuarterly: "In the correct (open or closed) position",
+      fsmValveElectronicSupervised: "Electronically supervised",
+      fsmValveAccessibleQuarterly: "Accessible",
+      fsmPivCorrectWrenchesQuarterly: "PIVs provided with correct wrenches",
+      fsmValveFreeDamageLeaksQuarterly: "Free from damage or leaks",
+      fsmValveProperSignageQuarterly: "Proper signage",
+      // Fire Service Mains - Quarterly FDC
+      fsmFdcCouplingSwivelsOperate: "Coupling/swivels operate correctly",
+      fsmFdcPlugsCapsInPlace: "Plugs/caps are in place",
+      fsmFdcGasketsNotDamaged: "Gaskets are not damaged",
+      fsmFdcAutoDrainValveOperating: "Automatic drain valve in place and operating properly",
+      fsmFdcIdentificationSigns: "Identification signs are in place",
+      fsmFdcInteriorClearObstructions: "Interior is clear of obstructions (unless locked)",
+      fsmFdcClappersOperateCorrectly: "Clapper(s) operates correctly",
+      fsmFdcCheckValveNotLeaking: "Check valve not leaking",
+      fsmFdcVisiblePipingUndamaged: "Visible piping supplying the fire department connection is undamaged",
+      // Fire Service Mains - Quarterly Hose Houses
+      hoseHousesAccessible: "Accessible",
+      hoseHousesFreeDamageLeaks: "Free from damage or leaks",
+      hoseHousesNoMissingEquipment: "No missing equipment",
+      // Fire Service Mains - Quarterly Dry Hydrant
+      dryHydrantWaterSupplyNotDeteriorated: "Water supply is not deteriorated in pond, stream, or cistern",
+      dryHydrantVegetationCleared: "Vegetation cleared 3 ft (0.9 m) radius from hydrant",
+      // Fire Service Mains - Semiannual Monitor Nozzles
+      monitorNozzlesNotLeaking: "Not leaking",
+      monitorNozzlesFreeOfDamage: "Free of damage",
+      monitorNozzlesFreeOfCorrosion: "Free of corrosion",
+      // Fire Service Mains - Semiannual Dry Hydrants
+      dryHydrantReflectiveMaterial: "Reflective material marking and signage is in accordance with NFPA 1142 section 8.4.7",
+      // Fire Service Mains - Annual Dry Barrel Hydrants
+      dryBarrelHydrantAccessible: "Accessible",
+      dryBarrelFreeWaterIce: "Barrel is free of water and ice",
+      dryBarrelDrainsProperly: "Barrel drains properly",
+      dryBarrelNotLeaking: "Not leaking",
+      dryBarrelFreeCracks: "Barrel is free of cracks",
+      dryBarrelOutletsLubricated: "Outlets are not excessively tight and lubricated",
+      dryBarrelNozzleThreadsNotWorn: "Nozzle threads are not worn",
+      dryBarrelOperatingNutNotWorn: "Operating nut is not worn",
+      dryBarrelOperatingWrenchAvailable: "Operating wrench is available",
+      dryBarrelFreeDetrimentalCorrosion: "Free of detrimental corrosion",
+      // Fire Service Mains - Annual Wet Barrel Hydrants
+      wetBarrelHydrantAccessible: "Accessible",
+      wetBarrelNotLeaking: "Not leaking",
+      wetBarrelFreeCracks: "Barrel is free of cracks",
+      wetBarrelOutletsLubricated: "Outlets not excessively tight and lubricated",
+      wetBarrelNozzleThreadsNotWorn: "Nozzle threads are not worn",
+      wetBarrelOperatingNutNotWorn: "Operating nut is not worn",
+      wetBarrelOperatingWrenchAvailable: "Operating wrench is available",
+      // Fire Service Mains - Annual FDC
+      fdcInteriorLockedPlugsFree: "Interior of connection with locked plugs or caps is free of obstructions",
+      // Fire Service Mains - Annual Mainline Strainers
+      mainlineStrainersNotPlugged: "Not plugged or fouled",
+      mainlineStrainersFreeCorrosion: "Free of corrosion",
+      mainlineStrainersNoDamagedParts: "No damaged parts",
+      // Fire Service Mains - Annual Pipe and Fittings
+      fsmPipeFittingsNotLeaking: "Not leaking",
+      fsmPipeFittingsHangersIntact: "Hangers intact and not damaged",
+      // Fire Service Mains - Five Years
+      fsmCheckValveInternalCondition: "Check valve - internal moves freely and in good condition",
+      fsmBackflowForwardFlowTest: "Backflow - forward flow test at minimum flow rate of the system demand",
+      // Fire Service Mains - Annual Tests Monitor Nozzles
+      monitorNozzlesFlowTest: "Flow test until all foreign material has cleared (not less than one minute)",
+      monitorNozzlesFullRangeMotion: "Operated through full range of motion",
+      // Fire Service Mains - Annual Tests Dry Hydrant
+      dryHydrantFlowTest: "Flow Test",
+      // Fire Service Mains - Annual Tests Hydrants
+      hydrantsFlowTestOneMinute: "Flow test until all foreign material has cleared (not less than one minute)",
+      hydrantsBarrelDrains60Min: "Barrel drains within 60 minutes",
+      // Fire Service Mains - Annual Tests Hydrant Isolation Valve
+      hydrantIsolationValveFullRange: "Operated through full range of motion",
+      hydrantIsolationValveStatusTest: "Status test (verify valve is in the open position)",
+      // Fire Service Mains - Five Years Tests Piping
+      pipingFlowTestFireRate: "Flow test piping at rate anticipated during a fire",
+      pipingFlowTestComparable: "Flow test results comparable to previous test",
+      // Fire Service Mains - Five Years Tests FDC
+      fdcHydrostaticTest150psi: "Piping from FDC to FDC check valve hydrostatically tested at 150 psi for at least 2 hours",
+      // Fire Service Mains - Annual Maintenance
+      mainlineStrainersCleanedInspected: "Removed, inspected, and cleaned",
+      hydrantsLubricate: "Lubricate stems, caps, plugs, and threads",
+      hydrantsAccessibleMaintenance: "Accessible (no snow, ice, or other material)",
+      hydrantsProtectedFromDamage: "Protected from damage",
+      monitorNozzlesLubricate: "Lubricate per manufacturer's recommendations",
       occupancyClassification: "Occupancy classification verified",
       hazardClassification: "Hazard classification verified",
       storageArrangement: "Storage arrangement verified",

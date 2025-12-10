@@ -42,7 +42,7 @@ export type InspectionType =
   | "wet_pipe" | "dry_pipe" | "preaction_deluge" | "foam_water" | "water_spray" | "water_mist"
   | "pump_weekly" | "pump_monthly" | "pump_annual"
   | "aboveground" | "underground" | "hydrant_flow"
-  | "water_tank" | "hazard_eval" | "standpipe";
+  | "water_tank" | "hazard_eval" | "standpipe" | "fire_service_mains";
 
 export type ChecklistValue = "yes" | "no" | "na" | null;
 
