@@ -340,7 +340,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addFirePump = async (pump: FirePump) => {
-    const newFirePumps = [...firePumps, pump];
+    const storedData = await AsyncStorage.getItem(FIRE_PUMPS_KEY);
+    const currentFirePumps: FirePump[] = storedData ? JSON.parse(storedData) : [];
+    const newFirePumps = [...currentFirePumps, pump];
     await saveFirePumps(newFirePumps);
   };
 
@@ -355,9 +357,14 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const deleteFirePump = async (id: string) => {
-    const newFirePumps = firePumps.filter((pump) => pump.id !== id);
+    const storedPumps = await AsyncStorage.getItem(FIRE_PUMPS_KEY);
+    const currentFirePumps: FirePump[] = storedPumps ? JSON.parse(storedPumps) : [];
+    const newFirePumps = currentFirePumps.filter((pump) => pump.id !== id);
     await saveFirePumps(newFirePumps);
-    const newPanels = firePumpPanels.filter((panel) => panel.pumpId !== id);
+    
+    const storedPanels = await AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY);
+    const currentPanels: FirePumpControlPanel[] = storedPanels ? JSON.parse(storedPanels) : [];
+    const newPanels = currentPanels.filter((panel) => panel.pumpId !== id);
     await saveFirePumpPanels(newPanels);
   };
 
