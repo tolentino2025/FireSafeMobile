@@ -190,22 +190,22 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     sublabel: panel.manufacturer && panel.model ? `${panel.manufacturer} ${panel.model}` : panel.startingType || "",
   }));
 
-  const handleChecklistChange = (id: string, value: "yes" | "no" | "na" | null) => {
+  const handleChecklistChange = useCallback((id: string, value: "yes" | "no" | "na" | null) => {
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
     }
     setChecklist((prev) =>
       prev.map((item) => (item.id === id ? { ...item, value } : item))
     );
-  };
+  }, []);
 
-  const handleChecklistPsiChange = (id: string, psiValue: string) => {
+  const handleChecklistPsiChange = useCallback((id: string, psiValue: string) => {
     setChecklist((prev) =>
       prev.map((item) => (item.id === id ? { ...item, psiValue } : item))
     );
-  };
+  }, []);
 
-  const handleNumericFieldChange = (itemId: string, fieldId: string, value: string) => {
+  const handleNumericFieldChange = useCallback((itemId: string, fieldId: string, value: string) => {
     setChecklist((prev) =>
       prev.map((item) => {
         if (item.id === itemId && item.numericFields) {
@@ -219,13 +219,13 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         return item;
       })
     );
-  };
+  }, []);
 
-  const handleNotesChange = (itemId: string, notes: string) => {
+  const handleNotesChange = useCallback((itemId: string, notes: string) => {
     setChecklist((prev) =>
       prev.map((item) => (item.id === itemId ? { ...item, notes } : item))
     );
-  };
+  }, []);
 
   const handleSubmit = async () => {
     if (!propertyName.trim()) {
@@ -300,6 +300,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       water_tank: "waterTank",
       hazard_eval: "hazardEval",
       standpipe: "standpipe",
+      fire_service_mains: "standpipe",
     };
     return mapping[type];
   };
@@ -310,7 +311,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       weekly: "weekly",
       monthly: "monthly",
       quarterly: "quarterly",
+      semiannually: "semiannually",
       annually: "annually",
+      three_years: "threeYears",
       five_years: "fiveYears",
     };
     return t.form.frequencies[frequencyMapping[freq]];

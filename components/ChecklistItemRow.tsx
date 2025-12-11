@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { View, StyleSheet, Pressable, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
@@ -17,7 +17,7 @@ interface ChecklistItemRowProps {
   showNotes?: boolean;
 }
 
-export function ChecklistItemRow({ 
+function ChecklistItemRowComponent({ 
   item, 
   onValueChange, 
   onPsiChange,
@@ -327,4 +327,15 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
     fontSize: 14,
   },
+});
+
+export const ChecklistItemRow = memo(ChecklistItemRowComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.value === nextProps.item.value &&
+    prevProps.item.psiValue === nextProps.item.psiValue &&
+    prevProps.item.notes === nextProps.item.notes &&
+    prevProps.showNotes === nextProps.showNotes &&
+    JSON.stringify(prevProps.item.numericFields) === JSON.stringify(nextProps.item.numericFields)
+  );
 });
