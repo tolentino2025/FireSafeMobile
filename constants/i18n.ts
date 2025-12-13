@@ -79,6 +79,7 @@ export const translations = {
       electricPump: "Bomba Elétrica",
       dieselPump: "Bomba Diesel",
       performanceTest: "Teste de Performance Anual",
+      dieselPerformanceTest: "Teste Anual Bomba Diesel",
     },
     form: {
       propertyName: "Nome da Propriedade",
@@ -2288,6 +2289,7 @@ export const translations = {
       electricPump: "Electric Pump",
       dieselPump: "Diesel Pump",
       performanceTest: "Annual Performance Test",
+      dieselPerformanceTest: "Diesel Pump Annual Test",
     },
     form: {
       propertyName: "Property Name",
