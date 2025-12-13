@@ -171,14 +171,15 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
         <Spacer height={Spacing["2xl"]} />
 
         <Button
-          title={isLoading 
-            ? (t.license?.activating || "Activating...") 
-            : (t.license?.activateButton || "Activate License")
-          }
           onPress={handleActivate}
           disabled={isLoading || licenseKeyInput.replace(/-/g, "").length < 12}
           style={styles.button}
-        />
+        >
+          {isLoading 
+            ? (t.license?.activating || "Activating...") 
+            : (t.license?.activateButton || "Ativar Licença")
+          }
+        </Button>
 
         {isLoading ? (
           <>
