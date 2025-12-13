@@ -5,6 +5,8 @@ import PropertiesScreen from "@/screens/PropertiesScreen";
 import PropertyFormScreen from "@/screens/PropertyFormScreen";
 import CompaniesScreen from "@/screens/CompaniesScreen";
 import CompanyFormScreen from "@/screens/CompanyFormScreen";
+import ContractorsScreen from "@/screens/ContractorsScreen";
+import ContractorFormScreen from "@/screens/ContractorFormScreen";
 import UsersScreen from "@/screens/UsersScreen";
 import UserFormScreen from "@/screens/UserFormScreen";
 import FirePumpListScreen from "@/screens/FirePumpListScreen";
@@ -19,6 +21,8 @@ export type PropertiesStackParamList = {
   PropertyForm: { propertyId?: string; companyId?: string; mode: "property" | "company" };
   Companies: undefined;
   CompanyForm: { companyId?: string };
+  Contractors: undefined;
+  ContractorForm: { contractorId?: string };
   Users: undefined;
   UserForm: { userId?: string };
   FirePumpList: undefined;
@@ -63,6 +67,21 @@ export default function PropertiesStackNavigator() {
       <Stack.Screen
         name="CompanyForm"
         component={CompanyFormScreen}
+        options={{
+          presentation: "modal",
+          headerTitle: "",
+        }}
+      />
+      <Stack.Screen
+        name="Contractors"
+        component={ContractorsScreen}
+        options={{
+          headerTitle: t.contractors?.title || "Contractors",
+        }}
+      />
+      <Stack.Screen
+        name="ContractorForm"
+        component={ContractorFormScreen}
         options={{
           presentation: "modal",
           headerTitle: "",

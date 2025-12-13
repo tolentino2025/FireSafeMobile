@@ -11,7 +11,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Property, Company, AppUser, FirePump } from "@/contexts/InspectionContext";
+import { useInspections, Property, Company, AppUser, FirePump, Contractor } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 
@@ -19,7 +19,7 @@ type PropertiesScreenProps = {
   navigation: NativeStackNavigationProp<PropertiesStackParamList, "PropertiesList">;
 };
 
-type TabType = "companies" | "properties" | "inspectors" | "pumps";
+type TabType = "companies" | "contractors" | "properties" | "inspectors" | "pumps";
 
 function UserCard({
   user,
@@ -96,10 +96,47 @@ function FirePumpCard({
   );
 }
 
+function ContractorCard({
+  contractor,
+  onPress,
+}: {
+  contractor: Contractor;
+  onPress: () => void;
+}) {
+  const { fullTheme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.userCard, { 
+        backgroundColor: fullTheme.colors.cardBackground,
+        borderColor: fullTheme.colors.border,
+      }]}
+    >
+      <View style={[styles.userIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name="tool" size={24} color={fullTheme.colors.primary} />
+      </View>
+      <View style={styles.userCardContent}>
+        <ThemedText type="h4" numberOfLines={1}>{contractor.name}</ThemedText>
+        <ThemedText type="small" secondary numberOfLines={1}>
+          {contractor.licenseNumber ? `#${contractor.licenseNumber}` : "-"}
+        </ThemedText>
+        <ThemedText type="small" secondary numberOfLines={1}>
+          {contractor.city ? `${contractor.city}` : ""}{contractor.state ? `, ${contractor.state}` : ""}
+        </ThemedText>
+        <ThemedText type="small" secondary numberOfLines={1}>
+          {contractor.phone || contractor.email || "-"}
+        </ThemedText>
+      </View>
+      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+    </Pressable>
+  );
+}
+
 export default function PropertiesScreen({ navigation }: PropertiesScreenProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { properties, companies, appUsers, firePumps } = useInspections();
+  const { properties, companies, appUsers, firePumps, contractors } = useInspections();
 
   const getPumpTypeLabel = (type: string) => {
     switch (type) {
@@ -160,6 +197,17 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     );
   }, [firePumps, searchQuery]);
 
+  const filteredContractors = useMemo(() => {
+    if (!searchQuery.trim()) return contractors;
+    const query = searchQuery.toLowerCase();
+    return contractors.filter(
+      (contractor) =>
+        contractor.name.toLowerCase().includes(query) ||
+        (contractor.licenseNumber && contractor.licenseNumber.toLowerCase().includes(query)) ||
+        (contractor.city && contractor.city.toLowerCase().includes(query))
+    );
+  }, [contractors, searchQuery]);
+
   const handleTabPress = (tab: TabType) => {
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
@@ -177,6 +225,8 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
       navigation.navigate("UserForm", {});
     } else if (activeTab === "pumps") {
       navigation.navigate("FirePumpList");
+    } else if (activeTab === "contractors") {
+      navigation.navigate("ContractorForm", {});
     } else {
       navigation.navigate("PropertyForm", { mode: "property" });
     }
@@ -196,6 +246,10 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
 
   const handlePumpPress = (pump: FirePump) => {
     navigation.navigate("FirePumpForm", { pumpId: pump.id, companyId: pump.companyId });
+  };
+
+  const handleContractorPress = (contractor: Contractor) => {
+    navigation.navigate("ContractorForm", { contractorId: contractor.id });
   };
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
@@ -222,6 +276,13 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   const renderPumpItem = ({ item }: { item: FirePump }) => (
     <>
       <FirePumpCard pump={item} getPumpTypeLabel={getPumpTypeLabel} onPress={() => handlePumpPress(item)} />
+      <Spacer height={Spacing.md} />
+    </>
+  );
+
+  const renderContractorItem = ({ item }: { item: Contractor }) => (
+    <>
+      <ContractorCard contractor={item} onPress={() => handleContractorPress(item)} />
       <Spacer height={Spacing.md} />
     </>
   );
@@ -333,6 +394,33 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
           </ThemedText>
         </Pressable>
         <Pressable
+          onPress={() => handleTabPress("contractors")}
+          style={[
+            styles.tab,
+            {
+              backgroundColor:
+                activeTab === "contractors" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border,
+            },
+          ]}
+        >
+          <Feather
+            name="tool"
+            size={16}
+            color={activeTab === "contractors" ? "#FFFFFF" : fullTheme.colors.textPrimary}
+          />
+          <ThemedText
+            type="small"
+            style={{
+              color: activeTab === "contractors" ? "#FFFFFF" : fullTheme.colors.textPrimary,
+              marginLeft: Spacing.xs,
+              fontWeight: "600",
+            }}
+          >
+            {t.contractors?.title || "Contratantes"}
+          </ThemedText>
+        </Pressable>
+        <Pressable
           onPress={() => handleTabPress("properties")}
           style={[
             styles.tab,
@@ -366,7 +454,7 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   );
 
   const renderEmpty = () => {
-    let icon: "briefcase" | "users" | "home" | "activity" = "briefcase";
+    let icon: "briefcase" | "users" | "home" | "activity" | "tool" = "briefcase";
     let message = t.companies?.noResults || t.properties.noResults;
     
     if (activeTab === "inspectors") {
@@ -378,6 +466,9 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     } else if (activeTab === "pumps") {
       icon = "activity";
       message = t.firePumps?.noResults || "Nenhuma bomba cadastrada";
+    } else if (activeTab === "contractors") {
+      icon = "tool";
+      message = t.contractors?.noResults || "Nenhum contratante cadastrado";
     }
 
     return (
@@ -415,6 +506,15 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         <ScreenFlatList
           data={filteredPumps}
           renderItem={renderPumpItem}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmpty}
+          contentContainerStyle={styles.listContent}
+        />
+      ) : activeTab === "contractors" ? (
+        <ScreenFlatList
+          data={filteredContractors}
+          renderItem={renderContractorItem}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderEmpty}

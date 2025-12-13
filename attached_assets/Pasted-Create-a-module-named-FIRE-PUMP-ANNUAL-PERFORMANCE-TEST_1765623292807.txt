@@ -1,0 +1,236 @@
+Create a module named "FIRE PUMP ANNUAL PERFORMANCE TEST – ELECTRIC FIRE PUMP"
+based strictly on NFPA 25 Handbook, reproducing 100% of the official form content.
+
+IMPORTANT:
+- Fire Pump, Contractor Information, and Job Information must be selected from dropdowns of pre-registered records.
+- Selecting an item must auto-populate all related fields.
+- Auto-populated fields must remain editable (override allowed).
+- Any override applies ONLY to this test record.
+- Master records must NEVER be overwritten unless the user explicitly clicks "Update Master Data".
+
+==================================================
+SECTION 0 — SELECT PRE-REGISTERED RECORDS (REQUIRED)
+==================================================
+Dropdowns:
+- Select Fire Pump (from Fire Pump Registry)
+- Select Contractor (from Contractor Registry)
+- Select Job / Site (from Job Registry)
+
+On selection, auto-load related data into the sections below.
+
+Buttons:
+- Load Selected Data
+- Clear Selections
+- Update Master Data (explicit action, optional)
+
+==================================================
+SECTION 1 — GENERAL INFORMATION
+==================================================
+Title: FIRE PUMP ANNUAL PERFORMANCE TEST
+
+----------------------------
+Contractor Information (AUTO-FILLED FROM DROPDOWN)
+----------------------------
+- Name
+- Address
+- Phone
+- Fax
+
+----------------------------
+Job Information (AUTO-FILLED FROM DROPDOWN)
+----------------------------
+- Job Name
+- Job No.
+- Test Date
+- Test performed for
+- Test location
+- Test Method
+
+----------------------------
+Test Header
+----------------------------
+Checkboxes:
+- Flow meter to drain or suction reservoir
+- Flowmeter back to suction (closed-loop metering)
+
+==================================================
+SECTION 2 — PUMP NAMEPLATE INFORMATION (AUTO-FILLED)
+==================================================
+Pump Nameplate Information:
+- Make
+- Model
+- Stages
+- Coupling
+- SN
+- Impeller Diameter
+- Speed
+- Rated Capacity
+- Rated Pressure
+
+Motor Nameplate Information:
+- Make
+- SN
+- Volts
+- Amps
+- Frame
+- Speed
+- HP
+
+Water Supply Type
+
+Pump Controller Nameplate Information:
+- Make
+- Model
+- SN
+- Time set for minutes
+- Turns on at
+- Turns off at
+
+==================================================
+SECTION 3 — PRESSURE MAINTENANCE (JOCKEY) PUMP (AUTO-FILLED)
+==================================================
+Pressure Maintenance Pump Nameplate Information:
+- Make
+- Model
+- SN
+- Speed
+- HP
+- Volts
+
+Pressure Maintenance Pump Controller Nameplate Information:
+- Make
+- Model
+- SN
+- Turns on at
+- Turns off at
+
+==================================================
+SECTION 4 — FLOW TEST PRE-CHECKS
+==================================================
+Yes / No fields:
+A. Manufacturer’s certified pump test curve attached
+B. Test results compared to manufacturer’s certified pump test curve
+C. Gauges and test equipment calibrated
+D. No objectionable vibration
+E. Pump operated without objectionable overheating
+
+==================================================
+SECTION 5 — FLOW TEST CALCULATIONS (READ-ONLY)
+==================================================
+Display formulas exactly:
+- PNet = PDischarge – PSuction
+- Q = 29.83 cd²√P
+- Pv = 0.4335 V² / (2g)
+- Q² / (890.47 D⁴)
+
+Include variable definitions exactly as per NFPA 25.
+
+==================================================
+SECTION 6 — SINGLE PUMP PERFORMANCE TEST TABLE
+==================================================
+Rows:
+0%, 25%, 50%, 75%, 100%, 125%, 150%, 0%, 100%, 150%
+
+Columns:
+- Pump speed (rpm)
+- Suction pressure (psi)
+- Discharge pressure (psi)
+- Nozzle size (in.)
+- Nozzle coefficient
+- Pitot readings (1–6)
+- Flow (gpm)
+- Net pressure (psi)
+- RPM adjusted net pressure
+- RPM adjusted flow
+- Suction velocity pressure (psi)
+- Discharge velocity pressure (psi)
+- Velocity adjusted pressure (psi)
+
+Checkbox:
+- Pump is constant speed
+- Pump is variable speed
+
+Notes field:
+- Notes (free text)
+
+Include informational notes exactly:
+1. Velocity pressure adjustments provide a more accurate analysis...
+2. These readings are applicable to diesel engine pumps only...
+
+==================================================
+SECTION 7 — ELECTRIC MOTOR MEASUREMENTS
+==================================================
+For each test point record:
+
+Voltage:
+- L1-L2
+- L2-L3
+- L1-L3
+
+Amperes:
+- L1
+- L2
+- L3
+
+==================================================
+SECTION 8 — PERFORMANCE VERIFICATION (YES / NO / N/A)
+==================================================
+G. Ampere demand ≤ full load amperes × service factor
+H1. Actual voltage × current ≤ rated values × service factor
+H2. Voltage ≤ 5% above rated
+H3. Voltage ≤ 10% above rated
+I. Engine-driven overload or stress
+J. Engine overspeed emergency shutdown tested
+K. Governor properly regulates engine speed
+L. Gear drive assembly operates without objectionable noise, vibration, or heating
+M. Pump started and reached rated speed at peak load
+N. Performance matches manufacturer’s curve
+O. Phase reversal test passed on normal and alternate power
+
+==================================================
+SECTION 9 — MULTIPLE PUMP OPERATION
+==================================================
+Checkbox:
+- Pumps operate in series
+- Pumps operate in parallel
+- N/A
+
+Include full multiple pump table exactly as per NFPA 25.
+
+==================================================
+SECTION 10 — ADDITIONAL TESTS — TRANSFER SWITCH
+==================================================
+Yes / No / N/A:
+- Simulate power failure at peak load
+- Power transferred to alternate source
+- Pump operated 2 minutes on alternate power
+- Record voltage, amperage, RPM, suction pressure, discharge pressure
+- Pump reconnects to normal power
+- Alarms function correctly
+- Suction screens inspected and cleared
+- ECM sensors function correctly
+
+==================================================
+SECTION 11 — FINAL VERIFICATION
+==================================================
+Yes / No / N/A:
+- Pump room temperature control functioning
+- Parallel and angular alignment verified
+- Fire pump supplies 100 percent of rated flow
+- Net pressure ≥ 95% of approved curve
+
+==================================================
+SECTION 12 — COMMENTS
+==================================================
+Free text field: Comments
+
+==================================================
+SECTION 13 — CONTROLLER NOTE
+==================================================
+Display note:
+"Work shall be completed, to the extent that such work can be completed without opening an energized electric motor-driven fire pump controller."
+
+DATA REQUIREMENTS:
+- Save test linked to Fire Pump ID, Contractor ID, and Job ID
+- Preserve historical test data
+- Allow PDF export identical to NFPA layout

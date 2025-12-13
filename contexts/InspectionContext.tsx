@@ -30,6 +30,8 @@ import {
   PreactionDelugeTripTestData,
   WaterTankData,
   InspectionSchedule,
+  Contractor,
+  JobSite,
   migrateInspections,
 } from "@/types/inspection";
 
@@ -61,6 +63,8 @@ export type {
   FirePumpControlPanel,
   PumpType,
   InspectionSchedule,
+  Contractor,
+  JobSite,
 };
 
 interface InspectionContextType {
@@ -71,6 +75,8 @@ interface InspectionContextType {
   firePumps: FirePump[];
   firePumpPanels: FirePumpControlPanel[];
   schedules: InspectionSchedule[];
+  contractors: Contractor[];
+  jobSites: JobSite[];
   currentInspection: Partial<Inspection> | null;
   isLoading: boolean;
   addInspection: (inspection: Inspection) => Promise<void>;
@@ -92,6 +98,12 @@ interface InspectionContextType {
   addFirePumpPanel: (panel: FirePumpControlPanel) => Promise<void>;
   updateFirePumpPanel: (id: string, updates: Partial<FirePumpControlPanel>) => Promise<void>;
   deleteFirePumpPanel: (id: string) => Promise<void>;
+  addContractor: (contractor: Contractor) => Promise<void>;
+  updateContractor: (id: string, updates: Partial<Contractor>) => Promise<void>;
+  deleteContractor: (id: string) => Promise<void>;
+  addJobSite: (jobSite: JobSite) => Promise<void>;
+  updateJobSite: (id: string, updates: Partial<JobSite>) => Promise<void>;
+  deleteJobSite: (id: string) => Promise<void>;
   getPropertyById: (id: string) => Property | undefined;
   getCompanyById: (id: string) => Company | undefined;
   getAppUserById: (id: string) => AppUser | undefined;
@@ -99,6 +111,9 @@ interface InspectionContextType {
   getFirePumpsByCompany: (companyId: string) => FirePump[];
   getFirePumpPanelById: (id: string) => FirePumpControlPanel | undefined;
   getPanelsByPump: (pumpId: string) => FirePumpControlPanel[];
+  getContractorById: (id: string) => Contractor | undefined;
+  getJobSiteById: (id: string) => JobSite | undefined;
+  getJobSitesByContractor: (contractorId: string) => JobSite[];
   createOrUpdateScheduleForInspection: (inspection: Inspection, language: "en" | "pt-BR") => Promise<void>;
   refreshData: () => Promise<void>;
 }
@@ -112,6 +127,8 @@ const APP_USERS_KEY = "@firesafe_app_users";
 const FIRE_PUMPS_KEY = "@firesafe_fire_pumps";
 const FIRE_PUMP_PANELS_KEY = "@firesafe_fire_pump_panels";
 const SCHEDULES_KEY = "@firesafe_schedules";
+const CONTRACTORS_KEY = "@firesafe_contractors";
+const JOB_SITES_KEY = "@firesafe_job_sites";
 const DATA_VERSION_KEY = "@firesafe_data_version";
 const CURRENT_DATA_VERSION = 3;
 
@@ -127,6 +144,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [firePumps, setFirePumps] = useState<FirePump[]>([]);
   const [firePumpPanels, setFirePumpPanels] = useState<FirePumpControlPanel[]>([]);
   const [schedules, setSchedules] = useState<InspectionSchedule[]>([]);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [jobSites, setJobSites] = useState<JobSite[]>([]);
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -141,7 +160,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
       const version = storedVersion ? parseInt(storedVersion, 10) : 1;
       
-      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels, storedSchedules] = await Promise.all([
+      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels, storedSchedules, storedContractors, storedJobSites] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
         AsyncStorage.getItem(COMPANIES_KEY),
@@ -149,6 +168,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         AsyncStorage.getItem(FIRE_PUMPS_KEY),
         AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY),
         AsyncStorage.getItem(SCHEDULES_KEY),
+        AsyncStorage.getItem(CONTRACTORS_KEY),
+        AsyncStorage.getItem(JOB_SITES_KEY),
       ]);
 
       if (storedInspections) {
@@ -179,6 +200,12 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedSchedules) {
         setSchedules(JSON.parse(storedSchedules));
+      }
+      if (storedContractors) {
+        setContractors(JSON.parse(storedContractors));
+      }
+      if (storedJobSites) {
+        setJobSites(JSON.parse(storedJobSites));
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -414,6 +441,91 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
     return firePumpPanels.filter((panel) => panel.pumpId === pumpId);
   };
 
+  const saveContractors = async (newContractors: Contractor[]) => {
+    try {
+      await AsyncStorage.setItem(CONTRACTORS_KEY, JSON.stringify(newContractors));
+      setContractors(newContractors);
+    } catch (error) {
+      console.error("Error saving contractors:", error);
+      throw error;
+    }
+  };
+
+  const addContractor = async (contractor: Contractor) => {
+    const storedData = await AsyncStorage.getItem(CONTRACTORS_KEY);
+    const currentContractors: Contractor[] = storedData ? JSON.parse(storedData) : [];
+    const newContractors = [...currentContractors, contractor];
+    await saveContractors(newContractors);
+  };
+
+  const updateContractor = async (id: string, updates: Partial<Contractor>) => {
+    const storedData = await AsyncStorage.getItem(CONTRACTORS_KEY);
+    const currentContractors: Contractor[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newContractors = currentContractors.map((contractor) =>
+      contractor.id === id ? { ...contractor, ...updates, updatedAt: new Date().toISOString() } : contractor
+    );
+    await saveContractors(newContractors);
+  };
+
+  const deleteContractor = async (id: string) => {
+    const storedData = await AsyncStorage.getItem(CONTRACTORS_KEY);
+    const currentContractors: Contractor[] = storedData ? JSON.parse(storedData) : [];
+    const newContractors = currentContractors.filter((contractor) => contractor.id !== id);
+    await saveContractors(newContractors);
+    
+    const storedJobs = await AsyncStorage.getItem(JOB_SITES_KEY);
+    const currentJobSites: JobSite[] = storedJobs ? JSON.parse(storedJobs) : [];
+    const newJobSites = currentJobSites.filter((job) => job.contractorId !== id);
+    await saveJobSites(newJobSites);
+  };
+
+  const getContractorById = (id: string) => {
+    return contractors.find((contractor) => contractor.id === id);
+  };
+
+  const saveJobSites = async (newJobSites: JobSite[]) => {
+    try {
+      await AsyncStorage.setItem(JOB_SITES_KEY, JSON.stringify(newJobSites));
+      setJobSites(newJobSites);
+    } catch (error) {
+      console.error("Error saving job sites:", error);
+      throw error;
+    }
+  };
+
+  const addJobSite = async (jobSite: JobSite) => {
+    const storedData = await AsyncStorage.getItem(JOB_SITES_KEY);
+    const currentJobSites: JobSite[] = storedData ? JSON.parse(storedData) : [];
+    const newJobSites = [...currentJobSites, jobSite];
+    await saveJobSites(newJobSites);
+  };
+
+  const updateJobSite = async (id: string, updates: Partial<JobSite>) => {
+    const storedData = await AsyncStorage.getItem(JOB_SITES_KEY);
+    const currentJobSites: JobSite[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newJobSites = currentJobSites.map((jobSite) =>
+      jobSite.id === id ? { ...jobSite, ...updates, updatedAt: new Date().toISOString() } : jobSite
+    );
+    await saveJobSites(newJobSites);
+  };
+
+  const deleteJobSite = async (id: string) => {
+    const storedData = await AsyncStorage.getItem(JOB_SITES_KEY);
+    const currentJobSites: JobSite[] = storedData ? JSON.parse(storedData) : [];
+    const newJobSites = currentJobSites.filter((jobSite) => jobSite.id !== id);
+    await saveJobSites(newJobSites);
+  };
+
+  const getJobSiteById = (id: string) => {
+    return jobSites.find((jobSite) => jobSite.id === id);
+  };
+
+  const getJobSitesByContractor = (contractorId: string) => {
+    return jobSites.filter((jobSite) => jobSite.contractorId === contractorId);
+  };
+
   const saveSchedules = async (newSchedules: InspectionSchedule[]) => {
     try {
       await AsyncStorage.setItem(SCHEDULES_KEY, JSON.stringify(newSchedules));
@@ -513,6 +625,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         firePumps,
         firePumpPanels,
         schedules,
+        contractors,
+        jobSites,
         currentInspection,
         isLoading,
         addInspection,
@@ -534,6 +648,12 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         addFirePumpPanel,
         updateFirePumpPanel,
         deleteFirePumpPanel,
+        addContractor,
+        updateContractor,
+        deleteContractor,
+        addJobSite,
+        updateJobSite,
+        deleteJobSite,
         getPropertyById,
         getCompanyById,
         getAppUserById,
@@ -541,6 +661,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         getFirePumpsByCompany,
         getFirePumpPanelById,
         getPanelsByPump,
+        getContractorById,
+        getJobSiteById,
+        getJobSitesByContractor,
         createOrUpdateScheduleForInspection,
         refreshData,
       }}

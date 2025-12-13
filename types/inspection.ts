@@ -173,6 +173,36 @@ export interface InspectionPhoto {
   timestamp: string;
 }
 
+export interface Contractor {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phone: string;
+  fax: string;
+  email: string;
+  licenseNumber: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobSite {
+  id: string;
+  contractorId: string;
+  jobName: string;
+  jobNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  testLocation: string;
+  testMethod: string;
+  comments: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Company {
   id: string;
   name: string;
