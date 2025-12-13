@@ -118,6 +118,7 @@ function SummaryHeader({ contractor, jobSite, inspector, pumpTag, testDate }: Su
 }
 
 const getDraftStorageKey = (id?: string) => `diesel_performance_test_draft_${id || 'new'}`;
+const DIESEL_TESTS_STORAGE_KEY = "@firesafe_diesel_performance_tests";
 const AUTO_SAVE_DELAY = 2000;
 
 export default function DieselPerformanceTestScreen({ navigation, route }: DieselPerformanceTestScreenProps) {
@@ -451,6 +452,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       return;
     }
 
+    setIsSaving(true);
     try {
       const finalTest: DieselPerformanceTest = {
         ...test as DieselPerformanceTest,
@@ -458,7 +460,22 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         updatedAt: new Date().toISOString(),
       };
       
+      const existingData = await AsyncStorage.getItem(DIESEL_TESTS_STORAGE_KEY);
+      const existingTests: DieselPerformanceTest[] = existingData ? JSON.parse(existingData) : [];
+      
+      const testIndex = existingTests.findIndex(t => t.id === finalTest.id);
+      if (testIndex >= 0) {
+        existingTests[testIndex] = finalTest;
+      } else {
+        existingTests.push(finalTest);
+      }
+      
+      await AsyncStorage.setItem(DIESEL_TESTS_STORAGE_KEY, JSON.stringify(existingTests));
       await clearDraft();
+      
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
       
       Alert.alert(
         t.common?.success || "Success",
@@ -468,6 +485,8 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     } catch (error) {
       console.error("Error saving performance test:", error);
       Alert.alert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving test");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -624,6 +643,17 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           value={reading.dieselWaterTempF}
           onChangeText={(v) => updateDieselReading(reading.id, "dieselWaterTempF", v)}
           placeholder={dt?.dieselWaterTemp || "Water Temp"}
+          placeholderTextColor={fullTheme.colors.placeholder}
+          keyboardType="numeric"
+        />
+      </View>
+      <Spacer size="sm" />
+      <View style={styles.readingInputs}>
+        <TextInput
+          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary, flex: 1 }]}
+          value={reading.coolingLoopPressurePsi}
+          onChangeText={(v) => updateDieselReading(reading.id, "coolingLoopPressurePsi", v)}
+          placeholder={dt?.coolingLoopPressure || "Cooling Loop PSI"}
           placeholderTextColor={fullTheme.colors.placeholder}
           keyboardType="numeric"
         />
