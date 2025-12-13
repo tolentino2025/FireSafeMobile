@@ -1,0 +1,192 @@
+ICON 1 — Electric Fire Pump
+WEEKLY — Pump House (General)
+
+Yes No N/A Heat in pump room is 40°F (4°C) or higher
+
+Yes No N/A Ventilation louvers are free to operate
+
+Yes No N/A Excessive water does not appear on the floor
+
+Yes No N/A Coupling guard is in place
+
+WEEKLY — Pump Systems (General)
+
+Yes No N/A Pump suction, discharge, and bypass valves are open
+
+Yes No N/A No piping or hoses leak
+
+Yes No N/A Fire pump leaking one drop of water per second at seals
+
+Yes No N/A Suction line pressure is within acceptable range
+
+Yes No N/A System line pressure is within acceptable range
+
+Yes No N/A Suction reservoir is full
+
+Yes No N/A Wet pit suction screens are unobstructed and in place
+
+Yes No N/A Waterflow test valves are in closed position, hose connection valve is closed, and the line to test valves is free of water
+
+WEEKLY — Electrical Systems (Controller / Power)
+
+Yes No N/A Controller pilot light (power on) is illuminated
+
+Yes No N/A Transfer switch normal power light is illuminated
+
+Yes No N/A Isolating switch for standby power is closed
+
+Yes No N/A Reverse-phase alarm light is not illuminated
+
+Yes No N/A Normal-phase rotation light is illuminated
+
+Yes No N/A Oil level in vertical motor sight glass is within acceptable range
+
+Yes No N/A Pressure maintenance (jockey) pump has power
+
+WEEKLY — Run / Test (Electric timing)
+
+Pump Systems
+
+Yes No N/A Record pump starting pressure psi
+
+Yes No N/A Operate fire pump for 10 minutes
+
+Yes No N/A Check packing gland tightness (slight leak at no flow)
+
+Yes No N/A Record suction pressure from gauge in psi
+
+Yes No N/A Record discharge pressure from gauge in psi
+
+Yes No N/A Adjust gland nuts if necessary
+
+Yes No N/A Check for unusual noise or vibration
+
+Yes No N/A Check packing boxes, bearings, or pump casing for overheating
+
+Yes No N/A Record pressure switch or pressure transducer and compare with pump discharge gauge
+
+Yes No N/A Record pumps highest psi and lowest psi pressure on the fire pump control log
+
+Yes No N/A Circulation relief valve functions correctly
+
+Electrical Systems
+
+Yes No N/A Record time controller is on first step (for reduced voltage or reduced current starting)
+
+Yes No N/A Observe time for motor to accelerate to full speed
+
+Yes No N/A Record time pump runs after starting for pumps having automatic stop feature
+
+MONTHLY — Action Electric Fire Pump
+
+Yes No N/A Test Non-flow test — operate 10 minutes
+
+Yes No N/A Test Record pump starting pressure
+
+Yes No N/A Test Check packing gland tightness (slight leak at no flow)
+
+Yes No N/A Test Record suction pressure from gauge psi (bar)
+
+Yes No N/A Test Record discharge pressure from gauge psi (bar)
+
+Yes No N/A Test Adjust gland nuts if necessary
+
+Yes No N/A Test Check for unusual noise or vibration
+
+Yes No N/A Test Record pressure switch or pressure transducer and compare with pump discharge gauge
+
+Yes No N/A Test Record pumps highest psi and lowest psi pressure on the fire pump control log
+
+Yes No N/A Test Circulation relief valve functions correctly
+
+Yes No N/A Test Record time controller is on first step (for reduced voltage or reduced current starting)
+
+Electrical System
+
+Yes No N/A Test Exercise isolating switch and circuit breaker (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Circuit breakers or fuses (Alternative ITM A.8.1.1.2)
+
+Battery System
+
+Yes No N/A Inspect Case exterior clean and dry (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Test Specific gravity or state of charge (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Charger and charge rate (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Equalize charge (Alternative ITM A.8.1.1.2)
+
+SEMIANNUAL — Action Electric Fire Pump System
+
+Electrical System
+
+Yes No N/A Test Operate manual starting means (Alternative ITM A.8.1.1.2)
+
+ANNUAL — Action Electric Fire Pump
+
+Pump System
+
+Yes No N/A Inspect/Change (as needed) Lubricate bearings
+
+Yes No N/A Test Power transfer switch
+
+Yes No N/A Inspect Check parallel and angular alignment
+
+Yes No N/A Test Main relief valve
+
+Yes No N/A Inspect Check flexible hoses and connections
+
+Yes No N/A Inspect Check plumbing parts — inside and outside panels
+
+Yes No N/A Inspect Check pump shaft end play
+
+Yes No N/A Inspect/Change Check accuracy of pressure gauges and sensors
+
+Yes No N/A Inspect Pump coupling alignment
+
+Mechanical Transmission
+
+Yes No N/A Change Lubricate coupling (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Change Lubricate right angle gear drive (Alternative ITM A.8.1.1.2)
+
+Electrical System
+
+Yes No N/A Inspect Corrosion on printed circuit boards
+
+Yes No N/A Inspect Cracked cable/wire insulation
+
+Yes No N/A Test Electronic control module (ECM)
+
+Yes No N/A Maintenance Sacrificial anode
+
+Yes No N/A Test Trip circuit breaker (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect/Test Operate emergency manual starting means (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Lubricate mechanical moving parts (except starters and relays) (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Calibrate pressure switch settings (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Lubricate motor bearings (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Leaks in plumbing parts (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Signs of water on electrical parts (Alternative ITM A.8.1.1.2)
+
+ANNUAL — Electrical System (shared block if you want)
+
+Yes No N/A Inspect Corrosion on printed circuit boards
+
+Yes No N/A Test Electrical control module (ECM)
+
+Yes No N/A Inspect Tighten control and power wiring connectors (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Voltmeter and ammeter for accuracy (5%) (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Cracked cable/wire insulation (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Leaks in plumbing parts (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Signs of water on electrical parts (Alternative ITM A.8.1.1.2)

@@ -1203,6 +1203,104 @@ const pumpAnnualChecklist: ChecklistTemplate[] = [
   { labelKey: "alarmConditionsVerified", frequencies: ["annually"] },
 ];
 
+const electricPumpChecklist: ChecklistTemplate[] = [
+  // WEEKLY - Pump House (General)
+  { labelKey: "epPumpRoomHeat40F", frequencies: ["weekly"] },
+  { labelKey: "epVentilationLouversFree", frequencies: ["weekly"] },
+  { labelKey: "epNoExcessiveWaterFloor", frequencies: ["weekly"] },
+  { labelKey: "epCouplingGuardInPlace", frequencies: ["weekly"] },
+  // WEEKLY - Pump Systems (General)
+  { labelKey: "epValvesOpen", frequencies: ["weekly"] },
+  { labelKey: "epNoPipingHoseLeaks", frequencies: ["weekly"] },
+  { labelKey: "epPumpSealsLeaking", frequencies: ["weekly"] },
+  { labelKey: "epSuctionPressureRange", frequencies: ["weekly"], hasPsi: true },
+  { labelKey: "epSystemPressureRange", frequencies: ["weekly"], hasPsi: true },
+  { labelKey: "epSuctionReservoirFull", frequencies: ["weekly"] },
+  { labelKey: "epWetPitScreensOk", frequencies: ["weekly"] },
+  { labelKey: "epTestValvesClosed", frequencies: ["weekly"] },
+  // WEEKLY - Electrical Systems (Controller / Power)
+  { labelKey: "epControllerPilotLightOn", frequencies: ["weekly"] },
+  { labelKey: "epTransferSwitchLightOn", frequencies: ["weekly"] },
+  { labelKey: "epIsolatingSwitchClosed", frequencies: ["weekly"] },
+  { labelKey: "epReversePhaseNotLit", frequencies: ["weekly"] },
+  { labelKey: "epNormalPhaseRotationLit", frequencies: ["weekly"] },
+  { labelKey: "epMotorOilLevelOk", frequencies: ["weekly"] },
+  { labelKey: "epJockeyPumpHasPower", frequencies: ["weekly"] },
+  // WEEKLY - Run / Test (Electric timing) - Pump Systems
+  { labelKey: "epRecordStartingPressure", frequencies: ["weekly"], hasPsi: true, isTestSection: true },
+  { labelKey: "epOperatePump10Min", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epCheckPackingGlandTightness", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epRecordSuctionPressure", frequencies: ["weekly"], hasPsi: true, isTestSection: true },
+  { labelKey: "epRecordDischargePressure", frequencies: ["weekly"], hasPsi: true, isTestSection: true },
+  { labelKey: "epAdjustGlandNuts", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epCheckNoiseVibration", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epCheckOverheating", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epRecordPressureSwitchCompare", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epRecordHighLowPressure", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "epCirculationReliefValve", frequencies: ["weekly"], isTestSection: true },
+  // WEEKLY - Run / Test (Electric timing) - Electrical Systems
+  { labelKey: "epRecordTimeFirstStep", frequencies: ["weekly"], isTestSection: true, numericFields: [
+    { labelKey: "seconds", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "epObserveMotorAccelTime", frequencies: ["weekly"], isTestSection: true, numericFields: [
+    { labelKey: "seconds", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "epRecordPumpRunTime", frequencies: ["weekly"], isTestSection: true, numericFields: [
+    { labelKey: "minutes", type: "minutes", unit: "min" },
+  ]},
+  // MONTHLY - Pump Action
+  { labelKey: "epMonthlyNonFlowTest10Min", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyRecordStartingPressure", frequencies: ["monthly"], hasPsi: true, isTestSection: true },
+  { labelKey: "epMonthlyCheckPackingGland", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyRecordSuctionPressure", frequencies: ["monthly"], hasPsi: true, isTestSection: true },
+  { labelKey: "epMonthlyRecordDischargePressure", frequencies: ["monthly"], hasPsi: true, isTestSection: true },
+  { labelKey: "epMonthlyAdjustGlandNuts", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyCheckNoiseVibration", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyRecordPressureSwitch", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyRecordHighLowPressure", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyCirculationReliefValve", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyRecordTimeFirstStep", frequencies: ["monthly"], isTestSection: true, numericFields: [
+    { labelKey: "seconds", type: "seconds", unit: "sec" },
+  ]},
+  // MONTHLY - Electrical System
+  { labelKey: "epMonthlyExerciseIsolatingSwitch", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyInspectCircuitBreakers", frequencies: ["monthly"] },
+  // MONTHLY - Battery System
+  { labelKey: "epMonthlyBatteryCaseClean", frequencies: ["monthly"] },
+  { labelKey: "epMonthlySpecificGravity", frequencies: ["monthly"], isTestSection: true },
+  { labelKey: "epMonthlyChargerAndRate", frequencies: ["monthly"] },
+  { labelKey: "epMonthlyEqualizeCharge", frequencies: ["monthly"] },
+  // SEMIANNUAL - Electrical System
+  { labelKey: "epSemiannualManualStartingMeans", frequencies: ["semiannually"], isTestSection: true },
+  // ANNUAL - Pump System
+  { labelKey: "epAnnualLubricateBearings", frequencies: ["annually"] },
+  { labelKey: "epAnnualPowerTransferSwitch", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "epAnnualCheckAlignment", frequencies: ["annually"] },
+  { labelKey: "epAnnualMainReliefValve", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "epAnnualCheckFlexibleHoses", frequencies: ["annually"] },
+  { labelKey: "epAnnualCheckPlumbingParts", frequencies: ["annually"] },
+  { labelKey: "epAnnualCheckShaftEndPlay", frequencies: ["annually"] },
+  { labelKey: "epAnnualCheckGaugeAccuracy", frequencies: ["annually"] },
+  { labelKey: "epAnnualPumpCouplingAlignment", frequencies: ["annually"] },
+  // ANNUAL - Mechanical Transmission
+  { labelKey: "epAnnualLubricateCoupling", frequencies: ["annually"] },
+  { labelKey: "epAnnualLubricateGearDrive", frequencies: ["annually"] },
+  // ANNUAL - Electrical System
+  { labelKey: "epAnnualPcbCorrosion", frequencies: ["annually"] },
+  { labelKey: "epAnnualCrackedInsulation", frequencies: ["annually"] },
+  { labelKey: "epAnnualTestEcm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "epAnnualSacrificialAnode", frequencies: ["annually"] },
+  { labelKey: "epAnnualTripCircuitBreaker", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "epAnnualEmergencyManualStart", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "epAnnualLubricateMechanicalParts", frequencies: ["annually"] },
+  { labelKey: "epAnnualCalibratePressureSwitch", frequencies: ["annually"] },
+  { labelKey: "epAnnualLubricateMotorBearings", frequencies: ["annually"] },
+  { labelKey: "epAnnualLeaksPlumbingParts", frequencies: ["annually"] },
+  { labelKey: "epAnnualWaterOnElectricalParts", frequencies: ["annually"] },
+  { labelKey: "epAnnualTightenWiringConnectors", frequencies: ["annually"] },
+  { labelKey: "epAnnualVoltmeterAmmeterAccuracy", frequencies: ["annually"] },
+];
+
 const abovegroundChecklist: ChecklistTemplate[] = [
   { labelKey: "pipingGoodCondition", frequencies: ["quarterly", "annually"] },
   { labelKey: "pipingNoLeaks", frequencies: ["quarterly", "annually"] },
@@ -1679,6 +1777,7 @@ const checklistsByType: Record<InspectionType, ChecklistTemplate[]> = {
   pump_weekly: pumpWeeklyChecklist,
   pump_monthly: pumpMonthlyChecklist,
   pump_annual: pumpAnnualChecklist,
+  electric_pump: electricPumpChecklist,
   aboveground: abovegroundChecklist,
   underground: undergroundChecklist,
   hydrant_flow: hydrantFlowChecklist,
