@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform } from "react-native";
+import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
+import * as MailComposer from "expo-mail-composer";
 
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -19,11 +20,16 @@ import {
   sendTestNotification,
 } from "@/utils/notifications";
 
+const ADMIN_EMAIL = "suporte@firesafeitm.com";
+
+type HelpType = "question" | "comment" | "suggestion" | "bugReport" | "other";
+
 export default function ProfileScreen() {
   const { fullTheme, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
+  const [helpModalVisible, setHelpModalVisible] = useState(false);
 
   useEffect(() => {
     loadNotificationSettings();
@@ -56,19 +62,51 @@ export default function ProfileScreen() {
   };
 
   const handleHelp = () => {
-    Alert.alert(
-      t.profile.help,
-      "For support, please contact:\nsupport@firesafeitm.com",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Send Email",
-          onPress: () => {
-            Linking.openURL("mailto:support@firesafeitm.com");
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    setHelpModalVisible(true);
+  };
+
+  const sendHelpEmail = async (type: HelpType) => {
+    setHelpModalVisible(false);
+    
+    const subjectMap: Record<HelpType, string> = {
+      question: t.profile.helpEmailSubjectQuestion,
+      comment: t.profile.helpEmailSubjectComment,
+      suggestion: t.profile.helpEmailSubjectSuggestion,
+      bugReport: t.profile.helpEmailSubjectBugReport,
+      other: t.profile.helpEmailSubjectOther,
+    };
+
+    const isAvailable = await MailComposer.isAvailableAsync();
+    
+    if (!isAvailable) {
+      Alert.alert(
+        t.profile.help,
+        t.common.emailNotAvailable,
+        [
+          { text: t.common.cancel, style: "cancel" },
+          {
+            text: "OK",
+            onPress: () => {
+              Linking.openURL(`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(subjectMap[type])}`);
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+      return;
+    }
+
+    try {
+      await MailComposer.composeAsync({
+        recipients: [ADMIN_EMAIL],
+        subject: subjectMap[type],
+        body: t.profile.helpEmailBody,
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
   };
 
   const handleToggleNotifications = async (value: boolean) => {
@@ -226,6 +264,58 @@ export default function ProfileScreen() {
       </View>
 
       <Spacer height={Spacing["4xl"]} />
+
+      <Modal
+        visible={helpModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setHelpModalVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={() => setHelpModalVisible(false)}
+        >
+          <View style={[styles.modalContent, { backgroundColor: fullTheme.colors.cardBackground }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">{t.profile.help}</ThemedText>
+              <Pressable onPress={() => setHelpModalVisible(false)}>
+                <Feather name="x" size={24} color={fullTheme.colors.textSecondary} />
+              </Pressable>
+            </View>
+            <ThemedText type="body" secondary style={styles.modalSubtitle}>
+              {t.profile.helpSubtitle}
+            </ThemedText>
+            <Spacer height={Spacing.lg} />
+            
+            <HelpOption
+              icon="help-circle"
+              label={t.profile.helpQuestion}
+              onPress={() => sendHelpEmail("question")}
+            />
+            <HelpOption
+              icon="message-circle"
+              label={t.profile.helpComment}
+              onPress={() => sendHelpEmail("comment")}
+            />
+            <HelpOption
+              icon="star"
+              label={t.profile.helpSuggestion}
+              onPress={() => sendHelpEmail("suggestion")}
+            />
+            <HelpOption
+              icon="alert-triangle"
+              label={t.profile.helpBugReport}
+              onPress={() => sendHelpEmail("bugReport")}
+            />
+            <HelpOption
+              icon="mail"
+              label={t.profile.helpOther}
+              onPress={() => sendHelpEmail("other")}
+              isLast
+            />
+          </View>
+        </Pressable>
+      </Modal>
     </ScreenScrollView>
   );
 }
@@ -306,6 +396,36 @@ function ThemeOption({ icon, label, selected, onPress, isLast }: ThemeOptionProp
   );
 }
 
+interface HelpOptionProps {
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  onPress: () => void;
+  isLast?: boolean;
+}
+
+function HelpOption({ icon, label, onPress, isLast }: HelpOptionProps) {
+  const { fullTheme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.helpOption,
+        !isLast && styles.helpOptionBorder,
+        { borderBottomColor: fullTheme.colors.border, opacity: pressed ? 0.7 : 1 },
+      ]}
+    >
+      <View style={[styles.helpIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name={icon} size={20} color={fullTheme.colors.primary} />
+      </View>
+      <ThemedText type="body" style={{ marginLeft: Spacing.md, flex: 1 }}>
+        {label}
+      </ThemedText>
+      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   profileHeader: {
     alignItems: "center",
@@ -377,5 +497,41 @@ const styles = StyleSheet.create({
   },
   versionContainer: {
     alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  modalSubtitle: {
+    marginTop: Spacing.xs,
+  },
+  helpOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+  },
+  helpOptionBorder: {
+    borderBottomWidth: 1,
+  },
+  helpIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
