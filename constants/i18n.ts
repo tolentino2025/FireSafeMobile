@@ -812,7 +812,7 @@ export const translations = {
       shMaintOsyStemsLubricated: "Hastes OS&Y lubrificadas anualmente",
       shMaintLubricateRepairHoseValves: "Lubrificar, reparar ou substituir válvulas de mangueira que não abrem suavemente ou completamente",
       // Preaction/Deluge Systems (pd prefix)
-      pdEnclosureMinTemp: "Gabinete sem alarme de baixa temperatura - verificar mínimo 40°F (4°C)",
+      pdEnclosureMinTemp: "O abrigo, não equipado com alarme de baixa temperatura, é inspecionado durante períodos de clima frio para verificação da manutenção de temperatura mínima de 40°F (4°C)",
       pdIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
       pdRpaReliefValveOperating: "RPA/RPDA - válvula de alívio diferencial operando corretamente",
       pdControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta/fechada)",
@@ -928,7 +928,7 @@ export const translations = {
       pdMaintValveCleaned: "Interior da válvula limpo após teste de disparo e inspeção interna",
       pdMaintAuxiliaryDrains: "Operar drenos auxiliares após operação do sistema e antes de condições de congelamento",
       // Dry Pipe Systems (dp prefix)
-      dpEnclosureMinTemp: "Gabinete sem alarme de baixa temperatura - verificar mínimo 40°F (4°C)",
+      dpEnclosureMinTemp: "O abrigo, não equipado com alarme de baixa temperatura, é inspecionado durante períodos de clima frio para verificação da manutenção de temperatura mínima de 40°F (4°C)",
       dpIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
       dpRpaReliefValveOperating: "RPA/RPDA - válvula de alívio diferencial operando corretamente",
       dpControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta/fechada)",
@@ -1031,7 +1031,7 @@ export const translations = {
       dpMaintOsyStemsLubricated: "OS&Y - hastes lubrificadas anualmente",
       dpMaintAuxiliaryDrains: "Operar todos os drenos auxiliares após operação e antes de condições de congelamento",
       // Wet Pipe Systems (wp prefix)
-      wpEnclosureMinTemp: "Gabinete sem alarme de baixa temperatura - verificar mínimo 40°F (4°C)",
+      wpEnclosureMinTemp: "O abrigo, não equipado com alarme de baixa temperatura, é inspecionado durante períodos de clima frio para verificação da manutenção de temperatura mínima de 40°F (4°C)",
       wpIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
       wpRpaReliefValveOperating: "RPA/RPDA - válvula de alívio diferencial operando corretamente",
       wpMasterPrdDownstreamPressure: "Pressão a jusante do PRD mestre conforme critérios de projeto",
