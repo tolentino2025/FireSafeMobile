@@ -48,6 +48,7 @@ const inspectionCategories = [
     items: [
       { type: "electric_pump" as const, icon: "zap" as const, labelKey: "electricPump" as const, nfpaRef: "NFPA 25" },
       { type: "diesel_pump" as const, icon: "truck" as const, labelKey: "dieselPump" as const, nfpaRef: "NFPA 25" },
+      { type: "performance_test" as const, icon: "activity" as const, labelKey: "performanceTest" as const, nfpaRef: "NFPA 25" },
     ],
   },
   {
@@ -124,8 +125,12 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
-  const handleTypeSelect = (type: InspectionType) => {
-    navigation.replace("InspectionForm", { type });
+  const handleTypeSelect = (type: InspectionType | "performance_test") => {
+    if (type === "performance_test") {
+      navigation.navigate("PerformanceTest", {});
+    } else {
+      navigation.replace("InspectionForm", { type });
+    }
   };
 
   return (

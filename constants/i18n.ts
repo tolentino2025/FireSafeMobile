@@ -78,6 +78,7 @@ export const translations = {
       standpipe: "Standpipe e Mangueiras",
       electricPump: "Bomba Elétrica",
       dieselPump: "Bomba Diesel",
+      performanceTest: "Teste de Performance Anual",
     },
     form: {
       propertyName: "Nome da Propriedade",
@@ -2156,6 +2157,7 @@ export const translations = {
       standpipe: "Standpipe & Hose",
       electricPump: "Electric Pump",
       dieselPump: "Diesel Pump",
+      performanceTest: "Annual Performance Test",
     },
     form: {
       propertyName: "Property Name",
