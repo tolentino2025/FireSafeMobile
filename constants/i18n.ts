@@ -156,7 +156,7 @@ export const translations = {
       normalWaterPressureMaintained: "Pressão normal de água mantida (psi)",
       enclosureMinTemp: "Temperatura mínima do compartimento 40°F (4°C) mantida",
       isolationValvesOpen: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
-      rpaReliefValve: "Válvula de alívio diferencial RPA/RPDA operando corretamente",
+      rpaReliefValve: "Válvula de alívio da montagem (conjunto) de regulação de pressão e Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão operando corretamente",
       masterPrdDownstreamPressure: "Pressão a jusante do PRD mestre de acordo com o projeto (psi)",
       masterPrdSupplyPressure: "Pressão de alimentação do PRD mestre de acordo com o projeto (psi)",
       masterPrdFreeFromDamage: "PRD mestre livre de danos ou vazamentos",
@@ -216,7 +216,7 @@ export const translations = {
       foamConcentrateCondition: "Condição do concentrado de espuma satisfatória",
       // Foam-Water - Weekly Backflow
       fwIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
-      fwRpaReliefValveOperating: "RPA e RPDA - válvula de alívio diferencial operando corretamente",
+      fwRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão e Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       // Foam-Water - Weekly Control Valves
       fwControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta ou fechada)",
       fwControlValvesSealed: "Válvulas de controle seladas",
@@ -374,7 +374,7 @@ export const translations = {
       fwMaintVacuumVentsServiced: "Respiros de vácuo de pressão revisados (5 anos)",
       // Water Mist - Weekly Backflow
       wmIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
-      wmRpaReliefValveOperating: "RPA e RPDA - válvula de alívio com sensor diferencial operando corretamente",
+      wmRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão e Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       // Water Mist - Weekly Control Valves
       wmControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta ou fechada)",
       wmControlValvesSealed: "Válvulas de controle seladas",
@@ -531,7 +531,7 @@ export const translations = {
       wsDelugeEnclosureMinTemp: "Invólucro (sem alarme de baixa temp.) - temperatura mínima 40°F (4°C)",
       // Water Spray - Weekly Backflow
       wsIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
-      wsRpaReliefValveOperating: "RPA e RPDA - válvula de alívio com sensor diferencial operando corretamente",
+      wsRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão e Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       // Water Spray - Weekly Control Valves
       wsControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta ou fechada)",
       wsControlValvesSealed: "Válvulas de controle seladas",
@@ -636,7 +636,7 @@ export const translations = {
       shDelugeEnclosureMinTemp: "Invólucro (sem alarme de baixa temp.) - temperatura mínima 40°F (4°C)",
       // Standpipe and Hose - Weekly Backflow
       shIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
-      shRpaReliefValveOperating: "RPA e RPDA - válvula de alívio com sensor diferencial operando corretamente",
+      shRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão e Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       // Standpipe and Hose - Weekly Control Valves
       shControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta ou fechada)",
       shControlValvesSealed: "Válvulas de controle seladas",
@@ -814,7 +814,7 @@ export const translations = {
       // Preaction/Deluge Systems (pd prefix)
       pdEnclosureMinTemp: "O abrigo, não equipado com alarme de baixa temperatura, é inspecionado durante períodos de clima frio para verificação da manutenção de temperatura mínima de 40°F (4°C)",
       pdIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
-      pdRpaReliefValveOperating: "RPA/RPDA - válvula de alívio diferencial operando corretamente",
+      pdRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão / Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       pdControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta/fechada)",
       pdControlValvesSealed: "Válvulas de controle lacradas",
       pdControlValvesAccessible: "Válvulas de controle acessíveis",
@@ -930,7 +930,7 @@ export const translations = {
       // Dry Pipe Systems (dp prefix)
       dpEnclosureMinTemp: "O abrigo, não equipado com alarme de baixa temperatura, é inspecionado durante períodos de clima frio para verificação da manutenção de temperatura mínima de 40°F (4°C)",
       dpIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
-      dpRpaReliefValveOperating: "RPA/RPDA - válvula de alívio diferencial operando corretamente",
+      dpRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão / Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       dpControlValvesCorrectPosition: "Válvulas de controle na posição correta (aberta/fechada)",
       dpControlValvesSealed: "Válvulas de controle lacradas",
       dpControlValvesAccessible: "Válvulas de controle acessíveis",
@@ -1033,7 +1033,7 @@ export const translations = {
       // Wet Pipe Systems (wp prefix)
       wpEnclosureMinTemp: "O abrigo, não equipado com alarme de baixa temperatura, é inspecionado durante períodos de clima frio para verificação da manutenção de temperatura mínima de 40°F (4°C)",
       wpIsolationValvesOpenLocked: "Válvulas de isolamento na posição aberta e travadas/supervisionadas",
-      wpRpaReliefValveOperating: "RPA/RPDA - válvula de alívio diferencial operando corretamente",
+      wpRpaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão / Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       wpMasterPrdDownstreamPressure: "Pressão a jusante do PRD mestre conforme critérios de projeto",
       wpMasterPrdSupplyPressure: "Pressão de suprimento do PRD mestre conforme critérios de projeto",
       wpMasterPrdFreeDamageLeaks: "PRD mestre livre de danos ou vazamentos",
@@ -1264,7 +1264,7 @@ export const translations = {
       fsmValveProperSignage: "Sinalização adequada",
       // Fire Service Mains - Weekly Backflow
       backflowIsolationValvesOpen: "Válvulas de isolamento na posição aberta e travadas ou supervisionadas",
-      rpaRpdaReliefValveOperating: "RPA e RPDA - válvula de alívio com sensor diferencial operando corretamente",
+      rpaRpdaReliefValveOperating: "Válvula de alívio da montagem (conjunto) de regulação de pressão e Válvula de alívio diferencial associada a dispositivos de redução/regulação de pressão - operando corretamente",
       // Fire Service Mains - Monthly Control Valves
       fsmValveCorrectPositionMonthly: "Na posição correta (aberta ou fechada)",
       fsmValveLockedSupervised: "Travada ou supervisionada",
