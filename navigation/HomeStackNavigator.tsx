@@ -4,6 +4,7 @@ import HomeScreen from "@/screens/HomeScreen";
 import NewInspectionScreen from "@/screens/NewInspectionScreen";
 import InspectionFormScreen from "@/screens/InspectionFormScreen";
 import InspectionDetailScreen from "@/screens/InspectionDetailScreen";
+import PerformanceTestScreen from "@/screens/PerformanceTestScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
@@ -14,6 +15,7 @@ export type HomeStackParamList = {
   NewInspection: undefined;
   InspectionForm: { type: InspectionType; inspectionId?: string };
   InspectionDetail: { inspectionId: string };
+  PerformanceTest: { testId?: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -56,6 +58,14 @@ export default function HomeStackNavigator() {
         options={{
           ...getCommonScreenOptions({ theme, isDark, transparent: false }),
           headerTitle: "Detalhes",
+        }}
+      />
+      <Stack.Screen
+        name="PerformanceTest"
+        component={PerformanceTestScreen}
+        options={{
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+          headerTitle: "Performance Test",
         }}
       />
     </Stack.Navigator>

@@ -1,0 +1,1126 @@
+import React, { useState, useCallback, useEffect } from "react";
+import { View, StyleSheet, TextInput, Pressable, Alert, Switch, Platform } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+
+import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { Button } from "@/components/Button";
+import { SelectPicker } from "@/components/SelectPicker";
+import { SignatureCapture } from "@/components/SignatureCapture";
+import Spacer from "@/components/Spacer";
+import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useInspections } from "@/contexts/InspectionContext";
+import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
+import {
+  PerformanceTest,
+  createEmptyPerformanceTest,
+  createEmptyTestReading,
+  calculateNetPressure,
+  calculatePercentOfRated,
+  evaluateShutoffTest,
+  evaluateRatedFlowTest,
+  evaluatePeakFlowTest,
+  TestReading,
+  DriverType,
+  PumpOrientation,
+  SupplySource,
+  TestMethod,
+  Deficiency,
+} from "@/types/performanceTest";
+
+type PerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "PerformanceTest">;
+
+interface CollapsibleSectionProps {
+  title: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+  progress?: number;
+}
+
+function CollapsibleSection({ title, isExpanded, onToggle, children, progress }: CollapsibleSectionProps) {
+  const { fullTheme } = useTheme();
+  const rotation = useSharedValue(isExpanded ? 1 : 0);
+  const height = useSharedValue(isExpanded ? 1 : 0);
+
+  useEffect(() => {
+    rotation.value = withSpring(isExpanded ? 1 : 0);
+    height.value = withTiming(isExpanded ? 1 : 0, { duration: 200 });
+  }, [isExpanded]);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value * 180}deg` }],
+  }));
+
+  const handlePress = () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onToggle();
+  };
+
+  return (
+    <View style={[styles.section, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+      <Pressable onPress={handlePress} style={styles.sectionHeader}>
+        <View style={styles.sectionTitleContainer}>
+          <ThemedText type="h3" style={styles.sectionTitle}>{title}</ThemedText>
+          {progress !== undefined ? (
+            <View style={[styles.progressBadge, { backgroundColor: progress === 100 ? fullTheme.colors.success : fullTheme.colors.warning }]}>
+              <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 10 }}>{progress}%</ThemedText>
+            </View>
+          ) : null}
+        </View>
+        <Animated.View style={iconStyle}>
+          <Feather name="chevron-down" size={24} color={fullTheme.colors.textSecondary} />
+        </Animated.View>
+      </Pressable>
+      {isExpanded ? (
+        <View style={styles.sectionContent}>
+          {children}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+export default function PerformanceTestScreen({ navigation, route }: PerformanceTestScreenProps) {
+  const { testId } = route.params || {};
+  const { fullTheme } = useTheme();
+  const { t } = useLanguage();
+  const { contractors, jobSites, getJobSitesByContractor } = useInspections();
+
+  const [test, setTest] = useState<Partial<PerformanceTest>>(() => createEmptyPerformanceTest());
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    contractor: true,
+    job: false,
+    pump: false,
+    driver: false,
+    controller: false,
+    power: false,
+    supply: false,
+    demand: false,
+    conditions: false,
+    results: false,
+    observations: false,
+    signatures: false,
+    attachments: false,
+  });
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleContractorSelect = (contractorId: string) => {
+    const contractor = contractors.find(c => c.id === contractorId);
+    if (contractor) {
+      setTest(prev => ({
+        ...prev,
+        contractorInfo: {
+          ...prev.contractorInfo!,
+          contractorId,
+          companyName: contractor.name,
+          address: contractor.address,
+          city: contractor.city,
+          state: contractor.state,
+          zipCode: contractor.zipCode,
+          phone: contractor.phone,
+          fax: contractor.fax || "",
+          email: contractor.email,
+          licenseNumber: contractor.licenseNumber || "",
+        },
+      }));
+    }
+  };
+
+  const handleJobSiteSelect = (jobSiteId: string) => {
+    const jobSite = jobSites.find(j => j.id === jobSiteId);
+    if (jobSite) {
+      setTest(prev => ({
+        ...prev,
+        jobInfo: {
+          ...prev.jobInfo!,
+          jobSiteId,
+          jobName: jobSite.jobName,
+          jobNumber: jobSite.jobNumber || "",
+          address: jobSite.address,
+          city: jobSite.city,
+          state: jobSite.state,
+        },
+      }));
+    }
+  };
+
+  const updateContractorInfo = (field: string, value: string) => {
+    setTest(prev => ({
+      ...prev,
+      contractorInfo: { ...prev.contractorInfo!, [field]: value },
+    }));
+  };
+
+  const updateJobInfo = (field: string, value: string) => {
+    setTest(prev => ({
+      ...prev,
+      jobInfo: { ...prev.jobInfo!, [field]: value },
+    }));
+  };
+
+  const updatePumpEquipment = (field: string, value: string) => {
+    setTest(prev => ({
+      ...prev,
+      pumpEquipment: { ...prev.pumpEquipment!, [field]: value },
+    }));
+  };
+
+  const updateDriverInfo = (field: string, value: string | boolean) => {
+    setTest(prev => ({
+      ...prev,
+      driverInfo: { ...prev.driverInfo!, [field]: value },
+    }));
+  };
+
+  const updateControllerInfo = (field: string, value: string | boolean) => {
+    setTest(prev => ({
+      ...prev,
+      controllerInfo: { ...prev.controllerInfo!, [field]: value },
+    }));
+  };
+
+  const updatePowerSupply = (field: string, value: string | boolean) => {
+    setTest(prev => ({
+      ...prev,
+      powerSupply: { ...prev.powerSupply!, [field]: value },
+    }));
+  };
+
+  const updateSupplyConditions = (field: string, value: string | boolean) => {
+    setTest(prev => ({
+      ...prev,
+      supplyConditions: { ...prev.supplyConditions!, [field]: value },
+    }));
+  };
+
+  const updateSystemDemand = (field: string, value: string) => {
+    setTest(prev => ({
+      ...prev,
+      systemDemand: { ...prev.systemDemand!, [field]: value },
+    }));
+  };
+
+  const updateTestConditions = (field: string, value: string) => {
+    setTest(prev => ({
+      ...prev,
+      testConditions: { ...prev.testConditions!, [field]: value },
+    }));
+  };
+
+  const updateTestReading = (readingId: string, field: string, value: string) => {
+    setTest(prev => {
+      const readings = prev.testConditions!.readings.map(r => {
+        if (r.id === readingId) {
+          const updated = { ...r, [field]: value };
+          if (field === "dischargePsi" || field === "suctionPsi") {
+            updated.netPressurePsi = calculateNetPressure(
+              field === "dischargePsi" ? value : r.dischargePsi,
+              field === "suctionPsi" ? value : r.suctionPsi
+            );
+          }
+          return updated;
+        }
+        return r;
+      });
+      return {
+        ...prev,
+        testConditions: { ...prev.testConditions!, readings },
+      };
+    });
+  };
+
+  const updateResultsSummary = (field: string, value: string | boolean) => {
+    setTest(prev => ({
+      ...prev,
+      resultsSummary: { ...prev.resultsSummary!, [field]: value },
+    }));
+  };
+
+  const updateObservations = (field: string, value: string) => {
+    setTest(prev => ({
+      ...prev,
+      observationsDeficiencies: { ...prev.observationsDeficiencies!, [field]: value },
+    }));
+  };
+
+  const addDeficiency = () => {
+    const newDeficiency: Deficiency = {
+      id: Date.now().toString(),
+      description: "",
+      severity: "minor",
+      recommendedAction: "",
+      targetCompletionDate: "",
+      resolved: false,
+    };
+    setTest(prev => ({
+      ...prev,
+      observationsDeficiencies: {
+        ...prev.observationsDeficiencies!,
+        deficiencies: [...prev.observationsDeficiencies!.deficiencies, newDeficiency],
+      },
+    }));
+  };
+
+  const updateDeficiency = (id: string, field: string, value: string | boolean) => {
+    setTest(prev => ({
+      ...prev,
+      observationsDeficiencies: {
+        ...prev.observationsDeficiencies!,
+        deficiencies: prev.observationsDeficiencies!.deficiencies.map(d =>
+          d.id === id ? { ...d, [field]: value } : d
+        ),
+      },
+    }));
+  };
+
+  const removeDeficiency = (id: string) => {
+    setTest(prev => ({
+      ...prev,
+      observationsDeficiencies: {
+        ...prev.observationsDeficiencies!,
+        deficiencies: prev.observationsDeficiencies!.deficiencies.filter(d => d.id !== id),
+      },
+    }));
+  };
+
+  const updateConductedBySignature = (field: string, value: string | null) => {
+    setTest(prev => ({
+      ...prev,
+      signatures: {
+        ...prev.signatures!,
+        conductedBy: { ...prev.signatures!.conductedBy, [field]: value },
+      },
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!test.contractorInfo?.companyName?.trim()) {
+      Alert.alert(t.common.error, t.performanceTest?.contractorRequired || "Contractor information is required");
+      return;
+    }
+    if (!test.jobInfo?.jobName?.trim()) {
+      Alert.alert(t.common.error, t.performanceTest?.jobRequired || "Job/Site information is required");
+      return;
+    }
+
+    try {
+      const finalTest: PerformanceTest = {
+        ...test as PerformanceTest,
+        status: "completed",
+        updatedAt: new Date().toISOString(),
+      };
+      
+      Alert.alert(
+        t.common.success || "Success",
+        t.performanceTest?.testSaved || "Performance test saved successfully",
+        [{ text: "OK", onPress: () => navigation.goBack() }]
+      );
+    } catch (error) {
+      console.error("Error saving performance test:", error);
+      Alert.alert(t.common.error, t.performanceTest?.saveError || "Error saving test");
+    }
+  };
+
+  const contractorOptions = contractors.map(c => ({
+    id: c.id,
+    label: c.name,
+    sublabel: `${c.city}, ${c.state}`,
+  }));
+
+  const availableJobSites = test.contractorInfo?.contractorId 
+    ? getJobSitesByContractor(test.contractorInfo.contractorId)
+    : jobSites;
+
+  const jobSiteOptions = availableJobSites.map(j => ({
+    id: j.id,
+    label: j.jobName,
+    sublabel: `${j.city}, ${j.state}`,
+  }));
+
+  const driverTypeOptions = [
+    { id: "electric", label: t.performanceTest?.driverTypes?.electric || "Electric Motor" },
+    { id: "diesel", label: t.performanceTest?.driverTypes?.diesel || "Diesel Engine" },
+  ];
+
+  const pumpOrientationOptions = [
+    { id: "horizontal_split", label: t.performanceTest?.pumpOrientations?.horizontalSplit || "Horizontal Split Case" },
+    { id: "vertical_inline", label: t.performanceTest?.pumpOrientations?.verticalInline || "Vertical Inline" },
+    { id: "vertical_turbine", label: t.performanceTest?.pumpOrientations?.verticalTurbine || "Vertical Turbine" },
+    { id: "end_suction", label: t.performanceTest?.pumpOrientations?.endSuction || "End Suction" },
+  ];
+
+  const supplySourceOptions = [
+    { id: "city_water", label: t.performanceTest?.supplySources?.cityWater || "City Water" },
+    { id: "tank", label: t.performanceTest?.supplySources?.tank || "Tank" },
+    { id: "reservoir", label: t.performanceTest?.supplySources?.reservoir || "Reservoir" },
+    { id: "pond", label: t.performanceTest?.supplySources?.pond || "Pond" },
+    { id: "well", label: t.performanceTest?.supplySources?.well || "Well" },
+    { id: "other", label: t.performanceTest?.supplySources?.other || "Other" },
+  ];
+
+  const testMethodOptions = [
+    { id: "flow_meter", label: t.performanceTest?.testMethods?.flowMeter || "Flow Meter" },
+    { id: "pitot_tube", label: t.performanceTest?.testMethods?.pitotTube || "Pitot Tube" },
+    { id: "flow_loop", label: t.performanceTest?.testMethods?.flowLoop || "Flow Loop" },
+    { id: "bypass", label: t.performanceTest?.testMethods?.bypass || "Bypass" },
+    { id: "other", label: t.performanceTest?.testMethods?.other || "Other" },
+  ];
+
+  const inputStyle = [
+    styles.input,
+    { backgroundColor: fullTheme.colors.inputBackground, color: fullTheme.colors.textPrimary, borderColor: fullTheme.colors.border },
+  ];
+
+  const renderInputField = (
+    label: string,
+    value: string,
+    onChange: (text: string) => void,
+    options?: { keyboardType?: "default" | "numeric" | "phone-pad" | "email-address"; placeholder?: string; multiline?: boolean }
+  ) => (
+    <View style={styles.fieldContainer}>
+      <ThemedText type="body" style={styles.fieldLabel}>{label}</ThemedText>
+      <TextInput
+        style={[inputStyle, options?.multiline ? styles.textArea : null]}
+        value={value}
+        onChangeText={onChange}
+        placeholder={options?.placeholder || label}
+        placeholderTextColor={fullTheme.colors.placeholder}
+        keyboardType={options?.keyboardType || "default"}
+        multiline={options?.multiline}
+        numberOfLines={options?.multiline ? 4 : 1}
+        textAlignVertical={options?.multiline ? "top" : "center"}
+      />
+    </View>
+  );
+
+  const renderSwitchField = (label: string, value: boolean, onChange: (val: boolean) => void) => (
+    <View style={styles.switchContainer}>
+      <ThemedText type="body" style={{ flex: 1 }}>{label}</ThemedText>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: fullTheme.colors.border, true: fullTheme.colors.primary }}
+        thumbColor="#FFFFFF"
+      />
+    </View>
+  );
+
+  const renderTestReadingRow = (reading: TestReading, showElectric: boolean) => (
+    <View key={reading.id} style={[styles.readingRow, { borderBottomColor: fullTheme.colors.border }]}>
+      <ThemedText type="body" style={styles.readingLabel}>
+        {reading.flowPercent}% {t.performanceTest?.flow || "Flow"}
+      </ThemedText>
+      <View style={styles.readingInputs}>
+        <TextInput
+          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+          value={reading.flowGpm}
+          onChangeText={(v) => updateTestReading(reading.id, "flowGpm", v)}
+          placeholder="GPM"
+          placeholderTextColor={fullTheme.colors.placeholder}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+          value={reading.suctionPsi}
+          onChangeText={(v) => updateTestReading(reading.id, "suctionPsi", v)}
+          placeholder={t.performanceTest?.suction || "Suction"}
+          placeholderTextColor={fullTheme.colors.placeholder}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+          value={reading.dischargePsi}
+          onChangeText={(v) => updateTestReading(reading.id, "dischargePsi", v)}
+          placeholder={t.performanceTest?.discharge || "Discharge"}
+          placeholderTextColor={fullTheme.colors.placeholder}
+          keyboardType="numeric"
+        />
+        <ThemedText type="small" style={styles.readingNetPressure}>
+          {reading.netPressurePsi || "-"} PSI
+        </ThemedText>
+      </View>
+    </View>
+  );
+
+  return (
+    <ScreenKeyboardAwareScrollView>
+      <ThemedText type="h2" style={styles.pageTitle}>
+        {t.performanceTest?.title || "Fire Pump Annual Performance Test"}
+      </ThemedText>
+      <ThemedText type="body" secondary style={styles.subtitle}>
+        {t.performanceTest?.subtitle || "NFPA 25 Compliant Test Form"}
+      </ThemedText>
+      <Spacer height={Spacing.xl} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.contractor || "1. Contractor Information"}
+        isExpanded={expandedSections.contractor}
+        onToggle={() => toggleSection("contractor")}
+      >
+        <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.selectContractor || "Select Contractor"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SelectPicker
+          options={contractorOptions}
+          selectedId={test.contractorInfo?.contractorId}
+          onSelect={handleContractorSelect}
+          placeholder={t.contractors?.selectContractor || "Select a contractor"}
+          title={t.contractors?.selectContractor || "Select Contractor"}
+          emptyText={t.contractors?.noResults || "No contractors found"}
+        />
+        <Spacer height={Spacing.lg} />
+        {renderInputField(t.performanceTest?.companyName || "Company Name", test.contractorInfo?.companyName || "", (v) => updateContractorInfo("companyName", v))}
+        {renderInputField(t.performanceTest?.address || "Address", test.contractorInfo?.address || "", (v) => updateContractorInfo("address", v))}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.city || "City", test.contractorInfo?.city || "", (v) => updateContractorInfo("city", v))}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.state || "State", test.contractorInfo?.state || "", (v) => updateContractorInfo("state", v))}
+          </View>
+        </View>
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.zipCode || "ZIP Code", test.contractorInfo?.zipCode || "", (v) => updateContractorInfo("zipCode", v))}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.phone || "Phone", test.contractorInfo?.phone || "", (v) => updateContractorInfo("phone", v), { keyboardType: "phone-pad" })}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.email || "Email", test.contractorInfo?.email || "", (v) => updateContractorInfo("email", v), { keyboardType: "email-address" })}
+        {renderInputField(t.performanceTest?.licenseNumber || "License Number", test.contractorInfo?.licenseNumber || "", (v) => updateContractorInfo("licenseNumber", v))}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.job || "2. Job/Site Information"}
+        isExpanded={expandedSections.job}
+        onToggle={() => toggleSection("job")}
+      >
+        <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.selectJobSite || "Select Job Site"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SelectPicker
+          options={jobSiteOptions}
+          selectedId={test.jobInfo?.jobSiteId}
+          onSelect={handleJobSiteSelect}
+          placeholder={t.jobSites?.selectJobSite || "Select a job site"}
+          title={t.jobSites?.selectJobSite || "Select Job Site"}
+          emptyText={t.jobSites?.noResults || "No job sites found"}
+        />
+        <Spacer height={Spacing.lg} />
+        {renderInputField(t.performanceTest?.jobName || "Job Name", test.jobInfo?.jobName || "", (v) => updateJobInfo("jobName", v))}
+        {renderInputField(t.performanceTest?.jobNumber || "Job Number", test.jobInfo?.jobNumber || "", (v) => updateJobInfo("jobNumber", v))}
+        {renderInputField(t.performanceTest?.address || "Address", test.jobInfo?.address || "", (v) => updateJobInfo("address", v))}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.city || "City", test.jobInfo?.city || "", (v) => updateJobInfo("city", v))}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.state || "State", test.jobInfo?.state || "", (v) => updateJobInfo("state", v))}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.testDate || "Test Date", test.jobInfo?.testDate || "", (v) => updateJobInfo("testDate", v))}
+        {renderInputField(t.performanceTest?.testLocation || "Test Location", test.jobInfo?.testLocation || "", (v) => updateJobInfo("testLocation", v))}
+        <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.testMethod || "Test Method"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SelectPicker
+          options={testMethodOptions}
+          selectedId={test.jobInfo?.testMethod}
+          onSelect={(v) => updateJobInfo("testMethod", v)}
+          placeholder={t.performanceTest?.selectTestMethod || "Select test method"}
+          title={t.performanceTest?.testMethod || "Test Method"}
+        />
+        <Spacer height={Spacing.md} />
+        {renderInputField(t.performanceTest?.weatherConditions || "Weather Conditions", test.jobInfo?.weatherConditions || "", (v) => updateJobInfo("weatherConditions", v))}
+        {renderInputField(t.performanceTest?.ambientTemp || "Ambient Temperature (F)", test.jobInfo?.ambientTemperatureF || "", (v) => updateJobInfo("ambientTemperatureF", v), { keyboardType: "numeric" })}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.pump || "3. Pump Equipment"}
+        isExpanded={expandedSections.pump}
+        onToggle={() => toggleSection("pump")}
+      >
+        {renderInputField(t.performanceTest?.pumpTag || "Pump Tag/ID", test.pumpEquipment?.pumpTag || "", (v) => updatePumpEquipment("pumpTag", v))}
+        {renderInputField(t.performanceTest?.manufacturer || "Manufacturer", test.pumpEquipment?.manufacturer || "", (v) => updatePumpEquipment("manufacturer", v))}
+        {renderInputField(t.performanceTest?.model || "Model", test.pumpEquipment?.model || "", (v) => updatePumpEquipment("model", v))}
+        {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.pumpEquipment?.serialNumber || "", (v) => updatePumpEquipment("serialNumber", v))}
+        <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.pumpOrientation || "Pump Orientation"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SelectPicker
+          options={pumpOrientationOptions}
+          selectedId={test.pumpEquipment?.pumpOrientation}
+          onSelect={(v) => updatePumpEquipment("pumpOrientation", v)}
+          placeholder={t.performanceTest?.selectOrientation || "Select orientation"}
+          title={t.performanceTest?.pumpOrientation || "Pump Orientation"}
+        />
+        <Spacer height={Spacing.md} />
+        {renderInputField(t.performanceTest?.yearInstalled || "Year Installed", test.pumpEquipment?.yearInstalled || "", (v) => updatePumpEquipment("yearInstalled", v), { keyboardType: "numeric" })}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.ratedFlowGpm || "Rated Flow (GPM)", test.pumpEquipment?.ratedFlowGpm || "", (v) => updatePumpEquipment("ratedFlowGpm", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.ratedPressurePsi || "Rated Pressure (PSI)", test.pumpEquipment?.ratedPressurePsi || "", (v) => updatePumpEquipment("ratedPressurePsi", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.ratedSpeedRpm || "Rated Speed (RPM)", test.pumpEquipment?.ratedSpeedRpm || "", (v) => updatePumpEquipment("ratedSpeedRpm", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.shutoffPressurePsi || "Shutoff Pressure (PSI)", test.pumpEquipment?.shutoffPressurePsi || "", (v) => updatePumpEquipment("shutoffPressurePsi", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.peakFlowGpm || "Peak Flow (150%) GPM", test.pumpEquipment?.peakFlowGpm || "", (v) => updatePumpEquipment("peakFlowGpm", v), { keyboardType: "numeric" })}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.impellerDiameter || "Impeller Diameter (in)", test.pumpEquipment?.impellerDiameterIn || "", (v) => updatePumpEquipment("impellerDiameterIn", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.impellerType || "Impeller Type", test.pumpEquipment?.impellerType || "", (v) => updatePumpEquipment("impellerType", v))}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.numberOfStages || "Number of Stages", test.pumpEquipment?.numberOfStages || "", (v) => updatePumpEquipment("numberOfStages", v), { keyboardType: "numeric" })}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.suctionSize || "Suction Size (in)", test.pumpEquipment?.suctionSizeIn || "", (v) => updatePumpEquipment("suctionSizeIn", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.dischargeSize || "Discharge Size (in)", test.pumpEquipment?.dischargeSizeIn || "", (v) => updatePumpEquipment("dischargeSizeIn", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.rotationDirection || "Rotation Direction", test.pumpEquipment?.rotationDirection || "", (v) => updatePumpEquipment("rotationDirection", v))}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.driver || "4. Driver Information"}
+        isExpanded={expandedSections.driver}
+        onToggle={() => toggleSection("driver")}
+      >
+        <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.driverType || "Driver Type"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SelectPicker
+          options={driverTypeOptions}
+          selectedId={test.driverInfo?.driverType}
+          onSelect={(v) => updateDriverInfo("driverType", v)}
+          placeholder={t.performanceTest?.selectDriverType || "Select driver type"}
+          title={t.performanceTest?.driverType || "Driver Type"}
+        />
+        <Spacer height={Spacing.md} />
+        {renderInputField(t.performanceTest?.manufacturer || "Manufacturer", test.driverInfo?.manufacturer || "", (v) => updateDriverInfo("manufacturer", v))}
+        {renderInputField(t.performanceTest?.model || "Model", test.driverInfo?.model || "", (v) => updateDriverInfo("model", v))}
+        {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.driverInfo?.serialNumber || "", (v) => updateDriverInfo("serialNumber", v))}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.horsePower || "Horse Power", test.driverInfo?.horsePower || "", (v) => updateDriverInfo("horsePower", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.ratedRpm || "Rated RPM", test.driverInfo?.ratedRpm || "", (v) => updateDriverInfo("ratedRpm", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        
+        {test.driverInfo?.driverType === "electric" ? (
+          <>
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.ratedVoltage || "Rated Voltage", (test.driverInfo as any)?.ratedVoltage || "", (v) => updateDriverInfo("ratedVoltage", v), { keyboardType: "numeric" })}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.phases || "Phases", (test.driverInfo as any)?.phases || "", (v) => updateDriverInfo("phases", v), { keyboardType: "numeric" })}
+              </View>
+            </View>
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.hertz || "Hertz", (test.driverInfo as any)?.hertz || "", (v) => updateDriverInfo("hertz", v), { keyboardType: "numeric" })}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.fla || "Full Load Amps", (test.driverInfo as any)?.fullLoadAmperage || "", (v) => updateDriverInfo("fullLoadAmperage", v), { keyboardType: "numeric" })}
+              </View>
+            </View>
+            {renderInputField(t.performanceTest?.lra || "Locked Rotor Amps", (test.driverInfo as any)?.lockedRotorAmperage || "", (v) => updateDriverInfo("lockedRotorAmperage", v), { keyboardType: "numeric" })}
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.serviceFactor || "Service Factor", (test.driverInfo as any)?.serviceFactor || "", (v) => updateDriverInfo("serviceFactor", v))}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.enclosureType || "Enclosure Type", (test.driverInfo as any)?.enclosureType || "", (v) => updateDriverInfo("enclosureType", v))}
+              </View>
+            </View>
+            {renderInputField(t.performanceTest?.insulationClass || "Insulation Class", (test.driverInfo as any)?.insulationClass || "", (v) => updateDriverInfo("insulationClass", v))}
+            {renderInputField(t.performanceTest?.frameSize || "Frame Size", (test.driverInfo as any)?.frameSize || "", (v) => updateDriverInfo("frameSize", v))}
+          </>
+        ) : (
+          <>
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.cylinders || "Number of Cylinders", (test.driverInfo as any)?.numberOfCylinders || "", (v) => updateDriverInfo("numberOfCylinders", v), { keyboardType: "numeric" })}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.displacement || "Displacement", (test.driverInfo as any)?.displacement || "", (v) => updateDriverInfo("displacement", v))}
+              </View>
+            </View>
+            {renderInputField(t.performanceTest?.fuelTankCapacity || "Fuel Tank Capacity (gal)", (test.driverInfo as any)?.fuelTankCapacityGal || "", (v) => updateDriverInfo("fuelTankCapacityGal", v), { keyboardType: "numeric" })}
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.fuelLevel || "Fuel Level", (test.driverInfo as any)?.fuelLevel || "", (v) => updateDriverInfo("fuelLevel", v))}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.oilLevel || "Oil Level", (test.driverInfo as any)?.oilLevel || "", (v) => updateDriverInfo("oilLevel", v))}
+              </View>
+            </View>
+            {renderInputField(t.performanceTest?.coolantLevel || "Coolant Level", (test.driverInfo as any)?.coolantLevel || "", (v) => updateDriverInfo("coolantLevel", v))}
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.batteryVoltage1 || "Battery 1 Voltage", (test.driverInfo as any)?.batteryVoltage1 || "", (v) => updateDriverInfo("batteryVoltage1", v), { keyboardType: "numeric" })}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField(t.performanceTest?.batteryVoltage2 || "Battery 2 Voltage", (test.driverInfo as any)?.batteryVoltage2 || "", (v) => updateDriverInfo("batteryVoltage2", v), { keyboardType: "numeric" })}
+              </View>
+            </View>
+            {renderInputField(t.performanceTest?.engineBlockHeater || "Engine Block Heater Status", (test.driverInfo as any)?.engineBlockHeaterStatus || "", (v) => updateDriverInfo("engineBlockHeaterStatus", v))}
+          </>
+        )}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.controller || "5. Controller Information"}
+        isExpanded={expandedSections.controller}
+        onToggle={() => toggleSection("controller")}
+      >
+        {renderInputField(t.performanceTest?.manufacturer || "Manufacturer", test.controllerInfo?.manufacturer || "", (v) => updateControllerInfo("manufacturer", v))}
+        {renderInputField(t.performanceTest?.model || "Model", test.controllerInfo?.model || "", (v) => updateControllerInfo("model", v))}
+        {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.controllerInfo?.serialNumber || "", (v) => updateControllerInfo("serialNumber", v))}
+        {renderInputField(t.performanceTest?.panelTag || "Panel Tag", test.controllerInfo?.panelTag || "", (v) => updateControllerInfo("panelTag", v))}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.supplyVoltage || "Supply Voltage", test.controllerInfo?.supplyVoltage || "", (v) => updateControllerInfo("supplyVoltage", v))}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.startingType || "Starting Type", test.controllerInfo?.startingType || "", (v) => updateControllerInfo("startingType", v))}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.transferSwitchType || "Transfer Switch Type", test.controllerInfo?.transferSwitchType || "", (v) => updateControllerInfo("transferSwitchType", v))}
+        {renderSwitchField(t.performanceTest?.hasAutomaticTransfer || "Automatic Transfer Switch", test.controllerInfo?.hasAutomaticTransfer || false, (v) => updateControllerInfo("hasAutomaticTransfer", v))}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.pressureStart || "Pressure Setting - Start (PSI)", test.controllerInfo?.pressureSettingStart || "", (v) => updateControllerInfo("pressureSettingStart", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.pressureStop || "Pressure Setting - Stop (PSI)", test.controllerInfo?.pressureSettingStop || "", (v) => updateControllerInfo("pressureSettingStop", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderSwitchField(t.performanceTest?.hasLowSuctionCutoff || "Low Suction Cutoff", test.controllerInfo?.hasLowSuctionCutoff || false, (v) => updateControllerInfo("hasLowSuctionCutoff", v))}
+        {test.controllerInfo?.hasLowSuctionCutoff ? (
+          renderInputField(t.performanceTest?.lowSuctionCutoffPsi || "Low Suction Cutoff (PSI)", test.controllerInfo?.lowSuctionCutoffPsi || "", (v) => updateControllerInfo("lowSuctionCutoffPsi", v), { keyboardType: "numeric" })
+        ) : null}
+        {renderSwitchField(t.performanceTest?.hasPhaseReversal || "Phase Reversal Protection", test.controllerInfo?.hasPhaseReversal || false, (v) => updateControllerInfo("hasPhaseReversal", v))}
+        {renderSwitchField(t.performanceTest?.hasPhaseLoss || "Phase Loss Protection", test.controllerInfo?.hasPhaseLoss || false, (v) => updateControllerInfo("hasPhaseLoss", v))}
+        {renderSwitchField(t.performanceTest?.hasOvercurrent || "Overcurrent Protection", test.controllerInfo?.hasOvercurrent || false, (v) => updateControllerInfo("hasOvercurrent", v))}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.power || "6. Power Supply"}
+        isExpanded={expandedSections.power}
+        onToggle={() => toggleSection("power")}
+      >
+        {renderInputField(t.performanceTest?.normalSourceDesc || "Normal Power Source Description", test.powerSupply?.normalSourceDescription || "", (v) => updatePowerSupply("normalSourceDescription", v))}
+        <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.normalSourceVoltage || "Normal Source Voltage"}</ThemedText>
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField("L1-L2", test.powerSupply?.normalSourceVoltageL1L2 || "", (v) => updatePowerSupply("normalSourceVoltageL1L2", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField("L2-L3", test.powerSupply?.normalSourceVoltageL2L3 || "", (v) => updatePowerSupply("normalSourceVoltageL2L3", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField("L3-L1", test.powerSupply?.normalSourceVoltageL3L1 || "", (v) => updatePowerSupply("normalSourceVoltageL3L1", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderSwitchField(t.performanceTest?.emergencySourceAvailable || "Emergency Source Available", test.powerSupply?.emergencySourceAvailable || false, (v) => updatePowerSupply("emergencySourceAvailable", v))}
+        {test.powerSupply?.emergencySourceAvailable ? (
+          <>
+            {renderInputField(t.performanceTest?.emergencySourceDesc || "Emergency Source Description", test.powerSupply?.emergencySourceDescription || "", (v) => updatePowerSupply("emergencySourceDescription", v))}
+            <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.emergencySourceVoltage || "Emergency Source Voltage"}</ThemedText>
+            <View style={styles.row}>
+              <View style={styles.flex1}>
+                {renderInputField("L1-L2", test.powerSupply?.emergencySourceVoltageL1L2 || "", (v) => updatePowerSupply("emergencySourceVoltageL1L2", v), { keyboardType: "numeric" })}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField("L2-L3", test.powerSupply?.emergencySourceVoltageL2L3 || "", (v) => updatePowerSupply("emergencySourceVoltageL2L3", v), { keyboardType: "numeric" })}
+              </View>
+              <View style={styles.flex1}>
+                {renderInputField("L3-L1", test.powerSupply?.emergencySourceVoltageL3L1 || "", (v) => updatePowerSupply("emergencySourceVoltageL3L1", v), { keyboardType: "numeric" })}
+              </View>
+            </View>
+            {renderInputField(t.performanceTest?.transferTime || "Transfer Time (seconds)", test.powerSupply?.transferTimeSeconds || "", (v) => updatePowerSupply("transferTimeSeconds", v), { keyboardType: "numeric" })}
+          </>
+        ) : null}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.supply || "7. Water Supply Conditions"}
+        isExpanded={expandedSections.supply}
+        onToggle={() => toggleSection("supply")}
+      >
+        <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.supplySource || "Supply Source"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SelectPicker
+          options={supplySourceOptions}
+          selectedId={test.supplyConditions?.supplySource}
+          onSelect={(v) => updateSupplyConditions("supplySource", v)}
+          placeholder={t.performanceTest?.selectSupplySource || "Select supply source"}
+          title={t.performanceTest?.supplySource || "Supply Source"}
+        />
+        <Spacer height={Spacing.md} />
+        {test.supplyConditions?.supplySource === "other" ? (
+          renderInputField(t.performanceTest?.supplySourceOther || "Other Supply Source", test.supplyConditions?.supplySourceOther || "", (v) => updateSupplyConditions("supplySourceOther", v))
+        ) : null}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.staticPressure || "Static Pressure (PSI)", test.supplyConditions?.staticPressurePsi || "", (v) => updateSupplyConditions("staticPressurePsi", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.residualPressure || "Residual Pressure (PSI)", test.supplyConditions?.residualPressurePsi || "", (v) => updateSupplyConditions("residualPressurePsi", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.suctionReservoirLevel || "Suction Reservoir Level", test.supplyConditions?.suctionReservoirLevel || "", (v) => updateSupplyConditions("suctionReservoirLevel", v))}
+        {renderInputField(t.performanceTest?.waterTemperature || "Water Temperature (F)", test.supplyConditions?.waterTemperatureF || "", (v) => updateSupplyConditions("waterTemperatureF", v), { keyboardType: "numeric" })}
+        {renderSwitchField(t.performanceTest?.hasSuctionScreen || "Suction Screen Installed", test.supplyConditions?.hasSuctionScreen || false, (v) => updateSupplyConditions("hasSuctionScreen", v))}
+        {test.supplyConditions?.hasSuctionScreen ? (
+          renderInputField(t.performanceTest?.suctionScreenCondition || "Suction Screen Condition", test.supplyConditions?.suctionScreenCondition || "", (v) => updateSupplyConditions("suctionScreenCondition", v))
+        ) : null}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.demand || "8. System Demand"}
+        isExpanded={expandedSections.demand}
+        onToggle={() => toggleSection("demand")}
+      >
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.systemDemandGpm || "System Demand (GPM)", test.systemDemand?.systemDemandGpm || "", (v) => updateSystemDemand("systemDemandGpm", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.systemDemandPsi || "System Demand (PSI)", test.systemDemand?.systemDemandPsi || "", (v) => updateSystemDemand("systemDemandPsi", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.hoseDemandGpm || "Hose Stream Demand (GPM)", test.systemDemand?.hoseDemandGpm || "", (v) => updateSystemDemand("hoseDemandGpm", v), { keyboardType: "numeric" })}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.totalDemandGpm || "Total Demand (GPM)", test.systemDemand?.totalDemandGpm || "", (v) => updateSystemDemand("totalDemandGpm", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.totalDemandPsi || "Total Demand (PSI)", test.systemDemand?.totalDemandPsi || "", (v) => updateSystemDemand("totalDemandPsi", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.conditions || "9. Test Conditions & Readings"}
+        isExpanded={expandedSections.conditions}
+        onToggle={() => toggleSection("conditions")}
+      >
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.suctionGauge || "Suction Gauge (PSI)", test.testConditions?.suctionGaugePsi || "", (v) => updateTestConditions("suctionGaugePsi", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.dischargeGauge || "Discharge Gauge (PSI)", test.testConditions?.dischargeGaugePsi || "", (v) => updateTestConditions("dischargeGaugePsi", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        {renderInputField(t.performanceTest?.flowMeterType || "Flow Meter Type", test.testConditions?.flowMeterType || "", (v) => updateTestConditions("flowMeterType", v))}
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.flowMeterSize || "Flow Meter Size", test.testConditions?.flowMeterSize || "", (v) => updateTestConditions("flowMeterSize", v))}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.calibrationDate || "Calibration Date", test.testConditions?.flowMeterCalibrationDate || "", (v) => updateTestConditions("flowMeterCalibrationDate", v))}
+          </View>
+        </View>
+        
+        <Spacer height={Spacing.lg} />
+        <ThemedText type="h3">{t.performanceTest?.testReadings || "Test Readings"}</ThemedText>
+        <ThemedText type="small" secondary>{t.performanceTest?.readingsHelp || "Enter readings at each flow percentage"}</ThemedText>
+        <Spacer height={Spacing.md} />
+        
+        {test.testConditions?.readings.map((reading) => renderTestReadingRow(reading, test.driverInfo?.driverType === "electric"))}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.results || "10. Results Summary"}
+        isExpanded={expandedSections.results}
+        onToggle={() => toggleSection("results")}
+      >
+        <ThemedText type="h4">{t.performanceTest?.shutoffTest || "Shutoff (Churn) Test"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.actual || "Actual (PSI)", test.resultsSummary?.shutoffPressureActual || "", (v) => updateResultsSummary("shutoffPressureActual", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.rated || "Rated (PSI)", test.resultsSummary?.shutoffPressureRated || "", (v) => updateResultsSummary("shutoffPressureRated", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        
+        <Spacer height={Spacing.lg} />
+        <ThemedText type="h4">{t.performanceTest?.ratedFlowTest || "100% Rated Flow Test"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.actual || "Actual (PSI)", test.resultsSummary?.ratedFlowPressureActual || "", (v) => updateResultsSummary("ratedFlowPressureActual", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.rated || "Rated (PSI)", test.resultsSummary?.ratedFlowPressureRated || "", (v) => updateResultsSummary("ratedFlowPressureRated", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+        
+        <Spacer height={Spacing.lg} />
+        <ThemedText type="h4">{t.performanceTest?.peakFlowTest || "150% Peak Flow Test"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <View style={styles.row}>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.actual || "Actual (PSI)", test.resultsSummary?.peakFlowPressureActual || "", (v) => updateResultsSummary("peakFlowPressureActual", v), { keyboardType: "numeric" })}
+          </View>
+          <View style={styles.flex1}>
+            {renderInputField(t.performanceTest?.minimum || "Minimum (PSI)", test.resultsSummary?.peakFlowPressureMin || "", (v) => updateResultsSummary("peakFlowPressureMin", v), { keyboardType: "numeric" })}
+          </View>
+        </View>
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.observations || "11. Observations & Deficiencies"}
+        isExpanded={expandedSections.observations}
+        onToggle={() => toggleSection("observations")}
+      >
+        {renderInputField(t.performanceTest?.generalObservations || "General Observations", test.observationsDeficiencies?.generalObservations || "", (v) => updateObservations("generalObservations", v), { multiline: true })}
+        
+        <Spacer height={Spacing.lg} />
+        <View style={styles.deficiencyHeader}>
+          <ThemedText type="h4">{t.performanceTest?.deficiencies || "Deficiencies"}</ThemedText>
+          <Pressable onPress={addDeficiency} style={[styles.addButton, { backgroundColor: fullTheme.colors.primary }]}>
+            <Feather name="plus" size={16} color="#FFFFFF" />
+            <ThemedText type="small" style={{ color: "#FFFFFF", marginLeft: Spacing.xs }}>{t.common.add || "Add"}</ThemedText>
+          </Pressable>
+        </View>
+        
+        {test.observationsDeficiencies?.deficiencies.map((deficiency, index) => (
+          <View key={deficiency.id} style={[styles.deficiencyCard, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}>
+            <View style={styles.deficiencyCardHeader}>
+              <ThemedText type="body">{t.performanceTest?.deficiency || "Deficiency"} #{index + 1}</ThemedText>
+              <Pressable onPress={() => removeDeficiency(deficiency.id)}>
+                <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+              </Pressable>
+            </View>
+            {renderInputField(t.performanceTest?.description || "Description", deficiency.description, (v) => updateDeficiency(deficiency.id, "description", v), { multiline: true })}
+            {renderInputField(t.performanceTest?.recommendedAction || "Recommended Action", deficiency.recommendedAction, (v) => updateDeficiency(deficiency.id, "recommendedAction", v))}
+            {renderInputField(t.performanceTest?.targetDate || "Target Completion Date", deficiency.targetCompletionDate, (v) => updateDeficiency(deficiency.id, "targetCompletionDate", v))}
+          </View>
+        ))}
+        
+        <Spacer height={Spacing.lg} />
+        {renderInputField(t.performanceTest?.recommendedMaintenance || "Recommended Maintenance Actions", test.observationsDeficiencies?.recommendedMaintenanceActions || "", (v) => updateObservations("recommendedMaintenanceActions", v), { multiline: true })}
+        {renderInputField(t.performanceTest?.nextTestDue || "Next Test Due Date", test.observationsDeficiencies?.nextTestDueDate || "", (v) => updateObservations("nextTestDueDate", v))}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.signatures || "12. Signatures"}
+        isExpanded={expandedSections.signatures}
+        onToggle={() => toggleSection("signatures")}
+      >
+        <ThemedText type="h4">{t.performanceTest?.conductedBy || "Test Conducted By"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        {renderInputField(t.performanceTest?.name || "Name", test.signatures?.conductedBy.name || "", (v) => updateConductedBySignature("name", v))}
+        {renderInputField(t.performanceTest?.titleField || "Title", test.signatures?.conductedBy.title || "", (v) => updateConductedBySignature("title", v))}
+        {renderInputField(t.performanceTest?.company || "Company", test.signatures?.conductedBy.company || "", (v) => updateConductedBySignature("company", v))}
+        {renderInputField(t.performanceTest?.date || "Date", test.signatures?.conductedBy.date || "", (v) => updateConductedBySignature("date", v))}
+        
+        <Spacer height={Spacing.md} />
+        <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.signature || "Signature"}</ThemedText>
+        <Spacer height={Spacing.sm} />
+        <SignatureCapture
+          signature={test.signatures?.conductedBy.signatureData || null}
+          onSignatureChange={(sig) => updateConductedBySignature("signatureData", sig)}
+        />
+      </CollapsibleSection>
+
+      <Spacer height={Spacing.md} />
+
+      <CollapsibleSection
+        title={t.performanceTest?.sections?.attachments || "13. Attachments"}
+        isExpanded={expandedSections.attachments}
+        onToggle={() => toggleSection("attachments")}
+      >
+        {renderSwitchField(t.performanceTest?.pumpCurveAttached || "Pump Curve Attached", test.attachments?.pumpCurveAttached || false, (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, pumpCurveAttached: v } })))}
+        {renderSwitchField(t.performanceTest?.previousTestAttached || "Previous Test Report Attached", test.attachments?.previousTestReportAttached || false, (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, previousTestReportAttached: v } })))}
+        {renderInputField(t.performanceTest?.additionalNotes || "Additional Notes", test.attachments?.additionalNotes || "", (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, additionalNotes: v } })), { multiline: true })}
+      </CollapsibleSection>
+
+      <Spacer height={Spacing["3xl"]} />
+
+      <Button onPress={handleSubmit}>{t.performanceTest?.saveTest || "Save Performance Test"}</Button>
+
+      <Spacer height={Spacing["4xl"]} />
+    </ScreenKeyboardAwareScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  pageTitle: {
+    textAlign: "center",
+  },
+  subtitle: {
+    textAlign: "center",
+  },
+  section: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  sectionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  sectionTitle: {
+    flex: 1,
+  },
+  progressBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+    marginLeft: Spacing.sm,
+  },
+  sectionContent: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
+  },
+  sectionSubtitle: {
+    marginBottom: Spacing.xs,
+  },
+  fieldContainer: {
+    marginBottom: Spacing.md,
+  },
+  fieldLabel: {
+    marginBottom: Spacing.xs,
+  },
+  input: {
+    height: Spacing.inputHeight,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.lg,
+    fontSize: 16,
+  },
+  textArea: {
+    height: 100,
+    paddingTop: Spacing.md,
+    textAlignVertical: "top",
+  },
+  row: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  flex1: {
+    flex: 1,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  readingRow: {
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  readingLabel: {
+    marginBottom: Spacing.sm,
+    fontWeight: "600",
+  },
+  readingInputs: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  readingInput: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    fontSize: 14,
+  },
+  readingNetPressure: {
+    width: 60,
+    textAlign: "right",
+  },
+  deficiencyHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.md,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+  },
+  deficiencyCard: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  deficiencyCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.md,
+  },
+});
