@@ -25,38 +25,45 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
   const { activateLicense } = useLicense();
   const insets = useSafeAreaInsets();
   
-  const [licenseKey, setLicenseKey] = useState("");
+  const [licenseKeyInput, setLicenseKeyInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const formatLicenseKey = (text: string) => {
+  const formatLicenseKeyInput = (text: string) => {
     const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const trimmed = cleaned.substring(0, 12);
     const parts = [];
     
-    if (cleaned.length > 0) {
-      parts.push(cleaned.substring(0, 4));
+    if (trimmed.length > 0) {
+      parts.push(trimmed.substring(0, 4));
     }
-    if (cleaned.length > 4) {
-      parts.push(cleaned.substring(4, 8));
+    if (trimmed.length > 4) {
+      parts.push(trimmed.substring(4, 8));
     }
-    if (cleaned.length > 8) {
-      parts.push(cleaned.substring(8, 12));
-    }
-    if (cleaned.length > 12) {
-      parts.push(cleaned.substring(12, 16));
+    if (trimmed.length > 8) {
+      parts.push(trimmed.substring(8, 12));
     }
     
     return parts.join("-");
   };
 
+  const getFullLicenseKey = () => {
+    const cleanedInput = licenseKeyInput.replace(/-/g, "");
+    if (cleanedInput.length === 12) {
+      return `FIRE-${cleanedInput.substring(0, 4)}-${cleanedInput.substring(4, 8)}-${cleanedInput.substring(8, 12)}`;
+    }
+    return "";
+  };
+
   const handleKeyChange = (text: string) => {
-    const formatted = formatLicenseKey(text);
-    setLicenseKey(formatted);
+    const formatted = formatLicenseKeyInput(text);
+    setLicenseKeyInput(formatted);
     setError(null);
   };
 
   const handleActivate = async () => {
-    if (licenseKey.length < 19) {
+    const fullKey = getFullLicenseKey();
+    if (!fullKey || licenseKeyInput.replace(/-/g, "").length < 12) {
       setError(t.license?.errors?.incompleteKey || "Please enter the complete license key");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
@@ -65,7 +72,8 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
     setIsLoading(true);
     setError(null);
 
-    const result = await activateLicense(licenseKey);
+    const fullKey = getFullLicenseKey();
+    const result = await activateLicense(fullKey);
 
     setIsLoading(false);
 
@@ -128,24 +136,29 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
             {t.license?.keyLabel || "License Key"}
           </ThemedText>
           <Spacer height={Spacing.sm} />
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: fullTheme.colors.cardBackground,
-                borderColor: error ? fullTheme.colors.error : fullTheme.colors.border,
-                color: fullTheme.colors.textPrimary,
-              },
-            ]}
-            value={licenseKey}
-            onChangeText={handleKeyChange}
-            placeholder="FIRE-XXXX-XXXX-XXXX"
-            placeholderTextColor={fullTheme.colors.textSecondary}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            maxLength={19}
-            editable={!isLoading}
-          />
+          <View style={[
+            styles.inputRow,
+            {
+              backgroundColor: fullTheme.colors.cardBackground,
+              borderColor: error ? fullTheme.colors.error : fullTheme.colors.border,
+            },
+          ]}>
+            <ThemedText type="body" style={styles.prefixText}>FIRE-</ThemedText>
+            <TextInput
+              style={[
+                styles.inputField,
+                { color: fullTheme.colors.textPrimary },
+              ]}
+              value={licenseKeyInput}
+              onChangeText={handleKeyChange}
+              placeholder="XXXX-XXXX-XXXX"
+              placeholderTextColor={fullTheme.colors.textSecondary}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              maxLength={14}
+              editable={!isLoading}
+            />
+          </View>
           {error ? (
             <>
               <Spacer height={Spacing.sm} />
@@ -164,7 +177,7 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
             : (t.license?.activateButton || "Activate License")
           }
           onPress={handleActivate}
-          disabled={isLoading || licenseKey.length < 19}
+          disabled={isLoading || licenseKeyInput.replace(/-/g, "").length < 12}
           style={styles.button}
         />
 
@@ -224,16 +237,26 @@ const styles = StyleSheet.create({
   inputLabel: {
     marginLeft: Spacing.xs,
   },
-  input: {
+  inputRow: {
     width: "100%",
     height: 56,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Spacing.lg,
+  },
+  prefixText: {
     fontSize: 18,
     fontWeight: "600",
     letterSpacing: 2,
-    textAlign: "center",
+  },
+  inputField: {
+    flex: 1,
+    height: 56,
+    fontSize: 18,
+    fontWeight: "600",
+    letterSpacing: 2,
   },
   button: {
     width: "100%",
