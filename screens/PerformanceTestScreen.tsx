@@ -64,11 +64,12 @@ function SectionCard({ title, children, sectionRef }: SectionCardProps) {
 interface SummaryHeaderProps {
   contractor: string;
   jobSite: string;
+  inspector: string;
   pumpTag: string;
   testDate: string;
 }
 
-function SummaryHeader({ contractor, jobSite, pumpTag, testDate }: SummaryHeaderProps) {
+function SummaryHeader({ contractor, jobSite, inspector, pumpTag, testDate }: SummaryHeaderProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
 
@@ -95,12 +96,22 @@ function SummaryHeader({ contractor, jobSite, pumpTag, testDate }: SummaryHeader
       <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
           <ThemedText type="small" style={styles.summaryLabel}>
+            {t.performanceTest?.inspector || "Inspector"}
+          </ThemedText>
+          <ThemedText type="body" style={styles.summaryValue}>
+            {inspector || "-"}
+          </ThemedText>
+        </View>
+        <View style={styles.summaryItem}>
+          <ThemedText type="small" style={styles.summaryLabel}>
             {t.performanceTest?.pumpTag || "Pump"}
           </ThemedText>
           <ThemedText type="body" style={styles.summaryValue}>
             {pumpTag || "-"}
           </ThemedText>
         </View>
+      </View>
+      <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
           <ThemedText type="small" style={styles.summaryLabel}>
             {t.performanceTest?.testDate || "Test Date"}
@@ -114,7 +125,7 @@ function SummaryHeader({ contractor, jobSite, pumpTag, testDate }: SummaryHeader
   );
 }
 
-const DRAFT_STORAGE_KEY = "performance_test_draft";
+const getDraftStorageKey = (id?: string) => `performance_test_draft_${id || 'new'}`;
 const AUTO_SAVE_DELAY = 2000;
 
 export default function PerformanceTestScreen({ navigation, route }: PerformanceTestScreenProps) {
@@ -165,11 +176,41 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     };
   }, [test]);
 
+  const activeDraftKeyRef = useRef<string | null>(null);
+  const saveInProgressRef = useRef<Promise<void> | null>(null);
+
+  const resolveDraftKey = useCallback((currentTest: Partial<PerformanceTest>) => {
+    return getDraftStorageKey(currentTest.id || testId || 'new');
+  }, [testId]);
+
+  const findExistingDraft = async (): Promise<{ key: string; data: string } | null> => {
+    try {
+      if (testId) {
+        const key = getDraftStorageKey(testId);
+        const data = await AsyncStorage.getItem(key);
+        if (data) return { key, data };
+      }
+      
+      const newKey = getDraftStorageKey('new');
+      const newData = await AsyncStorage.getItem(newKey);
+      if (newData) return { key: newKey, data: newData };
+      
+      return null;
+    } catch (error) {
+      console.error("Error finding draft:", error);
+      return null;
+    }
+  };
+
   const loadDraft = async () => {
     try {
-      const draft = await AsyncStorage.getItem(DRAFT_STORAGE_KEY);
-      if (draft) {
-        setTest(JSON.parse(draft));
+      const result = await findExistingDraft();
+      if (result) {
+        const parsedDraft = JSON.parse(result.data);
+        activeDraftKeyRef.current = result.key;
+        setTest(parsedDraft);
+      } else {
+        activeDraftKeyRef.current = getDraftStorageKey(testId || 'new');
       }
     } catch (error) {
       console.error("Error loading draft:", error);
@@ -177,16 +218,38 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   };
 
   const saveDraft = async () => {
-    try {
-      await AsyncStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(test));
-    } catch (error) {
-      console.error("Error saving draft:", error);
+    if (saveInProgressRef.current) {
+      await saveInProgressRef.current;
     }
+    
+    const saveOperation = (async () => {
+      try {
+        const newKey = resolveDraftKey(test);
+        const oldKey = activeDraftKeyRef.current;
+        
+        await AsyncStorage.setItem(newKey, JSON.stringify(test));
+        
+        if (oldKey && oldKey !== newKey) {
+          await AsyncStorage.removeItem(oldKey);
+        }
+        
+        activeDraftKeyRef.current = newKey;
+      } catch (error) {
+        console.error("Error saving draft:", error);
+      }
+    })();
+    
+    saveInProgressRef.current = saveOperation;
+    await saveOperation;
+    saveInProgressRef.current = null;
   };
 
   const clearDraft = async () => {
     try {
-      await AsyncStorage.removeItem(DRAFT_STORAGE_KEY);
+      if (activeDraftKeyRef.current) {
+        await AsyncStorage.removeItem(activeDraftKeyRef.current);
+      }
+      activeDraftKeyRef.current = null;
     } catch (error) {
       console.error("Error clearing draft:", error);
     }
@@ -604,6 +667,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         <SummaryHeader
           contractor={test.contractorInfo?.companyName || ""}
           jobSite={test.jobInfo?.jobName || ""}
+          inspector={test.signatures?.conductedBy?.name || ""}
           pumpTag={test.pumpEquipment?.pumpTag || ""}
           testDate={test.jobInfo?.testDate || ""}
         />
