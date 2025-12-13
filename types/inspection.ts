@@ -40,7 +40,7 @@ export interface FirePumpControlPanel {
 
 export type InspectionType = 
   | "wet_pipe" | "dry_pipe" | "preaction_deluge" | "foam_water" | "water_spray" | "water_mist"
-  | "pump_weekly" | "pump_monthly" | "pump_annual" | "electric_pump"
+  | "pump_weekly" | "pump_monthly" | "pump_annual" | "electric_pump" | "diesel_pump"
   | "aboveground" | "underground" | "hydrant_flow"
   | "water_tank" | "hazard_eval" | "standpipe" | "fire_service_mains";
 

@@ -1,0 +1,226 @@
+ICON 2 — Diesel Engine Fire Pump
+WEEKLY — Pump House (Diesel-specific requirement)
+
+Yes No N/A Heat in pump room is not less than 70°F (21°C) for diesel engine pump without engine heater
+
+WEEKLY — Pump House (General — optional duplicate under Diesel)
+
+Yes No N/A Heat in pump room is 40°F (4°C) or higher
+
+Yes No N/A Ventilation louvers are free to operate
+
+Yes No N/A Excessive water does not appear on the floor
+
+Yes No N/A Coupling guard is in place
+
+WEEKLY — Diesel Engine Systems (Pump House block)
+
+Yes No N/A Diesel fuel tank is at least two-thirds full
+
+Yes No N/A Controller selector switch is in “auto” position
+
+Yes No N/A Voltage readings for batteries (2) are within acceptable range
+
+Yes No N/A Charging current readings are within acceptable range for batteries
+
+Yes No N/A Pilot lights for batteries are “on” or battery failure pilot lights are “off”
+
+WEEKLY — Inspections (Diesel-focused block)
+
+Yes No N/A All alarm pilot lights are “off”
+
+Yes No N/A Record engine running time from meter
+
+Yes No N/A Oil level is within acceptable range in right angle gear drive pumps
+
+Yes No N/A Crankcase oil level is within acceptable range
+
+Yes No N/A Cooling water level is within acceptable range
+
+Yes No N/A Electrolyte level in batteries is within acceptable range
+
+Yes No N/A Battery terminals are free of corrosion
+
+Yes No N/A Water-jacket heater is operational
+
+Yes No N/A Battery cranking voltage exceeds 9 volts for a 12 volt system and 18 volts for a 24 volt system (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Water pump(s) is not leaking (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Jacket water heater operational (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Flexible hose and connections are in good operating condition (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Check lube oil heater for operation (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Oil lube level is within acceptable range (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Check for water in diesel fuel tank (Alternative ITM A.8.1.1.2)
+
+WEEKLY — Run / Test (Diesel timing + diesel-specific items)
+
+Pump Systems
+
+Yes No N/A Record pump starting pressure psi
+
+Yes No N/A Operate fire pump for 30 minutes for diesel pump
+
+Yes No N/A Check packing gland tightness (slight leak at no flow)
+
+Yes No N/A Record suction pressure from gauge in psi
+
+Yes No N/A Record discharge pressure from gauge in psi
+
+Yes No N/A Adjust gland nuts if necessary
+
+Yes No N/A Check for unusual noise or vibration
+
+Yes No N/A Check packing boxes, bearings, or pump casing for overheating
+
+Yes No N/A Record pressure switch or pressure transducer and compare with pump discharge gauge
+
+Yes No N/A Record pumps highest psi and lowest psi pressure on the fire pump control log
+
+Yes No N/A Circulation relief valve functions correctly
+
+Yes No N/A Check fuel system solenoids for proper operation (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Check tank float switch for proper operation (Alternative ITM A.8.1.1.2)
+
+Diesel Engine Systems
+
+Yes No N/A Record time for diesel engine to crank
+
+Yes No N/A Record time for diesel engine to reach running speed
+
+Yes No N/A Check oil pressure gauge, speed indicator and water and oil temperatures while engine is running
+
+Yes No N/A Check heat exchanger for cooling water flow
+
+Yes No N/A Operate speed governor (internal combustion engine only)
+
+Steam System (only if steam-driven pumps exist)
+
+Yes No N/A For steam-driven pumps, steam pressure is within acceptable range
+
+Exhaust System (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Examine exhaust system for leaks
+
+Yes No N/A Drain condensate trap
+
+QUARTERLY — Action Diesel Engine System
+
+Fuel
+
+Yes No N/A Clean Strainer, filter, or dirt leg, or combination thereof (Alternative ITM A.8.1.1.2)
+
+Lubrication System
+
+Yes No N/A Inspect/Change/Test Crankcase breather (Alternative ITM A.8.1.1.2)
+
+Cooling System
+
+Yes No N/A Clean Water strainer (Alternative ITM A.8.1.1.2)
+
+Exhaust System
+
+Yes No N/A Inspect Insulation and fire hazards (Alternative ITM A.8.1.1.2)
+
+Battery System
+
+Yes No N/A Inspect Terminals clean and tight (Alternative ITM A.8.1.1.2)
+
+Electrical System
+
+Yes No N/A Inspect Wire chafing where subject to movement (Alternative ITM A.8.1.1.2)
+
+SEMIANNUAL — Diesel Engine System
+
+Cooling System
+
+Yes No N/A Test Antifreeze protection level (Alternative ITM A.8.1.1.2)
+
+Exhaust System
+
+Yes No N/A Inspect Flexible exhaust section (Alternative ITM A.8.1.1.2)
+
+Electrical System
+
+Yes No N/A Inspect/Test Operation of safeties and alarms (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Clean Boxes, panels, and cabinets (Alternative ITM A.8.1.1.2)
+
+ANNUAL — Diesel Engine System
+
+Pump System
+
+Yes No N/A Test Main relief valve
+
+Fuel
+
+Yes No N/A Test Diesel fuel
+
+Yes No N/A Test Fuel pump alarm signals
+
+Yes No N/A Maintenance Active fuel maintenance system
+
+Yes No N/A Clean Change fuel filter every 50 operating hours or annually
+
+Yes No N/A Clean Water/foreign material in tank (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect/Test Tank vents and overflow piping unobstructed
+
+Yes No N/A Inspect Fuel tank piping (Alternative ITM A.8.1.1.2)
+
+Lubrication System
+
+Yes No N/A Change Oil change (50 hour maximum)
+
+Yes No N/A Change Oil filter(s) (50 hour maximum)
+
+Cooling System
+
+Yes No N/A Maintenance Replace circulating water filter
+
+Yes No N/A Test Supervisory signal for high cooling water temperature
+
+Yes No N/A Inspect Antifreeze (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Clean Heat exchanger (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect/Change Duct work/louvers (Alternative ITM A.8.1.1.2)
+
+Exhaust System
+
+Yes No N/A Inspect Check exhaust system and drain condensate trap
+
+Yes No N/A Test Check for excessive backpressure
+
+Yes No N/A Inspect Hangers and support in good condition (Alternative ITM A.8.1.1.2)
+
+Battery System
+
+Yes No N/A Maintenance Check specific gravity, state of charge, and charger rates
+
+Yes No N/A Maintenance Clean terminals
+
+Yes No N/A Maintenance Check battery cranking voltage exceeds 9 volts for a 12 volt system and 18 volts for a 24 volt system
+
+Yes No N/A Maintenance Ensure only distilled water is used
+
+ANNUAL — Electrical System (shared block if you want)
+
+Yes No N/A Inspect Corrosion on printed circuit boards
+
+Yes No N/A Test Electrical control module (ECM)
+
+Yes No N/A Inspect Tighten control and power wiring connectors (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Voltmeter and ammeter for accuracy (5%) (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Cracked cable/wire insulation (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Leaks in plumbing parts (Alternative ITM A.8.1.1.2)
+
+Yes No N/A Inspect Signs of water on electrical parts (Alternative ITM A.8.1.1.2)
