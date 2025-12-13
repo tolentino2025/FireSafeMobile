@@ -46,9 +46,7 @@ const inspectionCategories = [
   {
     categoryKey: "firePumps" as const,
     items: [
-      { type: "pump_weekly" as const, icon: "activity" as const, labelKey: "pumpWeekly" as const, nfpaRef: "NFPA 25" },
-      { type: "pump_monthly" as const, icon: "activity" as const, labelKey: "pumpMonthly" as const, nfpaRef: "NFPA 25" },
-      { type: "pump_annual" as const, icon: "activity" as const, labelKey: "pumpAnnual" as const, nfpaRef: "NFPA 25" },
+      { type: "electric_pump" as const, icon: "zap" as const, labelKey: "electricPump" as const, nfpaRef: "NFPA 25" },
     ],
   },
   {
