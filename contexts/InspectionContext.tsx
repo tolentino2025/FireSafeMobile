@@ -34,6 +34,7 @@ import {
   JobSite,
   migrateInspections,
 } from "@/types/inspection";
+import { DieselPerformanceTest } from "@/types/performanceTest";
 
 export type {
   InspectionStatus,
@@ -66,6 +67,7 @@ export type {
   Contractor,
   JobSite,
 };
+export type { DieselPerformanceTest } from "@/types/performanceTest";
 
 interface InspectionContextType {
   inspections: Inspection[];
@@ -77,6 +79,7 @@ interface InspectionContextType {
   schedules: InspectionSchedule[];
   contractors: Contractor[];
   jobSites: JobSite[];
+  dieselPerformanceTests: DieselPerformanceTest[];
   currentInspection: Partial<Inspection> | null;
   isLoading: boolean;
   addInspection: (inspection: Inspection) => Promise<void>;
@@ -116,6 +119,10 @@ interface InspectionContextType {
   getJobSitesByContractor: (contractorId: string) => JobSite[];
   createOrUpdateScheduleForInspection: (inspection: Inspection, language: "en" | "pt-BR") => Promise<void>;
   refreshData: () => Promise<void>;
+  addDieselPerformanceTest: (test: DieselPerformanceTest) => Promise<void>;
+  updateDieselPerformanceTest: (id: string, updates: Partial<DieselPerformanceTest>) => Promise<void>;
+  deleteDieselPerformanceTest: (id: string) => Promise<void>;
+  getDieselPerformanceTestById: (id: string) => DieselPerformanceTest | undefined;
 }
 
 const InspectionContext = createContext<InspectionContextType | undefined>(undefined);
@@ -129,6 +136,7 @@ const FIRE_PUMP_PANELS_KEY = "@firesafe_fire_pump_panels";
 const SCHEDULES_KEY = "@firesafe_schedules";
 const CONTRACTORS_KEY = "@firesafe_contractors";
 const JOB_SITES_KEY = "@firesafe_job_sites";
+const DIESEL_TESTS_KEY = "@firesafe_diesel_performance_tests";
 const DATA_VERSION_KEY = "@firesafe_data_version";
 const CURRENT_DATA_VERSION = 3;
 
@@ -146,6 +154,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [schedules, setSchedules] = useState<InspectionSchedule[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [jobSites, setJobSites] = useState<JobSite[]>([]);
+  const [dieselPerformanceTests, setDieselPerformanceTests] = useState<DieselPerformanceTest[]>([]);
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -160,7 +169,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
       const version = storedVersion ? parseInt(storedVersion, 10) : 1;
       
-      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels, storedSchedules, storedContractors, storedJobSites] = await Promise.all([
+      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels, storedSchedules, storedContractors, storedJobSites, storedDieselTests] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
         AsyncStorage.getItem(COMPANIES_KEY),
@@ -170,6 +179,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         AsyncStorage.getItem(SCHEDULES_KEY),
         AsyncStorage.getItem(CONTRACTORS_KEY),
         AsyncStorage.getItem(JOB_SITES_KEY),
+        AsyncStorage.getItem(DIESEL_TESTS_KEY),
       ]);
 
       if (storedInspections) {
@@ -206,6 +216,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedJobSites) {
         setJobSites(JSON.parse(storedJobSites));
+      }
+      if (storedDieselTests) {
+        setDieselPerformanceTests(JSON.parse(storedDieselTests));
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -526,6 +539,44 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
     return jobSites.filter((jobSite) => jobSite.contractorId === contractorId);
   };
 
+  const saveDieselPerformanceTests = async (newTests: DieselPerformanceTest[]) => {
+    try {
+      await AsyncStorage.setItem(DIESEL_TESTS_KEY, JSON.stringify(newTests));
+      setDieselPerformanceTests(newTests);
+    } catch (error) {
+      console.error("Error saving diesel performance tests:", error);
+      throw error;
+    }
+  };
+
+  const addDieselPerformanceTest = async (test: DieselPerformanceTest) => {
+    const storedData = await AsyncStorage.getItem(DIESEL_TESTS_KEY);
+    const currentTests: DieselPerformanceTest[] = storedData ? JSON.parse(storedData) : [];
+    const newTests = [...currentTests, test];
+    await saveDieselPerformanceTests(newTests);
+  };
+
+  const updateDieselPerformanceTest = async (id: string, updates: Partial<DieselPerformanceTest>) => {
+    const storedData = await AsyncStorage.getItem(DIESEL_TESTS_KEY);
+    const currentTests: DieselPerformanceTest[] = storedData ? JSON.parse(storedData) : [];
+    
+    const newTests = currentTests.map((test) =>
+      test.id === id ? { ...test, ...updates, updatedAt: new Date().toISOString() } : test
+    );
+    await saveDieselPerformanceTests(newTests);
+  };
+
+  const deleteDieselPerformanceTest = async (id: string) => {
+    const storedData = await AsyncStorage.getItem(DIESEL_TESTS_KEY);
+    const currentTests: DieselPerformanceTest[] = storedData ? JSON.parse(storedData) : [];
+    const newTests = currentTests.filter((test) => test.id !== id);
+    await saveDieselPerformanceTests(newTests);
+  };
+
+  const getDieselPerformanceTestById = (id: string) => {
+    return dieselPerformanceTests.find((test) => test.id === id);
+  };
+
   const saveSchedules = async (newSchedules: InspectionSchedule[]) => {
     try {
       await AsyncStorage.setItem(SCHEDULES_KEY, JSON.stringify(newSchedules));
@@ -627,6 +678,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         schedules,
         contractors,
         jobSites,
+        dieselPerformanceTests,
         currentInspection,
         isLoading,
         addInspection,
@@ -666,6 +718,10 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         getJobSitesByContractor,
         createOrUpdateScheduleForInspection,
         refreshData,
+        addDieselPerformanceTest,
+        updateDieselPerformanceTest,
+        deleteDieselPerformanceTest,
+        getDieselPerformanceTestById,
       }}
     >
       {children}

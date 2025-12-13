@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { View, StyleSheet, TextInput, Pressable, Alert, Switch, Platform, ScrollView } from "react-native";
+import { View, StyleSheet, TextInput, Pressable, Alert, Switch, Platform } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -125,20 +125,26 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, getJobSitesByContractor } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest } = useInspections();
   const insets = useSafeAreaInsets();
 
   const [test, setTest] = useState<Partial<DieselPerformanceTest>>(() => createEmptyDieselPerformanceTest());
   const [isSaving, setIsSaving] = useState(false);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const scrollViewRef = useRef<ScrollView>(null);
 
-  const dieselPumps = firePumps.filter(p => p.driverType === "diesel");
+  const dieselPumps = firePumps.filter(p => p.type === "diesel_main");
   const inspectors = appUsers.filter(u => u.role === "inspector" || u.role === "technician");
 
   useEffect(() => {
+    if (testId) {
+      const existingTest = getDieselPerformanceTestById(testId);
+      if (existingTest) {
+        setTest(existingTest);
+        return;
+      }
+    }
     loadDraft();
-  }, []);
+  }, [testId]);
 
   useEffect(() => {
     if (autoSaveTimerRef.current) {
@@ -241,18 +247,18 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         pumpEquipment: {
           ...prev.pumpEquipment!,
           pumpTag: pump.tag,
-          manufacturer: pump.manufacturer,
-          model: pump.model,
+          manufacturer: pump.manufacturer || "",
+          model: pump.model || "",
           serialNumber: pump.serialNumber || "",
-          ratedFlowGpm: pump.ratedFlowGpm,
-          ratedPressurePsi: pump.ratedPressurePsi,
-          ratedSpeedRpm: pump.ratedSpeedRpm,
+          ratedFlowGpm: pump.ratedFlowGpm?.toString() || "",
+          ratedPressurePsi: pump.ratedPressurePsi?.toString() || "",
+          ratedSpeedRpm: pump.ratedSpeedRpm?.toString() || "",
         },
         driverInfo: {
           ...prev.driverInfo!,
-          manufacturer: pump.engineManufacturer || "",
-          model: pump.engineModel || "",
-          horsePower: pump.powerHP,
+          manufacturer: pump.manufacturer || "",
+          model: pump.model || "",
+          horsePower: pump.powerHP?.toString() || "",
         },
       }));
     }
@@ -432,7 +438,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       Alert.alert(
-        t.common?.success || "Success",
+        "Success",
         t.performanceTest?.draftSaved || "Draft saved successfully"
       );
     } catch (error) {
@@ -460,17 +466,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         updatedAt: new Date().toISOString(),
       };
       
-      const existingData = await AsyncStorage.getItem(DIESEL_TESTS_STORAGE_KEY);
-      const existingTests: DieselPerformanceTest[] = existingData ? JSON.parse(existingData) : [];
-      
-      const testIndex = existingTests.findIndex(t => t.id === finalTest.id);
-      if (testIndex >= 0) {
-        existingTests[testIndex] = finalTest;
+      const existingTest = getDieselPerformanceTestById(finalTest.id);
+      if (existingTest) {
+        await updateDieselPerformanceTest(finalTest.id, finalTest);
       } else {
-        existingTests.push(finalTest);
+        await addDieselPerformanceTest(finalTest);
       }
       
-      await AsyncStorage.setItem(DIESEL_TESTS_STORAGE_KEY, JSON.stringify(existingTests));
       await clearDraft();
       
       if (Platform.OS !== "web") {
@@ -478,7 +480,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       }
       
       Alert.alert(
-        t.common?.success || "Success",
+        "Success",
         t.performanceTest?.testSaved || "Performance test saved successfully",
         [{ text: "OK", onPress: () => navigation.goBack() }]
       );
@@ -612,7 +614,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {reading.netPressurePsi || "-"}
         </ThemedText>
       </View>
-      <Spacer size="sm" />
+      <Spacer height={Spacing.sm} />
       <View style={styles.readingInputs}>
         <TextInput
           style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
@@ -647,7 +649,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           keyboardType="numeric"
         />
       </View>
-      <Spacer size="sm" />
+      <Spacer height={Spacing.sm} />
       <View style={styles.readingInputs}>
         <TextInput
           style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary, flex: 1 }]}
@@ -658,12 +660,23 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           keyboardType="numeric"
         />
       </View>
+      <Spacer height={Spacing.sm} />
+      <TextInput
+        style={[styles.input, styles.textArea, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+        value={reading.observations}
+        onChangeText={(v) => updateDieselReading(reading.id, "observations", v)}
+        placeholder={t.performanceTest?.observations || "Observations"}
+        placeholderTextColor={fullTheme.colors.placeholder}
+        multiline
+        numberOfLines={2}
+        textAlignVertical="top"
+      />
     </View>
   );
 
   return (
     <View style={{ flex: 1, backgroundColor: fullTheme.colors.background }}>
-      <ScreenKeyboardAwareScrollView scrollViewRef={scrollViewRef}>
+      <ScreenKeyboardAwareScrollView>
         <ThemedText type="h2" style={styles.pageTitle}>
           {dt?.title || "Fire Pump Annual Performance Test - Diesel Engine"}
         </ThemedText>
@@ -671,7 +684,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {dt?.subtitle || "Diesel Engine - Per NFPA 25"}
         </ThemedText>
 
-        <Spacer size="lg" />
+        <Spacer height={Spacing.lg} />
 
         <SummaryHeader
           contractor={test.contractorInfo?.companyName || ""}
@@ -681,42 +694,42 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           testDate={test.jobInfo?.testDate || ""}
         />
 
-        <Spacer size="lg" />
+        <Spacer height={Spacing.lg} />
 
         {/* Section 1: General Information */}
         <SectionCard title={dt?.sections?.general || "1. General Information"}>
           <SelectPicker
-            label={t.performanceTest?.selectContractor || "Select Contractor"}
+            title={t.performanceTest?.selectContractor || "Select Contractor"}
             options={contractorOptions}
             selectedId={test.contractorInfo?.contractorId || ""}
             onSelect={handleContractorSelect}
             placeholder={t.performanceTest?.selectContractor || "Select Contractor"}
           />
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           <SelectPicker
-            label={t.performanceTest?.selectJobSite || "Select Job Site"}
+            title={t.performanceTest?.selectJobSite || "Select Job Site"}
             options={jobSiteOptions}
             selectedId={test.jobInfo?.jobSiteId || ""}
             onSelect={handleJobSiteSelect}
             placeholder={t.performanceTest?.selectJobSite || "Select Job Site"}
           />
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           <SelectPicker
-            label={dt?.selectDieselPump || "Select Diesel Pump"}
+            title={dt?.selectDieselPump || "Select Diesel Pump"}
             options={dieselPumpOptions}
             selectedId=""
             onSelect={handlePumpSelect}
             placeholder={dt?.selectDieselPump || "Select Diesel Pump"}
           />
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           <SelectPicker
-            label={t.performanceTest?.selectInspector || "Select Inspector"}
+            title={t.performanceTest?.selectInspector || "Select Inspector"}
             options={inspectorOptions}
             selectedId=""
             onSelect={handleInspectorSelect}
             placeholder={t.performanceTest?.selectInspector || "Select Inspector"}
           />
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           {renderInputField(
             t.performanceTest?.testDate || "Test Date",
             test.jobInfo?.testDate || "",
@@ -724,7 +737,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           )}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 2: Pump Equipment */}
         <SectionCard title={dt?.sections?.pump || "2. Pump Equipment"}>
@@ -738,7 +751,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(dt?.speed || "Rated Speed (RPM)", test.pumpEquipment?.ratedSpeedRpm || "", (v) => updatePumpEquipment("ratedSpeedRpm", v), { keyboardType: "numeric" })}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 3: Diesel Engine Information */}
         <SectionCard title={dt?.sections?.driver || "3. Diesel Engine Information"}>
@@ -747,11 +760,11 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.driverInfo?.serialNumber || "", (v) => updateDriverInfo("serialNumber", v))}
           {renderInputField(dt?.horsepower || "Horsepower", test.driverInfo?.horsePower || "", (v) => updateDriverInfo("horsePower", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.ratedSpeed || "Rated Speed (RPM)", test.driverInfo?.ratedRpm || "", (v) => updateDriverInfo("ratedRpm", v), { keyboardType: "numeric" })}
-          {renderInputField(dt?.numberOfCylinders || "Number of Cylinders", test.driverInfo?.numberOfCylinders || "", (v) => updateDriverInfo("numberOfCylinders", v), { keyboardType: "numeric" })}
+          {renderInputField("Number of Cylinders", test.driverInfo?.numberOfCylinders || "", (v) => updateDriverInfo("numberOfCylinders", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.fuelType || "Fuel Type", test.driverInfo?.fuelTankCapacityGal || "", (v) => updateDriverInfo("fuelTankCapacityGal", v))}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 4: Controller Information */}
         <SectionCard title={dt?.sections?.controller || "4. Controller Information"}>
@@ -760,10 +773,10 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.controllerInfo?.serialNumber || "", (v) => updateControllerInfo("serialNumber", v))}
           {renderInputField(dt?.turnsOnAt || "Turns On At (PSI)", test.controllerInfo?.pressureSettingStart || "", (v) => updateControllerInfo("pressureSettingStart", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.turnsOffAt || "Turns Off At (PSI)", test.controllerInfo?.pressureSettingStop || "", (v) => updateControllerInfo("pressureSettingStop", v), { keyboardType: "numeric" })}
-          {renderSwitchField(t.performanceTest?.hasAutomaticTransfer || "Automatic Transfer", test.controllerInfo?.hasAutomaticTransfer || false, (v) => updateControllerInfo("hasAutomaticTransfer", v))}
+          {renderSwitchField("Automatic Transfer", test.controllerInfo?.hasAutomaticTransfer || false, (v) => updateControllerInfo("hasAutomaticTransfer", v))}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 5: Battery Information */}
         <SectionCard title={dt?.sections?.power || "5. Power Supply (Batteries)"}>
@@ -775,83 +788,83 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(dt?.alternatePowerSource || "Alternate Power Source", test.batteryInfo?.alternatePowerSource || "", (v) => updateBatteryInfo("alternatePowerSource", v))}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 6: Water Supply Conditions */}
         <SectionCard title={dt?.sections?.waterSupply || "6. Water Supply Conditions"}>
           <SelectPicker
-            label={dt?.waterSupplyType || "Water Supply Type"}
+            title={dt?.waterSupplyType || "Water Supply Type"}
             options={supplySourceOptions}
             selectedId={test.supplyConditions?.supplySource || "city_water"}
             onSelect={(v) => updateSupplyConditions("supplySource", v)}
             placeholder={dt?.waterSupplyType || "Select Water Supply Type"}
           />
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           {renderInputField(t.performanceTest?.staticPressure || "Static Pressure (PSI)", test.supplyConditions?.staticPressurePsi || "", (v) => updateSupplyConditions("staticPressurePsi", v), { keyboardType: "numeric" })}
           {renderInputField(t.performanceTest?.residualPressure || "Residual Pressure (PSI)", test.supplyConditions?.residualPressurePsi || "", (v) => updateSupplyConditions("residualPressurePsi", v), { keyboardType: "numeric" })}
-          {renderInputField(t.performanceTest?.waterTemperature || "Water Temperature (F)", test.supplyConditions?.waterTemperatureF || "", (v) => updateSupplyConditions("waterTemperatureF", v), { keyboardType: "numeric" })}
+          {renderInputField("Water Temperature (F)", test.supplyConditions?.waterTemperatureF || "", (v) => updateSupplyConditions("waterTemperatureF", v), { keyboardType: "numeric" })}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 7: System Demand */}
         <SectionCard title={dt?.sections?.demand || "7. System Demand"}>
           {renderInputField(dt?.systemDemandFlow || "System Demand Flow (GPM)", test.systemDemand?.systemDemandGpm || "", (v) => updateSystemDemand("systemDemandGpm", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.systemDemandPressure || "System Demand Pressure (PSI)", test.systemDemand?.systemDemandPsi || "", (v) => updateSystemDemand("systemDemandPsi", v), { keyboardType: "numeric" })}
-          {renderInputField(t.performanceTest?.hoseDemand || "Hose Demand (GPM)", test.systemDemand?.hoseDemandGpm || "", (v) => updateSystemDemand("hoseDemandGpm", v), { keyboardType: "numeric" })}
-          {renderInputField(t.performanceTest?.totalDemandGpm || "Total Demand (GPM)", test.systemDemand?.totalDemandGpm || "", (v) => updateSystemDemand("totalDemandGpm", v), { keyboardType: "numeric" })}
+          {renderInputField("Hose Demand (GPM)", test.systemDemand?.hoseDemandGpm || "", (v) => updateSystemDemand("hoseDemandGpm", v), { keyboardType: "numeric" })}
+          {renderInputField("Total Demand (GPM)", test.systemDemand?.totalDemandGpm || "", (v) => updateSystemDemand("totalDemandGpm", v), { keyboardType: "numeric" })}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 8: Test Conditions & Readings */}
         <SectionCard title={dt?.sections?.readings || "8. Test Conditions & Readings"}>
           <ThemedText type="body" style={[styles.fieldLabel, { marginBottom: Spacing.sm }]}>
-            {dt?.testReadingsHeader || "Test Readings (GPM / Suction PSI / Discharge PSI / Net PSI)"}
+            {"Test Readings (GPM / Suction PSI / Discharge PSI / Net PSI)"}
           </ThemedText>
           <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, marginBottom: Spacing.md }}>
-            {dt?.dieselColumnsHeader || "RPM / Oil Pressure (PSI) / Exhaust (in. Hg) / Water Temp (F)"}
+            {"RPM / Oil Pressure (PSI) / Exhaust (in. Hg) / Water Temp (F)"}
           </ThemedText>
           {test.dieselReadings?.map(reading => renderDieselReadingRow(reading))}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 10: Multiple Pump Operation */}
         <SectionCard title={dt?.sections?.multiplePump || "10. Multiple Pump Operation"}>
-          {renderSwitchField(dt?.isMultiplePumpSystem || "Is Multiple Pump System?", test.multiplePumpOperation?.isMultiplePumpSystem || false, (v) => updateMultiplePumpOperation("isMultiplePumpSystem", v))}
+          {renderSwitchField("Is Multiple Pump System?", test.multiplePumpOperation?.isMultiplePumpSystem || false, (v) => updateMultiplePumpOperation("isMultiplePumpSystem", v))}
           {test.multiplePumpOperation?.isMultiplePumpSystem ? (
             <>
-              {renderInputField(dt?.numberOfPumps || "Number of Pumps", test.multiplePumpOperation?.numberOfPumps || "", (v) => updateMultiplePumpOperation("numberOfPumps", v), { keyboardType: "numeric" })}
-              {renderInputField(dt?.operationSequence || "Operation Sequence", test.multiplePumpOperation?.pumpOperationSequence || "", (v) => updateMultiplePumpOperation("pumpOperationSequence", v), { multiline: true })}
-              {renderSwitchField(dt?.allPumpsTestedIndividually || "All Pumps Tested Individually?", test.multiplePumpOperation?.allPumpsTestedIndividually || false, (v) => updateMultiplePumpOperation("allPumpsTestedIndividually", v))}
+              {renderInputField("Number of Pumps", test.multiplePumpOperation?.numberOfPumps || "", (v) => updateMultiplePumpOperation("numberOfPumps", v), { keyboardType: "numeric" })}
+              {renderInputField("Operation Sequence", test.multiplePumpOperation?.pumpOperationSequence || "", (v) => updateMultiplePumpOperation("pumpOperationSequence", v), { multiline: true })}
+              {renderSwitchField("All Pumps Tested Individually?", test.multiplePumpOperation?.allPumpsTestedIndividually || false, (v) => updateMultiplePumpOperation("allPumpsTestedIndividually", v))}
             </>
           ) : null}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 11: Transfer Switch Test */}
         <SectionCard title={dt?.sections?.transferSwitch || "11. Additional Tests - Transfer Switch"}>
-          {renderSwitchField(dt?.hasTransferSwitch || "Has Transfer Switch?", test.transferSwitchTest?.hasTransferSwitch || false, (v) => updateTransferSwitchTest("hasTransferSwitch", v))}
+          {renderSwitchField("Has Transfer Switch?", test.transferSwitchTest?.hasTransferSwitch || false, (v) => updateTransferSwitchTest("hasTransferSwitch", v))}
           {test.transferSwitchTest?.hasTransferSwitch ? (
             <>
-              {renderInputField(dt?.transferSwitchType || "Transfer Switch Type", test.transferSwitchTest?.transferSwitchType || "", (v) => updateTransferSwitchTest("transferSwitchType", v))}
-              {renderInputField(dt?.normalToEmergency || "Normal to Emergency (seconds)", test.transferSwitchTest?.normalToEmergencySeconds || "", (v) => updateTransferSwitchTest("normalToEmergencySeconds", v), { keyboardType: "numeric" })}
-              {renderInputField(dt?.emergencyToNormal || "Emergency to Normal (seconds)", test.transferSwitchTest?.emergencyToNormalSeconds || "", (v) => updateTransferSwitchTest("emergencyToNormalSeconds", v), { keyboardType: "numeric" })}
+              {renderInputField("Transfer Switch Type", test.transferSwitchTest?.transferSwitchType || "", (v) => updateTransferSwitchTest("transferSwitchType", v))}
+              {renderInputField("Normal to Emergency (seconds)", test.transferSwitchTest?.normalToEmergencySeconds || "", (v) => updateTransferSwitchTest("normalToEmergencySeconds", v), { keyboardType: "numeric" })}
+              {renderInputField("Emergency to Normal (seconds)", test.transferSwitchTest?.emergencyToNormalSeconds || "", (v) => updateTransferSwitchTest("emergencyToNormalSeconds", v), { keyboardType: "numeric" })}
             </>
           ) : null}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 12: Results Summary */}
         <SectionCard title={dt?.sections?.results || "12. Results Summary"}>
-          {renderInputField(t.performanceTest?.shutoffPressure || "Shutoff Pressure Actual (PSI)", test.resultsSummary?.shutoffPressureActual || "", (v) => updateResultsSummary("shutoffPressureActual", v), { keyboardType: "numeric" })}
-          {renderInputField(t.performanceTest?.ratedFlowPressure || "Rated Flow Pressure Actual (PSI)", test.resultsSummary?.ratedFlowPressureActual || "", (v) => updateResultsSummary("ratedFlowPressureActual", v), { keyboardType: "numeric" })}
-          {renderInputField(t.performanceTest?.peakFlowPressure || "Peak Flow Pressure Actual (PSI)", test.resultsSummary?.peakFlowPressureActual || "", (v) => updateResultsSummary("peakFlowPressureActual", v), { keyboardType: "numeric" })}
+          {renderInputField("Shutoff Pressure Actual (PSI)", test.resultsSummary?.shutoffPressureActual || "", (v) => updateResultsSummary("shutoffPressureActual", v), { keyboardType: "numeric" })}
+          {renderInputField("Rated Flow Pressure Actual (PSI)", test.resultsSummary?.ratedFlowPressureActual || "", (v) => updateResultsSummary("ratedFlowPressureActual", v), { keyboardType: "numeric" })}
+          {renderInputField("Peak Flow Pressure Actual (PSI)", test.resultsSummary?.peakFlowPressureActual || "", (v) => updateResultsSummary("peakFlowPressureActual", v), { keyboardType: "numeric" })}
           <View style={styles.resultRow}>
-            <ThemedText type="body">{t.performanceTest?.overallResult || "Overall Result"}:</ThemedText>
+            <ThemedText type="body">{"Overall Result"}:</ThemedText>
             <ThemedText 
               type="h3" 
               style={{ 
@@ -867,7 +880,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           </View>
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 13: Observations & Deficiencies */}
         <SectionCard title={dt?.sections?.observations || "13. Observations & Deficiencies"}>
@@ -877,7 +890,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
             (v) => updateObservations("generalObservations", v),
             { multiline: true }
           )}
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           <View style={styles.deficiencyHeader}>
             <ThemedText type="body">{t.performanceTest?.deficiencies || "Deficiencies"}</ThemedText>
             <Pressable 
@@ -904,7 +917,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           ))}
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 14: Signatures */}
         <SectionCard title={dt?.sections?.signatures || "14. Signatures"}>
@@ -912,37 +925,37 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(t.performanceTest?.printName || "Print Name", test.signatures?.conductedBy?.name || "", (v) => updateConductedBySignature("name", v))}
           {renderInputField(t.performanceTest?.signatureJobTitle || "Title", test.signatures?.conductedBy?.title || "", (v) => updateConductedBySignature("title", v))}
           {renderInputField(t.performanceTest?.date || "Date", test.signatures?.conductedBy?.date || "", (v) => updateConductedBySignature("date", v))}
-          <Spacer size="md" />
+          <Spacer height={Spacing.md} />
           <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.signature || "Signature"}</ThemedText>
           <SignatureCapture
-            onSignatureCapture={(sig) => updateConductedBySignature("signatureData", sig)}
-            signatureData={test.signatures?.conductedBy?.signatureData || null}
+            onSignatureChange={(sig: string | null) => updateConductedBySignature("signatureData", sig)}
+            signature={test.signatures?.conductedBy?.signatureData || null}
           />
         </SectionCard>
 
-        <Spacer size="md" />
+        <Spacer height={Spacing.md} />
 
         {/* Section 15: Attachments */}
         <SectionCard title={dt?.sections?.attachments || "15. Attachments"}>
           {renderInputField(
-            t.performanceTest?.additionalNotes || "Additional Notes",
+            "Additional Notes",
             test.attachments?.additionalNotes || "",
             (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, additionalNotes: v } })),
             { multiline: true }
           )}
           {renderSwitchField(
-            t.performanceTest?.pumpCurveAttached || "Pump Curve Attached",
+            "Pump Curve Attached",
             test.attachments?.pumpCurveAttached || false,
             (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, pumpCurveAttached: v } }))
           )}
           {renderSwitchField(
-            t.performanceTest?.previousTestReportAttached || "Previous Test Report Attached",
+            "Previous Test Report Attached",
             test.attachments?.previousTestReportAttached || false,
             (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, previousTestReportAttached: v } }))
           )}
         </SectionCard>
 
-        <Spacer size="xl" />
+        <Spacer height={Spacing.xl} />
         <View style={{ height: 100 }} />
       </ScreenKeyboardAwareScrollView>
 

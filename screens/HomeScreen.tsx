@@ -126,6 +126,36 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
         <Spacer height={Spacing["3xl"]} />
 
+        <ThemedText type="h3">{t.home.quickActions || "Quick Actions"}</ThemedText>
+        <Spacer height={Spacing.lg} />
+
+        <Pressable
+          onPress={() => navigation.navigate("DieselPerformanceTest", {})}
+          style={({ pressed }) => [
+            styles.quickActionCard,
+            { 
+              backgroundColor: fullTheme.colors.cardBackground, 
+              borderColor: fullTheme.colors.border,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
+        >
+          <View style={[styles.quickActionIcon, { backgroundColor: fullTheme.colors.primary }]}>
+            <Feather name="activity" size={24} color="#FFFFFF" />
+          </View>
+          <View style={styles.quickActionContent}>
+            <ThemedText type="body" style={{ fontWeight: "600" }}>
+              {t.performanceTest?.dieselPerformanceTest?.title || "Fire Pump Annual Performance Test"}
+            </ThemedText>
+            <ThemedText type="small" secondary>
+              {t.performanceTest?.dieselPerformanceTest?.subtitle || "Diesel Engine - Per NFPA 25"}
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+        </Pressable>
+
+        <Spacer height={Spacing["3xl"]} />
+
         <ThemedText type="h3">{t.home.recentActivity}</ThemedText>
         <Spacer height={Spacing.lg} />
 
