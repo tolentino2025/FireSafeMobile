@@ -1301,6 +1301,132 @@ const electricPumpChecklist: ChecklistTemplate[] = [
   { labelKey: "epAnnualVoltmeterAmmeterAccuracy", frequencies: ["annually"] },
 ];
 
+const dieselPumpChecklist: ChecklistTemplate[] = [
+  // WEEKLY - Pump House (Diesel-specific)
+  { labelKey: "dpPumpRoomHeat70F", frequencies: ["weekly"] },
+  // WEEKLY - Pump House (General)
+  { labelKey: "dpPumpRoomHeat40F", frequencies: ["weekly"] },
+  { labelKey: "dpVentilationLouversFree", frequencies: ["weekly"] },
+  { labelKey: "dpNoExcessiveWaterFloor", frequencies: ["weekly"] },
+  { labelKey: "dpCouplingGuardInPlace", frequencies: ["weekly"] },
+  // WEEKLY - Diesel Engine Systems
+  { labelKey: "dpFuelTankTwoThirdsFull", frequencies: ["weekly"] },
+  { labelKey: "dpControllerSwitchAuto", frequencies: ["weekly"] },
+  { labelKey: "dpBatteryVoltageRange", frequencies: ["weekly"], numericFields: [
+    { labelKey: "voltageReading", type: "voltage", unit: "V" },
+  ]},
+  { labelKey: "dpChargingCurrentRange", frequencies: ["weekly"], numericFields: [
+    { labelKey: "amperageReading", type: "amperage", unit: "A" },
+  ]},
+  { labelKey: "dpBatteryPilotLights", frequencies: ["weekly"] },
+  // WEEKLY - Inspections (Diesel-focused)
+  { labelKey: "dpAlarmPilotLightsOff", frequencies: ["weekly"] },
+  { labelKey: "dpRecordEngineRunTime", frequencies: ["weekly"], numericFields: [
+    { labelKey: "minutes", type: "minutes", unit: "min" },
+  ]},
+  { labelKey: "dpOilLevelGearDrive", frequencies: ["weekly"] },
+  { labelKey: "dpCrankcaseOilLevel", frequencies: ["weekly"] },
+  { labelKey: "dpCoolingWaterLevel", frequencies: ["weekly"] },
+  { labelKey: "dpElectrolyteLevel", frequencies: ["weekly"] },
+  { labelKey: "dpBatteryTerminalsClean", frequencies: ["weekly"] },
+  { labelKey: "dpWaterJacketHeaterOp", frequencies: ["weekly"] },
+  { labelKey: "dpBatteryCrankingVoltage", frequencies: ["weekly"], numericFields: [
+    { labelKey: "voltageReading", type: "voltage", unit: "V" },
+  ]},
+  { labelKey: "dpWaterPumpNotLeaking", frequencies: ["weekly"] },
+  { labelKey: "dpJacketWaterHeaterOp", frequencies: ["weekly"] },
+  { labelKey: "dpFlexibleHoseCondition", frequencies: ["weekly"] },
+  { labelKey: "dpLubeOilHeaterCheck", frequencies: ["weekly"] },
+  { labelKey: "dpOilLubeLevel", frequencies: ["weekly"] },
+  { labelKey: "dpCheckWaterInFuelTank", frequencies: ["weekly"] },
+  // WEEKLY - Run/Test (Pump Systems)
+  { labelKey: "dpRecordStartingPressure", frequencies: ["weekly"], hasPsi: true, isTestSection: true },
+  { labelKey: "dpOperatePump30Min", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpCheckPackingGland", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpRecordSuctionPressure", frequencies: ["weekly"], hasPsi: true, isTestSection: true },
+  { labelKey: "dpRecordDischargePressure", frequencies: ["weekly"], hasPsi: true, isTestSection: true },
+  { labelKey: "dpAdjustGlandNuts", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpCheckNoiseVibration", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpCheckOverheating", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpRecordPressureSwitch", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpRecordHighLowPressure", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpCirculationReliefValve", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpFuelSystemSolenoids", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpTankFloatSwitch", frequencies: ["weekly"], isTestSection: true },
+  // WEEKLY - Run/Test (Diesel Engine Systems)
+  { labelKey: "dpRecordCrankTime", frequencies: ["weekly"], isTestSection: true, numericFields: [
+    { labelKey: "seconds", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "dpRecordRunningSpeedTime", frequencies: ["weekly"], isTestSection: true, numericFields: [
+    { labelKey: "seconds", type: "seconds", unit: "sec" },
+  ]},
+  { labelKey: "dpCheckOilPressureGauges", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpCheckHeatExchanger", frequencies: ["weekly"], isTestSection: true },
+  { labelKey: "dpOperateSpeedGovernor", frequencies: ["weekly"], isTestSection: true },
+  // WEEKLY - Steam System (if applicable)
+  { labelKey: "dpSteamPressureRange", frequencies: ["weekly"], hasPsi: true },
+  // WEEKLY - Exhaust System
+  { labelKey: "dpExamineExhaustLeaks", frequencies: ["weekly"] },
+  { labelKey: "dpDrainCondensateTrap", frequencies: ["weekly"] },
+  // QUARTERLY - Fuel
+  { labelKey: "dpCleanStrainerFilterDirtLeg", frequencies: ["quarterly"] },
+  // QUARTERLY - Lubrication
+  { labelKey: "dpInspectCrankcaseBreather", frequencies: ["quarterly"] },
+  // QUARTERLY - Cooling
+  { labelKey: "dpCleanWaterStrainer", frequencies: ["quarterly"] },
+  // QUARTERLY - Exhaust
+  { labelKey: "dpInspectInsulationFireHazards", frequencies: ["quarterly"] },
+  // QUARTERLY - Battery
+  { labelKey: "dpInspectTerminalsCleanTight", frequencies: ["quarterly"] },
+  // QUARTERLY - Electrical
+  { labelKey: "dpInspectWireChafing", frequencies: ["quarterly"] },
+  // SEMIANNUAL - Cooling
+  { labelKey: "dpTestAntifreezeLevel", frequencies: ["semiannually"], isTestSection: true },
+  // SEMIANNUAL - Exhaust
+  { labelKey: "dpInspectFlexibleExhaust", frequencies: ["semiannually"] },
+  // SEMIANNUAL - Electrical
+  { labelKey: "dpTestSafetiesAlarms", frequencies: ["semiannually"], isTestSection: true },
+  { labelKey: "dpCleanBoxesPanelsCabinets", frequencies: ["semiannually"] },
+  // ANNUAL - Pump System
+  { labelKey: "dpTestMainReliefValve", frequencies: ["annually"], isTestSection: true },
+  // ANNUAL - Fuel
+  { labelKey: "dpTestDieselFuel", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTestFuelPumpAlarms", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpMaintActiveFuelSystem", frequencies: ["annually"] },
+  { labelKey: "dpChangeFuelFilter", frequencies: ["annually"] },
+  { labelKey: "dpCleanWaterForeignMaterial", frequencies: ["annually"] },
+  { labelKey: "dpInspectTankVentsOverflow", frequencies: ["annually"] },
+  { labelKey: "dpInspectFuelTankPiping", frequencies: ["annually"] },
+  // ANNUAL - Lubrication
+  { labelKey: "dpOilChange50Hours", frequencies: ["annually"] },
+  { labelKey: "dpOilFilterChange", frequencies: ["annually"] },
+  // ANNUAL - Cooling
+  { labelKey: "dpReplaceCirculatingWaterFilter", frequencies: ["annually"] },
+  { labelKey: "dpTestHighCoolingWaterTemp", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpInspectAntifreeze", frequencies: ["annually"] },
+  { labelKey: "dpCleanHeatExchanger", frequencies: ["annually"] },
+  { labelKey: "dpInspectDuctWorkLouvers", frequencies: ["annually"] },
+  // ANNUAL - Exhaust
+  { labelKey: "dpCheckExhaustDrainCondensate", frequencies: ["annually"] },
+  { labelKey: "dpTestExcessiveBackpressure", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpInspectHangersSupports", frequencies: ["annually"] },
+  // ANNUAL - Battery
+  { labelKey: "dpCheckSpecificGravityCharge", frequencies: ["annually"] },
+  { labelKey: "dpCleanTerminals", frequencies: ["annually"] },
+  { labelKey: "dpCheckBatteryCrankingVoltage", frequencies: ["annually"], numericFields: [
+    { labelKey: "voltageReading", type: "voltage", unit: "V" },
+  ]},
+  { labelKey: "dpEnsureDistilledWater", frequencies: ["annually"] },
+  // ANNUAL - Electrical
+  { labelKey: "dpInspectPcbCorrosion", frequencies: ["annually"] },
+  { labelKey: "dpTestEcm", frequencies: ["annually"], isTestSection: true },
+  { labelKey: "dpTightenWiringConnectors", frequencies: ["annually"] },
+  { labelKey: "dpInspectVoltmeterAmmeter", frequencies: ["annually"] },
+  { labelKey: "dpInspectCrackedInsulation", frequencies: ["annually"] },
+  { labelKey: "dpInspectLeaksPlumbing", frequencies: ["annually"] },
+  { labelKey: "dpInspectWaterOnElectrical", frequencies: ["annually"] },
+];
+
 const abovegroundChecklist: ChecklistTemplate[] = [
   { labelKey: "pipingGoodCondition", frequencies: ["quarterly", "annually"] },
   { labelKey: "pipingNoLeaks", frequencies: ["quarterly", "annually"] },
@@ -1778,6 +1904,7 @@ const checklistsByType: Record<InspectionType, ChecklistTemplate[]> = {
   pump_monthly: pumpMonthlyChecklist,
   pump_annual: pumpAnnualChecklist,
   electric_pump: electricPumpChecklist,
+  diesel_pump: dieselPumpChecklist,
   aboveground: abovegroundChecklist,
   underground: undergroundChecklist,
   hydrant_flow: hydrantFlowChecklist,

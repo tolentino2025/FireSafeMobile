@@ -47,6 +47,7 @@ const inspectionCategories = [
     categoryKey: "firePumps" as const,
     items: [
       { type: "electric_pump" as const, icon: "zap" as const, labelKey: "electricPump" as const, nfpaRef: "NFPA 25" },
+      { type: "diesel_pump" as const, icon: "truck" as const, labelKey: "dieselPump" as const, nfpaRef: "NFPA 25" },
     ],
   },
   {
