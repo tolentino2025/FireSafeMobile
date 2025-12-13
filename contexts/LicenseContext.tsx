@@ -7,6 +7,10 @@ import {
   checkLicenseExpiration,
   createLicenseData,
 } from "@/utils/licenseUtils";
+import {
+  scheduleLicenseExpirationReminders,
+  cancelLicenseExpirationReminders,
+} from "@/utils/notifications";
 
 const LICENSE_STORAGE_KEY = "@firesafe_license";
 
@@ -14,9 +18,10 @@ interface LicenseContextType {
   licenseData: LicenseData | null;
   licenseStatus: LicenseValidationResult | null;
   isLoading: boolean;
-  activateLicense: (key: string) => Promise<{ success: boolean; error?: string }>;
+  activateLicense: (key: string, language?: "en" | "pt-BR") => Promise<{ success: boolean; error?: string }>;
   clearLicense: () => Promise<void>;
   refreshLicenseStatus: () => void;
+  scheduleExpirationNotifications: (language: "en" | "pt-BR") => Promise<void>;
 }
 
 const LicenseContext = createContext<LicenseContextType | undefined>(undefined);
@@ -51,7 +56,7 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const activateLicense = async (key: string): Promise<{ success: boolean; error?: string }> => {
+  const activateLicense = async (key: string, language: "en" | "pt-BR" = "pt-BR"): Promise<{ success: boolean; error?: string }> => {
     const isValidFormat = validateLicenseKeyFormat(key);
     
     if (!isValidFormat) {
@@ -64,6 +69,12 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
       setLicenseData(newLicenseData);
       const status = checkLicenseExpiration(newLicenseData);
       setLicenseStatus(status);
+      
+      await scheduleLicenseExpirationReminders({
+        expirationDate: newLicenseData.expiresAt,
+        language,
+      });
+      
       return { success: true };
     } catch (error) {
       console.error("Error saving license:", error);
@@ -74,6 +85,7 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
   const clearLicense = async () => {
     try {
       await AsyncStorage.removeItem(LICENSE_STORAGE_KEY);
+      await cancelLicenseExpirationReminders();
       setLicenseData(null);
       setLicenseStatus(null);
     } catch (error) {
@@ -88,6 +100,15 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const scheduleExpirationNotifications = async (language: "en" | "pt-BR") => {
+    if (licenseData && licenseStatus?.isValid) {
+      await scheduleLicenseExpirationReminders({
+        expirationDate: licenseData.expiresAt,
+        language,
+      });
+    }
+  };
+
   return (
     <LicenseContext.Provider
       value={{
@@ -97,6 +118,7 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
         activateLicense,
         clearLicense,
         refreshLicenseStatus,
+        scheduleExpirationNotifications,
       }}
     >
       {children}

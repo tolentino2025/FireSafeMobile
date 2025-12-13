@@ -72,7 +72,7 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
     setIsLoading(true);
     setError(null);
 
-    const result = await activateLicense(fullKey);
+    const result = await activateLicense(fullKey, language as "en" | "pt-BR");
 
     setIsLoading(false);
 

@@ -28,7 +28,8 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 11. **Photo Capture**: Attach photos to inspections using camera or gallery
 12. **PDF Reports**: Generate professional NFPA 25 compliant PDF reports with full company and inspector details
 13. **Share & Export**: Share reports via email, WhatsApp, and other apps
-14. **Notifications**: Schedule reminders for upcoming inspections
+14. **Notifications**: Schedule reminders for upcoming inspections and license expiration warnings
+15. **License System**: App requires license key activation (6-month validity)
 
 ## Project Architecture
 
