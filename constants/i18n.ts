@@ -19,6 +19,8 @@ export const translations = {
       recentActivity: "Atividade Recente",
       noInspections: "Nenhuma inspeção agendada",
       incomplete: "Incompletas",
+      quickActions: "Ações Rápidas",
+      firePumpTest: "Teste de Performance Bomba",
     },
     inspections: {
       title: "Inspeções",
@@ -2095,6 +2097,8 @@ export const translations = {
       recentActivity: "Recent Activity",
       noInspections: "No inspections scheduled",
       incomplete: "Incomplete",
+      quickActions: "Quick Actions",
+      firePumpTest: "Fire Pump Performance Test",
     },
     inspections: {
       title: "Inspections",

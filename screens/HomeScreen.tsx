@@ -126,6 +126,36 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
         <Spacer height={Spacing["3xl"]} />
 
+        <ThemedText type="h3">{t.home.quickActions}</ThemedText>
+        <Spacer height={Spacing.lg} />
+
+        <Pressable
+          onPress={() => navigation.navigate("PerformanceTest", {})}
+          style={({ pressed }) => [
+            styles.quickActionCard,
+            {
+              backgroundColor: fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <View style={[styles.quickActionIcon, { backgroundColor: fullTheme.colors.primary }]}>
+            <Feather name="activity" size={24} color="#FFFFFF" />
+          </View>
+          <View style={styles.quickActionContent}>
+            <ThemedText type="body" style={{ fontWeight: "600" }}>
+              {t.home.firePumpTest}
+            </ThemedText>
+            <ThemedText type="small" secondary>
+              NFPA 25
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+        </Pressable>
+
+        <Spacer height={Spacing["3xl"]} />
+
         <ThemedText type="h3">{t.home.recentActivity}</ThemedText>
         <Spacer height={Spacing.lg} />
 
@@ -205,5 +235,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
+  },
+  quickActionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  quickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  quickActionContent: {
+    flex: 1,
+    marginLeft: Spacing.md,
   },
 });
