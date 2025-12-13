@@ -163,6 +163,284 @@ export interface TestReading {
   observations: string;
 }
 
+export interface DieselTestReading {
+  id: string;
+  flowPercent: string;
+  flowGpm: string;
+  suctionPsi: string;
+  dischargePsi: string;
+  netPressurePsi: string;
+  rpm: string;
+  oilPressurePsi: string;
+  exhaustBackPressureInHg: string;
+  dieselWaterTempF: string;
+  coolingLoopPressurePsi: string;
+  observations: string;
+}
+
+export interface DieselBatteryInfo {
+  startingBatteriesType: string;
+  battery1Voltage: string;
+  battery2Voltage: string;
+  chargerType: string;
+  chargerVoltage: string;
+  alternatePowerSource: string;
+}
+
+export interface DieselVerificationItem {
+  id: string;
+  labelKey: string;
+  value: "yes" | "no" | "na" | null;
+  notes: string;
+}
+
+export interface MultiplePumpOperation {
+  isMultiplePumpSystem: boolean;
+  numberOfPumps: string;
+  pumpOperationSequence: string;
+  allPumpsTestedIndividually: boolean;
+  combinedFlowTest: boolean;
+  notes: string;
+}
+
+export interface TransferSwitchTest {
+  hasTransferSwitch: boolean;
+  transferSwitchType: string;
+  normalToEmergencySeconds: string;
+  emergencyToNormalSeconds: string;
+  testDate: string;
+  testResult: "pass" | "fail" | "na";
+  notes: string;
+}
+
+export interface DieselPerformanceTest {
+  id: string;
+  status: PerformanceTestStatus;
+  testNumber: string;
+  createdAt: string;
+  updatedAt: string;
+  contractorInfo: ContractorInfo;
+  jobInfo: JobInfo;
+  pumpEquipment: PumpEquipmentInfo;
+  driverInfo: DieselDriverInfo;
+  controllerInfo: ControllerInfo;
+  batteryInfo: DieselBatteryInfo;
+  supplyConditions: SupplyConditions;
+  systemDemand: SystemDemand;
+  dieselReadings: DieselTestReading[];
+  verificationItems: DieselVerificationItem[];
+  multiplePumpOperation: MultiplePumpOperation;
+  transferSwitchTest: TransferSwitchTest;
+  resultsSummary: ResultsSummary;
+  observationsDeficiencies: ObservationsDeficiencies;
+  signatures: TestSignatures;
+  attachments: TestAttachments;
+}
+
+export function createEmptyDieselTestReading(id: string, flowPercent: string): DieselTestReading {
+  return {
+    id,
+    flowPercent,
+    flowGpm: "",
+    suctionPsi: "",
+    dischargePsi: "",
+    netPressurePsi: "",
+    rpm: "",
+    oilPressurePsi: "",
+    exhaustBackPressureInHg: "",
+    dieselWaterTempF: "",
+    coolingLoopPressurePsi: "",
+    observations: "",
+  };
+}
+
+export function createEmptyDieselPerformanceTest(): Partial<DieselPerformanceTest> {
+  const now = new Date().toISOString();
+  return {
+    id: Date.now().toString(),
+    status: "draft",
+    testNumber: "",
+    createdAt: now,
+    updatedAt: now,
+    contractorInfo: {
+      contractorId: "",
+      companyName: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      phone: "",
+      fax: "",
+      email: "",
+      licenseNumber: "",
+    },
+    jobInfo: {
+      jobSiteId: "",
+      jobName: "",
+      jobNumber: "",
+      address: "",
+      city: "",
+      state: "",
+      testDate: now.split("T")[0],
+      testLocation: "",
+      testMethod: "flow_meter",
+      weatherConditions: "",
+      ambientTemperatureF: "",
+    },
+    pumpEquipment: {
+      pumpTag: "",
+      manufacturer: "",
+      model: "",
+      serialNumber: "",
+      pumpOrientation: "horizontal_split",
+      yearInstalled: "",
+      ratedFlowGpm: "",
+      ratedPressurePsi: "",
+      ratedSpeedRpm: "",
+      shutoffPressurePsi: "",
+      peakFlowGpm: "",
+      impellerDiameterIn: "",
+      impellerType: "",
+      numberOfStages: "",
+      suctionSizeIn: "",
+      dischargeSizeIn: "",
+      rotationDirection: "",
+    },
+    driverInfo: {
+      driverType: "diesel",
+      manufacturer: "",
+      model: "",
+      serialNumber: "",
+      horsePower: "",
+      ratedRpm: "",
+      numberOfCylinders: "",
+      displacement: "",
+      fuelTankCapacityGal: "",
+      fuelLevel: "",
+      oilLevel: "",
+      coolantLevel: "",
+      batteryVoltage1: "",
+      batteryVoltage2: "",
+      engineBlockHeaterStatus: "",
+      lastOilChangeDate: "",
+      lastCoolantChangeDate: "",
+    },
+    controllerInfo: {
+      manufacturer: "",
+      model: "",
+      serialNumber: "",
+      panelTag: "",
+      supplyVoltage: "",
+      startingType: "",
+      transferSwitchType: "",
+      hasAutomaticTransfer: false,
+      pressureSettingStart: "",
+      pressureSettingStop: "",
+      hasLowSuctionCutoff: false,
+      lowSuctionCutoffPsi: "",
+      hasPhaseReversal: false,
+      hasPhaseLoss: false,
+      hasOvercurrent: false,
+    },
+    batteryInfo: {
+      startingBatteriesType: "",
+      battery1Voltage: "",
+      battery2Voltage: "",
+      chargerType: "",
+      chargerVoltage: "",
+      alternatePowerSource: "",
+    },
+    supplyConditions: {
+      supplySource: "city_water",
+      staticPressurePsi: "",
+      residualPressurePsi: "",
+      suctionReservoirLevel: "",
+      waterTemperatureF: "",
+      hasSuctionScreen: false,
+      suctionScreenCondition: "",
+    },
+    systemDemand: {
+      systemDemandGpm: "",
+      systemDemandPsi: "",
+      hoseDemandGpm: "",
+      totalDemandGpm: "",
+      totalDemandPsi: "",
+    },
+    dieselReadings: [
+      createEmptyDieselTestReading("1", "0"),
+      createEmptyDieselTestReading("2", "25"),
+      createEmptyDieselTestReading("3", "50"),
+      createEmptyDieselTestReading("4", "75"),
+      createEmptyDieselTestReading("5", "100"),
+      createEmptyDieselTestReading("6", "125"),
+      createEmptyDieselTestReading("7", "150"),
+      createEmptyDieselTestReading("8", "0"),
+      createEmptyDieselTestReading("9", "100"),
+      createEmptyDieselTestReading("10", "150"),
+    ],
+    verificationItems: [],
+    multiplePumpOperation: {
+      isMultiplePumpSystem: false,
+      numberOfPumps: "",
+      pumpOperationSequence: "",
+      allPumpsTestedIndividually: false,
+      combinedFlowTest: false,
+      notes: "",
+    },
+    transferSwitchTest: {
+      hasTransferSwitch: false,
+      transferSwitchType: "",
+      normalToEmergencySeconds: "",
+      emergencyToNormalSeconds: "",
+      testDate: "",
+      testResult: "na",
+      notes: "",
+    },
+    resultsSummary: {
+      shutoffPressureActual: "",
+      shutoffPressureRated: "",
+      shutoffPressurePercent: "",
+      shutoffPressurePass: false,
+      ratedFlowPressureActual: "",
+      ratedFlowPressureRated: "",
+      ratedFlowPressurePercent: "",
+      ratedFlowPass: false,
+      peakFlowPressureActual: "",
+      peakFlowPressureMin: "",
+      peakFlowPressurePercent: "",
+      peakFlowPass: false,
+      overallResult: "fail",
+      netPressureAtChurn: "",
+      netPressureAtRated: "",
+      netPressureAtPeak: "",
+      speedAtChurn: "",
+      speedAtRated: "",
+      speedAtPeak: "",
+    },
+    observationsDeficiencies: {
+      generalObservations: "",
+      deficiencies: [],
+      recommendedMaintenanceActions: "",
+      nextTestDueDate: "",
+    },
+    signatures: {
+      conductedBy: {
+        name: "",
+        title: "",
+        company: "",
+        date: "",
+        signatureData: null,
+      },
+    },
+    attachments: {
+      photos: [],
+      pumpCurveAttached: false,
+      previousTestReportAttached: false,
+      additionalNotes: "",
+    },
+  };
+}
+
 export interface TestConditions {
   suctionGaugePsi: string;
   dischargeGaugePsi: string;

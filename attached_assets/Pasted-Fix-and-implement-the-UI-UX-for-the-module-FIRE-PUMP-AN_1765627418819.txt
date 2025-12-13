@@ -1,0 +1,268 @@
+Fix and implement the UI/UX for the module
+"FIRE PUMP ANNUAL PERFORMANCE TEST – DIESEL ENGINE FIRE PUMP"
+based strictly on NFPA 25 Handbook.
+
+==================================================
+GLOBAL UI REQUIREMENTS (MANDATORY)
+==================================================
+- Use a SINGLE VERTICAL SCROLL SCREEN (mobile-first).
+- DO NOT use accordion, collapsible sections, dropdown sections, or expand/collapse arrows.
+- ALL sections must be visible in sequence while scrolling.
+- Use section headers and card-style blocks to visually separate content.
+- Keep all NFPA 25 labels EXACTLY in English (no renaming, no translation).
+
+==================================================
+ALLOWED DROPDOWNS (PRE-REGISTERED DATA ONLY)
+==================================================
+Dropdowns are allowed ONLY for selecting pre-registered entities:
+
+- Diesel Fire Pump
+- Contractor Company
+- Inspector
+- Owner / Property Owner
+- Contracting Party / Client
+- Job / Site
+
+When a dropdown value is selected:
+- Auto-populate all related fields in the form.
+- Allow override ONLY for this test record.
+- NEVER overwrite master records unless user explicitly clicks "Update Master Record".
+
+==================================================
+TOP OF SCREEN — REQUIRED SELECTIONS
+==================================================
+At the top of the scroll screen, place a fixed card with:
+
+Dropdowns:
+- Select Diesel Fire Pump (from pump registry, filtered to Diesel)
+- Select Contractor Company
+- Select Inspector
+- Select Owner / Property Owner
+- Select Contracting Party / Client
+- Select Job / Site
+
+After selection, display a compact summary (read-only):
+- Pump Name / ID
+- Contractor Name
+- Inspector Name
+- Job / Site Name
+
+==================================================
+SECTION 1 — GENERAL INFORMATION
+==================================================
+Visible card section (not collapsible):
+
+Title: FIRE PUMP ANNUAL PERFORMANCE TEST
+
+Fields (auto-filled from dropdowns where applicable):
+- Contractor Information:
+  - Name
+  - Address
+  - Phone
+  - Fax
+
+- Job Information:
+  - Job Name
+  - Job No.
+  - Test Date
+  - Test performed for
+  - Test location
+  - Test Method
+
+Test Header (checkboxes):
+- Flow meter to drain or suction reservoir
+- Flowmeter back to suction (closed-loop metering)
+
+==================================================
+SECTION 2 — PUMP EQUIPMENT (AUTO-FILLED)
+==================================================
+Pump Nameplate Information:
+- Make
+- Model
+- Stages
+- Coupling
+- SN
+- Impeller Diameter
+- Speed
+- Rated Capacity
+- Rated Pressure
+
+Water Supply Type
+
+==================================================
+SECTION 3 — DRIVER INFORMATION (DIESEL ENGINE)
+==================================================
+Driver / Engine Information:
+- Engine Make
+- Engine Model
+- Serial Number
+- Rated Speed
+- Horsepower
+- Cooling Type
+- Fuel Type
+
+==================================================
+SECTION 4 — CONTROLLER INFORMATION
+==================================================
+Pump Controller Nameplate Information:
+- Make
+- Model
+- SN
+- Time set for minutes
+- Turns on at
+- Turns off at
+
+==================================================
+SECTION 5 — POWER SUPPLY
+==================================================
+Fields:
+- Starting batteries type
+- Battery voltage
+- Battery charger type
+- Battery charger voltage
+- Alternate power source (if applicable)
+
+==================================================
+SECTION 6 — WATER SUPPLY CONDITIONS
+==================================================
+Fields:
+- Water supply type
+- Static pressure
+- Residual pressure
+- Flow test reference (if applicable)
+
+==================================================
+SECTION 7 — SYSTEM DEMAND
+==================================================
+Fields:
+- System demand flow (gpm)
+- System demand pressure (psi)
+- Basis of demand (sprinkler / standpipe / combined)
+
+==================================================
+SECTION 8 — TEST CONDITIONS & READINGS (DIESEL)
+==================================================
+Use a horizontally scrollable table or a mobile-optimized grid.
+
+Rows:
+0%, 25%, 50%, 75%, 100%, 125%, 150%, 0%, 100%, 150%
+
+Columns (BASE NFPA COLUMNS):
+- Pump speed (rpm)
+- Suction pressure (psi)
+- Discharge pressure (psi)
+- Nozzle size (in.)
+- Nozzle coefficient
+- Pitot readings (1–6)
+- Flow (gpm)
+- Net pressure (psi)
+- RPM adjusted net pressure
+- RPM adjusted flow
+- Suction velocity pressure (psi)
+- Discharge velocity pressure (psi)
+- Velocity adjusted pressure (psi)
+
+DIESEL-ONLY COLUMNS (MANDATORY):
+- Oil pressure (psi)
+- Exhaust back pressure (in. Hg)
+- Diesel water temperature
+- Cooling loop pressure (psi)
+
+Include checkboxes:
+- Pump is constant speed
+- Pump is variable speed
+
+Include Notes field (free text).
+
+Display informational notes exactly as NFPA:
+1. Velocity pressure adjustments provide a more accurate analysis...
+2. These readings are applicable to diesel engine pumps only...
+
+==================================================
+SECTION 9 — PERFORMANCE VERIFICATION (YES / NO / N/A)
+==================================================
+Include all NFPA verification items exactly:
+
+- G. Ampere demand ≤ full load amperes × service factor
+- H1. Actual voltage × current ≤ rated values × service factor
+- H2. Voltage ≤ 5% above rated
+- H3. Voltage ≤ 10% above rated
+- I. Did engine-driven units operate without any signs of overload or stress?
+- J. Was the engine overspeed emergency shutdown tested?
+- K. Was the governor set to properly regulate the engine speed at rated pump speed?
+- L. Did the gear drive assembly operate without excessive objectionable noise, vibration, or heating?
+- M. Was the fire pump unit started and brought up to rated speed without interruption under peak load?
+- N. Did the fire pump performance equal the manufacturer’s factory curve?
+- O. Did the electric motor pumps pass phase reversal test on normal and alternate power?
+
+==================================================
+SECTION 10 — MULTIPLE PUMP OPERATION
+==================================================
+Visible block with checkboxes:
+- Pumps operate in series
+- Pumps operate in parallel
+- N/A
+
+Include the full multiple pump table exactly as NFPA 25, using mobile-optimized layout.
+
+==================================================
+SECTION 11 — ADDITIONAL TESTS — TRANSFER SWITCH
+==================================================
+Yes / No / N/A fields:
+- Simulate power failure while pump is operating at peak load
+- Power transferred to alternate power source
+- Pump performed for 2 minutes on alternate power
+- Record voltage, amperage, RPM, suction pressure, discharge pressure
+- Pump reconnects to normal power source
+- Alarm indicating (visual and audible) functions correctly
+- Suction screens inspected and cleared of any debris
+- ECM sensors (primary and redundant) function correctly
+
+==================================================
+SECTION 12 — RESULTS SUMMARY
+==================================================
+Auto-calculated summary:
+- Rated flow vs measured flow
+- Net pressure compliance (≥ 95%)
+- Pass / Fail status (informational only)
+
+==================================================
+SECTION 13 — OBSERVATIONS & DEFICIENCIES
+==================================================
+Free text fields:
+- Observations
+- Deficiencies identified
+
+==================================================
+SECTION 14 — SIGNATURES
+==================================================
+Signature blocks:
+- Inspector Name (auto-filled)
+- Inspector Signature
+- Date
+- Owner / Client Representative Signature
+
+==================================================
+SECTION 15 — ATTACHMENTS
+==================================================
+File upload:
+- Test curves
+- Photos
+- Additional documents
+
+==================================================
+BOTTOM ACTION BAR (STICKY)
+==================================================
+Buttons:
+- Save Draft
+- Finalize Test
+- Export PDF
+
+==================================================
+DATA RULES
+==================================================
+- Link test record to selected Diesel Fire Pump ID, Contractor ID, Inspector ID, Job ID
+- Autosave on scroll/input
+- Validation before finalize (required dropdowns must be selected)
+- Preserve historical test records
+- Do NOT use accordion UI anywhere
