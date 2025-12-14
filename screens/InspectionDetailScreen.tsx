@@ -98,7 +98,9 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       weekly: "weekly",
       monthly: "monthly",
       quarterly: "quarterly",
+      semiannually: "semiannually",
       annually: "annually",
+      three_years: "threeYears",
       five_years: "fiveYears",
     };
     return t.form.frequencies[frequencyMapping[freq]];
@@ -255,20 +257,17 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
               {inspection.firePumpData.model ? (
                 <InfoRow icon="info" label={t.firePumps.model} value={inspection.firePumpData.model} />
               ) : null}
-              {inspection.firePumpData.flowRateGpm ? (
-                <InfoRow icon="droplet" label={t.firePumps.flowRate} value={`${inspection.firePumpData.flowRateGpm} GPM`} />
+              {inspection.firePumpData.ratedFlowGpm ? (
+                <InfoRow icon="droplet" label={t.firePumps.ratedFlowGpm} value={`${inspection.firePumpData.ratedFlowGpm} GPM`} />
               ) : null}
-              {inspection.firePumpData.pressurePsi ? (
-                <InfoRow icon="activity" label={t.firePumps.pressure} value={`${inspection.firePumpData.pressurePsi} PSI`} />
+              {inspection.firePumpData.ratedPressurePsi ? (
+                <InfoRow icon="activity" label={t.firePumps.ratedPressurePsi} value={`${inspection.firePumpData.ratedPressurePsi} PSI`} />
               ) : null}
-              {inspection.firePumpData.motorHp ? (
-                <InfoRow icon="zap" label={t.firePumps.motorPower} value={`${inspection.firePumpData.motorHp} HP`} isLast={!inspection.firePumpData.serialNumber && !inspection.firePumpData.installationDate} />
+              {inspection.firePumpData.powerHP ? (
+                <InfoRow icon="zap" label={t.firePumps.powerHP} value={`${inspection.firePumpData.powerHP} HP`} isLast={!inspection.firePumpData.serialNumber} />
               ) : null}
               {inspection.firePumpData.serialNumber ? (
-                <InfoRow icon="hash" label={t.firePumps.serialNumber} value={inspection.firePumpData.serialNumber} isLast={!inspection.firePumpData.installationDate} />
-              ) : null}
-              {inspection.firePumpData.installationDate ? (
-                <InfoRow icon="calendar" label={t.firePumps.installationDate} value={formatDate(inspection.firePumpData.installationDate)} isLast />
+                <InfoRow icon="hash" label={t.firePumps.serialNumber} value={inspection.firePumpData.serialNumber} isLast />
               ) : null}
             </View>
           </>

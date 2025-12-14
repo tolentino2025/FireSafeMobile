@@ -23,12 +23,15 @@ const INSPECTION_TYPE_NAMES: Record<InspectionType, { en: string; pt: string }> 
   pump_weekly: { en: "Fire Pump - Weekly Inspection", pt: "Bomba de Incêndio - Inspeção Semanal" },
   pump_monthly: { en: "Fire Pump - Monthly Inspection", pt: "Bomba de Incêndio - Inspeção Mensal" },
   pump_annual: { en: "Fire Pump - Annual Test", pt: "Bomba de Incêndio - Teste Anual" },
+  electric_pump: { en: "Electric Fire Pump", pt: "Bomba de Incêndio Elétrica" },
+  diesel_pump: { en: "Diesel Fire Pump", pt: "Bomba de Incêndio Diesel" },
   aboveground: { en: "Aboveground Piping", pt: "Tubulação Aérea" },
   underground: { en: "Underground Piping", pt: "Tubulação Subterrânea" },
   hydrant_flow: { en: "Hydrant Flow Test", pt: "Teste de Vazão de Hidrante" },
   water_tank: { en: "Water Storage Tank", pt: "Tanque de Armazenamento de Água" },
   hazard_eval: { en: "Hazard Evaluation", pt: "Avaliação de Riscos" },
   standpipe: { en: "Standpipe & Hose System", pt: "Sistema de Standpipe e Mangueiras" },
+  fire_service_mains: { en: "Fire Service Mains", pt: "Rede Principal de Incêndio" },
 };
 
 interface GeneratePdfOptions {
