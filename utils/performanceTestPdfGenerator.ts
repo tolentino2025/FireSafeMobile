@@ -184,6 +184,20 @@ const translations = {
     chargerType: "Charger Type",
     chargerVoltage: "Charger Voltage",
     alternateSource: "Alternate Power Source",
+    multiplePumpOperation: "Multiple Pump Operation",
+    numberOfPumps: "Number of Pumps",
+    operationSequence: "Operation Sequence",
+    allPumpsTested: "All Pumps Tested Individually",
+    combinedFlowTest: "Combined Flow Test",
+    transferSwitchTest: "Transfer Switch Test",
+    normalToEmergency: "Normal to Emergency",
+    emergencyToNormal: "Emergency to Normal",
+    stages: "Stages",
+    impellerDiameter: "Impeller Diameter",
+    testResult: "Test Result",
+    notes: "Notes",
+    isMultiplePumpSystem: "Multiple Pump System",
+    hasTransferSwitch: "Has Transfer Switch",
   },
   "pt-BR": {
     title: "Relatório de Teste de Desempenho de Bomba de Incêndio",
@@ -310,6 +324,20 @@ const translations = {
     chargerType: "Tipo de Carregador",
     chargerVoltage: "Tensão do Carregador",
     alternateSource: "Fonte Alternativa",
+    multiplePumpOperation: "Operação de Múltiplas Bombas",
+    numberOfPumps: "Número de Bombas",
+    operationSequence: "Sequência de Operação",
+    allPumpsTested: "Todas Bombas Testadas Individualmente",
+    combinedFlowTest: "Teste de Vazão Combinada",
+    transferSwitchTest: "Teste de Chave de Transferência",
+    normalToEmergency: "Normal para Emergência",
+    emergencyToNormal: "Emergência para Normal",
+    stages: "Estágios",
+    impellerDiameter: "Diâmetro do Impelidor",
+    testResult: "Resultado do Teste",
+    notes: "Notas",
+    isMultiplePumpSystem: "Sistema de Múltiplas Bombas",
+    hasTransferSwitch: "Possui Chave de Transferência",
   },
 };
 
@@ -1041,6 +1069,10 @@ const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string =>
               <div class="info-value">${sanitizeHtml(test.pumpEquipment?.model) || "-"}</div>
             </div>
             <div class="info-item">
+              <div class="info-label">${t.serialNumber}</div>
+              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.serialNumber) || "-"}</div>
+            </div>
+            <div class="info-item">
               <div class="info-label">${t.ratedFlow}</div>
               <div class="info-value">${test.pumpEquipment?.ratedFlowGpm ? `${sanitizeHtml(test.pumpEquipment.ratedFlowGpm)} GPM` : "-"}</div>
             </div>
@@ -1051,6 +1083,26 @@ const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string =>
             <div class="info-item">
               <div class="info-label">${t.ratedSpeed}</div>
               <div class="info-value">${test.pumpEquipment?.ratedSpeedRpm ? `${sanitizeHtml(test.pumpEquipment.ratedSpeedRpm)} RPM` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.shutoffPressure}</div>
+              <div class="info-value">${test.pumpEquipment?.shutoffPressurePsi ? `${sanitizeHtml(test.pumpEquipment.shutoffPressurePsi)} PSI` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.peakFlow}</div>
+              <div class="info-value">${test.pumpEquipment?.peakFlowGpm ? `${sanitizeHtml(test.pumpEquipment.peakFlowGpm)} GPM` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.stages}</div>
+              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.numberOfStages) || "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.impellerDiameter}</div>
+              <div class="info-value">${test.pumpEquipment?.impellerDiameterIn ? `${sanitizeHtml(test.pumpEquipment.impellerDiameterIn)} in` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.yearInstalled}</div>
+              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.yearInstalled) || "-"}</div>
             </div>
           </div>
         </div>
@@ -1067,12 +1119,28 @@ const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string =>
               <div class="info-value">${sanitizeHtml(test.driverInfo?.model) || "-"}</div>
             </div>
             <div class="info-item">
+              <div class="info-label">${t.serialNumber}</div>
+              <div class="info-value">${sanitizeHtml(test.driverInfo?.serialNumber) || "-"}</div>
+            </div>
+            <div class="info-item">
               <div class="info-label">${t.horsePower}</div>
               <div class="info-value">${test.driverInfo?.horsePower ? `${sanitizeHtml(test.driverInfo.horsePower)} HP` : "-"}</div>
             </div>
             <div class="info-item">
+              <div class="info-label">${t.ratedRpm}</div>
+              <div class="info-value">${test.driverInfo?.ratedRpm ? `${sanitizeHtml(test.driverInfo.ratedRpm)} RPM` : "-"}</div>
+            </div>
+            <div class="info-item">
               <div class="info-label">${t.cylinders}</div>
               <div class="info-value">${sanitizeHtml(test.driverInfo?.numberOfCylinders) || "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.displacement}</div>
+              <div class="info-value">${sanitizeHtml(test.driverInfo?.displacement) || "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.fuelTankCapacity}</div>
+              <div class="info-value">${test.driverInfo?.fuelTankCapacityGal ? `${sanitizeHtml(test.driverInfo.fuelTankCapacityGal)} gal` : "-"}</div>
             </div>
             <div class="info-item">
               <div class="info-label">${t.fuelLevel}</div>
@@ -1093,6 +1161,10 @@ const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string =>
             <div class="info-item">
               <div class="info-label">${t.batteryVoltage} 2</div>
               <div class="info-value">${test.driverInfo?.batteryVoltage2 ? `${sanitizeHtml(test.driverInfo.batteryVoltage2)} V` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.engineBlockHeater}</div>
+              <div class="info-value">${sanitizeHtml(test.driverInfo?.engineBlockHeaterStatus) || "-"}</div>
             </div>
           </div>
         </div>
@@ -1152,7 +1224,11 @@ const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string =>
             </div>
             <div class="info-item">
               <div class="info-label">${t.pressureStart}</div>
-              <div class="info-value">${test.controllerInfo?.pressureStartPsi ? `${sanitizeHtml(test.controllerInfo.pressureStartPsi)} PSI` : "-"}</div>
+              <div class="info-value">${test.controllerInfo?.pressureSettingStart ? `${sanitizeHtml(test.controllerInfo.pressureSettingStart)} PSI` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.pressureStop}</div>
+              <div class="info-value">${test.controllerInfo?.pressureSettingStop ? `${sanitizeHtml(test.controllerInfo.pressureSettingStop)} PSI` : "-"}</div>
             </div>
           </div>
         </div>
@@ -1176,6 +1252,100 @@ const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string =>
               <div class="info-label">${t.waterTemp}</div>
               <div class="info-value">${test.supplyConditions?.waterTemperatureF ? `${sanitizeHtml(test.supplyConditions.waterTemperatureF)} °F` : "-"}</div>
             </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">${t.systemDemand}</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">${t.demandGpm}</div>
+              <div class="info-value">${test.systemDemand?.systemDemandGpm ? `${sanitizeHtml(test.systemDemand.systemDemandGpm)} GPM` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.demandPsi}</div>
+              <div class="info-value">${test.systemDemand?.systemDemandPsi ? `${sanitizeHtml(test.systemDemand.systemDemandPsi)} PSI` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.hoseDemand}</div>
+              <div class="info-value">${test.systemDemand?.hoseDemandGpm ? `${sanitizeHtml(test.systemDemand.hoseDemandGpm)} GPM` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.totalDemand}</div>
+              <div class="info-value">${test.systemDemand?.totalDemandGpm ? `${sanitizeHtml(test.systemDemand.totalDemandGpm)} GPM` : "-"}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">${t.multiplePumpOperation}</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">${t.isMultiplePumpSystem}</div>
+              <div class="info-value">${test.multiplePumpOperation?.isMultiplePumpSystem ? t.yes : t.no}</div>
+            </div>
+            ${test.multiplePumpOperation?.isMultiplePumpSystem ? `
+            <div class="info-item">
+              <div class="info-label">${t.numberOfPumps}</div>
+              <div class="info-value">${sanitizeHtml(test.multiplePumpOperation?.numberOfPumps) || "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.operationSequence}</div>
+              <div class="info-value">${sanitizeHtml(test.multiplePumpOperation?.pumpOperationSequence) || "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.allPumpsTested}</div>
+              <div class="info-value">${test.multiplePumpOperation?.allPumpsTestedIndividually ? t.yes : t.no}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.combinedFlowTest}</div>
+              <div class="info-value">${test.multiplePumpOperation?.combinedFlowTest ? t.yes : t.no}</div>
+            </div>
+            ` : ""}
+            ${test.multiplePumpOperation?.notes ? `
+            <div class="info-item" style="grid-column: span 2;">
+              <div class="info-label">${t.notes}</div>
+              <div class="info-value">${sanitizeHtml(test.multiplePumpOperation.notes)}</div>
+            </div>
+            ` : ""}
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">${t.transferSwitchTest}</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">${t.hasTransferSwitch}</div>
+              <div class="info-value">${test.transferSwitchTest?.hasTransferSwitch ? t.yes : t.no}</div>
+            </div>
+            ${test.transferSwitchTest?.hasTransferSwitch ? `
+            <div class="info-item">
+              <div class="info-label">${t.startingType}</div>
+              <div class="info-value">${sanitizeHtml(test.transferSwitchTest?.transferSwitchType) || "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.normalToEmergency}</div>
+              <div class="info-value">${test.transferSwitchTest?.normalToEmergencySeconds ? `${sanitizeHtml(test.transferSwitchTest.normalToEmergencySeconds)} sec` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.emergencyToNormal}</div>
+              <div class="info-value">${test.transferSwitchTest?.emergencyToNormalSeconds ? `${sanitizeHtml(test.transferSwitchTest.emergencyToNormalSeconds)} sec` : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.testDate}</div>
+              <div class="info-value">${test.transferSwitchTest?.testDate ? formatDate(test.transferSwitchTest.testDate, language) : "-"}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">${t.testResult}</div>
+              <div class="info-value">${test.transferSwitchTest?.testResult === "pass" ? t.pass : test.transferSwitchTest?.testResult === "fail" ? t.fail : "-"}</div>
+            </div>
+            ` : ""}
+            ${test.transferSwitchTest?.notes ? `
+            <div class="info-item" style="grid-column: span 2;">
+              <div class="info-label">${t.notes}</div>
+              <div class="info-value">${sanitizeHtml(test.transferSwitchTest.notes)}</div>
+            </div>
+            ` : ""}
           </div>
         </div>
 
