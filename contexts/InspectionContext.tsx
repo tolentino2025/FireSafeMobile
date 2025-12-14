@@ -139,6 +139,111 @@ const JOB_SITES_KEY = "@firesafe_job_sites";
 const DIESEL_TESTS_KEY = "@firesafe_diesel_performance_tests";
 const DATA_VERSION_KEY = "@firesafe_data_version";
 const CURRENT_DATA_VERSION = 3;
+const SAMPLE_DATA_LOADED_KEY = "@firesafe_sample_data_loaded";
+
+const now = new Date().toISOString();
+const sampleCompanies: Company[] = [
+  {
+    id: "company-1",
+    name: "Petrobras S.A.",
+    cnpj: "33.000.167/0001-01",
+    address: "Av. República do Chile, 65",
+    city: "Rio de Janeiro",
+    state: "RJ",
+    zipCode: "20031-912",
+    contactName: "Carlos Silva",
+    contactPhone: "(21) 3224-4477",
+    contactEmail: "carlos.silva@petrobras.com.br",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "company-2",
+    name: "Shopping Center Norte",
+    cnpj: "47.067.128/0001-06",
+    address: "Travessa Casalbuono, 120",
+    city: "São Paulo",
+    state: "SP",
+    zipCode: "02089-900",
+    contactName: "Maria Santos",
+    contactPhone: "(11) 2224-5000",
+    contactEmail: "maria.santos@centernorte.com.br",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "company-3",
+    name: "Hospital Albert Einstein",
+    cnpj: "60.765.823/0001-30",
+    address: "Av. Albert Einstein, 627",
+    city: "São Paulo",
+    state: "SP",
+    zipCode: "05652-900",
+    contactName: "Dr. Roberto Mendes",
+    contactPhone: "(11) 2151-1233",
+    contactEmail: "roberto.mendes@einstein.br",
+    createdAt: now,
+    updatedAt: now,
+  },
+];
+
+const sampleAppUsers: AppUser[] = [
+  {
+    id: "user-1",
+    name: "João Pedro Oliveira",
+    email: "joao.oliveira@firesafe.com.br",
+    phone: "(11) 99999-1234",
+    role: "Inspetor Sênior",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "user-2",
+    name: "Ana Carolina Ferreira",
+    email: "ana.ferreira@firesafe.com.br",
+    phone: "(11) 98888-5678",
+    role: "Técnico NFPA 25",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "user-3",
+    name: "Ricardo Souza",
+    email: "ricardo.souza@firesafe.com.br",
+    phone: "(21) 97777-9012",
+    role: "Engenheiro de Segurança",
+    createdAt: now,
+    updatedAt: now,
+  },
+];
+
+const sampleProperties: Property[] = [
+  {
+    id: "prop-1",
+    name: "Refinaria Duque de Caxias",
+    address: "Rodovia Washington Luiz, km 113,7",
+    phone: "(21) 2677-1234",
+    contact: "Fernando Costa",
+    companyId: "company-1",
+  },
+  {
+    id: "prop-2",
+    name: "Torre Norte - Centro de Convenções",
+    address: "Travessa Casalbuono, 120 - Bloco A",
+    phone: "(11) 2224-5001",
+    contact: "Paula Lima",
+    companyId: "company-2",
+  },
+  {
+    id: "prop-3",
+    name: "Unidade Morumbi",
+    address: "Av. Albert Einstein, 627 - Bloco A",
+    phone: "(11) 2151-1234",
+    contact: "Enfermeira Chefe Maria",
+    companyId: "company-3",
+  },
+];
+
 
 interface InspectionProviderProps {
   children: ReactNode;
@@ -193,14 +298,26 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         
         setInspections(parsedInspections);
       }
+      const sampleDataLoaded = await AsyncStorage.getItem(SAMPLE_DATA_LOADED_KEY);
+      const shouldLoadSampleData = !sampleDataLoaded && !storedCompanies && !storedAppUsers && !storedProperties;
+
       if (storedProperties) {
         setProperties(JSON.parse(storedProperties));
+      } else if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(PROPERTIES_KEY, JSON.stringify(sampleProperties));
+        setProperties(sampleProperties);
       }
       if (storedCompanies) {
         setCompanies(JSON.parse(storedCompanies));
+      } else if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(COMPANIES_KEY, JSON.stringify(sampleCompanies));
+        setCompanies(sampleCompanies);
       }
       if (storedAppUsers) {
         setAppUsers(JSON.parse(storedAppUsers));
+      } else if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(APP_USERS_KEY, JSON.stringify(sampleAppUsers));
+        setAppUsers(sampleAppUsers);
       }
       if (storedFirePumps) {
         setFirePumps(JSON.parse(storedFirePumps));
@@ -219,6 +336,10 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedDieselTests) {
         setDieselPerformanceTests(JSON.parse(storedDieselTests));
+      }
+
+      if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(SAMPLE_DATA_LOADED_KEY, "true");
       }
     } catch (error) {
       console.error("Error loading data:", error);
