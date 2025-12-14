@@ -125,7 +125,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getFirePumpPanelsByPumpId } = useInspections();
   const insets = useSafeAreaInsets();
 
   const [test, setTest] = useState<Partial<DieselPerformanceTest>>(() => createEmptyDieselPerformanceTest());
@@ -258,6 +258,8 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     const pump = dieselPumps.find(p => p.id === pumpId);
     if (pump) {
       setSelectedPumpId(pumpId);
+      const panels = getFirePumpPanelsByPumpId(pumpId);
+      const panel = panels.length > 0 ? panels[0] : null;
       setTest(prev => ({
         ...prev,
         pumpEquipment: {
@@ -275,6 +277,16 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           manufacturer: pump.manufacturer || "",
           model: pump.model || "",
           horsePower: pump.powerHP?.toString() || "",
+        },
+        controllerInfo: {
+          ...prev.controllerInfo!,
+          manufacturer: panel?.manufacturer || "",
+          model: panel?.model || "",
+          serialNumber: panel?.serialNumber || "",
+          panelTag: panel?.tag || "",
+          supplyVoltage: panel?.supplyVoltage || "",
+          startingType: panel?.startingType || "",
+          hasAutomaticTransfer: panel?.hasAutomaticTransfer || false,
         },
       }));
     }
