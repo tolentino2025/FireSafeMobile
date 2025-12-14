@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
@@ -50,22 +50,8 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
         : mode === "company"
         ? t.properties.addCompany
         : t.properties.addProperty,
-      headerLeft: () => (
-        <Pressable onPress={() => navigation.goBack()}>
-          <ThemedText type="body" style={{ color: AppColors.primary }}>
-            {t.form.cancel}
-          </ThemedText>
-        </Pressable>
-      ),
-      headerRight: () => (
-        <Pressable onPress={handleSave}>
-          <ThemedText type="body" style={{ color: AppColors.primary, fontWeight: "600" }}>
-            {t.form.save}
-          </ThemedText>
-        </Pressable>
-      ),
     });
-  }, [navigation, name, address, phone, contact]);
+  }, [navigation, isEditing, mode, t]);
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -196,9 +182,13 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
         autoCapitalize="characters"
       />
 
+      <Spacer height={Spacing["3xl"]} />
+
+      <Button onPress={handleSave}>{t.form.save}</Button>
+
       {isEditing ? (
         <>
-          <Spacer height={Spacing["4xl"]} />
+          <Spacer height={Spacing.lg} />
           <Button
             onPress={handleDelete}
             style={{ backgroundColor: AppColors.error }}
@@ -207,6 +197,8 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
           </Button>
         </>
       ) : null}
+
+      <Spacer height={Spacing["4xl"]} />
     </ScreenKeyboardAwareScrollView>
   );
 }
