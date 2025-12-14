@@ -133,7 +133,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const dieselPumps = firePumps.filter(p => p.type === "diesel_main");
-  const inspectors = appUsers.filter(u => u.role === "inspector" || u.role === "technician");
+  const inspectors = appUsers;
 
   useEffect(() => {
     if (testId) {
