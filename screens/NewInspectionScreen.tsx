@@ -48,6 +48,7 @@ const inspectionCategories = [
     items: [
       { type: "electric_pump" as const, icon: "zap" as const, labelKey: "electricPump" as const, nfpaRef: "NFPA 25" },
       { type: "diesel_pump" as const, icon: "truck" as const, labelKey: "dieselPump" as const, nfpaRef: "NFPA 25" },
+      { type: "performance_test" as const, icon: "activity" as const, labelKey: "performanceTest" as const, nfpaRef: "NFPA 25" },
       { type: "diesel_performance_test" as const, icon: "settings" as const, labelKey: "dieselPerformanceTest" as const, nfpaRef: "NFPA 25" },
     ],
   },
