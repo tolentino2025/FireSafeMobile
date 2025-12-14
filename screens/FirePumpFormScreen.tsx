@@ -987,8 +987,8 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
 
       <Button onPress={handleSubmit}>
         <View style={styles.saveButtonContent}>
-          <Feather name="save" size={18} color="#FFFFFF" />
-          <ThemedText type="body" style={styles.saveButtonText}>{t.form.save}</ThemedText>
+          <Feather name="save" size={18} color={fullTheme.colors.buttonText} />
+          <ThemedText type="body" style={[styles.saveButtonText, { color: fullTheme.colors.buttonText }]}>{t.form.save}</ThemedText>
         </View>
       </Button>
 
@@ -1116,7 +1116,6 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   saveButtonText: {
-    color: "#FFFFFF",
     fontWeight: "600",
   },
 });
