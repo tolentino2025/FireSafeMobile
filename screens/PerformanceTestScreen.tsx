@@ -34,6 +34,7 @@ import {
   Deficiency,
 } from "@/types/performanceTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 type PerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "PerformanceTest">;
 
@@ -134,6 +135,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const { t } = useLanguage();
   const { contractors, jobSites, getJobSitesByContractor } = useInspections();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const [test, setTest] = useState<Partial<PerformanceTest>>(() => createEmptyPerformanceTest());
   const [isSaving, setIsSaving] = useState(false);
@@ -1113,10 +1115,11 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
           {renderInputField(t.performanceTest?.additionalNotes || "Additional Notes", test.attachments?.additionalNotes || "", (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, additionalNotes: v } })), { multiline: true })}
         </SectionCard>
 
-        <Spacer height={120} />
+        <Spacer height={Spacing.xl} />
+        <View style={{ height: 80 + tabBarHeight }} />
       </ScreenKeyboardAwareScrollView>
 
-      <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: insets.bottom + Spacing.md }]}>
+      <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.md, bottom: tabBarHeight }]}>
         <Pressable
           onPress={handleSaveDraft}
           style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
