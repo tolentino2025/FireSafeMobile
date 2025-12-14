@@ -3,6 +3,12 @@ export type InspectionFrequency = "daily" | "weekly" | "monthly" | "quarterly" |
 
 export type PumpType = "electric_main" | "diesel_main" | "jockey";
 
+export type PumpOrientation = "horizontal_split_case" | "vertical_inline" | "vertical_turbine" | "end_suction";
+export type EnclosureType = "tefc" | "odp" | "xp" | "wpii";
+export type InsulationClass = "a" | "b" | "f" | "h";
+export type GovernorType = "mechanical" | "electronic" | "isochronous";
+export type FuelType = "diesel" | "lpg" | "natural_gas";
+
 export interface FirePump {
   id: string;
   companyId: string;
@@ -18,10 +24,48 @@ export interface FirePump {
   powerHP?: number;
   voltage?: string;
   phases?: number;
+  frequency?: number;
+  pumpOrientation?: PumpOrientation;
+  numberOfStages?: number;
+  impellerDiameter?: string;
+  suctionSize?: string;
+  dischargeSize?: string;
+  ulFmListed?: boolean;
+  motorManufacturer?: string;
+  motorModel?: string;
+  motorSerialNumber?: string;
+  fullLoadAmperage?: number;
+  lockedRotorAmperage?: number;
+  serviceFactor?: number;
+  frameSize?: string;
+  enclosureType?: EnclosureType;
+  insulationClass?: InsulationClass;
+  engineManufacturer?: string;
+  engineModel?: string;
+  engineSerialNumber?: string;
+  numberOfCylinders?: number;
+  displacement?: string;
+  ratedEngineHP?: number;
+  ratedEngineRPM?: number;
+  fuelType?: FuelType;
+  fuelTankCapacity?: number;
+  oilCapacity?: number;
+  coolantCapacity?: number;
+  governorType?: GovernorType;
+  isTurboSupercharged?: boolean;
+  battery1Voltage?: number;
+  battery1CCA?: number;
+  battery2Voltage?: number;
+  battery2CCA?: number;
+  batteryChargerManufacturer?: string;
+  batteryChargerModel?: string;
   comments?: string;
   createdAt: string;
   updatedAt: string;
 }
+
+export type NEMARating = "1" | "3r" | "4" | "4x" | "12";
+export type StartingMethodType = "across_the_line" | "reduced_voltage" | "soft_starter" | "vfd" | "wye_delta" | "part_winding";
 
 export interface FirePumpControlPanel {
   id: string;
@@ -31,8 +75,21 @@ export interface FirePumpControlPanel {
   model?: string;
   serialNumber?: string;
   supplyVoltage?: string;
-  startingType?: string;
+  startingType?: StartingMethodType;
   hasAutomaticTransfer?: boolean;
+  listedApprovedBy?: string;
+  nemaRating?: NEMARating;
+  mainBreakerRating?: string;
+  controlVoltage?: string;
+  hasPressureMaintenance?: boolean;
+  hasSequentialStart?: boolean;
+  hasAlarmRelay?: boolean;
+  hasRemoteStart?: boolean;
+  hasEmergencyRun?: boolean;
+  hasPhaseReversalProtection?: boolean;
+  hasGroundFaultProtection?: boolean;
+  undervoltageSettings?: string;
+  overvoltageSettings?: string;
   comments?: string;
   createdAt: string;
   updatedAt: string;
