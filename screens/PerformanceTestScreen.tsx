@@ -135,7 +135,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -143,10 +143,14 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const [isSaving, setIsSaving] = useState(false);
   const [selectedPumpId, setSelectedPumpId] = useState<string>("");
   const [selectedInspectorId, setSelectedInspectorId] = useState<string>("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const electricPumps = firePumps.filter(p => p.type === "electric_main");
+  const allElectricPumps = firePumps.filter(p => p.type === "electric_main");
+  const electricPumps = selectedCompanyId 
+    ? allElectricPumps.filter(p => p.companyId === selectedCompanyId)
+    : allElectricPumps;
   const inspectors = appUsers;
 
   const sectionRefs = {
@@ -307,6 +311,25 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         },
       }));
     }
+  };
+
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    setSelectedPumpId("");
+    setTest(prev => ({
+      ...prev,
+      pumpEquipment: {
+        ...prev.pumpEquipment!,
+        pumpId: "",
+        pumpTag: "",
+        manufacturer: "",
+        model: "",
+        serialNumber: "",
+        ratedFlowGpm: "",
+        ratedPressurePsi: "",
+        ratedSpeedRpm: "",
+      },
+    }));
   };
 
   const handlePumpSelect = (pumpId: string) => {
@@ -625,6 +648,12 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     id: j.id,
     label: j.jobName,
     sublabel: `${j.city}, ${j.state}`,
+  }));
+
+  const companyOptions = companies.map(c => ({
+    id: c.id,
+    label: c.name,
+    sublabel: `${c.city}, ${c.state}`,
   }));
 
   const electricPumpOptions = electricPumps.map(p => ({
@@ -999,15 +1028,26 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         <Spacer height={Spacing.md} />
 
         <SectionCard title={t.performanceTest?.sections?.pump || "3. Pump Equipment"} sectionRef={sectionRefs.pump}>
+          <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.dieselPerformanceTest?.selectCompany || "Select Company"}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          <SelectPicker
+            options={companyOptions}
+            selectedId={selectedCompanyId}
+            onSelect={handleCompanySelect}
+            placeholder={t.performanceTest?.dieselPerformanceTest?.selectCompany || "Select Company"}
+            title={t.performanceTest?.dieselPerformanceTest?.selectCompany || "Select Company"}
+          />
+          <Spacer height={Spacing.lg} />
           <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.selectElectricPump || "Select Electric Pump"}</ThemedText>
           <Spacer height={Spacing.sm} />
           <SelectPicker
             options={electricPumpOptions}
             selectedId={selectedPumpId}
             onSelect={handlePumpSelect}
-            placeholder={t.performanceTest?.selectElectricPump || "Select Electric Pump"}
+            placeholder={selectedCompanyId ? (t.performanceTest?.selectElectricPump || "Select Electric Pump") : (t.performanceTest?.dieselPerformanceTest?.selectCompanyFirst || "Select a company first")}
             title={t.performanceTest?.selectElectricPump || "Select Electric Pump"}
             emptyText={t.firePumps?.noResults || "No pumps found"}
+            disabled={!selectedCompanyId}
           />
           <Spacer height={Spacing.lg} />
           {renderInputField(t.performanceTest?.pumpTag || "Pump Tag/ID", test.pumpEquipment?.pumpTag || "", (v) => updatePumpEquipment("pumpTag", v))}
