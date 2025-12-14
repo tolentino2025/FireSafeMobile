@@ -61,12 +61,16 @@ export default function PumpCurveChartScreen({ route }: PumpCurveChartScreenProp
 
   const scaleX = (flow: number) => {
     if (!chartData) return 0;
-    return CHART_PADDING + ((flow - chartData.minFlow) / (chartData.maxFlow - chartData.minFlow)) * chartWidth;
+    const range = chartData.maxFlow - chartData.minFlow;
+    if (range === 0) return CHART_PADDING + chartWidth / 2;
+    return CHART_PADDING + ((flow - chartData.minFlow) / range) * chartWidth;
   };
 
   const scaleY = (pressure: number) => {
     if (!chartData) return 0;
-    return CHART_PADDING + CHART_HEIGHT - ((pressure - chartData.minPressure) / (chartData.maxPressure - chartData.minPressure)) * CHART_HEIGHT;
+    const range = chartData.maxPressure - chartData.minPressure;
+    if (range === 0) return CHART_PADDING + CHART_HEIGHT / 2;
+    return CHART_PADDING + CHART_HEIGHT - ((pressure - chartData.minPressure) / range) * CHART_HEIGHT;
   };
 
   const generateCurvePath = () => {

@@ -652,9 +652,22 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   );
 
   const handleGeneratePumpCurve = () => {
-    const validReadings = test.dieselReadings?.filter(r => 
-      r.flowGpm && r.netPressurePsi && !isNaN(parseFloat(r.flowGpm)) && !isNaN(parseFloat(r.netPressurePsi))
-    ) || [];
+    const validReadings = (test.dieselReadings || [])
+      .filter(r => {
+        const flowGpm = parseFloat(r.flowGpm);
+        const suctionPsi = parseFloat(r.suctionPsi);
+        const dischargePsi = parseFloat(r.dischargePsi);
+        return !isNaN(flowGpm) && !isNaN(suctionPsi) && !isNaN(dischargePsi);
+      })
+      .map(r => {
+        const suctionPsi = parseFloat(r.suctionPsi);
+        const dischargePsi = parseFloat(r.dischargePsi);
+        const calculatedNetPressure = (dischargePsi - suctionPsi).toFixed(1);
+        return {
+          ...r,
+          netPressurePsi: r.netPressurePsi || calculatedNetPressure,
+        };
+      });
     
     if (validReadings.length < 2) {
       Alert.alert(
