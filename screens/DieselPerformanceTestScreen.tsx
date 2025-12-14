@@ -26,6 +26,7 @@ import {
   Deficiency,
 } from "@/types/performanceTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 type DieselPerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "DieselPerformanceTest">;
 
@@ -127,6 +128,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const { t } = useLanguage();
   const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump } = useInspections();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const [test, setTest] = useState<Partial<DieselPerformanceTest>>(() => createEmptyDieselPerformanceTest());
   const [isSaving, setIsSaving] = useState(false);
@@ -682,8 +684,8 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     
     if (validReadings.length < 2) {
       Alert.alert(
-        t.performanceTest?.pumpCurve?.insufficientData || "Insufficient Data",
-        t.performanceTest?.pumpCurve?.needMoreReadings || "Please enter at least 2 complete readings (Flow GPM, Suction PSI, Discharge PSI) to generate the pump curve."
+        dt?.pumpCurve?.insufficientData || "Insufficient Data",
+        dt?.pumpCurve?.needMoreReadings || "Please enter at least 2 complete readings (Flow GPM, Suction PSI, Discharge PSI) to generate the pump curve."
       );
       return;
     }
@@ -887,7 +889,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           >
             <Feather name="trending-up" size={20} color="#FFFFFF" />
             <ThemedText type="body" style={{ color: "#FFFFFF", marginLeft: Spacing.sm, fontWeight: "600" }}>
-              {t.performanceTest?.pumpCurve?.generateCurve || "Generate Pump Curve"}
+              {dt?.pumpCurve?.generateCurve || "Generate Pump Curve"}
             </ThemedText>
           </Pressable>
         </SectionCard>
@@ -1020,11 +1022,11 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         </SectionCard>
 
         <Spacer height={Spacing.xl} />
-        <View style={{ height: 100 }} />
+        <View style={{ height: 80 + tabBarHeight }} />
       </ScreenKeyboardAwareScrollView>
 
       {/* Sticky Bottom Action Bar */}
-      <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: insets.bottom + Spacing.md }]}>
+      <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.md, bottom: tabBarHeight }]}>
         <Pressable 
           style={[styles.actionButton, { borderColor: fullTheme.colors.border }]}
           onPress={handleSaveDraft}
