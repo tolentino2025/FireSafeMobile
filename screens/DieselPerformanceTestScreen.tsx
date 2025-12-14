@@ -1008,7 +1008,14 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.conductedBy || "Conducted By"}</ThemedText>
           {renderInputField(t.performanceTest?.printName || "Print Name", test.signatures?.conductedBy?.name || "", (v) => updateConductedBySignature("name", v))}
           {renderInputField(t.performanceTest?.signatureJobTitle || "Title", test.signatures?.conductedBy?.title || "", (v) => updateConductedBySignature("title", v))}
-          {renderInputField(t.performanceTest?.date || "Date", test.signatures?.conductedBy?.date || "", (v) => updateConductedBySignature("date", v))}
+          <View style={styles.fieldContainer}>
+            <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.date || "Date"}</ThemedText>
+            <DatePickerField
+              value={test.signatures?.conductedBy?.date || ""}
+              onChange={(v) => updateConductedBySignature("date", v)}
+              placeholder={t.performanceTest?.date || "Date"}
+            />
+          </View>
           <Spacer height={Spacing.md} />
           <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.signature || "Signature"}</ThemedText>
           <SignatureCapture

@@ -1292,7 +1292,14 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
               {renderInputField(t.performanceTest?.flowMeterSize || "Flow Meter Size", test.testConditions?.flowMeterSize || "", (v) => updateTestConditions("flowMeterSize", v))}
             </View>
             <View style={styles.flex1}>
-              {renderInputField(t.performanceTest?.calibrationDate || "Calibration Date", test.testConditions?.flowMeterCalibrationDate || "", (v) => updateTestConditions("flowMeterCalibrationDate", v))}
+              <View style={styles.fieldContainer}>
+                <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.calibrationDate || "Calibration Date"}</ThemedText>
+                <DatePickerField
+                  value={test.testConditions?.flowMeterCalibrationDate || ""}
+                  onChange={(v) => updateTestConditions("flowMeterCalibrationDate", v)}
+                  placeholder={t.performanceTest?.calibrationDate || "Calibration Date"}
+                />
+              </View>
             </View>
           </View>
           
@@ -1353,7 +1360,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
             <ThemedText type="h4">{t.performanceTest?.deficiencies || "Deficiencies"}</ThemedText>
             <Pressable onPress={addDeficiency} style={[styles.addButton, { backgroundColor: fullTheme.colors.primary }]}>
               <Feather name="plus" size={16} color="#FFFFFF" />
-              <ThemedText type="small" style={{ color: "#FFFFFF", marginLeft: Spacing.xs }}>{t.common.add || "Add"}</ThemedText>
+              <ThemedText type="small" style={{ color: "#FFFFFF", marginLeft: Spacing.xs }}>{t.performanceTest?.addDeficiency || "Add"}</ThemedText>
             </Pressable>
           </View>
           
@@ -1367,13 +1374,27 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
               </View>
               {renderInputField(t.performanceTest?.description || "Description", deficiency.description, (v) => updateDeficiency(deficiency.id, "description", v), { multiline: true })}
               {renderInputField(t.performanceTest?.recommendedAction || "Recommended Action", deficiency.recommendedAction, (v) => updateDeficiency(deficiency.id, "recommendedAction", v))}
-              {renderInputField(t.performanceTest?.targetDate || "Target Completion Date", deficiency.targetCompletionDate, (v) => updateDeficiency(deficiency.id, "targetCompletionDate", v))}
+              <View style={styles.fieldContainer}>
+                <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.targetDate || "Target Completion Date"}</ThemedText>
+                <DatePickerField
+                  value={deficiency.targetCompletionDate}
+                  onChange={(v) => updateDeficiency(deficiency.id, "targetCompletionDate", v)}
+                  placeholder={t.performanceTest?.targetDate || "Target Completion Date"}
+                />
+              </View>
             </View>
           ))}
           
           <Spacer height={Spacing.lg} />
           {renderInputField(t.performanceTest?.recommendedMaintenance || "Recommended Maintenance Actions", test.observationsDeficiencies?.recommendedMaintenanceActions || "", (v) => updateObservations("recommendedMaintenanceActions", v), { multiline: true })}
-          {renderInputField(t.performanceTest?.nextTestDue || "Next Test Due Date", test.observationsDeficiencies?.nextTestDueDate || "", (v) => updateObservations("nextTestDueDate", v))}
+          <View style={styles.fieldContainer}>
+            <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.nextTestDue || "Next Test Due Date"}</ThemedText>
+            <DatePickerField
+              value={test.observationsDeficiencies?.nextTestDueDate || ""}
+              onChange={(v) => updateObservations("nextTestDueDate", v)}
+              placeholder={t.performanceTest?.nextTestDue || "Next Test Due Date"}
+            />
+          </View>
         </SectionCard>
 
         <Spacer height={Spacing.md} />
@@ -1389,13 +1410,20 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
             onSelect={handleInspectorSelect}
             placeholder={t.performanceTest?.selectInspector || "Select Inspector"}
             title={t.performanceTest?.selectInspector || "Select Inspector"}
-            emptyText={t.appUsers?.noResults || "No inspectors found"}
+            emptyText="No inspectors found"
           />
           <Spacer height={Spacing.lg} />
           {renderInputField(t.performanceTest?.name || "Name", test.signatures?.conductedBy.name || "", (v) => updateConductedBySignature("name", v))}
           {renderInputField(t.performanceTest?.titleField || "Title", test.signatures?.conductedBy.title || "", (v) => updateConductedBySignature("title", v))}
           {renderInputField(t.performanceTest?.company || "Company", test.signatures?.conductedBy.company || "", (v) => updateConductedBySignature("company", v))}
-          {renderInputField(t.performanceTest?.date || "Date", test.signatures?.conductedBy.date || "", (v) => updateConductedBySignature("date", v))}
+          <View style={styles.fieldContainer}>
+            <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.date || "Date"}</ThemedText>
+            <DatePickerField
+              value={test.signatures?.conductedBy.date || ""}
+              onChange={(v) => updateConductedBySignature("date", v)}
+              placeholder={t.performanceTest?.date || "Date"}
+            />
+          </View>
           
           <Spacer height={Spacing.md} />
           <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.signature || "Signature"}</ThemedText>
