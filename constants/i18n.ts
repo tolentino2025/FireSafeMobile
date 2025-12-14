@@ -78,7 +78,7 @@ export const translations = {
       standpipe: "Standpipe e Mangueiras",
       electricPump: "Bomba Elétrica",
       dieselPump: "Bomba Diesel",
-      performanceTest: "Teste de Performance Anual",
+      performanceTest: "Teste Anual - Bomba Elétrica",
       dieselPerformanceTest: "Teste Anual Bomba Diesel",
     },
     form: {
@@ -1875,7 +1875,7 @@ export const translations = {
       notRegistered: "Não cadastrado",
     },
     performanceTest: {
-      title: "Teste de Performance Anual - Bomba de Incêndio",
+      title: "Teste de Performance Anual - Bomba Elétrica",
       subtitle: "Formulário em Conformidade com NFPA 25",
       sections: {
         contractor: "1. Informações da Prestadora",
@@ -2317,7 +2317,7 @@ export const translations = {
       standpipe: "Standpipe & Hose",
       electricPump: "Electric Pump",
       dieselPump: "Diesel Pump",
-      performanceTest: "Annual Performance Test",
+      performanceTest: "Annual Test - Electric Pump",
       dieselPerformanceTest: "Diesel Pump Annual Test",
     },
     form: {
@@ -4114,7 +4114,7 @@ export const translations = {
       notRegistered: "Not registered",
     },
     performanceTest: {
-      title: "Fire Pump Annual Performance Test",
+      title: "Annual Performance Test - Electric Pump",
       subtitle: "NFPA 25 Compliant Test Form",
       sections: {
         contractor: "1. Contractor Information",
