@@ -130,16 +130,30 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
 
   const [test, setTest] = useState<Partial<DieselPerformanceTest>>(() => createEmptyDieselPerformanceTest());
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedPumpId, setSelectedPumpId] = useState<string>("");
+  const [selectedInspectorId, setSelectedInspectorId] = useState<string>("");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const dieselPumps = firePumps.filter(p => p.type === "diesel_main");
   const inspectors = appUsers;
+
+  const restoreSelectedIds = (testData: Partial<DieselPerformanceTest>) => {
+    if (testData.pumpEquipment?.pumpTag) {
+      const pump = dieselPumps.find(p => p.tag === testData.pumpEquipment?.pumpTag);
+      if (pump) setSelectedPumpId(pump.id);
+    }
+    if (testData.signatures?.conductedBy?.name) {
+      const inspector = inspectors.find(i => i.name === testData.signatures?.conductedBy?.name);
+      if (inspector) setSelectedInspectorId(inspector.id);
+    }
+  };
 
   useEffect(() => {
     if (testId) {
       const existingTest = getDieselPerformanceTestById(testId);
       if (existingTest) {
         setTest(existingTest);
+        restoreSelectedIds(existingTest);
         return;
       }
     }
@@ -171,6 +185,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         const parsedDraft = JSON.parse(data);
         activeDraftKeyRef.current = key;
         setTest(parsedDraft);
+        restoreSelectedIds(parsedDraft);
       } else {
         activeDraftKeyRef.current = key;
       }
@@ -242,6 +257,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const handlePumpSelect = (pumpId: string) => {
     const pump = dieselPumps.find(p => p.id === pumpId);
     if (pump) {
+      setSelectedPumpId(pumpId);
       setTest(prev => ({
         ...prev,
         pumpEquipment: {
@@ -267,6 +283,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const handleInspectorSelect = (inspectorId: string) => {
     const inspector = inspectors.find(i => i.id === inspectorId);
     if (inspector) {
+      setSelectedInspectorId(inspectorId);
       setTest(prev => ({
         ...prev,
         signatures: {
@@ -717,7 +734,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           <SelectPicker
             title={dt?.selectDieselPump || "Select Diesel Pump"}
             options={dieselPumpOptions}
-            selectedId=""
+            selectedId={selectedPumpId}
             onSelect={handlePumpSelect}
             placeholder={dt?.selectDieselPump || "Select Diesel Pump"}
           />
@@ -725,7 +742,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           <SelectPicker
             title={t.performanceTest?.selectInspector || "Select Inspector"}
             options={inspectorOptions}
-            selectedId=""
+            selectedId={selectedInspectorId}
             onSelect={handleInspectorSelect}
             placeholder={t.performanceTest?.selectInspector || "Select Inspector"}
           />
