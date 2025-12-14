@@ -8,6 +8,11 @@
     "scheme": "firesafeitm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#DC2626"
+    },
     "description": "Professional fire protection systems inspection app following NFPA 25 standards. Manage inspections, generate PDF reports, and track maintenance schedules.",
     "githubUrl": "https://github.com/firesafe-itm",
     "ios": {
