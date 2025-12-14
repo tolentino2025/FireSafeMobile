@@ -2026,6 +2026,8 @@ export const translations = {
       ratedFlowTest: "Teste de Vazão Nominal",
       peakFlowTest: "Teste de Vazão Máxima",
       readings: "Leituras",
+      testReadings: "Leituras do Teste",
+      readingsHelp: "Insira as leituras em cada percentual de vazão",
       addReading: "Adicionar Leitura",
       gpm: "GPM",
       psi: "PSI",
