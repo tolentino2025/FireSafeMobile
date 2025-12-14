@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Pressable, StyleSheet, Platform, Modal } from "react-native";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
@@ -18,6 +18,7 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
   const { fullTheme } = useTheme();
   const { language } = useLanguage();
   const [showPicker, setShowPicker] = useState(false);
+  const [tempDate, setTempDate] = useState<Date>(new Date());
 
   const parseDate = (dateStr: string): Date => {
     if (!dateStr) return new Date();
@@ -41,21 +42,31 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
     return date.toLocaleDateString("en-US");
   };
 
-  const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === "android") {
-      setShowPicker(false);
+  useEffect(() => {
+    if (showPicker) {
+      setTempDate(parseDate(value));
     }
+  }, [showPicker, value]);
+
+  const handleDateChangeAndroid = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    setShowPicker(false);
     if (event.type === "set" && selectedDate) {
       onChange(formatDate(selectedDate));
-      if (Platform.OS === "ios") {
-        setShowPicker(false);
-      }
-    } else if (event.type === "dismissed") {
-      setShowPicker(false);
+    }
+  };
+
+  const handleDateChangeIOS = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (selectedDate) {
+      setTempDate(selectedDate);
     }
   };
 
   const handleConfirmIOS = () => {
+    onChange(formatDate(tempDate));
+    setShowPicker(false);
+  };
+
+  const handleCancelIOS = () => {
     setShowPicker(false);
   };
 
@@ -124,7 +135,7 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
           value={parseDate(value)}
           mode="date"
           display="default"
-          onChange={handleDateChange}
+          onChange={handleDateChangeAndroid}
         />
       ) : null}
 
@@ -133,7 +144,7 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
           transparent
           animationType="slide"
           visible={showPicker}
-          onRequestClose={() => setShowPicker(false)}
+          onRequestClose={handleCancelIOS}
         >
           <View style={styles.modalOverlay}>
             <View
@@ -143,7 +154,7 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
               ]}
             >
               <View style={styles.modalHeader}>
-                <Pressable onPress={() => setShowPicker(false)}>
+                <Pressable onPress={handleCancelIOS}>
                   <ThemedText type="body" style={{ color: fullTheme.colors.primary }}>
                     {language === "pt-BR" ? "Cancelar" : "Cancel"}
                   </ThemedText>
@@ -155,10 +166,10 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
                 </Pressable>
               </View>
               <DateTimePicker
-                value={parseDate(value)}
+                value={tempDate}
                 mode="date"
                 display="spinner"
-                onChange={handleDateChange}
+                onChange={handleDateChangeIOS}
                 style={styles.iosPicker}
               />
             </View>
