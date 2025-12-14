@@ -468,13 +468,13 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedFirePumps) {
         setFirePumps(JSON.parse(storedFirePumps));
-      } else if (shouldLoadSampleData) {
+      } else {
         await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(sampleFirePumps));
         setFirePumps(sampleFirePumps);
       }
       if (storedFirePumpPanels) {
         setFirePumpPanels(JSON.parse(storedFirePumpPanels));
-      } else if (shouldLoadSampleData) {
+      } else {
         await AsyncStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(sampleFirePumpPanels));
         setFirePumpPanels(sampleFirePumpPanels);
       }
@@ -483,7 +483,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedContractors) {
         setContractors(JSON.parse(storedContractors));
-      } else if (shouldLoadSampleData) {
+      } else {
         await AsyncStorage.setItem(CONTRACTORS_KEY, JSON.stringify(sampleContractors));
         setContractors(sampleContractors);
       }
