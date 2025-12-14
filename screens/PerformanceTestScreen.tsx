@@ -42,7 +42,7 @@ type PerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "Pe
 interface SectionCardProps {
   title: string;
   children: React.ReactNode;
-  sectionRef?: React.RefObject<View>;
+  sectionRef?: React.RefObject<View | null>;
 }
 
 function SectionCard({ title, children, sectionRef }: SectionCardProps) {
@@ -329,10 +329,21 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         },
         driverInfo: {
           ...prev.driverInfo!,
-          driverType: "electric",
+          driverType: "electric" as const,
           manufacturer: pump.manufacturer || "",
           model: pump.model || "",
+          serialNumber: prev.driverInfo?.serialNumber || "",
           horsePower: pump.powerHP?.toString() || "",
+          ratedRpm: prev.driverInfo && 'ratedRpm' in prev.driverInfo ? prev.driverInfo.ratedRpm : "",
+          ratedVoltage: prev.driverInfo && 'ratedVoltage' in prev.driverInfo ? prev.driverInfo.ratedVoltage : "",
+          phases: prev.driverInfo && 'phases' in prev.driverInfo ? prev.driverInfo.phases : "",
+          hertz: prev.driverInfo && 'hertz' in prev.driverInfo ? prev.driverInfo.hertz : "",
+          fullLoadAmperage: prev.driverInfo && 'fullLoadAmperage' in prev.driverInfo ? prev.driverInfo.fullLoadAmperage : "",
+          lockedRotorAmperage: prev.driverInfo && 'lockedRotorAmperage' in prev.driverInfo ? prev.driverInfo.lockedRotorAmperage : "",
+          serviceFactor: prev.driverInfo && 'serviceFactor' in prev.driverInfo ? prev.driverInfo.serviceFactor : "",
+          enclosureType: prev.driverInfo && 'enclosureType' in prev.driverInfo ? prev.driverInfo.enclosureType : "",
+          insulationClass: prev.driverInfo && 'insulationClass' in prev.driverInfo ? prev.driverInfo.insulationClass : "",
+          frameSize: prev.driverInfo && 'frameSize' in prev.driverInfo ? prev.driverInfo.frameSize : "",
         },
         controllerInfo: {
           ...prev.controllerInfo!,
