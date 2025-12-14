@@ -5,7 +5,6 @@ import {
   LicenseValidationResult,
   validateLicenseKeyCrypto,
   checkLicenseExpiration,
-  createLicenseData,
   getDeviceId,
   activateLicenseWithApi,
   validateLicenseWithApi,
@@ -104,21 +103,20 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
       const deviceId = await getOrCreateDeviceId();
       const apiResult = await activateLicenseWithApi(key, deviceId);
       
-      let newLicenseData: LicenseData;
+      if (apiResult.error === "network_error") {
+        return { success: false, error: "network_error" };
+      }
       
-      if (apiResult.success && apiResult.activatedAt && apiResult.expiresAt) {
-        newLicenseData = {
-          key: key.toUpperCase().trim(),
-          activatedAt: apiResult.activatedAt,
-          expiresAt: apiResult.expiresAt,
-          validityMonths: apiResult.validityMonths || localValidation.validityMonths || 6,
-        };
-      } else if (apiResult.error === "network_error") {
-        const validityMonths = localValidation.validityMonths || 6;
-        newLicenseData = createLicenseData(key, validityMonths);
-      } else {
+      if (!apiResult.success || !apiResult.activatedAt || !apiResult.expiresAt) {
         return { success: false, error: apiResult.error || "activation_failed" };
       }
+      
+      const newLicenseData: LicenseData = {
+        key: key.toUpperCase().trim(),
+        activatedAt: apiResult.activatedAt,
+        expiresAt: apiResult.expiresAt,
+        validityMonths: apiResult.validityMonths || 6,
+      };
       
       await AsyncStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(newLicenseData));
       setLicenseData(newLicenseData);
