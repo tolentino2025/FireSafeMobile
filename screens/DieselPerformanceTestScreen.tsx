@@ -1026,7 +1026,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       </ScreenKeyboardAwareScrollView>
 
       {/* Sticky Bottom Action Bar */}
-      <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.md, bottom: tabBarHeight }]}>
+      <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.lg + insets.bottom, bottom: tabBarHeight + Spacing.sm }]}>
         <Pressable 
           style={[styles.actionButton, { borderColor: fullTheme.colors.border }]}
           onPress={handleSaveDraft}
