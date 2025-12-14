@@ -10,6 +10,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { SelectPicker } from "@/components/SelectPicker";
+import { DatePickerField } from "@/components/DatePickerField";
 import { SignatureCapture } from "@/components/SignatureCapture";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
@@ -822,7 +823,14 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
               {renderInputField(t.performanceTest?.state || "State", test.jobInfo?.state || "", (v) => updateJobInfo("state", v))}
             </View>
           </View>
-          {renderInputField(t.performanceTest?.testDate || "Test Date", test.jobInfo?.testDate || "", (v) => updateJobInfo("testDate", v))}
+          <View style={styles.fieldContainer}>
+            <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.testDate || "Test Date"}</ThemedText>
+            <DatePickerField
+              value={test.jobInfo?.testDate || ""}
+              onChange={(v) => updateJobInfo("testDate", v)}
+              placeholder={t.performanceTest?.testDate || "Test Date"}
+            />
+          </View>
           {renderInputField(t.performanceTest?.testLocation || "Test Location", test.jobInfo?.testLocation || "", (v) => updateJobInfo("testLocation", v))}
           <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.testMethod || "Test Method"}</ThemedText>
           <Spacer height={Spacing.sm} />

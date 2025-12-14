@@ -19,6 +19,7 @@ import { ChecklistItemRow } from "@/components/ChecklistItemRow";
 import { SignatureCapture } from "@/components/SignatureCapture";
 import { PhotoCapture } from "@/components/PhotoCapture";
 import { SelectPicker } from "@/components/SelectPicker";
+import { DatePickerField } from "@/components/DatePickerField";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -479,12 +480,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         <View style={styles.halfField}>
           <ThemedText type="h3">{t.form.date}</ThemedText>
           <Spacer height={Spacing.sm} />
-          <TextInput
-            style={inputStyle}
+          <DatePickerField
             value={date}
-            onChangeText={setDate}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={theme.placeholder}
+            onChange={setDate}
+            placeholder={t.form.date}
           />
         </View>
         <View style={styles.halfField}>

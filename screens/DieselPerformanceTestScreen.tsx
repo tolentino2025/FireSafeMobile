@@ -10,6 +10,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/Button";
 import { SelectPicker } from "@/components/SelectPicker";
+import { DatePickerField } from "@/components/DatePickerField";
 import { SignatureCapture } from "@/components/SignatureCapture";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
@@ -772,11 +773,14 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
             placeholder={t.performanceTest?.selectInspector || "Select Inspector"}
           />
           <Spacer height={Spacing.md} />
-          {renderInputField(
-            t.performanceTest?.testDate || "Test Date",
-            test.jobInfo?.testDate || "",
-            (v) => updateJobInfo("testDate", v)
-          )}
+          <View style={styles.fieldContainer}>
+            <ThemedText type="body" style={styles.fieldLabel}>{t.performanceTest?.testDate || "Test Date"}</ThemedText>
+            <DatePickerField
+              value={test.jobInfo?.testDate || ""}
+              onChange={(v) => updateJobInfo("testDate", v)}
+              placeholder={t.performanceTest?.testDate || "Test Date"}
+            />
+          </View>
         </SectionCard>
 
         <Spacer height={Spacing.md} />
