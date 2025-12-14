@@ -392,6 +392,51 @@ const sampleContractors: Contractor[] = [
   },
 ];
 
+const sampleJobSites: JobSite[] = [
+  {
+    id: "jobsite-1",
+    contractorId: "contractor-1",
+    jobName: "Shopping Center Iguatemi",
+    jobNumber: "SC-2024-001",
+    address: "Av. Brigadeiro Faria Lima, 2232",
+    city: "São Paulo",
+    state: "SP",
+    testLocation: "Casa de Bombas - Subsolo 2",
+    testMethod: "Teste de Performance com Pitot",
+    comments: "Bomba diesel principal - teste anual NFPA 25",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "jobsite-2",
+    contractorId: "contractor-2",
+    jobName: "Hospital Albert Einstein",
+    jobNumber: "HAE-2024-015",
+    address: "Av. Albert Einstein, 627",
+    city: "São Paulo",
+    state: "SP",
+    testLocation: "Casa de Bombas - Térreo",
+    testMethod: "Teste de Performance Completo",
+    comments: "Sistema de sprinklers - teste trimestral",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "jobsite-3",
+    contractorId: "contractor-3",
+    jobName: "Condomínio Edifício Aurora",
+    jobNumber: "CEA-2024-042",
+    address: "Rua das Flores, 500",
+    city: "Belo Horizonte",
+    state: "MG",
+    testLocation: "Reservatório Superior",
+    testMethod: "Teste de Vazão e Pressão",
+    comments: "Bomba jockey e bomba principal elétrica",
+    createdAt: now,
+    updatedAt: now,
+  },
+];
+
 interface InspectionProviderProps {
   children: ReactNode;
 }
@@ -503,6 +548,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedJobSites) {
         setJobSites(JSON.parse(storedJobSites));
+      } else {
+        await AsyncStorage.setItem(JOB_SITES_KEY, JSON.stringify(sampleJobSites));
+        setJobSites(sampleJobSites);
       }
       if (storedDieselTests) {
         setDieselPerformanceTests(JSON.parse(storedDieselTests));
