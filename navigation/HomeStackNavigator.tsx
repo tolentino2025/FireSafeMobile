@@ -6,10 +6,12 @@ import InspectionFormScreen from "@/screens/InspectionFormScreen";
 import InspectionDetailScreen from "@/screens/InspectionDetailScreen";
 import PerformanceTestScreen from "@/screens/PerformanceTestScreen";
 import DieselPerformanceTestScreen from "@/screens/DieselPerformanceTestScreen";
+import PumpCurveChartScreen from "@/screens/PumpCurveChartScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
 import { InspectionType } from "@/contexts/InspectionContext";
+import { DieselTestReading } from "@/types/performanceTest";
 
 export type HomeStackParamList = {
   Home: undefined;
@@ -18,6 +20,7 @@ export type HomeStackParamList = {
   InspectionDetail: { inspectionId: string };
   PerformanceTest: { testId?: string };
   DieselPerformanceTest: { testId?: string };
+  PumpCurveChart: { readings: DieselTestReading[]; pumpTag: string; ratedFlowGpm: string; ratedPressurePsi: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -76,6 +79,15 @@ export default function HomeStackNavigator() {
         options={{
           ...getCommonScreenOptions({ theme, isDark, transparent: false }),
           headerTitle: "Diesel Performance Test",
+        }}
+      />
+      <Stack.Screen
+        name="PumpCurveChart"
+        component={PumpCurveChartScreen}
+        options={{
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+          headerTitle: "Pump Curve",
+          presentation: "modal",
         }}
       />
     </Stack.Navigator>

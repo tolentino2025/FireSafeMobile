@@ -170,12 +170,6 @@ export interface DieselTestReading {
   suctionPsi: string;
   dischargePsi: string;
   netPressurePsi: string;
-  rpm: string;
-  oilPressurePsi: string;
-  exhaustBackPressureInHg: string;
-  dieselWaterTempF: string;
-  coolingLoopPressurePsi: string;
-  observations: string;
 }
 
 export interface DieselBatteryInfo {
@@ -245,12 +239,6 @@ export function createEmptyDieselTestReading(id: string, flowPercent: string): D
     suctionPsi: "",
     dischargePsi: "",
     netPressurePsi: "",
-    rpm: "",
-    oilPressurePsi: "",
-    exhaustBackPressureInHg: "",
-    dieselWaterTempF: "",
-    coolingLoopPressurePsi: "",
-    observations: "",
   };
 }
 
@@ -374,9 +362,6 @@ export function createEmptyDieselPerformanceTest(): Partial<DieselPerformanceTes
       createEmptyDieselTestReading("5", "100"),
       createEmptyDieselTestReading("6", "125"),
       createEmptyDieselTestReading("7", "150"),
-      createEmptyDieselTestReading("8", "0"),
-      createEmptyDieselTestReading("9", "100"),
-      createEmptyDieselTestReading("10", "150"),
     ],
     verificationItems: [],
     multiplePumpOperation: {

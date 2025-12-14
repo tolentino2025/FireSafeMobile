@@ -627,7 +627,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
           value={reading.suctionPsi}
           onChangeText={(v) => updateDieselReading(reading.id, "suctionPsi", v)}
-          placeholder={t.performanceTest?.suction || "Suction"}
+          placeholder={t.performanceTest?.suction || "Suction PSI"}
           placeholderTextColor={fullTheme.colors.placeholder}
           keyboardType="numeric"
         />
@@ -635,73 +635,46 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
           value={reading.dischargePsi}
           onChangeText={(v) => updateDieselReading(reading.id, "dischargePsi", v)}
-          placeholder={t.performanceTest?.discharge || "Discharge"}
+          placeholder={t.performanceTest?.discharge || "Discharge PSI"}
           placeholderTextColor={fullTheme.colors.placeholder}
           keyboardType="numeric"
         />
-        <ThemedText type="small" style={styles.readingNetPressure}>
-          {reading.netPressurePsi || "-"}
-        </ThemedText>
+        <View style={styles.netPressureContainer}>
+          <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary }}>
+            {t.performanceTest?.netPressure || "Net"}
+          </ThemedText>
+          <ThemedText type="body" style={styles.readingNetPressure}>
+            {reading.netPressurePsi || "-"}
+          </ThemedText>
+        </View>
       </View>
-      <Spacer height={Spacing.sm} />
-      <View style={styles.readingInputs}>
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.rpm}
-          onChangeText={(v) => updateDieselReading(reading.id, "rpm", v)}
-          placeholder="RPM"
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.oilPressurePsi}
-          onChangeText={(v) => updateDieselReading(reading.id, "oilPressurePsi", v)}
-          placeholder={dt?.oilPressure || "Oil PSI"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.exhaustBackPressureInHg}
-          onChangeText={(v) => updateDieselReading(reading.id, "exhaustBackPressureInHg", v)}
-          placeholder={dt?.exhaustBackPressure || "Exhaust"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.dieselWaterTempF}
-          onChangeText={(v) => updateDieselReading(reading.id, "dieselWaterTempF", v)}
-          placeholder={dt?.dieselWaterTemp || "Water Temp"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-      </View>
-      <Spacer height={Spacing.sm} />
-      <View style={styles.readingInputs}>
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary, flex: 1 }]}
-          value={reading.coolingLoopPressurePsi}
-          onChangeText={(v) => updateDieselReading(reading.id, "coolingLoopPressurePsi", v)}
-          placeholder={dt?.coolingLoopPressure || "Cooling Loop PSI"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-      </View>
-      <Spacer height={Spacing.sm} />
-      <TextInput
-        style={[styles.input, styles.textArea, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-        value={reading.observations}
-        onChangeText={(v) => updateDieselReading(reading.id, "observations", v)}
-        placeholder={t.performanceTest?.observations || "Observations"}
-        placeholderTextColor={fullTheme.colors.placeholder}
-        multiline
-        numberOfLines={2}
-        textAlignVertical="top"
-      />
     </View>
   );
+
+  const handleGeneratePumpCurve = () => {
+    const validReadings = test.dieselReadings?.filter(r => 
+      r.flowGpm && r.netPressurePsi && !isNaN(parseFloat(r.flowGpm)) && !isNaN(parseFloat(r.netPressurePsi))
+    ) || [];
+    
+    if (validReadings.length < 2) {
+      Alert.alert(
+        t.performanceTest?.pumpCurve?.insufficientData || "Insufficient Data",
+        t.performanceTest?.pumpCurve?.needMoreReadings || "Please enter at least 2 complete readings (Flow GPM, Suction PSI, Discharge PSI) to generate the pump curve."
+      );
+      return;
+    }
+
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    navigation.navigate("PumpCurveChart", {
+      readings: validReadings,
+      pumpTag: test.pumpEquipment?.pumpTag || "",
+      ratedFlowGpm: test.pumpEquipment?.ratedFlowGpm || "",
+      ratedPressurePsi: test.pumpEquipment?.ratedPressurePsi || "",
+    });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: fullTheme.colors.background }}>
@@ -848,13 +821,51 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
 
         {/* Section 8: Test Conditions & Readings */}
         <SectionCard title={dt?.sections?.readings || "8. Test Conditions & Readings"}>
-          <ThemedText type="body" style={[styles.fieldLabel, { marginBottom: Spacing.sm }]}>
-            {"Test Readings (GPM / Suction PSI / Discharge PSI / Net PSI)"}
-          </ThemedText>
-          <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, marginBottom: Spacing.md }}>
-            {"RPM / Oil Pressure (PSI) / Exhaust (in. Hg) / Water Temp (F)"}
-          </ThemedText>
+          <View style={styles.readingsHeader}>
+            <View style={styles.readingsHeaderItem}>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                {t.performanceTest?.flow || "Flow"}
+              </ThemedText>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                (GPM)
+              </ThemedText>
+            </View>
+            <View style={styles.readingsHeaderItem}>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                {t.performanceTest?.suction || "Suction"}
+              </ThemedText>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                (PSI)
+              </ThemedText>
+            </View>
+            <View style={styles.readingsHeaderItem}>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                {t.performanceTest?.discharge || "Discharge"}
+              </ThemedText>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                (PSI)
+              </ThemedText>
+            </View>
+            <View style={styles.readingsHeaderItem}>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                {t.performanceTest?.netPressure || "Net"}
+              </ThemedText>
+              <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary, textAlign: "center" }}>
+                (PSI)
+              </ThemedText>
+            </View>
+          </View>
           {test.dieselReadings?.map(reading => renderDieselReadingRow(reading))}
+          <Spacer height={Spacing.lg} />
+          <Pressable 
+            style={[styles.pumpCurveButton, { backgroundColor: fullTheme.colors.primary }]}
+            onPress={handleGeneratePumpCurve}
+          >
+            <Feather name="trending-up" size={20} color="#FFFFFF" />
+            <ThemedText type="body" style={{ color: "#FFFFFF", marginLeft: Spacing.sm, fontWeight: "600" }}>
+              {t.performanceTest?.pumpCurve?.generateCurve || "Generate Pump Curve"}
+            </ThemedText>
+          </Pressable>
         </SectionCard>
 
         <Spacer height={Spacing.md} />
@@ -1120,8 +1131,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   readingNetPressure: {
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  netPressureContainer: {
     width: 50,
-    textAlign: "right",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  readingsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingBottom: Spacing.sm,
+    marginBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  readingsHeaderItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  pumpCurveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
   },
   resultRow: {
     flexDirection: "row",
