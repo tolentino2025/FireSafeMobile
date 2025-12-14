@@ -19,7 +19,7 @@ type JobSiteFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "
 
 export default function JobSiteFormScreen({ navigation, route }: JobSiteFormScreenProps) {
   const { jobSiteId, contractorId: routeContractorId } = route.params || {};
-  const { theme } = useTheme();
+  const { theme, fullTheme } = useTheme();
   const { t } = useLanguage();
   const { jobSites, contractors, addJobSite, updateJobSite } = useInspections();
 

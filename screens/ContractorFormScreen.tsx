@@ -18,7 +18,7 @@ type ContractorFormScreenProps = NativeStackScreenProps<PropertiesStackParamList
 
 export default function ContractorFormScreen({ navigation, route }: ContractorFormScreenProps) {
   const { contractorId } = route.params || {};
-  const { theme } = useTheme();
+  const { theme, fullTheme } = useTheme();
   const { t } = useLanguage();
   const { contractors, addContractor, updateContractor } = useInspections();
 

@@ -18,7 +18,7 @@ type CompanyFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "
 
 export default function CompanyFormScreen({ navigation, route }: CompanyFormScreenProps) {
   const { companyId } = route.params || {};
-  const { theme } = useTheme();
+  const { theme, fullTheme } = useTheme();
   const { t } = useLanguage();
   const { companies, addCompany, updateCompany } = useInspections();
 

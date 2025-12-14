@@ -18,7 +18,7 @@ type PropertyFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, 
 
 export default function PropertyFormScreen({ navigation, route }: PropertyFormScreenProps) {
   const { mode, propertyId, companyId } = route.params;
-  const { theme } = useTheme();
+  const { theme, fullTheme } = useTheme();
   const { t } = useLanguage();
   const {
     properties,

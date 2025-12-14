@@ -18,7 +18,7 @@ type UserFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "Use
 
 export default function UserFormScreen({ navigation, route }: UserFormScreenProps) {
   const { userId } = route.params || {};
-  const { theme } = useTheme();
+  const { theme, fullTheme } = useTheme();
   const { t } = useLanguage();
   const { appUsers, addAppUser, updateAppUser } = useInspections();
 
