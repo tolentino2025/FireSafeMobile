@@ -134,7 +134,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getPanelsByPump } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -553,6 +553,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       return;
     }
 
+    setIsSaving(true);
     try {
       const finalTest: PerformanceTest = {
         ...test as PerformanceTest,
@@ -560,7 +561,18 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         updatedAt: new Date().toISOString(),
       };
       
+      const existingTest = getElectricPerformanceTestById(finalTest.id);
+      if (existingTest) {
+        await updateElectricPerformanceTest(finalTest.id, finalTest);
+      } else {
+        await addElectricPerformanceTest(finalTest);
+      }
+      
       await clearDraft();
+      
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
       
       Alert.alert(
         t.common.success || "Success",
@@ -570,6 +582,8 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     } catch (error) {
       console.error("Error saving performance test:", error);
       Alert.alert(t.common.error, t.performanceTest?.saveError || "Error saving test");
+    } finally {
+      setIsSaving(false);
     }
   };
 
