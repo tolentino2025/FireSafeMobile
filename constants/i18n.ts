@@ -2226,6 +2226,8 @@ export const translations = {
       dieselPerformanceTest: {
         title: "Teste de Performance Anual - Bomba Diesel",
         subtitle: "Motor Diesel - Conforme NFPA 25",
+        selectCompany: "Selecionar Empresa",
+        selectCompanyFirst: "Selecione uma empresa primeiro",
         selectDieselPump: "Selecionar Bomba Diesel",
         selectElectricPump: "Selecionar Bomba Elétrica",
         summaryHeader: "Resumo da Seleção",
@@ -4641,6 +4643,8 @@ export const translations = {
       dieselPerformanceTest: {
         title: "Fire Pump Annual Performance Test - Diesel Engine",
         subtitle: "Diesel Engine - Per NFPA 25",
+        selectCompany: "Select Company",
+        selectCompanyFirst: "Select a company first",
         selectDieselPump: "Select Diesel Pump",
         selectElectricPump: "Select Electric Pump",
         summaryHeader: "Selection Summary",

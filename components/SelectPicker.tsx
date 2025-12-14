@@ -22,6 +22,7 @@ interface SelectPickerProps {
   placeholder: string;
   title: string;
   emptyText?: string;
+  disabled?: boolean;
 }
 
 export function SelectPicker({
@@ -31,6 +32,7 @@ export function SelectPicker({
   placeholder,
   title,
   emptyText = "No options available",
+  disabled = false,
 }: SelectPickerProps) {
   const { fullTheme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -39,6 +41,7 @@ export function SelectPicker({
   const selectedOption = options.find((opt) => opt.id === selectedId);
 
   const handleOpen = () => {
+    if (disabled) return;
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -86,7 +89,8 @@ export function SelectPicker({
           styles.picker,
           { 
             backgroundColor: fullTheme.colors.inputBackground, 
-            borderColor: fullTheme.colors.border 
+            borderColor: fullTheme.colors.border,
+            opacity: disabled ? 0.5 : 1,
           },
         ]}
       >

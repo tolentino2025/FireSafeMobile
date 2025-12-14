@@ -128,7 +128,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -136,9 +136,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const [isSaving, setIsSaving] = useState(false);
   const [selectedPumpId, setSelectedPumpId] = useState<string>("");
   const [selectedInspectorId, setSelectedInspectorId] = useState<string>("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const dieselPumps = firePumps.filter(p => p.type === "diesel_main");
+  const allDieselPumps = firePumps.filter(p => p.type === "diesel_main");
+  const dieselPumps = selectedCompanyId 
+    ? allDieselPumps.filter(p => p.companyId === selectedCompanyId)
+    : allDieselPumps;
   const inspectors = appUsers;
 
   const restoreSelectedIds = (testData: Partial<DieselPerformanceTest>) => {
@@ -216,6 +220,24 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     } catch (error) {
       console.error("Error clearing draft:", error);
     }
+  };
+
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    setSelectedPumpId("");
+    setTest(prev => ({
+      ...prev,
+      pumpEquipment: {
+        ...prev.pumpEquipment!,
+        pumpTag: "",
+        manufacturer: "",
+        model: "",
+        serialNumber: "",
+        ratedFlowGpm: "",
+        ratedPressurePsi: "",
+        ratedSpeedRpm: "",
+      },
+    }));
   };
 
   const handleContractorSelect = (contractorId: string) => {
@@ -550,6 +572,12 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
 
   const dt = t.performanceTest?.dieselPerformanceTest;
 
+  const companyOptions = companies.map(c => ({
+    id: c.id,
+    label: c.name,
+    sublabel: `${c.city}, ${c.state}`,
+  }));
+
   const contractorOptions = contractors.map(c => ({
     id: c.id,
     label: c.name,
@@ -758,11 +786,20 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           />
           <Spacer height={Spacing.md} />
           <SelectPicker
+            title={dt?.selectCompany || t.inspection?.selectCompany || "Select Company"}
+            options={companyOptions}
+            selectedId={selectedCompanyId}
+            onSelect={handleCompanySelect}
+            placeholder={dt?.selectCompany || t.inspection?.selectCompany || "Select Company"}
+          />
+          <Spacer height={Spacing.md} />
+          <SelectPicker
             title={dt?.selectDieselPump || "Select Diesel Pump"}
             options={dieselPumpOptions}
             selectedId={selectedPumpId}
             onSelect={handlePumpSelect}
-            placeholder={dt?.selectDieselPump || "Select Diesel Pump"}
+            placeholder={selectedCompanyId ? (dt?.selectDieselPump || "Select Diesel Pump") : (dt?.selectCompanyFirst || "Select a company first")}
+            disabled={!selectedCompanyId}
           />
           <Spacer height={Spacing.md} />
           <SelectPicker
