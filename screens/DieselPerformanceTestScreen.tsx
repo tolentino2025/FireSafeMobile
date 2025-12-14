@@ -125,7 +125,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getFirePumpPanelsByPumpId } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump } = useInspections();
   const insets = useSafeAreaInsets();
 
   const [test, setTest] = useState<Partial<DieselPerformanceTest>>(() => createEmptyDieselPerformanceTest());
@@ -258,7 +258,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     const pump = dieselPumps.find(p => p.id === pumpId);
     if (pump) {
       setSelectedPumpId(pumpId);
-      const panels = getFirePumpPanelsByPumpId(pumpId);
+      const panels = getPanelsByPump(pumpId);
       const panel = panels.length > 0 ? panels[0] : null;
       setTest(prev => ({
         ...prev,
