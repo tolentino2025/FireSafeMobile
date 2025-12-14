@@ -6,6 +6,9 @@ import {
   validateLicenseKeyCrypto,
   checkLicenseExpiration,
   createLicenseData,
+  getDeviceId,
+  activateLicenseWithApi,
+  validateLicenseWithApi,
 } from "@/utils/licenseUtils";
 import {
   scheduleLicenseExpirationReminders,
@@ -13,6 +16,7 @@ import {
 } from "@/utils/notifications";
 
 const LICENSE_STORAGE_KEY = "@firesafe_license";
+const DEVICE_ID_KEY = "@firesafe_device_id";
 
 interface LicenseContextType {
   licenseData: LicenseData | null;
@@ -41,8 +45,27 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
       if (storedLicense) {
         const data: LicenseData = JSON.parse(storedLicense);
         setLicenseData(data);
-        const status = checkLicenseExpiration(data);
-        setLicenseStatus(status);
+        const localStatus = checkLicenseExpiration(data);
+        setLicenseStatus(localStatus);
+        
+        const deviceId = await getOrCreateDeviceId();
+        const serverResult = await validateLicenseWithApi(data.key, deviceId);
+        
+        if (serverResult.success && serverResult.expiresAt) {
+          const updatedData: LicenseData = {
+            ...data,
+            expiresAt: serverResult.expiresAt,
+            activatedAt: serverResult.activatedAt || data.activatedAt,
+          };
+          await AsyncStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(updatedData));
+          setLicenseData(updatedData);
+          const serverStatus = checkLicenseExpiration(updatedData);
+          setLicenseStatus(serverStatus);
+        } else if (serverResult.error && serverResult.error !== "network_error") {
+          await AsyncStorage.removeItem(LICENSE_STORAGE_KEY);
+          setLicenseData(null);
+          setLicenseStatus(null);
+        }
       } else {
         setLicenseData(null);
         setLicenseStatus(null);
@@ -55,17 +78,48 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   };
+  
+  const getOrCreateDeviceId = async (): Promise<string> => {
+    try {
+      const storedDeviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
+      if (storedDeviceId) return storedDeviceId;
+      
+      const newDeviceId = await getDeviceId();
+      await AsyncStorage.setItem(DEVICE_ID_KEY, newDeviceId);
+      return newDeviceId;
+    } catch (error) {
+      console.error("Error getting device ID:", error);
+      return `fallback-${Math.random().toString(36).substring(2, 15)}`;
+    }
+  };
 
   const activateLicense = async (key: string, language: "en" | "pt-BR" = "pt-BR"): Promise<{ success: boolean; error?: string }> => {
-    const validationResult = validateLicenseKeyCrypto(key);
+    const localValidation = validateLicenseKeyCrypto(key);
     
-    if (!validationResult.valid) {
-      return { success: false, error: validationResult.error || "invalid_key" };
+    if (!localValidation.valid) {
+      return { success: false, error: localValidation.error || "invalid_key" };
     }
 
     try {
-      const validityMonths = validationResult.validityMonths || 6;
-      const newLicenseData = createLicenseData(key, validityMonths);
+      const deviceId = await getOrCreateDeviceId();
+      const apiResult = await activateLicenseWithApi(key, deviceId);
+      
+      let newLicenseData: LicenseData;
+      
+      if (apiResult.success && apiResult.activatedAt && apiResult.expiresAt) {
+        newLicenseData = {
+          key: key.toUpperCase().trim(),
+          activatedAt: apiResult.activatedAt,
+          expiresAt: apiResult.expiresAt,
+          validityMonths: apiResult.validityMonths || localValidation.validityMonths || 6,
+        };
+      } else if (apiResult.error === "network_error") {
+        const validityMonths = localValidation.validityMonths || 6;
+        newLicenseData = createLicenseData(key, validityMonths);
+      } else {
+        return { success: false, error: apiResult.error || "activation_failed" };
+      }
+      
       await AsyncStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(newLicenseData));
       setLicenseData(newLicenseData);
       const status = checkLicenseExpiration(newLicenseData);

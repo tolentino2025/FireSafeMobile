@@ -1,6 +1,14 @@
+import * as Application from "expo-application";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
+
 const LICENSE_PREFIX = "FIRE";
 const SECRET_KEY = "FIRESAFE_ITM_LICENSE_SECRET_2025_NFPA25";
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+const LICENSE_API_URL = __DEV__ 
+  ? "https://firesafe-itm-mauromelo.replit.app/api"
+  : "https://firesafe-itm-mauromelo.replit.app/api";
 
 export interface LicenseData {
   key: string;
@@ -200,4 +208,121 @@ export function createLicenseData(key: string, validityMonths: number = 6): Lice
     expiresAt: expiresAt.toISOString(),
     validityMonths,
   };
+}
+
+export async function getDeviceId(): Promise<string> {
+  try {
+    if (Platform.OS === "ios") {
+      const iosId = await Application.getIosIdForVendorAsync();
+      if (iosId) return iosId;
+    }
+    
+    if (Platform.OS === "android") {
+      const androidId = Application.androidId;
+      if (androidId) return androidId;
+    }
+    
+    const deviceName = Device.deviceName || "unknown";
+    const brand = Device.brand || "unknown";
+    const model = Device.modelName || "unknown";
+    const osVersion = Device.osVersion || "unknown";
+    const fallbackId = `${brand}-${model}-${deviceName}-${osVersion}`.replace(/\s/g, "_");
+    
+    if (fallbackId !== "unknown-unknown-unknown-unknown") {
+      return fallbackId;
+    }
+    
+    return `web-${Math.random().toString(36).substring(2, 15)}`;
+  } catch (error) {
+    console.error("Error getting device ID:", error);
+    return `web-${Math.random().toString(36).substring(2, 15)}`;
+  }
+}
+
+export interface ApiActivationResult {
+  success: boolean;
+  validityMonths?: number;
+  activatedAt?: string;
+  expiresAt?: string;
+  error?: string;
+}
+
+export async function activateLicenseWithApi(
+  licenseKey: string,
+  deviceId: string
+): Promise<ApiActivationResult> {
+  try {
+    const response = await fetch(`${LICENSE_API_URL}/license/activate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        licenseKey: licenseKey.toUpperCase().trim(),
+        deviceId,
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok || !data.success) {
+      return {
+        success: false,
+        error: data.error || "activation_failed",
+      };
+    }
+    
+    return {
+      success: true,
+      validityMonths: data.validityMonths,
+      activatedAt: data.activatedAt,
+      expiresAt: data.expiresAt,
+    };
+  } catch (error) {
+    console.error("API activation error:", error);
+    return {
+      success: false,
+      error: "network_error",
+    };
+  }
+}
+
+export async function validateLicenseWithApi(
+  licenseKey: string,
+  deviceId: string
+): Promise<ApiActivationResult> {
+  try {
+    const response = await fetch(`${LICENSE_API_URL}/license/validate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        licenseKey: licenseKey.toUpperCase().trim(),
+        deviceId,
+      }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok || !data.success) {
+      return {
+        success: false,
+        error: data.error || "validation_failed",
+      };
+    }
+    
+    return {
+      success: true,
+      validityMonths: data.validityMonths,
+      activatedAt: data.activatedAt,
+      expiresAt: data.expiresAt,
+    };
+  } catch (error) {
+    console.error("API validation error:", error);
+    return {
+      success: false,
+      error: "network_error",
+    };
+  }
 }
