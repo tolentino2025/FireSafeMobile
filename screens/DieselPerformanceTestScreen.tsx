@@ -27,6 +27,7 @@ import {
 } from "@/types/performanceTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { generateDieselPumpPdf } from "@/utils/performanceTestPdfGenerator";
 
 type DieselPerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "DieselPerformanceTest">;
 
@@ -125,7 +126,7 @@ const AUTO_SAVE_DELAY = 2000;
 export default function DieselPerformanceTestScreen({ navigation, route }: DieselPerformanceTestScreenProps) {
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
@@ -523,14 +524,27 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     }
   };
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    Alert.alert(
-      t.performanceTest?.exportPdf || "Export PDF",
-      t.performanceTest?.exportPdfMessage || "PDF export will be available soon"
-    );
+    
+    try {
+      const result = await generateDieselPumpPdf(test, language);
+      
+      if (!result.success) {
+        Alert.alert(
+          t.common?.error || "Error",
+          result.message || t.performanceTest?.pdfError || "Error generating PDF"
+        );
+      }
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      Alert.alert(
+        t.common?.error || "Error",
+        t.performanceTest?.pdfError || "Error generating PDF"
+      );
+    }
   };
 
   const dt = t.performanceTest?.dieselPerformanceTest;
