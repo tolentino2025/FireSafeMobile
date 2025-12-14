@@ -11,6 +11,8 @@ import Animated, {
   withRepeat,
   withSequence,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -28,6 +30,7 @@ import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { generatePdf } from "@/utils/pdfGenerator";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -35,9 +38,11 @@ const frequencies: InspectionFrequency[] = ["daily", "weekly", "monthly", "quart
 
 export default function InspectionFormScreen({ navigation, route }: InspectionFormScreenProps) {
   const { type, inspectionId } = route.params;
-  const { theme } = useTheme();
+  const { theme, fullTheme } = useTheme();
   const { t, language } = useLanguage();
   const { inspections, addInspection, updateInspection, companies, appUsers, firePumps, firePumpPanels, getFirePumpsByCompany, getPanelsByPump, createOrUpdateScheduleForInspection } = useInspections();
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const existingInspection = inspectionId
     ? inspections.find((i) => i.id === inspectionId)
@@ -65,6 +70,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(existingInspection?.geoLocation || null);
   const [autoSaved, setAutoSaved] = useState(false);
   const [isNewInspection] = useState(!existingInspection);
+  const [isSaving, setIsSaving] = useState(false);
 
   const autoSaveOpacity = useSharedValue(0);
 
@@ -284,6 +290,111 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }
   };
 
+  const handleSaveDraft = async () => {
+    setIsSaving(true);
+    try {
+      const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
+      const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+      const selectedPump = selectedFirePumpId ? firePumps.find((p) => p.id === selectedFirePumpId) : undefined;
+      const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
+
+      const inspectionData: Inspection = {
+        id: existingInspection?.id || Date.now().toString(),
+        type,
+        status: "draft",
+        propertyId: "",
+        propertyName,
+        propertyAddress,
+        propertyPhone,
+        inspectorName,
+        contractNo,
+        date,
+        frequency,
+        checklist,
+        observations,
+        signature,
+        photos,
+        companyId: selectedCompanyId,
+        companyData: selectedCompany,
+        inspectorId: selectedInspectorId,
+        inspectorData: selectedInspector,
+        firePumpId: isPumpInspection ? selectedFirePumpId : undefined,
+        firePumpData: isPumpInspection ? selectedPump : undefined,
+        firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
+        firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
+        geoLocation,
+        createdAt: existingInspection?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (existingInspection) {
+        await updateInspection(existingInspection.id, inspectionData);
+      } else {
+        await addInspection(inspectionData);
+      }
+
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      Alert.alert(
+        t.common.success,
+        t.form.draftSaved || "Rascunho salvo com sucesso"
+      );
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      Alert.alert(t.common.error, t.report.shareError);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
+    const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+    const selectedPump = selectedFirePumpId ? firePumps.find((p) => p.id === selectedFirePumpId) : undefined;
+    const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
+
+    const inspectionData: Inspection = {
+      id: existingInspection?.id || Date.now().toString(),
+      type,
+      status: existingInspection?.status || "draft",
+      propertyId: "",
+      propertyName,
+      propertyAddress,
+      propertyPhone,
+      inspectorName,
+      contractNo,
+      date,
+      frequency,
+      checklist,
+      observations,
+      signature,
+      photos,
+      companyId: selectedCompanyId,
+      companyData: selectedCompany,
+      inspectorId: selectedInspectorId,
+      inspectorData: selectedInspector,
+      firePumpId: isPumpInspection ? selectedFirePumpId : undefined,
+      firePumpData: isPumpInspection ? selectedPump : undefined,
+      firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
+      firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
+      geoLocation,
+      createdAt: existingInspection?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await generatePdf(inspectionData, language as "en" | "pt-BR");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      Alert.alert(t.common.error, t.report.pdfError || "Erro ao gerar PDF");
+    }
+  };
+
   const getTypeKey = (type: InspectionType): keyof typeof t.inspectionTypes => {
     const mapping: Record<InspectionType, keyof typeof t.inspectionTypes> = {
       wet_pipe: "wetPipe",
@@ -338,6 +449,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   ];
 
   return (
+    <>
     <ScreenKeyboardAwareScrollView>
       <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>
         <Feather name="check-circle" size={14} color={AppColors.success} />
@@ -571,12 +683,34 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         onSignatureChange={setSignature}
       />
 
-      <Spacer height={Spacing["3xl"]} />
-
-      <Button onPress={handleSubmit}>{t.form.submit}</Button>
-
-      <Spacer height={Spacing["4xl"]} />
+      <Spacer height={100 + Spacing["4xl"]} />
     </ScreenKeyboardAwareScrollView>
+
+    <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.md, bottom: tabBarHeight }]}>
+      <Pressable
+        onPress={handleSaveDraft}
+        disabled={isSaving}
+        style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+      >
+        <Feather name="save" size={18} color={fullTheme.colors.textPrimary} />
+        <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>{t.form.saveDraft || "Salvar"}</ThemedText>
+      </Pressable>
+      <Pressable
+        onPress={handleSubmit}
+        style={[styles.actionButton, styles.submitButton, { backgroundColor: fullTheme.colors.primary }]}
+      >
+        <Feather name="check-circle" size={18} color="#FFFFFF" />
+        <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: "#FFFFFF" }}>{t.form.submit}</ThemedText>
+      </Pressable>
+      <Pressable
+        onPress={handleExportPdf}
+        style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+      >
+        <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
+        <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
+      </Pressable>
+    </View>
+    </>
   );
 }
 
@@ -614,5 +748,30 @@ const styles = StyleSheet.create({
   textArea: {
     height: 120,
     paddingTop: Spacing.md,
+  },
+  stickyBottomBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    gap: Spacing.sm,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    flex: 1,
+  },
+  submitButton: {
+    borderWidth: 0,
   },
 });
