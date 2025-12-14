@@ -244,6 +244,108 @@ const sampleProperties: Property[] = [
   },
 ];
 
+const sampleFirePumps: FirePump[] = [
+  {
+    id: "pump-1",
+    companyId: "company-1",
+    propertyId: "prop-1",
+    tag: "BCI-01",
+    type: "diesel_main",
+    manufacturer: "Weg",
+    model: "NFP 150-500",
+    serialNumber: "WEG-2023-001234",
+    ratedFlowGpm: 1000,
+    ratedPressurePsi: 125,
+    ratedSpeedRpm: 1750,
+    powerHP: 100,
+    comments: "Bomba principal diesel - Casa de Bombas A",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "pump-2",
+    companyId: "company-1",
+    propertyId: "prop-1",
+    tag: "BCE-01",
+    type: "electric_main",
+    manufacturer: "Weg",
+    model: "NFP 100-400",
+    serialNumber: "WEG-2023-002345",
+    ratedFlowGpm: 750,
+    ratedPressurePsi: 100,
+    ratedSpeedRpm: 1750,
+    powerHP: 75,
+    voltage: "440V",
+    phases: 3,
+    comments: "Bomba principal elétrica - Casa de Bombas A",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "pump-3",
+    companyId: "company-1",
+    propertyId: "prop-1",
+    tag: "BCJ-01",
+    type: "jockey",
+    manufacturer: "Schneider",
+    model: "BC-21R 1.5CV",
+    serialNumber: "SCH-2023-003456",
+    ratedFlowGpm: 20,
+    ratedPressurePsi: 150,
+    ratedSpeedRpm: 3500,
+    powerHP: 2,
+    voltage: "220V",
+    phases: 1,
+    comments: "Bomba Jockey - Manutenção de pressão",
+    createdAt: now,
+    updatedAt: now,
+  },
+];
+
+const sampleFirePumpPanels: FirePumpControlPanel[] = [
+  {
+    id: "panel-1",
+    pumpId: "pump-1",
+    tag: "QCI-01",
+    manufacturer: "Eaton",
+    model: "FD-100D",
+    serialNumber: "EAT-2023-P001",
+    supplyVoltage: "24V DC",
+    startingType: "Partida Direta",
+    hasAutomaticTransfer: true,
+    comments: "Painel de controle bomba diesel - Com ATS integrado",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "panel-2",
+    pumpId: "pump-2",
+    tag: "QCE-01",
+    manufacturer: "Weg",
+    model: "SSW900",
+    serialNumber: "WEG-2023-P002",
+    supplyVoltage: "440V",
+    startingType: "Soft Starter",
+    hasAutomaticTransfer: false,
+    comments: "Painel de controle bomba elétrica - Soft starter",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "panel-3",
+    pumpId: "pump-3",
+    tag: "QCJ-01",
+    manufacturer: "Schneider",
+    model: "ATV320",
+    serialNumber: "SCH-2023-P003",
+    supplyVoltage: "220V",
+    startingType: "Inversor de Frequência",
+    hasAutomaticTransfer: false,
+    comments: "Painel de controle bomba jockey",
+    createdAt: now,
+    updatedAt: now,
+  },
+];
 
 interface InspectionProviderProps {
   children: ReactNode;
@@ -321,9 +423,15 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedFirePumps) {
         setFirePumps(JSON.parse(storedFirePumps));
+      } else if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(sampleFirePumps));
+        setFirePumps(sampleFirePumps);
       }
       if (storedFirePumpPanels) {
         setFirePumpPanels(JSON.parse(storedFirePumpPanels));
+      } else if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(sampleFirePumpPanels));
+        setFirePumpPanels(sampleFirePumpPanels);
       }
       if (storedSchedules) {
         setSchedules(JSON.parse(storedSchedules));
