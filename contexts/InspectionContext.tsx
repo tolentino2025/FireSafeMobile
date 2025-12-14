@@ -467,7 +467,21 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         setAppUsers(sampleAppUsers);
       }
       if (storedFirePumps) {
-        setFirePumps(JSON.parse(storedFirePumps));
+        let parsedFirePumps: FirePump[] = JSON.parse(storedFirePumps);
+        // Migrate pumps without type field - default to electric_main
+        let needsMigration = false;
+        parsedFirePumps = parsedFirePumps.map(pump => {
+          if (!pump.type) {
+            needsMigration = true;
+            return { ...pump, type: "electric_main" as PumpType };
+          }
+          return pump;
+        });
+        if (needsMigration) {
+          await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(parsedFirePumps));
+          console.log("Migrated fire pumps: added missing type field");
+        }
+        setFirePumps(parsedFirePumps);
       } else {
         await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(sampleFirePumps));
         setFirePumps(sampleFirePumps);
