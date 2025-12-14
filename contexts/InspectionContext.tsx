@@ -347,6 +347,51 @@ const sampleFirePumpPanels: FirePumpControlPanel[] = [
   },
 ];
 
+const sampleContractors: Contractor[] = [
+  {
+    id: "contractor-1",
+    name: "FireTech Sistemas de Incêndio Ltda",
+    licenseNumber: "CREA-RJ 2023/12345",
+    address: "Rua das Indústrias, 500 - Galpão 3",
+    city: "Rio de Janeiro",
+    state: "RJ",
+    zipCode: "20940-070",
+    phone: "(21) 3456-7890",
+    fax: "(21) 3456-7891",
+    email: "contato@firetech.com.br",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "contractor-2",
+    name: "Hidra Proteção Contra Incêndio",
+    licenseNumber: "CREA-SP 2022/98765",
+    address: "Av. Industrial, 1200 - Sala 45",
+    city: "São Paulo",
+    state: "SP",
+    zipCode: "04543-011",
+    phone: "(11) 2345-6789",
+    fax: "(11) 2345-6780",
+    email: "comercial@hidraprotecao.com.br",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "contractor-3",
+    name: "SOS Fire Manutenção e Inspeção",
+    licenseNumber: "CREA-MG 2024/54321",
+    address: "Rua dos Bombeiros, 88",
+    city: "Belo Horizonte",
+    state: "MG",
+    zipCode: "30130-000",
+    phone: "(31) 3333-4444",
+    fax: "(31) 3333-4445",
+    email: "atendimento@sosfire.com.br",
+    createdAt: now,
+    updatedAt: now,
+  },
+];
+
 interface InspectionProviderProps {
   children: ReactNode;
 }
@@ -438,6 +483,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedContractors) {
         setContractors(JSON.parse(storedContractors));
+      } else if (shouldLoadSampleData) {
+        await AsyncStorage.setItem(CONTRACTORS_KEY, JSON.stringify(sampleContractors));
+        setContractors(sampleContractors);
       }
       if (storedJobSites) {
         setJobSites(JSON.parse(storedJobSites));
