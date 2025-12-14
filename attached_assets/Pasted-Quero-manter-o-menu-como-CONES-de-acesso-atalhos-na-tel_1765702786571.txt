@@ -1,0 +1,76 @@
+Quero manter o menu como ÍCONES de acesso (atalhos) na tela, mas corrigir a distribuição para NÃO haver sobreposição, corte de texto nem colisão com ícones.
+
+PROBLEMA ATUAL:
+- Ícones e textos estão sobrepostos/cortados.
+- Os “cards/botões” de acesso estão estreitos demais.
+- O texto quebra e invade o ícone ou o espaço do item ao lado.
+
+OBJETIVO (OBRIGATÓRIO):
+Manter o padrão de ÍCONES DE ACESSO (atalhos) visíveis na tela, com distribuição responsiva e legível, SEM rolagem horizontal como “tabs”.
+
+SOLUÇÃO DE LAYOUT (MOBILE-FIRST):
+1) Trocar o container atual por um GRID responsivo de ícones:
+   - Usar grid com colunas adaptativas: 2 colunas no celular pequeno, 3 colunas no celular normal, 4 colunas em telas maiores.
+   - Espaçamento consistente entre itens (gap).
+
+2) Cada item (atalho) deve ser um “tile/card” com:
+   - Altura fixa (ex.: 64–80px) para padronizar.
+   - Ícone centralizado ou alinhado à esquerda (mas SEM colisão).
+   - Texto SEM quebra agressiva e SEM invadir o ícone.
+
+3) Regras para o texto do atalho (para nunca sobrepor):
+   - Permitir no máximo 2 linhas (line clamp 2) OU 1 linha com reticências.
+   - Se 2 linhas: alinhar abaixo do ícone e truncar com reticências ao exceder.
+   - Nunca deixar o texto “passar por cima” do ícone.
+   - Nunca deixar o texto ultrapassar o card.
+
+4) Regras de dimensionamento:
+   - Definir min-width por tile (ex.: 96–120px) e width: 100% dentro da coluna.
+   - Definir padding interno (ex.: 10–12px).
+   - Definir gap entre ícone e texto (ex.: 6–8px).
+
+5) Ícone e tipografia:
+   - Ícone com tamanho fixo (ex.: 20–24px).
+   - Texto com font-size 11–13px e peso médio.
+   - Centralizar conteúdo para ficar limpo e consistente.
+
+6) Estado ativo/selecionado:
+   - Pode mudar cor de fundo/borda/sombra
+   - NÃO pode mudar o tamanho do tile (para não quebrar o grid).
+
+IMPLEMENTAÇÃO (GUIA TÉCNICO):
+- Container:
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));  // default mobile small
+  gap: 10px;
+
+- Breakpoints:
+  @media (min-width: 380px) => 3 colunas
+  @media (min-width: 640px) => 4 colunas (ou 3 dependendo do layout)
+
+- Tile:
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  min-height: 72px;
+  border-radius: 16px;
+
+- Texto (opção 1: 1 linha):
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+
+- Texto (opção 2: 2 linhas com clamp):
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+ENTREGA ESPERADA:
+- Manter os ícones de acesso como atalhos.
+- Distribuição em grid responsivo, sem sobreposição.
+- Textos legíveis (1 linha com reticências ou 2 linhas clamp).
+- Layout consistente em telas pequenas e grandes.

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, StyleSheet, TextInput, Pressable, Platform } from "react-native";
+import { View, StyleSheet, TextInput, Pressable, Platform, useWindowDimensions } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -137,6 +137,10 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const { properties, companies, appUsers, firePumps, contractors } = useInspections();
+  const { width: screenWidth } = useWindowDimensions();
+  
+  const numColumns = screenWidth < 380 ? 2 : screenWidth < 640 ? 3 : 4;
+  const tileWidth = (screenWidth - Spacing.xl * 2 - Spacing.sm * (numColumns - 1)) / numColumns;
 
   const getPumpTypeLabel = (type: string) => {
     switch (type) {
@@ -311,142 +315,46 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
 
       <Spacer height={Spacing.lg} />
 
-      <View style={styles.tabRow}>
-        <Pressable
-          onPress={() => handleTabPress("companies")}
-          style={[
-            styles.tab,
-            {
-              backgroundColor:
-                activeTab === "companies" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
-              borderColor: fullTheme.colors.border,
-            },
-          ]}
-        >
-          <Feather
-            name="briefcase"
-            size={16}
-            color={activeTab === "companies" ? "#FFFFFF" : fullTheme.colors.textPrimary}
-          />
-          <ThemedText
-            type="small"
-            style={{
-              color: activeTab === "companies" ? "#FFFFFF" : fullTheme.colors.textPrimary,
-              marginLeft: Spacing.xs,
-              fontWeight: "600",
-            }}
-          >
-            {t.properties.companies}
-          </ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={() => handleTabPress("inspectors")}
-          style={[
-            styles.tab,
-            {
-              backgroundColor:
-                activeTab === "inspectors" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
-              borderColor: fullTheme.colors.border,
-            },
-          ]}
-        >
-          <Feather
-            name="users"
-            size={16}
-            color={activeTab === "inspectors" ? "#FFFFFF" : fullTheme.colors.textPrimary}
-          />
-          <ThemedText
-            type="small"
-            style={{
-              color: activeTab === "inspectors" ? "#FFFFFF" : fullTheme.colors.textPrimary,
-              marginLeft: Spacing.xs,
-              fontWeight: "600",
-            }}
-          >
-            {t.users?.title || "Inspetores"}
-          </ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={() => handleTabPress("pumps")}
-          style={[
-            styles.tab,
-            {
-              backgroundColor:
-                activeTab === "pumps" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
-              borderColor: fullTheme.colors.border,
-            },
-          ]}
-        >
-          <Feather
-            name="activity"
-            size={16}
-            color={activeTab === "pumps" ? "#FFFFFF" : fullTheme.colors.textPrimary}
-          />
-          <ThemedText
-            type="small"
-            style={{
-              color: activeTab === "pumps" ? "#FFFFFF" : fullTheme.colors.textPrimary,
-              marginLeft: Spacing.xs,
-              fontWeight: "600",
-            }}
-          >
-            {t.firePumps?.title || "Bombas"}
-          </ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={() => handleTabPress("contractors")}
-          style={[
-            styles.tab,
-            {
-              backgroundColor:
-                activeTab === "contractors" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
-              borderColor: fullTheme.colors.border,
-            },
-          ]}
-        >
-          <Feather
-            name="tool"
-            size={16}
-            color={activeTab === "contractors" ? "#FFFFFF" : fullTheme.colors.textPrimary}
-          />
-          <ThemedText
-            type="small"
-            style={{
-              color: activeTab === "contractors" ? "#FFFFFF" : fullTheme.colors.textPrimary,
-              marginLeft: Spacing.xs,
-              fontWeight: "600",
-            }}
-          >
-            {t.contractors?.title || "Contratantes"}
-          </ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={() => handleTabPress("properties")}
-          style={[
-            styles.tab,
-            {
-              backgroundColor:
-                activeTab === "properties" ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
-              borderColor: fullTheme.colors.border,
-            },
-          ]}
-        >
-          <Feather
-            name="home"
-            size={16}
-            color={activeTab === "properties" ? "#FFFFFF" : fullTheme.colors.textPrimary}
-          />
-          <ThemedText
-            type="small"
-            style={{
-              color: activeTab === "properties" ? "#FFFFFF" : fullTheme.colors.textPrimary,
-              marginLeft: Spacing.xs,
-              fontWeight: "600",
-            }}
-          >
-            {t.properties.properties}
-          </ThemedText>
-        </Pressable>
+      <View style={styles.tabGrid}>
+        {[
+          { id: "companies" as TabType, icon: "briefcase" as const, label: t.properties.companies },
+          { id: "inspectors" as TabType, icon: "users" as const, label: t.users?.title || "Inspetores" },
+          { id: "pumps" as TabType, icon: "activity" as const, label: t.firePumps?.title || "Bombas" },
+          { id: "contractors" as TabType, icon: "tool" as const, label: t.contractors?.title || "Prestadoras" },
+          { id: "properties" as TabType, icon: "home" as const, label: t.properties.properties },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <Pressable
+              key={tab.id}
+              onPress={() => handleTabPress(tab.id)}
+              style={[
+                styles.tabTile,
+                {
+                  width: tileWidth,
+                  backgroundColor: isActive ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
+                  borderColor: isActive ? fullTheme.colors.primary : fullTheme.colors.border,
+                },
+              ]}
+            >
+              <Feather
+                name={tab.icon}
+                size={22}
+                color={isActive ? "#FFFFFF" : fullTheme.colors.textPrimary}
+              />
+              <ThemedText
+                type="small"
+                numberOfLines={2}
+                style={[
+                  styles.tabTileText,
+                  { color: isActive ? "#FFFFFF" : fullTheme.colors.textPrimary },
+                ]}
+              >
+                {tab.label}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
       </View>
 
       <Spacer height={Spacing.xl} />
@@ -563,18 +471,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: "100%",
   },
-  tabRow: {
+  tabGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: Spacing.sm,
   },
-  tab: {
-    flex: 1,
-    flexDirection: "row",
+  tabTile: {
+    minHeight: 72,
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
+    gap: Spacing.xs,
+  },
+  tabTileText: {
+    fontWeight: "600",
+    textAlign: "center",
+    fontSize: 11,
   },
   emptyState: {
     padding: Spacing["3xl"],
