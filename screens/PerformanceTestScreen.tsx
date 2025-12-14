@@ -708,38 +708,188 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   );
 
   const renderTestReadingRow = (reading: TestReading, showElectric: boolean) => (
-    <View key={reading.id} style={[styles.readingRow, { borderBottomColor: fullTheme.colors.border }]}>
-      <ThemedText type="body" style={styles.readingLabel}>
-        {reading.flowPercent}% {t.performanceTest?.flow || "Flow"}
-      </ThemedText>
-      <View style={styles.readingInputs}>
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.flowGpm}
-          onChangeText={(v) => updateTestReading(reading.id, "flowGpm", v)}
-          placeholder="GPM"
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.suctionPsi}
-          onChangeText={(v) => updateTestReading(reading.id, "suctionPsi", v)}
-          placeholder={t.performanceTest?.suction || "Suction"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.dischargePsi}
-          onChangeText={(v) => updateTestReading(reading.id, "dischargePsi", v)}
-          placeholder={t.performanceTest?.discharge || "Discharge"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <ThemedText type="small" style={styles.readingNetPressure}>
-          {reading.netPressurePsi || "-"} PSI
+    <View key={reading.id} style={[styles.readingCard, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}>
+      <View style={[styles.readingHeader, { backgroundColor: fullTheme.colors.primary }]}>
+        <ThemedText type="body" style={styles.readingHeaderText}>
+          {reading.flowPercent}% {t.performanceTest?.flow || "Flow"}
         </ThemedText>
+      </View>
+      
+      <View style={styles.readingContent}>
+        <View style={styles.readingFieldRow}>
+          <View style={styles.readingFieldHalf}>
+            <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.performanceTest?.gpm || "GPM"}</ThemedText>
+            <TextInput
+              style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+              value={reading.flowGpm}
+              onChangeText={(v) => updateTestReading(reading.id, "flowGpm", v)}
+              placeholder="0"
+              placeholderTextColor={fullTheme.colors.placeholder}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.readingFieldHalf}>
+            <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.performanceTest?.suction || "Suction"} ({t.performanceTest?.psi || "PSI"})</ThemedText>
+            <TextInput
+              style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+              value={reading.suctionPsi}
+              onChangeText={(v) => updateTestReading(reading.id, "suctionPsi", v)}
+              placeholder="0"
+              placeholderTextColor={fullTheme.colors.placeholder}
+              keyboardType="numeric"
+            />
+          </View>
+        </View>
+        
+        <View style={styles.readingFieldRow}>
+          <View style={styles.readingFieldHalf}>
+            <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.performanceTest?.discharge || "Discharge"} ({t.performanceTest?.psi || "PSI"})</ThemedText>
+            <TextInput
+              style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+              value={reading.dischargePsi}
+              onChangeText={(v) => updateTestReading(reading.id, "dischargePsi", v)}
+              placeholder="0"
+              placeholderTextColor={fullTheme.colors.placeholder}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.readingFieldHalf}>
+            <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.performanceTest?.netPressure || "Net Pressure"} ({t.performanceTest?.psi || "PSI"})</ThemedText>
+            <View style={[styles.readingFieldCalculated, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>{reading.netPressurePsi || "-"}</ThemedText>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.readingFieldRow}>
+          <View style={styles.readingFieldFull}>
+            <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.performanceTest?.rpm || "RPM"}</ThemedText>
+            <TextInput
+              style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+              value={reading.rpm}
+              onChangeText={(v) => updateTestReading(reading.id, "rpm", v)}
+              placeholder="0"
+              placeholderTextColor={fullTheme.colors.placeholder}
+              keyboardType="numeric"
+            />
+          </View>
+        </View>
+        
+        {showElectric ? (
+          <>
+            <View style={styles.readingSubsection}>
+              <ThemedText type="small" style={[styles.readingSubsectionTitle, { color: fullTheme.colors.primary }]}>
+                {t.performanceTest?.voltage || "Voltage"} (V)
+              </ThemedText>
+            </View>
+            <View style={styles.readingFieldRow}>
+              <View style={styles.readingFieldThird}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>L1-L2</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.voltageL1L2 || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "voltageL1L2", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.readingFieldThird}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>L2-L3</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.voltageL2L3 || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "voltageL2L3", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.readingFieldThird}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>L3-L1</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.voltageL3L1 || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "voltageL3L1", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+            
+            <View style={styles.readingSubsection}>
+              <ThemedText type="small" style={[styles.readingSubsectionTitle, { color: fullTheme.colors.primary }]}>
+                {t.performanceTest?.amperage || "Amperage"} (A)
+              </ThemedText>
+            </View>
+            <View style={styles.readingFieldRow}>
+              <View style={styles.readingFieldThird}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>L1</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.amperageL1 || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "amperageL1", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.readingFieldThird}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>L2</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.amperageL2 || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "amperageL2", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.readingFieldThird}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>L3</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.amperageL3 || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "amperageL3", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+            
+            <View style={styles.readingFieldRow}>
+              <View style={styles.readingFieldFull}>
+                <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.performanceTest?.powerKw || "Power"} (kW)</ThemedText>
+                <TextInput
+                  style={[styles.readingFieldInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+                  value={reading.powerKw || ""}
+                  onChangeText={(v) => updateTestReading(reading.id, "powerKw", v)}
+                  placeholder="0"
+                  placeholderTextColor={fullTheme.colors.placeholder}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </>
+        ) : null}
+        
+        <View style={styles.readingFieldRow}>
+          <View style={styles.readingFieldFull}>
+            <ThemedText type="small" secondary style={styles.readingFieldLabel}>{t.form?.observations || "Observations"}</ThemedText>
+            <TextInput
+              style={[styles.readingFieldInput, styles.readingObservationsInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+              value={reading.observations}
+              onChangeText={(v) => updateTestReading(reading.id, "observations", v)}
+              placeholder={t.form?.observations || "Observations"}
+              placeholderTextColor={fullTheme.colors.placeholder}
+              multiline
+              numberOfLines={2}
+              textAlignVertical="top"
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -1408,6 +1558,68 @@ const styles = StyleSheet.create({
   readingNetPressure: {
     width: 60,
     textAlign: "right",
+  },
+  readingCard: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.lg,
+    overflow: "hidden",
+  },
+  readingHeader: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  readingHeaderText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  readingContent: {
+    padding: Spacing.md,
+  },
+  readingFieldRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  readingFieldHalf: {
+    flex: 1,
+  },
+  readingFieldThird: {
+    flex: 1,
+  },
+  readingFieldFull: {
+    flex: 1,
+  },
+  readingFieldLabel: {
+    marginBottom: Spacing.xs,
+    fontSize: 12,
+  },
+  readingFieldInput: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    fontSize: 14,
+  },
+  readingFieldCalculated: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  readingSubsection: {
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  readingSubsectionTitle: {
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  readingObservationsInput: {
+    height: 60,
+    paddingTop: Spacing.sm,
   },
   deficiencyHeader: {
     flexDirection: "row",
