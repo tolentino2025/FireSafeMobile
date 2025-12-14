@@ -11,7 +11,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Property, Company, AppUser, FirePump, Contractor } from "@/contexts/InspectionContext";
+import { useInspections, Property, Company, AppUser, FirePump, Contractor, JobSite } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 
@@ -19,7 +19,7 @@ type PropertiesScreenProps = {
   navigation: NativeStackNavigationProp<PropertiesStackParamList, "PropertiesList">;
 };
 
-type TabType = "companies" | "contractors" | "properties" | "inspectors" | "pumps";
+type TabType = "companies" | "contractors" | "properties" | "inspectors" | "pumps" | "jobSites";
 
 function UserCard({
   user,
@@ -133,10 +133,51 @@ function ContractorCard({
   );
 }
 
+function JobSiteCard({
+  jobSite,
+  contractorName,
+  onPress,
+}: {
+  jobSite: JobSite;
+  contractorName?: string;
+  onPress: () => void;
+}) {
+  const { fullTheme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.userCard, { 
+        backgroundColor: fullTheme.colors.cardBackground,
+        borderColor: fullTheme.colors.border,
+      }]}
+    >
+      <View style={[styles.userIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name="map-pin" size={24} color={fullTheme.colors.primary} />
+      </View>
+      <View style={styles.userCardContent}>
+        <ThemedText type="h4" numberOfLines={1}>{jobSite.jobName}</ThemedText>
+        <ThemedText type="small" secondary numberOfLines={1}>
+          {jobSite.jobNumber ? `#${jobSite.jobNumber}` : "-"}
+        </ThemedText>
+        {contractorName ? (
+          <ThemedText type="small" secondary numberOfLines={1}>
+            {contractorName}
+          </ThemedText>
+        ) : null}
+        <ThemedText type="small" secondary numberOfLines={1}>
+          {jobSite.city ? `${jobSite.city}` : ""}{jobSite.state ? `, ${jobSite.state}` : ""}
+        </ThemedText>
+      </View>
+      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+    </Pressable>
+  );
+}
+
 export default function PropertiesScreen({ navigation }: PropertiesScreenProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { properties, companies, appUsers, firePumps, contractors } = useInspections();
+  const { properties, companies, appUsers, firePumps, contractors, jobSites, getContractorById } = useInspections();
   const { width: screenWidth } = useWindowDimensions();
   
   const numColumns = screenWidth < 380 ? 2 : screenWidth < 640 ? 3 : 4;
@@ -212,6 +253,17 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     );
   }, [contractors, searchQuery]);
 
+  const filteredJobSites = useMemo(() => {
+    if (!searchQuery.trim()) return jobSites;
+    const query = searchQuery.toLowerCase();
+    return jobSites.filter(
+      (jobSite) =>
+        jobSite.jobName.toLowerCase().includes(query) ||
+        (jobSite.jobNumber && jobSite.jobNumber.toLowerCase().includes(query)) ||
+        (jobSite.city && jobSite.city.toLowerCase().includes(query))
+    );
+  }, [jobSites, searchQuery]);
+
   const handleTabPress = (tab: TabType) => {
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
@@ -231,6 +283,8 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
       navigation.navigate("FirePumpList");
     } else if (activeTab === "contractors") {
       navigation.navigate("ContractorForm", {});
+    } else if (activeTab === "jobSites") {
+      navigation.navigate("JobSiteForm", {});
     } else {
       navigation.navigate("PropertyForm", { mode: "property" });
     }
@@ -254,6 +308,10 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
 
   const handleContractorPress = (contractor: Contractor) => {
     navigation.navigate("ContractorForm", { contractorId: contractor.id });
+  };
+
+  const handleJobSitePress = (jobSite: JobSite) => {
+    navigation.navigate("JobSiteForm", { jobSiteId: jobSite.id });
   };
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
@@ -291,6 +349,16 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     </>
   );
 
+  const renderJobSiteItem = ({ item }: { item: JobSite }) => {
+    const contractor = getContractorById(item.contractorId);
+    return (
+      <>
+        <JobSiteCard jobSite={item} contractorName={contractor?.name} onPress={() => handleJobSitePress(item)} />
+        <Spacer height={Spacing.md} />
+      </>
+    );
+  };
+
   const renderHeader = () => (
     <>
       <View style={[styles.searchContainer, { 
@@ -321,6 +389,7 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
           { id: "inspectors" as TabType, icon: "users" as const, label: t.users?.title || "Inspetores" },
           { id: "pumps" as TabType, icon: "activity" as const, label: t.firePumps?.title || "Bombas" },
           { id: "contractors" as TabType, icon: "tool" as const, label: t.contractors?.title || "Prestadoras" },
+          { id: "jobSites" as TabType, icon: "map-pin" as const, label: t.jobSites?.title || "Locais" },
           { id: "properties" as TabType, icon: "home" as const, label: t.properties.properties },
         ].map((tab) => {
           const isActive = activeTab === tab.id;
@@ -362,7 +431,7 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   );
 
   const renderEmpty = () => {
-    let icon: "briefcase" | "users" | "home" | "activity" | "tool" = "briefcase";
+    let icon: "briefcase" | "users" | "home" | "activity" | "tool" | "map-pin" = "briefcase";
     let message = t.companies?.noResults || t.properties.noResults;
     
     if (activeTab === "inspectors") {
@@ -377,6 +446,9 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     } else if (activeTab === "contractors") {
       icon = "tool";
       message = t.contractors?.noResults || "Nenhum contratante cadastrado";
+    } else if (activeTab === "jobSites") {
+      icon = "map-pin";
+      message = t.jobSites?.noResults || "Nenhum local cadastrado";
     }
 
     return (
@@ -423,6 +495,15 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         <ScreenFlatList
           data={filteredContractors}
           renderItem={renderContractorItem}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmpty}
+          contentContainerStyle={styles.listContent}
+        />
+      ) : activeTab === "jobSites" ? (
+        <ScreenFlatList
+          data={filteredJobSites}
+          renderItem={renderJobSiteItem}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderEmpty}
