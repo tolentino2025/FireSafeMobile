@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   LicenseData,
   LicenseValidationResult,
-  validateLicenseKeyFormat,
+  validateLicenseKeyCrypto,
   checkLicenseExpiration,
   createLicenseData,
 } from "@/utils/licenseUtils";
@@ -57,14 +57,15 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
   };
 
   const activateLicense = async (key: string, language: "en" | "pt-BR" = "pt-BR"): Promise<{ success: boolean; error?: string }> => {
-    const isValidFormat = validateLicenseKeyFormat(key);
+    const validationResult = validateLicenseKeyCrypto(key);
     
-    if (!isValidFormat) {
-      return { success: false, error: "invalid_key" };
+    if (!validationResult.valid) {
+      return { success: false, error: validationResult.error || "invalid_key" };
     }
 
     try {
-      const newLicenseData = createLicenseData(key);
+      const validityMonths = validationResult.validityMonths || 6;
+      const newLicenseData = createLicenseData(key, validityMonths);
       await AsyncStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(newLicenseData));
       setLicenseData(newLicenseData);
       const status = checkLicenseExpiration(newLicenseData);
