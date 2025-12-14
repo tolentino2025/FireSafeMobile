@@ -1894,6 +1894,7 @@ export const translations = {
       },
       selectContractor: "Selecionar Prestadora",
       selectJobSite: "Selecionar Local de Trabalho",
+      selectElectricPump: "Selecionar Bomba Elétrica",
       companyName: "Nome da Empresa",
       address: "Endereço",
       city: "Cidade",
@@ -2053,6 +2054,7 @@ export const translations = {
         title: "Teste de Performance Anual - Bomba Diesel",
         subtitle: "Motor Diesel - Conforme NFPA 25",
         selectDieselPump: "Selecionar Bomba Diesel",
+        selectElectricPump: "Selecionar Bomba Elétrica",
         summaryHeader: "Resumo da Seleção",
         sections: {
           general: "1. Informações Gerais",
@@ -4133,6 +4135,7 @@ export const translations = {
       },
       selectContractor: "Select Contractor",
       selectJobSite: "Select Job Site",
+      selectElectricPump: "Select Electric Pump",
       companyName: "Company Name",
       address: "Address",
       city: "City",
@@ -4292,6 +4295,7 @@ export const translations = {
         title: "Fire Pump Annual Performance Test - Diesel Engine",
         subtitle: "Diesel Engine - Per NFPA 25",
         selectDieselPump: "Select Diesel Pump",
+        selectElectricPump: "Select Electric Pump",
         summaryHeader: "Selection Summary",
         sections: {
           general: "1. General Information",

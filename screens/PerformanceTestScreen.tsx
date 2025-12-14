@@ -133,14 +133,19 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { contractors, jobSites, getJobSitesByContractor } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, getJobSitesByContractor, getPanelsByPump } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
   const [test, setTest] = useState<Partial<PerformanceTest>>(() => createEmptyPerformanceTest());
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedPumpId, setSelectedPumpId] = useState<string>("");
+  const [selectedInspectorId, setSelectedInspectorId] = useState<string>("");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  const electricPumps = firePumps.filter(p => p.type === "electric_main");
+  const inspectors = appUsers;
 
   const sectionRefs = {
     contractor: useRef<View>(null),
@@ -210,6 +215,12 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         const parsedDraft = JSON.parse(result.data);
         activeDraftKeyRef.current = result.key;
         setTest(parsedDraft);
+        if (parsedDraft.pumpEquipment?.pumpId) {
+          setSelectedPumpId(parsedDraft.pumpEquipment.pumpId);
+        }
+        if (parsedDraft.signatures?.conductedBy?.userId) {
+          setSelectedInspectorId(parsedDraft.signatures.conductedBy.userId);
+        }
       } else {
         activeDraftKeyRef.current = getDraftStorageKey(testId || 'new');
       }
@@ -291,6 +302,63 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
           address: jobSite.address,
           city: jobSite.city,
           state: jobSite.state,
+        },
+      }));
+    }
+  };
+
+  const handlePumpSelect = (pumpId: string) => {
+    const pump = electricPumps.find(p => p.id === pumpId);
+    if (pump) {
+      setSelectedPumpId(pumpId);
+      const panels = getPanelsByPump(pumpId);
+      const panel = panels.length > 0 ? panels[0] : null;
+      setTest(prev => ({
+        ...prev,
+        pumpEquipment: {
+          ...prev.pumpEquipment!,
+          pumpId: pumpId,
+          pumpTag: pump.tag,
+          manufacturer: pump.manufacturer || "",
+          model: pump.model || "",
+          serialNumber: pump.serialNumber || "",
+          ratedFlowGpm: pump.ratedFlowGpm?.toString() || "",
+          ratedPressurePsi: pump.ratedPressurePsi?.toString() || "",
+          ratedSpeedRpm: pump.ratedSpeedRpm?.toString() || "",
+        },
+        driverInfo: {
+          ...prev.driverInfo!,
+          driverType: "electric",
+          manufacturer: pump.manufacturer || "",
+          model: pump.model || "",
+          horsePower: pump.powerHP?.toString() || "",
+        },
+        controllerInfo: {
+          ...prev.controllerInfo!,
+          manufacturer: panel?.manufacturer || "",
+          model: panel?.model || "",
+          serialNumber: panel?.serialNumber || "",
+          supplyVoltage: panel?.supplyVoltage || "",
+          startingType: panel?.startingType || "",
+        },
+      }));
+    }
+  };
+
+  const handleInspectorSelect = (inspectorId: string) => {
+    const inspector = inspectors.find(i => i.id === inspectorId);
+    if (inspector) {
+      setSelectedInspectorId(inspectorId);
+      setTest(prev => ({
+        ...prev,
+        signatures: {
+          ...prev.signatures!,
+          conductedBy: {
+            ...prev.signatures!.conductedBy,
+            userId: inspectorId,
+            name: inspector.name,
+            company: "",
+          },
         },
       }));
     }
@@ -519,6 +587,18 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     sublabel: `${j.city}, ${j.state}`,
   }));
 
+  const electricPumpOptions = electricPumps.map(p => ({
+    id: p.id,
+    label: p.tag,
+    sublabel: `${p.manufacturer} - ${p.model}`,
+  }));
+
+  const inspectorOptions = inspectors.map(i => ({
+    id: i.id,
+    label: i.name,
+    sublabel: i.role,
+  }));
+
   const driverTypeOptions = [
     { id: "electric", label: t.performanceTest?.driverTypes?.electric || "Electric Motor" },
     { id: "diesel", label: t.performanceTest?.driverTypes?.diesel || "Diesel Engine" },
@@ -722,6 +802,17 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         <Spacer height={Spacing.md} />
 
         <SectionCard title={t.performanceTest?.sections?.pump || "3. Pump Equipment"} sectionRef={sectionRefs.pump}>
+          <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.selectElectricPump || "Select Electric Pump"}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          <SelectPicker
+            options={electricPumpOptions}
+            selectedId={selectedPumpId}
+            onSelect={handlePumpSelect}
+            placeholder={t.performanceTest?.selectElectricPump || "Select Electric Pump"}
+            title={t.performanceTest?.selectElectricPump || "Select Electric Pump"}
+            emptyText={t.firePumps?.noResults || "No pumps found"}
+          />
+          <Spacer height={Spacing.lg} />
           {renderInputField(t.performanceTest?.pumpTag || "Pump Tag/ID", test.pumpEquipment?.pumpTag || "", (v) => updatePumpEquipment("pumpTag", v))}
           {renderInputField(t.performanceTest?.manufacturer || "Manufacturer", test.pumpEquipment?.manufacturer || "", (v) => updatePumpEquipment("manufacturer", v))}
           {renderInputField(t.performanceTest?.model || "Model", test.pumpEquipment?.model || "", (v) => updatePumpEquipment("model", v))}
@@ -1093,6 +1184,17 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         <SectionCard title={t.performanceTest?.sections?.signatures || "12. Signatures"} sectionRef={sectionRefs.signatures}>
           <ThemedText type="h4">{t.performanceTest?.conductedBy || "Test Conducted By"}</ThemedText>
           <Spacer height={Spacing.sm} />
+          <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.selectInspector || "Select Inspector"}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          <SelectPicker
+            options={inspectorOptions}
+            selectedId={selectedInspectorId}
+            onSelect={handleInspectorSelect}
+            placeholder={t.performanceTest?.selectInspector || "Select Inspector"}
+            title={t.performanceTest?.selectInspector || "Select Inspector"}
+            emptyText={t.appUsers?.noResults || "No inspectors found"}
+          />
+          <Spacer height={Spacing.lg} />
           {renderInputField(t.performanceTest?.name || "Name", test.signatures?.conductedBy.name || "", (v) => updateConductedBySignature("name", v))}
           {renderInputField(t.performanceTest?.titleField || "Title", test.signatures?.conductedBy.title || "", (v) => updateConductedBySignature("title", v))}
           {renderInputField(t.performanceTest?.company || "Company", test.signatures?.conductedBy.company || "", (v) => updateConductedBySignature("company", v))}
