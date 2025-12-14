@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal } from "react-native";
+import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal, Share } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
-import * as MailComposer from "expo-mail-composer";
 
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -68,7 +67,7 @@ export default function ProfileScreen() {
     setHelpModalVisible(true);
   };
 
-  const sendHelpEmail = async (type: HelpType) => {
+  const sendHelpRequest = async (type: HelpType) => {
     setHelpModalVisible(false);
     
     const subjectMap: Record<HelpType, string> = {
@@ -79,33 +78,16 @@ export default function ProfileScreen() {
       other: t.profile.helpEmailSubjectOther,
     };
 
-    const isAvailable = await MailComposer.isAvailableAsync();
-    
-    if (!isAvailable) {
-      Alert.alert(
-        t.profile.help,
-        t.common.emailNotAvailable,
-        [
-          { text: t.common.cancel, style: "cancel" },
-          {
-            text: "OK",
-            onPress: () => {
-              Linking.openURL(`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(subjectMap[type])}`);
-            },
-          },
-        ]
-      );
-      return;
-    }
+    const message = `${subjectMap[type]}\n\n${t.profile.helpEmailBody}\n\n${t.profile.helpContact}: ${ADMIN_EMAIL}`;
 
     try {
-      await MailComposer.composeAsync({
-        recipients: [ADMIN_EMAIL],
-        subject: subjectMap[type],
-        body: t.profile.helpEmailBody,
+      await Share.share({
+        message: message,
+        title: subjectMap[type],
       });
     } catch (error) {
-      console.error("Error sending email:", error);
+      console.error("Error sharing:", error);
+      Linking.openURL(`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(subjectMap[type])}&body=${encodeURIComponent(t.profile.helpEmailBody)}`);
     }
   };
 
@@ -290,27 +272,27 @@ export default function ProfileScreen() {
             <HelpOption
               icon="help-circle"
               label={t.profile.helpQuestion}
-              onPress={() => sendHelpEmail("question")}
+              onPress={() => sendHelpRequest("question")}
             />
             <HelpOption
               icon="message-circle"
               label={t.profile.helpComment}
-              onPress={() => sendHelpEmail("comment")}
+              onPress={() => sendHelpRequest("comment")}
             />
             <HelpOption
               icon="star"
               label={t.profile.helpSuggestion}
-              onPress={() => sendHelpEmail("suggestion")}
+              onPress={() => sendHelpRequest("suggestion")}
             />
             <HelpOption
               icon="alert-triangle"
               label={t.profile.helpBugReport}
-              onPress={() => sendHelpEmail("bugReport")}
+              onPress={() => sendHelpRequest("bugReport")}
             />
             <HelpOption
               icon="mail"
               label={t.profile.helpOther}
-              onPress={() => sendHelpEmail("other")}
+              onPress={() => sendHelpRequest("other")}
               isLast
             />
           </View>

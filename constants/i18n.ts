@@ -2380,6 +2380,7 @@ export const translations = {
       helpEmailSubjectBugReport: "Reportar Problema - FireSafe ITM",
       helpEmailSubjectOther: "Contato - FireSafe ITM",
       helpEmailBody: "Olá equipe FireSafe ITM,\n\nDescreva sua mensagem aqui:\n\n",
+      helpContact: "Contato",
       logout: "Sair",
       deleteAccount: "Excluir Conta",
       version: "Versão",
@@ -2397,6 +2398,7 @@ export const translations = {
       cancel: "Cancelar",
       deleteConfirmation: "Tem certeza que deseja excluir esta inspeção?",
       emailNotAvailable: "Email não está disponível neste dispositivo",
+      sharingNotAvailable: "Compartilhamento não está disponível neste dispositivo",
       runInExpoGo: "Execute no Expo Go para usar a câmera",
     },
     license: {
@@ -4797,6 +4799,7 @@ export const translations = {
       helpEmailSubjectBugReport: "Report Issue - FireSafe ITM",
       helpEmailSubjectOther: "Contact - FireSafe ITM",
       helpEmailBody: "Hello FireSafe ITM Team,\n\nPlease describe your message here:\n\n",
+      helpContact: "Contact",
       logout: "Log Out",
       deleteAccount: "Delete Account",
       version: "Version",
@@ -4814,6 +4817,7 @@ export const translations = {
       cancel: "Cancel",
       deleteConfirmation: "Are you sure you want to delete this inspection?",
       emailNotAvailable: "Email is not available on this device",
+      sharingNotAvailable: "Sharing is not available on this device",
       runInExpoGo: "Run in Expo Go to use camera",
     },
     license: {
