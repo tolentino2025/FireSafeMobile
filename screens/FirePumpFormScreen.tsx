@@ -985,7 +985,12 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSubmit}>{t.form.save}</Button>
+      <Button onPress={handleSubmit}>
+        <View style={styles.saveButtonContent}>
+          <Feather name="save" size={18} color="#FFFFFF" />
+          <ThemedText type="body" style={styles.saveButtonText}>{t.form.save}</ThemedText>
+        </View>
+      </Button>
 
       {existingPump ? (
         <>
@@ -1104,5 +1109,14 @@ const styles = StyleSheet.create({
   noPanels: {
     alignItems: "center",
     paddingVertical: Spacing.xl,
+  },
+  saveButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
 });

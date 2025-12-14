@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, TextInput, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -117,7 +118,12 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSubmit}>{t.form.save}</Button>
+      <Button onPress={handleSubmit}>
+        <View style={styles.saveButtonContent}>
+          <Feather name="save" size={18} color="#FFFFFF" />
+          <ThemedText type="body" style={styles.saveButtonText}>{t.form.save}</ThemedText>
+        </View>
+      </Button>
 
       <Spacer height={Spacing["4xl"]} />
     </ScreenKeyboardAwareScrollView>
@@ -131,5 +137,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
     fontSize: 16,
+  },
+  saveButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
 });
