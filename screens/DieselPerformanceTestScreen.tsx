@@ -611,41 +611,52 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
 
   const renderDieselReadingRow = (reading: DieselTestReading) => (
     <View key={reading.id} style={[styles.readingRow, { borderBottomColor: fullTheme.colors.border }]}>
-      <ThemedText type="body" style={styles.readingLabel}>
-        {reading.flowPercent}% {t.performanceTest?.flow || "Flow"}
-      </ThemedText>
-      <View style={styles.readingInputs}>
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.flowGpm}
-          onChangeText={(v) => updateDieselReading(reading.id, "flowGpm", v)}
-          placeholder="GPM"
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.suctionPsi}
-          onChangeText={(v) => updateDieselReading(reading.id, "suctionPsi", v)}
-          placeholder={t.performanceTest?.suction || "Suction PSI"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
-          value={reading.dischargePsi}
-          onChangeText={(v) => updateDieselReading(reading.id, "dischargePsi", v)}
-          placeholder={t.performanceTest?.discharge || "Discharge PSI"}
-          placeholderTextColor={fullTheme.colors.placeholder}
-          keyboardType="numeric"
-        />
+      <View style={styles.readingHeader}>
+        <ThemedText type="body" style={styles.readingLabel}>
+          {reading.flowPercent}% {t.performanceTest?.flow || "Flow"}
+        </ThemedText>
         <View style={styles.netPressureContainer}>
           <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary }}>
-            {t.performanceTest?.netPressure || "Net"}
+            {t.performanceTest?.netPressure || "Net PSI"}
           </ThemedText>
-          <ThemedText type="body" style={styles.readingNetPressure}>
+          <ThemedText type="body" style={[styles.readingNetPressure, { color: fullTheme.colors.primary }]}>
             {reading.netPressurePsi || "-"}
           </ThemedText>
+        </View>
+      </View>
+      <View style={styles.readingInputs}>
+        <View style={styles.readingInputWrapper}>
+          <ThemedText type="small" style={[styles.inputLabel, { color: fullTheme.colors.textSecondary }]}>GPM</ThemedText>
+          <TextInput
+            style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+            value={reading.flowGpm}
+            onChangeText={(v) => updateDieselReading(reading.id, "flowGpm", v)}
+            placeholder="0"
+            placeholderTextColor={fullTheme.colors.placeholder}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.readingInputWrapper}>
+          <ThemedText type="small" style={[styles.inputLabel, { color: fullTheme.colors.textSecondary }]}>{t.performanceTest?.suction || "Sucção"}</ThemedText>
+          <TextInput
+            style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+            value={reading.suctionPsi}
+            onChangeText={(v) => updateDieselReading(reading.id, "suctionPsi", v)}
+            placeholder="0"
+            placeholderTextColor={fullTheme.colors.placeholder}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.readingInputWrapper}>
+          <ThemedText type="small" style={[styles.inputLabel, { color: fullTheme.colors.textSecondary }]}>{t.performanceTest?.discharge || "Descarga"}</ThemedText>
+          <TextInput
+            style={[styles.readingInput, { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border, color: fullTheme.colors.textPrimary }]}
+            value={reading.dischargePsi}
+            onChangeText={(v) => updateDieselReading(reading.id, "dischargePsi", v)}
+            placeholder="0"
+            placeholderTextColor={fullTheme.colors.placeholder}
+            keyboardType="numeric"
+          />
         </View>
       </View>
     </View>
@@ -1126,31 +1137,43 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
   },
-  readingLabel: {
+  readingHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: Spacing.sm,
+  },
+  readingLabel: {
     fontWeight: "600",
   },
   readingInputs: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     gap: Spacing.sm,
   },
-  readingInput: {
+  readingInputWrapper: {
     flex: 1,
+  },
+  inputLabel: {
+    marginBottom: Spacing.xs,
+    fontSize: 11,
+  },
+  readingInput: {
     height: 40,
     borderWidth: 1,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.sm,
     fontSize: 14,
-  },
-  readingNetPressure: {
-    fontWeight: "600",
     textAlign: "center",
   },
+  readingNetPressure: {
+    fontWeight: "700",
+    fontSize: 16,
+  },
   netPressureContainer: {
-    width: 50,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: Spacing.xs,
   },
   readingsHeader: {
     flexDirection: "row",
