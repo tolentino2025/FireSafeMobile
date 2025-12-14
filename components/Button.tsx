@@ -16,7 +16,7 @@ interface ButtonProps {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "save";
 }
 
 const springConfig: WithSpringConfig = {
@@ -69,6 +69,8 @@ export function Button({
       case "outline":
       case "ghost":
         return isPressed ? fullTheme.colors.backgroundSecondary : "transparent";
+      case "save":
+        return isPressed ? "#D4D4D4" : "#EDEDED";
       default:
         return fullTheme.colors.primary;
     }
@@ -85,6 +87,8 @@ export function Button({
       case "outline":
       case "ghost":
         return fullTheme.colors.primary;
+      case "save":
+        return "#111827";
       default:
         return fullTheme.colors.buttonText;
     }

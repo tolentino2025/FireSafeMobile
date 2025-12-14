@@ -214,10 +214,10 @@ export default function ContractorFormScreen({ navigation, route }: ContractorFo
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSubmit}>
+      <Button onPress={handleSubmit} variant="save">
         <View style={styles.saveButtonContent}>
-          <Feather name="save" size={18} color={fullTheme.colors.buttonText} />
-          <ThemedText type="body" style={[styles.saveButtonText, { color: fullTheme.colors.buttonText }]}>{t.form.save}</ThemedText>
+          <Feather name="save" size={18} color="#111827" />
+          <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
         </View>
       </Button>
 
