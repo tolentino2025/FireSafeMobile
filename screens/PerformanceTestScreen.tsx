@@ -136,7 +136,6 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const insets = useSafeAreaInsets();
 
   const [test, setTest] = useState<Partial<PerformanceTest>>(() => createEmptyPerformanceTest());
-  const [showJumpModal, setShowJumpModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -502,36 +501,6 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     );
   };
 
-  const sectionsList = [
-    { id: "contractor", label: t.performanceTest?.sections?.contractor || "1. Contractor" },
-    { id: "job", label: t.performanceTest?.sections?.job || "2. Job/Site" },
-    { id: "pump", label: t.performanceTest?.sections?.pump || "3. Pump Equipment" },
-    { id: "driver", label: t.performanceTest?.sections?.driver || "4. Driver" },
-    { id: "controller", label: t.performanceTest?.sections?.controller || "5. Controller" },
-    { id: "power", label: t.performanceTest?.sections?.power || "6. Power Supply" },
-    { id: "supply", label: t.performanceTest?.sections?.supply || "7. Water Supply" },
-    { id: "demand", label: t.performanceTest?.sections?.demand || "8. System Demand" },
-    { id: "conditions", label: t.performanceTest?.sections?.conditions || "9. Test Conditions" },
-    { id: "results", label: t.performanceTest?.sections?.results || "10. Results" },
-    { id: "observations", label: t.performanceTest?.sections?.observations || "11. Observations" },
-    { id: "signatures", label: t.performanceTest?.sections?.signatures || "12. Signatures" },
-    { id: "attachments", label: t.performanceTest?.sections?.attachments || "13. Attachments" },
-  ];
-
-  const scrollToSection = (sectionId: string) => {
-    const ref = sectionRefs[sectionId as keyof typeof sectionRefs];
-    if (ref?.current) {
-      ref.current.measureLayout(
-        scrollViewRef.current as any,
-        (x, y) => {
-          scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
-        },
-        () => {}
-      );
-    }
-    setShowJumpModal(false);
-  };
-
   const contractorOptions = contractors.map(c => ({
     id: c.id,
     label: c.name,
@@ -672,17 +641,6 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
           testDate={test.jobInfo?.testDate || ""}
         />
         <Spacer height={Spacing.xl} />
-
-        <Pressable
-          onPress={() => setShowJumpModal(true)}
-          style={[styles.jumpButton, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}
-        >
-          <Feather name="list" size={18} color={fullTheme.colors.primary} />
-          <ThemedText type="body" style={{ marginLeft: Spacing.sm, color: fullTheme.colors.primary }}>
-            {t.performanceTest?.jumpToSection || "Jump to Section"}
-          </ThemedText>
-        </Pressable>
-        <Spacer height={Spacing.lg} />
 
         <SectionCard title={t.performanceTest?.sections?.contractor || "1. Contractor Information"} sectionRef={sectionRefs.contractor}>
           <ThemedText type="body" style={styles.sectionSubtitle}>{t.performanceTest?.selectContractor || "Select Contractor"}</ThemedText>
@@ -1181,31 +1139,6 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
           <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>{t.performanceTest?.exportPdf || "PDF"}</ThemedText>
         </Pressable>
       </View>
-
-      {showJumpModal ? (
-        <Pressable style={styles.modalOverlay} onPress={() => setShowJumpModal(false)}>
-          <View style={[styles.jumpModal, { backgroundColor: fullTheme.colors.cardBackground }]}>
-            <View style={styles.jumpModalHeader}>
-              <ThemedText type="h3">{t.performanceTest?.jumpToSection || "Jump to Section"}</ThemedText>
-              <Pressable onPress={() => setShowJumpModal(false)}>
-                <Feather name="x" size={24} color={fullTheme.colors.textSecondary} />
-              </Pressable>
-            </View>
-            <ScrollView style={styles.jumpModalList}>
-              {sectionsList.map((section) => (
-                <Pressable
-                  key={section.id}
-                  style={[styles.jumpModalItem, { borderBottomColor: fullTheme.colors.border }]}
-                  onPress={() => scrollToSection(section.id)}
-                >
-                  <ThemedText type="body">{section.label}</ThemedText>
-                  <Feather name="chevron-right" size={18} color={fullTheme.colors.textSecondary} />
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        </Pressable>
-      ) : null}
     </View>
   );
 }
