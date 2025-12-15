@@ -1,16 +1,42 @@
-export function getLocalTimeZone(): string | undefined {
+import * as Localization from "expo-localization";
+
+export function getLocalTimeZone(): string {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const calendars = Localization.getCalendars();
+    if (calendars && calendars.length > 0 && calendars[0].timeZone) {
+      return calendars[0].timeZone;
+    }
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   } catch {
-    return undefined;
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    } catch {
+      return "UTC";
+    }
   }
 }
 
-export function formatDateWithTimezone(dateString: string, language: "pt-BR" | "en"): string {
+export function getDeviceLocale(): string {
+  try {
+    const locales = Localization.getLocales();
+    if (locales && locales.length > 0) {
+      return locales[0].languageTag || locales[0].languageCode || "pt-BR";
+    }
+  } catch {
+    return "pt-BR";
+  }
+  return "pt-BR";
+}
+
+export function formatDateWithTimezone(
+  dateString: string, 
+  language: "pt-BR" | "en",
+  customTimezone?: string
+): string {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
   
-  const timeZone = getLocalTimeZone();
+  const timeZone = customTimezone || getLocalTimeZone();
   
   return date.toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
     day: "2-digit",
@@ -20,16 +46,40 @@ export function formatDateWithTimezone(dateString: string, language: "pt-BR" | "
   });
 }
 
-export function formatShortDateWithTimezone(dateString: string, language: "pt-BR" | "en"): string {
+export function formatShortDateWithTimezone(
+  dateString: string, 
+  language: "pt-BR" | "en",
+  customTimezone?: string
+): string {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
   
-  const timeZone = getLocalTimeZone();
+  const timeZone = customTimezone || getLocalTimeZone();
   
   return date.toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone,
+  });
+}
+
+export function formatDateTimeWithTimezone(
+  dateString: string, 
+  language: "pt-BR" | "en",
+  customTimezone?: string
+): string {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  
+  const timeZone = customTimezone || getLocalTimeZone();
+  
+  return date.toLocaleString(language === "pt-BR" ? "pt-BR" : "en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     timeZone,
   });
 }
@@ -45,4 +95,17 @@ export function getLocalISOString(date: Date = new Date()): string {
   const tzOffset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date.getTime() - tzOffset);
   return localDate.toISOString();
+}
+
+export function getCurrentTimezoneInfo(): { timezone: string; offset: string; region: string } {
+  const timezone = getLocalTimeZone();
+  const now = new Date();
+  const offset = now.toLocaleTimeString("en-US", { 
+    timeZone: timezone, 
+    timeZoneName: "shortOffset" 
+  }).split(" ").pop() || "";
+  
+  const region = timezone.split("/").pop()?.replace(/_/g, " ") || timezone;
+  
+  return { timezone, offset, region };
 }
