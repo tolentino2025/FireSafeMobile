@@ -100,18 +100,25 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    let timeZone: string | undefined;
-    try {
-      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      timeZone = undefined;
+    // Parse YYYY-MM-DD as local date, not UTC
+    const parts = dateString.split('-');
+    let date: Date;
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        date = new Date(year, month - 1, day, 12, 0, 0);
+      } else {
+        date = new Date(dateString);
+      }
+    } else {
+      date = new Date(dateString);
     }
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-      timeZone,
     });
   };
 

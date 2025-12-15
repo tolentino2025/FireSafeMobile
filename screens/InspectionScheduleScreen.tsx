@@ -63,19 +63,25 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
     );
   }, [schedules, filter, today]);
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    let timeZone: string | undefined;
-    try {
-      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      timeZone = undefined;
+  const parseLocalDate = (dateString: string): Date => {
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return new Date(year, month - 1, day, 12, 0, 0);
+      }
     }
+    return new Date(dateString);
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-      timeZone,
     });
   };
 

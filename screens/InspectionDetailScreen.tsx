@@ -39,20 +39,26 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     );
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const locale = language === "pt-BR" ? "pt-BR" : "en-US";
-    let timeZone: string | undefined;
-    try {
-      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      timeZone = undefined;
+  const parseLocalDate = (dateString: string): Date => {
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return new Date(year, month - 1, day, 12, 0, 0);
+      }
     }
+    return new Date(dateString);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = parseLocalDate(dateString);
+    const locale = language === "pt-BR" ? "pt-BR" : "en-US";
     return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "long",
       year: "numeric",
-      timeZone,
     });
   };
 
