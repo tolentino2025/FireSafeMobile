@@ -22,6 +22,16 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
 
   const parseDate = (dateStr: string): Date => {
     if (!dateStr) return new Date();
+    // Parse YYYY-MM-DD as local date, not UTC
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return new Date(year, month - 1, day, 12, 0, 0); // noon to avoid timezone edge cases
+      }
+    }
     const parsed = new Date(dateStr);
     return isNaN(parsed.getTime()) ? new Date() : parsed;
   };
