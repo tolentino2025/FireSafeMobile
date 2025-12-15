@@ -18,6 +18,7 @@ import {
   checkNotificationPermissions,
   sendTestNotification,
 } from "@/utils/notifications";
+import { shareUserManualPdf } from "@/utils/manualPdfGenerator";
 
 const ADMIN_EMAIL = "suporte@firesafeitm.com";
 
@@ -30,6 +31,7 @@ export default function ProfileScreen() {
   const [hasPermission, setHasPermission] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
+  const [generatingManual, setGeneratingManual] = useState(false);
 
   useEffect(() => {
     loadNotificationSettings();
@@ -65,6 +67,34 @@ export default function ProfileScreen() {
       Haptics.selectionAsync();
     }
     setHelpModalVisible(true);
+  };
+
+  const handleDownloadManual = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    setGeneratingManual(true);
+    try {
+      const success = await shareUserManualPdf(language as "pt-BR" | "en");
+      if (!success) {
+        Alert.alert(
+          language === "pt-BR" ? "Erro" : "Error",
+          language === "pt-BR" 
+            ? "Não foi possível gerar o manual. Tente novamente." 
+            : "Could not generate the manual. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error generating manual:", error);
+      Alert.alert(
+        language === "pt-BR" ? "Erro" : "Error",
+        language === "pt-BR" 
+          ? "Ocorreu um erro ao gerar o manual." 
+          : "An error occurred while generating the manual."
+      );
+    } finally {
+      setGeneratingManual(false);
+    }
   };
 
   const sendHelpRequest = async (type: HelpType) => {
@@ -223,6 +253,12 @@ export default function ProfileScreen() {
               thumbColor={notificationsEnabled ? "#FFFFFF" : "#F4F4F4"}
             />
           }
+        />
+        <SettingsRow
+          icon="book-open"
+          label={language === "pt-BR" ? "Manual do Usuário" : "User Manual"}
+          value={generatingManual ? (language === "pt-BR" ? "Gerando..." : "Generating...") : undefined}
+          onPress={generatingManual ? undefined : handleDownloadManual}
         />
         <SettingsRow
           icon="info"
