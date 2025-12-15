@@ -5,6 +5,7 @@ import { Platform } from "react-native";
 const LICENSE_PREFIX = "FIRE";
 const SECRET_KEY = 'FIRESAFE_ITM_LICENSE_SECRET_2025_NFPA25';
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const LICENSE_API_URL = 'https://api.firesafe-itm.com';
 
 function encodeBase32Custom(num: number, length: number): string {
   let result = '';
@@ -186,10 +187,19 @@ export function checkLicenseExpiration(licenseData: LicenseData): LicenseValidat
 
 export function formatDate(dateString: string, language: "pt-BR" | "en"): string {
   const date = new Date(dateString);
+  
+  let timeZone: string | undefined;
+  try {
+    timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    timeZone = undefined;
+  }
+  
   return date.toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
     day: "2-digit",
     month: "long",
     year: "numeric",
+    timeZone,
   });
 }
 
@@ -213,7 +223,7 @@ export async function getDeviceId(): Promise<string> {
     }
     
     if (Platform.OS === "android") {
-      const androidId = Application.androidId;
+      const androidId = Application.getAndroidId();
       if (androidId) return androidId;
     }
     
