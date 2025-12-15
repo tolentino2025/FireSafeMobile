@@ -415,21 +415,34 @@ interface GeneratePerformanceTestPdfOptions {
   language: "en" | "pt-BR";
 }
 
+const getLocalTimeZone = (): string | undefined => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+};
+
 const formatDate = (dateString: string, language: string): string => {
   if (!dateString) return "-";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
+  
+  const timeZone = getLocalTimeZone();
+  
   if (language === "pt-BR") {
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "long",
       year: "numeric",
+      timeZone,
     });
   }
   return date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone,
   });
 };
 

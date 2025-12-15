@@ -33,13 +33,22 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
     return `${year}-${month}-${day}`;
   };
 
+  const getLocalTimeZone = (): string | undefined => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return undefined;
+    }
+  };
+
   const formatDisplayDate = (dateStr: string): string => {
     if (!dateStr) return "";
     const date = parseDate(dateStr);
+    const timeZone = getLocalTimeZone();
     if (language === "pt-BR") {
-      return date.toLocaleDateString("pt-BR");
+      return date.toLocaleDateString("pt-BR", { timeZone });
     }
-    return date.toLocaleDateString("en-US");
+    return date.toLocaleDateString("en-US", { timeZone });
   };
 
   useEffect(() => {

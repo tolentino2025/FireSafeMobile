@@ -59,7 +59,13 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [inspectorEmail, setInspectorEmail] = useState(existingInspection?.inspectorData?.email || "");
   const [inspectorPhone, setInspectorPhone] = useState(existingInspection?.inspectorData?.phone || "");
   const [contractNo, setContractNo] = useState(existingInspection?.contractNo || "");
-  const [date, setDate] = useState(existingInspection?.date || new Date().toISOString().split("T")[0]);
+  const getLocalDateString = (d: Date = new Date()): string => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const [date, setDate] = useState(existingInspection?.date || getLocalDateString());
   const [frequency, setFrequency] = useState<InspectionFrequency>(existingInspection?.frequency || "weekly");
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
     existingInspection?.checklist || getChecklistForType(type, existingInspection?.frequency || "weekly", t.checklistItems)

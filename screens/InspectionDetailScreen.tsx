@@ -42,10 +42,17 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const locale = language === "pt-BR" ? "pt-BR" : "en-US";
+    let timeZone: string | undefined;
+    try {
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      timeZone = undefined;
+    }
     return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "long",
       year: "numeric",
+      timeZone,
     });
   };
 

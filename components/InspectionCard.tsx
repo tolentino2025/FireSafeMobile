@@ -101,10 +101,17 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    let timeZone: string | undefined;
+    try {
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      timeZone = undefined;
+    }
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "short",
       year: "numeric",
+      timeZone,
     });
   };
 

@@ -194,18 +194,30 @@ export async function getScheduledNotifications(): Promise<Notifications.Notific
   }
 }
 
+function getLocalTimeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
 function formatDate(date: Date, language: string): string {
+  const timeZone = getLocalTimeZone();
+  
   if (language === "pt-BR") {
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "long",
       year: "numeric",
+      timeZone,
     });
   }
   return date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone,
   });
 }
 

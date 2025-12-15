@@ -64,12 +64,19 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
   }, [schedules, filter, today]);
 
   const formatDate = (dateString: string): string => {
-    const datePart = dateString.split("T")[0];
-    const [year, month, day] = datePart.split("-");
-    if (language === "pt-BR") {
-      return `${day}/${month}/${year}`;
+    const date = new Date(dateString);
+    let timeZone: string | undefined;
+    try {
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      timeZone = undefined;
     }
-    return `${month}/${day}/${year}`;
+    return date.toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone,
+    });
   };
 
   const handleSchedulePress = (schedule: InspectionSchedule) => {
