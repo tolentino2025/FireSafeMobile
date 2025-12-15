@@ -839,9 +839,8 @@ const generateInspectionPdfHtmlWithPhotos = (
 };
 
 export const generateAndPrintPdf = async (options: GeneratePdfOptions): Promise<void> => {
-  const photosWithBase64 = await ensureAllPhotosBase64(options.inspection.photos || []);
-  const html = generateInspectionPdfHtmlWithPhotos(options, photosWithBase64);
-  await Print.printAsync({ html });
+  const uri = await generatePdfUri(options);
+  await Print.printAsync({ uri });
 };
 
 export const generatePdfUri = async (options: GeneratePdfOptions): Promise<string> => {
