@@ -43,27 +43,16 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
       const storedLicense = await AsyncStorage.getItem(LICENSE_STORAGE_KEY);
       if (storedLicense) {
         const data: LicenseData = JSON.parse(storedLicense);
-        setLicenseData(data);
-        const localStatus = checkLicenseExpiration(data);
-        setLicenseStatus(localStatus);
+        const cryptoValidation = validateLicenseKeyCrypto(data.key);
         
-        const deviceId = await getOrCreateDeviceId();
-        const serverResult = await validateLicenseWithApi(data.key, deviceId);
-        
-        if (serverResult.success && serverResult.expiresAt) {
-          const updatedData: LicenseData = {
-            ...data,
-            expiresAt: serverResult.expiresAt,
-            activatedAt: serverResult.activatedAt || data.activatedAt,
-          };
-          await AsyncStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(updatedData));
-          setLicenseData(updatedData);
-          const serverStatus = checkLicenseExpiration(updatedData);
-          setLicenseStatus(serverStatus);
-        } else if (serverResult.error && serverResult.error !== "network_error") {
+        if (!cryptoValidation.valid) {
           await AsyncStorage.removeItem(LICENSE_STORAGE_KEY);
           setLicenseData(null);
           setLicenseStatus(null);
+        } else {
+          setLicenseData(data);
+          const localStatus = checkLicenseExpiration(data);
+          setLicenseStatus(localStatus);
         }
       } else {
         setLicenseData(null);
@@ -100,22 +89,16 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const deviceId = await getOrCreateDeviceId();
-      const apiResult = await activateLicenseWithApi(key, deviceId);
-      
-      if (apiResult.error === "network_error") {
-        return { success: false, error: "network_error" };
-      }
-      
-      if (!apiResult.success || !apiResult.activatedAt || !apiResult.expiresAt) {
-        return { success: false, error: apiResult.error || "activation_failed" };
-      }
+      const activatedAt = new Date();
+      const validityMonths = localValidation.validityMonths || 6;
+      const expiresAt = new Date(activatedAt);
+      expiresAt.setMonth(expiresAt.getMonth() + validityMonths);
       
       const newLicenseData: LicenseData = {
         key: key.toUpperCase().trim(),
-        activatedAt: apiResult.activatedAt,
-        expiresAt: apiResult.expiresAt,
-        validityMonths: apiResult.validityMonths || 6,
+        activatedAt: activatedAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+        validityMonths,
       };
       
       await AsyncStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(newLicenseData));
