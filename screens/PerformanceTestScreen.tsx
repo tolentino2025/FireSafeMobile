@@ -135,7 +135,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById, addInspection } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -591,6 +591,36 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       } else {
         await addElectricPerformanceTest(finalTest);
       }
+
+      const getLocalDateString = (d: Date = new Date()): string => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const inspectionRecord = {
+        id: `insp-electric-${finalTest.id}`,
+        type: "electric_pump" as const,
+        propertyName: finalTest.jobInfo?.jobName || "",
+        propertyAddress: `${finalTest.jobInfo?.address || ""}, ${finalTest.jobInfo?.city || ""}, ${finalTest.jobInfo?.state || ""}`.trim().replace(/^,\s*|,\s*$/g, ""),
+        propertyPhone: "",
+        inspectorName: finalTest.signatures?.conductedBy?.name || "",
+        contractNo: finalTest.jobInfo?.jobNumber || "",
+        date: finalTest.jobInfo?.testDate || getLocalDateString(),
+        frequency: "annually" as const,
+        checklist: [],
+        observations: finalTest.observationsDeficiencies?.generalObservations || "",
+        signature: finalTest.signatures?.conductedBy?.signatureData || null,
+        photos: [],
+        geoLocation: null,
+        status: "completed" as const,
+        performanceTestId: finalTest.id,
+        createdAt: finalTest.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      await addInspection(inspectionRecord as any);
       
       await clearDraft();
       
