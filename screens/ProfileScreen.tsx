@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal, Share } from "react-native";
+import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal, Share, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
@@ -29,6 +29,7 @@ export default function ProfileScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
 
   useEffect(() => {
     loadNotificationSettings();
@@ -53,11 +54,10 @@ export default function ProfileScreen() {
   };
 
   const handleAbout = () => {
-    Alert.alert(
-      "FireSafe ITM",
-      "Sistema de Inspeção, Teste e Manutenção NFPA 25\n\nVersion: 1.0.0\n\nCompliance with NFPA 25 standards for fire protection systems inspection.",
-      [{ text: "OK" }]
-    );
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    setAboutModalVisible(true);
   };
 
   const handleHelp = () => {
@@ -298,7 +298,129 @@ export default function ProfileScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <Modal
+        visible={aboutModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAboutModalVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={() => setAboutModalVisible(false)}
+        >
+          <View style={[styles.aboutModalContent, { backgroundColor: fullTheme.colors.cardBackground }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">{t.profile.about}</ThemedText>
+              <Pressable onPress={() => setAboutModalVisible(false)}>
+                <Feather name="x" size={24} color={fullTheme.colors.textSecondary} />
+              </Pressable>
+            </View>
+            
+            <ScrollView showsVerticalScrollIndicator={false}>
+            <Spacer height={Spacing.xl} />
+            
+            <View style={styles.aboutLogoContainer}>
+              <View style={[styles.aboutLogo, { backgroundColor: fullTheme.colors.primary }]}>
+                <Feather name="shield" size={40} color="#FFFFFF" />
+              </View>
+              <Spacer height={Spacing.md} />
+              <ThemedText type="h2">FireSafe ITM</ThemedText>
+              <ThemedText type="small" secondary>{t.profile.version} {version}</ThemedText>
+            </View>
+            
+            <Spacer height={Spacing.xl} />
+            
+            <View style={[styles.aboutSection, { borderTopColor: fullTheme.colors.border }]}>
+              <ThemedText type="body" style={styles.aboutText}>
+                {language === "pt-BR" 
+                  ? "O FireSafe ITM é um aplicativo completo para Inspeção, Teste e Manutenção de sistemas de proteção contra incêndio, desenvolvido em conformidade com as normas NFPA 25."
+                  : "FireSafe ITM is a complete application for Inspection, Testing, and Maintenance of fire protection systems, developed in compliance with NFPA 25 standards."
+                }
+              </ThemedText>
+              
+              <Spacer height={Spacing.lg} />
+              
+              <ThemedText type="h4">{language === "pt-BR" ? "Recursos Principais:" : "Key Features:"}</ThemedText>
+              <Spacer height={Spacing.sm} />
+              
+              <View style={styles.featureList}>
+                <FeatureItem 
+                  icon="check-circle" 
+                  text={language === "pt-BR" ? "Sprinklers (Tubo Molhado, Seco, Pré-Ação)" : "Sprinklers (Wet Pipe, Dry Pipe, Preaction)"}
+                />
+                <FeatureItem 
+                  icon="activity" 
+                  text={language === "pt-BR" ? "Bombas de Incêndio (Semanal, Mensal, Anual)" : "Fire Pumps (Weekly, Monthly, Annual)"}
+                />
+                <FeatureItem 
+                  icon="droplet" 
+                  text={language === "pt-BR" ? "Hidrantes e Tubulação" : "Hydrants and Piping"}
+                />
+                <FeatureItem 
+                  icon="database" 
+                  text={language === "pt-BR" ? "Tanques e Reservatórios" : "Water Tanks"}
+                />
+                <FeatureItem 
+                  icon="file-text" 
+                  text={language === "pt-BR" ? "Relatórios PDF Profissionais" : "Professional PDF Reports"}
+                />
+                <FeatureItem 
+                  icon="camera" 
+                  text={language === "pt-BR" ? "Captura de Fotos e Assinaturas" : "Photo and Signature Capture"}
+                />
+                <FeatureItem 
+                  icon="bell" 
+                  text={language === "pt-BR" ? "Lembretes de Inspeções Programadas" : "Scheduled Inspection Reminders"}
+                />
+                <FeatureItem 
+                  icon="wifi-off" 
+                  text={language === "pt-BR" ? "Funciona 100% Offline" : "Works 100% Offline"}
+                />
+              </View>
+              
+              <Spacer height={Spacing.lg} />
+              
+              <View style={[styles.complianceBadge, { backgroundColor: `${fullTheme.colors.success}15` }]}>
+                <Feather name="award" size={20} color={fullTheme.colors.success} />
+                <ThemedText type="body" style={{ color: fullTheme.colors.success, marginLeft: Spacing.sm, fontWeight: "600" }}>
+                  {language === "pt-BR" ? "Conforme NFPA 25" : "NFPA 25 Compliant"}
+                </ThemedText>
+              </View>
+            </View>
+            
+            <Spacer height={Spacing.lg} />
+            
+            <Pressable 
+              style={[styles.aboutCloseButton, { backgroundColor: fullTheme.colors.primary }]}
+              onPress={() => setAboutModalVisible(false)}
+            >
+              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                {t.common.close || "OK"}
+              </ThemedText>
+            </Pressable>
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
     </ScreenScrollView>
+  );
+}
+
+interface FeatureItemProps {
+  icon: keyof typeof Feather.glyphMap;
+  text: string;
+}
+
+function FeatureItem({ icon, text }: FeatureItemProps) {
+  const { fullTheme } = useTheme();
+  return (
+    <View style={styles.featureItem}>
+      <Feather name={icon} size={16} color={fullTheme.colors.primary} />
+      <ThemedText type="small" style={{ marginLeft: Spacing.sm, flex: 1 }}>
+        {text}
+      </ThemedText>
+    </View>
   );
 }
 
@@ -515,5 +637,50 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+  },
+  aboutModalContent: {
+    width: "100%",
+    maxWidth: 400,
+    maxHeight: "90%",
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+  },
+  aboutLogoContainer: {
+    alignItems: "center",
+  },
+  aboutLogo: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aboutSection: {
+    borderTopWidth: 1,
+    paddingTop: Spacing.lg,
+  },
+  aboutText: {
+    lineHeight: 22,
+    textAlign: "center",
+  },
+  featureList: {
+    gap: Spacing.sm,
+  },
+  featureItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  complianceBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+  },
+  aboutCloseButton: {
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    alignItems: "center",
   },
 });
