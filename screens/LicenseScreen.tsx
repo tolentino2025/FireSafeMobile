@@ -177,8 +177,8 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
           variant="save"
         >
           <View style={styles.buttonContent}>
-            <Feather name="key" size={20} color={isLoading || licenseKeyInput.replace(/-/g, "").length < 12 ? "#E5E7EB" : "#111827"} />
-            <ThemedText type="body" style={[styles.buttonText, { color: isLoading || licenseKeyInput.replace(/-/g, "").length < 12 ? "#E5E7EB" : "#111827" }]}>
+            <Feather name="key" size={20} color="#000000" />
+            <ThemedText type="body" style={styles.activateButtonText}>
               {isLoading 
                 ? (t.license?.activating || "Activating...") 
                 : (t.license?.activateButton || "Ativar Licença")
@@ -274,6 +274,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: "600",
+  },
+  activateButtonText: {
+    fontWeight: "600",
+    color: "#000000",
   },
   infoBox: {
     width: "100%",
