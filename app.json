@@ -4,7 +4,7 @@
     "slug": "firesafe-itm",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/app-icon.png",
     "scheme": "firesafeitm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
