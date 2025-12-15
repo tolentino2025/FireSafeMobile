@@ -131,7 +131,7 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
         <Spacer height={Spacing["3xl"]} />
 
         <View style={styles.inputContainer}>
-          <ThemedText type="label" style={styles.inputLabel}>
+          <ThemedText type="small" style={styles.inputLabel}>
             {t.license?.keyLabel || "License Key"}
           </ThemedText>
           <Spacer height={Spacing.sm} />
@@ -174,11 +174,17 @@ export default function LicenseScreen({ isExpired = false, expirationDate }: Lic
           onPress={handleActivate}
           disabled={isLoading || licenseKeyInput.replace(/-/g, "").length < 12}
           style={styles.button}
+          variant="save"
         >
-          {isLoading 
-            ? (t.license?.activating || "Activating...") 
-            : (t.license?.activateButton || "Ativar Licença")
-          }
+          <View style={styles.buttonContent}>
+            <Feather name="key" size={20} color={isLoading || licenseKeyInput.replace(/-/g, "").length < 12 ? "#E5E7EB" : "#111827"} />
+            <ThemedText type="body" style={[styles.buttonText, { color: isLoading || licenseKeyInput.replace(/-/g, "").length < 12 ? "#E5E7EB" : "#111827" }]}>
+              {isLoading 
+                ? (t.license?.activating || "Activating...") 
+                : (t.license?.activateButton || "Ativar Licença")
+              }
+            </ThemedText>
+          </View>
         </Button>
 
         {isLoading ? (
@@ -260,6 +266,14 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  buttonText: {
+    fontWeight: "600",
   },
   infoBox: {
     width: "100%",
