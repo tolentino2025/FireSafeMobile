@@ -33,6 +33,7 @@ import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
+import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -51,7 +52,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     : undefined;
 
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>(existingInspection?.companyId);
+  const [selectedContractorCompanyId, setSelectedContractorCompanyId] = useState<string | undefined>(undefined);
   const [selectedInspectorId, setSelectedInspectorId] = useState<string | undefined>(existingInspection?.inspectorId);
+  
+  const isFM85A = type === "fm85a";
   const [selectedFirePumpId, setSelectedFirePumpId] = useState<string | undefined>(existingInspection?.firePumpId);
   const [selectedFirePumpPanelId, setSelectedFirePumpPanelId] = useState<string | undefined>(existingInspection?.firePumpPanelId);
   const [propertyName, setPropertyName] = useState(existingInspection?.propertyName || "");
@@ -157,6 +161,36 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           .join(", ")
       );
       setPropertyPhone(company.contactPhone);
+      
+      if (isFM85A) {
+        setFm85aCertificate(prev => ({
+          ...prev,
+          clientInfo: {
+            ...prev.clientInfo,
+            fmGlobalClientName: company.name,
+            fmGlobalClientAddress: [company.address, company.city, company.state, company.zipCode]
+              .filter(Boolean)
+              .join(", "),
+          },
+        }));
+      }
+    }
+  };
+
+  const handleContractorCompanySelect = (companyId: string) => {
+    setSelectedContractorCompanyId(companyId);
+    const company = companies.find((c) => c.id === companyId);
+    if (company) {
+      setFm85aCertificate(prev => ({
+        ...prev,
+        contractorInfo: {
+          ...prev.contractorInfo,
+          contractorCompanyName: company.name,
+          contractorCompanyAddress: [company.address, company.city, company.state, company.zipCode]
+            .filter(Boolean)
+            .join(", "),
+        },
+      }));
     }
   };
 
@@ -167,6 +201,16 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       setInspectorName(inspector.name);
       setInspectorEmail(inspector.email);
       setInspectorPhone(inspector.phone);
+      
+      if (isFM85A) {
+        setFm85aCertificate(prev => ({
+          ...prev,
+          signatures: {
+            ...prev.signatures,
+            inspectorName: inspector.name,
+          },
+        }));
+      }
     }
   };
 
@@ -410,6 +454,15 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }
   };
 
+  const handleFM85APdf = async () => {
+    try {
+      await generateAndShareFM85APdf({ certificate: fm85aCertificate, language: language as "en" | "pt-BR" });
+    } catch (error) {
+      console.error("Error generating FM85A PDF:", error);
+      Alert.alert(t.common.error, t.report.pdfError || "Erro ao gerar PDF");
+    }
+  };
+
   const getTypeKey = (type: InspectionType): keyof typeof t.inspectionTypes => {
     const mapping: Record<InspectionType, keyof typeof t.inspectionTypes> = {
       wet_pipe: "wetPipe",
@@ -465,6 +518,94 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     styles.input,
     { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.border },
   ];
+
+  if (isFM85A) {
+    return (
+      <>
+        <ScreenKeyboardAwareScrollView>
+          <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>
+            <Feather name="check-circle" size={14} color={AppColors.success} />
+            <ThemedText type="small" style={{ color: AppColors.success, marginLeft: Spacing.xs }}>
+              {t.form.autoSaved}
+            </ThemedText>
+          </Animated.View>
+
+          <ThemedText type="h3">{language === 'pt-BR' ? 'Empresa Contratada (Contractor)' : 'Contractor Company'}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          <SelectPicker
+            options={companyOptions}
+            selectedId={selectedContractorCompanyId}
+            onSelect={handleContractorCompanySelect}
+            placeholder={language === 'pt-BR' ? 'Selecione a empresa contratada' : 'Select contractor company'}
+            title={language === 'pt-BR' ? 'Empresa Contratada' : 'Contractor Company'}
+            emptyText={t.companies.noResults}
+          />
+
+          <Spacer height={Spacing.lg} />
+
+          <ThemedText type="h3">{language === 'pt-BR' ? 'Empresa/Propriedade (Cliente)' : 'Client Company/Property'}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          <SelectPicker
+            options={companyOptions}
+            selectedId={selectedCompanyId}
+            onSelect={handleCompanySelect}
+            placeholder={t.companies.noCompanySelected}
+            title={language === 'pt-BR' ? 'Empresa Cliente' : 'Client Company'}
+            emptyText={t.companies.noResults}
+          />
+
+          <Spacer height={Spacing.lg} />
+
+          <ThemedText type="h3">{t.users.selectInspector}</ThemedText>
+          <Spacer height={Spacing.sm} />
+          <SelectPicker
+            options={inspectorOptions}
+            selectedId={selectedInspectorId}
+            onSelect={handleInspectorSelect}
+            placeholder={t.users.noInspectorSelected}
+            title={t.users.selectInspector}
+            emptyText={t.users.noResults}
+          />
+
+          <Spacer height={Spacing["2xl"]} />
+
+          <FM85ASection
+            certificate={fm85aCertificate}
+            onCertificateChange={setFm85aCertificate}
+            isExpanded={fm85aExpanded}
+            onToggleExpand={() => setFm85aExpanded(!fm85aExpanded)}
+          />
+
+          <Spacer height={100 + Spacing["4xl"]} />
+        </ScreenKeyboardAwareScrollView>
+
+        <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.md, bottom: tabBarHeight }]}>
+          <Pressable
+            onPress={handleSaveDraft}
+            disabled={isSaving}
+            style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+          >
+            <Feather name="save" size={18} color={fullTheme.colors.textPrimary} />
+            <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>{language === 'pt-BR' ? 'Salvar' : 'Save'}</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleSubmit}
+            style={[styles.actionButton, styles.submitButton, { backgroundColor: fullTheme.colors.primary }]}
+          >
+            <Feather name="check-circle" size={18} color="#FFFFFF" />
+            <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: "#FFFFFF" }}>{language === 'pt-BR' ? 'Concluir' : 'Complete'}</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleFM85APdf}
+            style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+          >
+            <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
+            <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
+          </Pressable>
+        </View>
+      </>
+    );
+  }
 
   return (
     <>

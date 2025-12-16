@@ -1,0 +1,95 @@
+PROMPT 2 — FM85A no MESMO layout das inspeções (e dropdown só para empresa(s) e inspetor)
+
+Objetivo: no InspectionFormScreen, quando type === "fm85a":
+
+manter o padrão visual (cards + spacing + bottom bar fixo)
+
+exibir apenas os dropdowns permitidos e o conteúdo do FM85A
+
+preencher automaticamente os campos do certificado a partir dos cadastros
+
+Alterações no InspectionFormScreen.tsx:
+
+Criar estado para seleção do contractor (empresa contratada)
+
+Hoje você já tem selectedCompanyId (que é a “empresa/propriedade”) e selectedInspectorId.
+
+Adicionar:
+
+const [selectedContractorCompanyId, setSelectedContractorCompanyId] = useState<string | undefined>(...)
+
+Opções do picker: usar companies já existentes.
+
+Render condicional: “modo FM85A”
+
+Criar const isFM85A = type === "fm85a";
+
+Se isFM85A:
+
+NÃO renderizar: frequência, checklist, fotos, assinatura da inspeção, bomba etc.
+
+Renderizar SOMENTE:
+
+SelectPicker Contractor Company (dropdown)
+
+SelectPicker Client Company (dropdown) (pode reaproveitar o selectedCompanyId)
+
+SelectPicker Inspector (dropdown)
+
+FM85ASection (form completo já existente)
+
+Manter o mesmo container/spacing do ScreenKeyboardAwareScrollView.
+
+Autofill do certificado via dropdown
+
+Quando selecionar contractor company:
+
+preencher fm85aCertificate.contractorInfo.*
+
+exemplo (ajustar conforme seus campos reais do Company):
+
+contractorCompanyName = company.name
+
+address / city / state / zip concatenado
+
+phone = company.contactPhone
+
+email se existir
+
+Quando selecionar client company:
+
+preencher fm85aCertificate.clientInfo.* (nome, endereço, telefone etc)
+
+Quando selecionar inspector:
+
+preencher os campos do certificado relacionados ao inspetor (onde você usa isso no FM85A — se no seu modelo ele fica em contractorInfo ou signatures, preencha lá).
+
+IMPORTANTÍSSIMO: não alterar o gerador de PDF (utils/fm85aPdfGenerator.ts) nem o HTML, só garantir que os valores cheguem preenchidos no certificate.
+
+Bottom bar idêntico ao das inspeções
+
+No modo FM85A, o bottom bar deve ficar:
+
+Botão 1: Salvar (draft) → chama o mesmo handleSaveDraft (mas salvando fm85aCertificate junto).
+
+Botão 2: Concluir → chama handleSubmit (ou equivalente), definindo status e persistindo.
+
+Botão 3: PDF → gerar/compartilhar PDF FM85A usando generateAndShareFM85APdf({ certificate: fm85aCertificate, language })
+
+Visual: copiar exatamente os estilos do bottom bar do InspectionFormScreen.
+
+Critérios de aceite:
+
+FM85A visualmente fica igual às inspeções de sprinklers (mesmo padrão de espaçamento, cards, tipografia e bottom bar).
+
+Existe dropdown somente para:
+
+Empresa Contratada (Contractor)
+
+Empresa/Propriedade (Client)
+
+Inspetor
+
+Ao selecionar, os campos correspondentes do certificado são preenchidos automaticamente.
+
+PDF FM85A continua igual (sem alteração de layout).
