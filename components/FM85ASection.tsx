@@ -923,7 +923,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Feather name="share-2" size={18} color="#FFFFFF" />
+                  <Feather name="check-circle" size={18} color="#FFFFFF" />
                   <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: "#FFFFFF" }}>
                     {language === 'pt-BR' ? 'Enviar' : 'Send'}
                   </ThemedText>
