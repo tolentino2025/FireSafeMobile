@@ -27,6 +27,7 @@ import { HydrostaticTestSection } from "@/components/inspections/HydrostaticTest
 import Spacer from "@/components/Spacer";
 import { FM85ACertificate, createEmptyFM85ACertificate } from "@/types/fm85a";
 import { HydrostaticTest, createEmptyHydrostaticTest } from "@/types/hydrostaticTest";
+import { validateHydrostaticTest } from "@/utils/validators/hydrostaticTestValidator";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel, GeoLocation } from "@/contexts/InspectionContext";
@@ -296,7 +297,18 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   }, []);
 
   const handleSubmit = async () => {
-    if (!propertyName.trim()) {
+    if (isHydrostatic) {
+      const validationErrors = validateHydrostaticTest(hydrostaticTest, language as "en" | "pt-BR");
+      if (validationErrors.length > 0) {
+        const errorMessages = validationErrors.map(e => `- ${e.message}`).join('\n');
+        const title = language === "pt-BR" ? "Campos Obrigatórios" : "Required Fields";
+        const subtitle = language === "pt-BR" 
+          ? "Por favor, preencha os seguintes campos:" 
+          : "Please fill in the following fields:";
+        Alert.alert(title, `${subtitle}\n\n${errorMessages}`);
+        return;
+      }
+    } else if (!propertyName.trim()) {
       Alert.alert(t.common.error, t.form.required);
       return;
     }
@@ -311,12 +323,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       type,
       status: "completed",
       propertyId: "",
-      propertyName,
-      propertyAddress,
-      propertyPhone,
-      inspectorName,
+      propertyName: isHydrostatic ? hydrostaticTest.owner.corporateName : propertyName,
+      propertyAddress: isHydrostatic ? hydrostaticTest.owner.address : propertyAddress,
+      propertyPhone: isHydrostatic ? hydrostaticTest.owner.contact : propertyPhone,
+      inspectorName: isHydrostatic ? hydrostaticTest.inspector.name : inspectorName,
       contractNo,
-      date,
+      date: isHydrostatic ? hydrostaticTest.testDate : date,
       frequency,
       checklist,
       observations,
@@ -344,7 +356,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         await addInspection(inspectionData);
       }
       
-      await createOrUpdateScheduleForInspection(inspectionData, language as "en" | "pt-BR");
+      if (!isHydrostatic) {
+        await createOrUpdateScheduleForInspection(inspectionData, language as "en" | "pt-BR");
+      }
       
       navigation.goBack();
     } catch (error) {
@@ -366,12 +380,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         type,
         status: "draft",
         propertyId: "",
-        propertyName,
-        propertyAddress,
-        propertyPhone,
-        inspectorName,
+        propertyName: isHydrostatic ? (hydrostaticTest.owner.corporateName || "") : propertyName,
+        propertyAddress: isHydrostatic ? (hydrostaticTest.owner.address || "") : propertyAddress,
+        propertyPhone: isHydrostatic ? (hydrostaticTest.owner.contact || "") : propertyPhone,
+        inspectorName: isHydrostatic ? (hydrostaticTest.inspector.name || "") : inspectorName,
         contractNo,
-        date,
+        date: isHydrostatic ? (hydrostaticTest.testDate || date) : date,
         frequency,
         checklist,
         observations,
@@ -428,12 +442,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       type,
       status: existingInspection?.status || "draft",
       propertyId: "",
-      propertyName,
-      propertyAddress,
-      propertyPhone,
-      inspectorName,
+      propertyName: isHydrostatic ? (hydrostaticTest.owner.corporateName || "") : propertyName,
+      propertyAddress: isHydrostatic ? (hydrostaticTest.owner.address || "") : propertyAddress,
+      propertyPhone: isHydrostatic ? (hydrostaticTest.owner.contact || "") : propertyPhone,
+      inspectorName: isHydrostatic ? (hydrostaticTest.inspector.name || "") : inspectorName,
       contractNo,
-      date,
+      date: isHydrostatic ? (hydrostaticTest.testDate || date) : date,
       frequency,
       checklist,
       observations,
