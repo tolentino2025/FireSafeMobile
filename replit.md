@@ -89,8 +89,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 │   ├── ProfileScreen.tsx
 │   ├── PropertiesScreen.tsx     # 3-tab view: Companies, Inspectors, Properties
 │   ├── PropertyFormScreen.tsx
-│   ├── UserFormScreen.tsx       # Create/edit inspectors
-│   └── FM85AFormScreen.tsx      # FM Global FM85A Certificate form
+│   └── UserFormScreen.tsx       # Create/edit inspectors
 └── utils/
     ├── checklistTemplates.ts    # NFPA 25 checklist templates
     ├── notifications.ts         # Push notification scheduling
