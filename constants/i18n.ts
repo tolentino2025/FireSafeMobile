@@ -60,6 +60,7 @@ export const translations = {
         hydrants: "Hidrantes e Tubulações",
         tanks: "Tanques e Certificados",
         certificates: "Certificados FM Global",
+        tests: "Testes",
       },
     },
     inspectionTypes: {
@@ -83,6 +84,7 @@ export const translations = {
       performanceTest: "Teste Anual - Bomba Elétrica",
       dieselPerformanceTest: "Teste Anual Bomba Diesel",
       fm85a: "Certificado FM85A",
+      hydrostaticTest: "Teste Hidrostático",
     },
     form: {
       propertyName: "Nome da Propriedade",
@@ -2647,6 +2649,7 @@ export const translations = {
         hydrants: "Hydrants & Piping",
         tanks: "Tanks & Certificates",
         certificates: "FM Global Certificates",
+        tests: "Tests",
       },
     },
     inspectionTypes: {
@@ -2670,6 +2673,7 @@ export const translations = {
       performanceTest: "Annual Test - Electric Pump",
       dieselPerformanceTest: "Diesel Pump Annual Test",
       fm85a: "FM85A Certificate",
+      hydrostaticTest: "Hydrostatic Test",
     },
     form: {
       propertyName: "Property Name",

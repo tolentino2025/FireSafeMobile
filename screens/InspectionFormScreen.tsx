@@ -483,6 +483,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       standpipe: "standpipe",
       fire_service_mains: "standpipe",
       fm85a: "fm85a",
+      hydrostatic_test: "hydrostaticTest",
     };
     return mapping[type];
   };

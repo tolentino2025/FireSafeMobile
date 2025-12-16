@@ -100,7 +100,7 @@ export type InspectionType =
   | "pump_weekly" | "pump_monthly" | "pump_annual" | "electric_pump" | "diesel_pump"
   | "aboveground" | "underground" | "hydrant_flow"
   | "water_tank" | "hazard_eval" | "standpipe" | "fire_service_mains"
-  | "fm85a";
+  | "fm85a" | "hydrostatic_test";
 
 export type ChecklistValue = "yes" | "no" | "na" | null;
 

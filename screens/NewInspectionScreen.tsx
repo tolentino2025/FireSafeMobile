@@ -74,6 +74,12 @@ const inspectionCategories = [
       { type: "fm85a" as const, icon: "file-text" as const, labelKey: "fm85a" as const, nfpaRef: "FM Global" },
     ],
   },
+  {
+    categoryKey: "tests" as const,
+    items: [
+      { type: "hydrostatic_test" as const, icon: "thermometer" as const, labelKey: "hydrostaticTest" as const, nfpaRef: "NFPA 25" },
+    ],
+  },
 ];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

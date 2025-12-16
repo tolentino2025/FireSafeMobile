@@ -1913,6 +1913,7 @@ const checklistsByType: Record<InspectionType, ChecklistTemplate[]> = {
   standpipe: standpipeChecklist,
   fire_service_mains: fireServiceMainsChecklist,
   fm85a: [],
+  hydrostatic_test: [],
 };
 
 export function getChecklistForType(
