@@ -29,6 +29,7 @@ export const translations = {
       new: "Nova Inspeção",
       noResults: "Nenhuma inspeção encontrada",
       status: {
+        draft: "Rascunho",
         completed: "Concluída",
         pending: "Pendente",
         inProgress: "Em Andamento",
@@ -2448,6 +2449,7 @@ export const translations = {
       new: "New Inspection",
       noResults: "No inspections found",
       status: {
+        draft: "Draft",
         completed: "Completed",
         pending: "Pending",
         inProgress: "In Progress",

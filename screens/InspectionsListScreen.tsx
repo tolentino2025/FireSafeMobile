@@ -97,7 +97,7 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
       <Spacer height={Spacing.md} />
 
       <View style={styles.filterRow}>
-        {["completed", "in_progress", "pending"].map((status) => (
+        {(["completed", "in_progress", "pending", "draft"] as const).map((status) => (
           <Pressable
             key={status}
             onPress={() => setStatusFilter(statusFilter === status ? null : status)}
@@ -123,6 +123,8 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
                 ? t.inspections.status.completed
                 : status === "in_progress"
                 ? t.inspections.status.inProgress
+                : status === "draft"
+                ? t.inspections.status.draft
                 : t.inspections.status.pending}
             </ThemedText>
           </Pressable>

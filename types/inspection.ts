@@ -1,4 +1,4 @@
-export type InspectionStatus = "pending" | "in_progress" | "completed";
+export type InspectionStatus = "draft" | "pending" | "in_progress" | "completed";
 export type InspectionFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "semiannually" | "annually" | "three_years" | "five_years";
 
 export type PumpType = "electric_main" | "diesel_main" | "jockey";

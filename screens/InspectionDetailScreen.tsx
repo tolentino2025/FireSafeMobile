@@ -89,6 +89,9 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         return fullTheme.colors.success;
       case "in_progress":
         return fullTheme.colors.warning;
+      case "draft":
+        return fullTheme.colors.textSecondary;
+      case "pending":
       default:
         return fullTheme.colors.textSecondary;
     }
@@ -100,6 +103,9 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         return t.inspections.status.completed;
       case "in_progress":
         return t.inspections.status.inProgress;
+      case "draft":
+        return t.inspections.status.draft;
+      case "pending":
       default:
         return t.inspections.status.pending;
     }
