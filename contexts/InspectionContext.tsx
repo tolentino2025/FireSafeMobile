@@ -613,10 +613,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const updateInspection = async (id: string, updates: Partial<Inspection>) => {
-    const storedData = await AsyncStorage.getItem(INSPECTIONS_KEY);
-    const currentInspections: Inspection[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newInspections = currentInspections.map((insp) =>
+    const newInspections = inspections.map((insp) =>
       insp.id === id ? { ...insp, ...updates, updatedAt: new Date().toISOString() } : insp
     );
     await saveInspections(newInspections);
@@ -682,10 +679,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const updateCompany = async (id: string, updates: Partial<Company>) => {
-    const storedData = await AsyncStorage.getItem(COMPANIES_KEY);
-    const currentCompanies: Company[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newCompanies = currentCompanies.map((comp) =>
+    const newCompanies = companies.map((comp) =>
       comp.id === id ? { ...comp, ...updates, updatedAt: new Date().toISOString() } : comp
     );
     await saveCompanies(newCompanies);
@@ -716,10 +710,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const updateAppUser = async (id: string, updates: Partial<AppUser>) => {
-    const storedData = await AsyncStorage.getItem(APP_USERS_KEY);
-    const currentAppUsers: AppUser[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newAppUsers = currentAppUsers.map((user) =>
+    const newAppUsers = appUsers.map((user) =>
       user.id === id ? { ...user, ...updates, updatedAt: new Date().toISOString() } : user
     );
     await saveAppUsers(newAppUsers);
@@ -745,31 +736,22 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addFirePump = async (pump: FirePump) => {
-    const storedData = await AsyncStorage.getItem(FIRE_PUMPS_KEY);
-    const currentFirePumps: FirePump[] = storedData ? JSON.parse(storedData) : [];
-    const newFirePumps = [...currentFirePumps, pump];
+    const newFirePumps = [...firePumps, pump];
     await saveFirePumps(newFirePumps);
   };
 
   const updateFirePump = async (id: string, updates: Partial<FirePump>) => {
-    const storedData = await AsyncStorage.getItem(FIRE_PUMPS_KEY);
-    const currentFirePumps: FirePump[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newFirePumps = currentFirePumps.map((pump) =>
+    const newFirePumps = firePumps.map((pump) =>
       pump.id === id ? { ...pump, ...updates, updatedAt: new Date().toISOString() } : pump
     );
     await saveFirePumps(newFirePumps);
   };
 
   const deleteFirePump = async (id: string) => {
-    const storedPumps = await AsyncStorage.getItem(FIRE_PUMPS_KEY);
-    const currentFirePumps: FirePump[] = storedPumps ? JSON.parse(storedPumps) : [];
-    const newFirePumps = currentFirePumps.filter((pump) => pump.id !== id);
+    const newFirePumps = firePumps.filter((pump) => pump.id !== id);
     await saveFirePumps(newFirePumps);
     
-    const storedPanels = await AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY);
-    const currentPanels: FirePumpControlPanel[] = storedPanels ? JSON.parse(storedPanels) : [];
-    const newPanels = currentPanels.filter((panel) => panel.pumpId !== id);
+    const newPanels = firePumpPanels.filter((panel) => panel.pumpId !== id);
     await saveFirePumpPanels(newPanels);
   };
 
@@ -797,10 +779,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const updateFirePumpPanel = async (id: string, updates: Partial<FirePumpControlPanel>) => {
-    const storedData = await AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY);
-    const currentPanels: FirePumpControlPanel[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newPanels = currentPanels.map((panel) =>
+    const newPanels = firePumpPanels.map((panel) =>
       panel.id === id ? { ...panel, ...updates, updatedAt: new Date().toISOString() } : panel
     );
     await saveFirePumpPanels(newPanels);
@@ -830,31 +809,22 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addContractor = async (contractor: Contractor) => {
-    const storedData = await AsyncStorage.getItem(CONTRACTORS_KEY);
-    const currentContractors: Contractor[] = storedData ? JSON.parse(storedData) : [];
-    const newContractors = [...currentContractors, contractor];
+    const newContractors = [...contractors, contractor];
     await saveContractors(newContractors);
   };
 
   const updateContractor = async (id: string, updates: Partial<Contractor>) => {
-    const storedData = await AsyncStorage.getItem(CONTRACTORS_KEY);
-    const currentContractors: Contractor[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newContractors = currentContractors.map((contractor) =>
+    const newContractors = contractors.map((contractor) =>
       contractor.id === id ? { ...contractor, ...updates, updatedAt: new Date().toISOString() } : contractor
     );
     await saveContractors(newContractors);
   };
 
   const deleteContractor = async (id: string) => {
-    const storedData = await AsyncStorage.getItem(CONTRACTORS_KEY);
-    const currentContractors: Contractor[] = storedData ? JSON.parse(storedData) : [];
-    const newContractors = currentContractors.filter((contractor) => contractor.id !== id);
+    const newContractors = contractors.filter((contractor) => contractor.id !== id);
     await saveContractors(newContractors);
     
-    const storedJobs = await AsyncStorage.getItem(JOB_SITES_KEY);
-    const currentJobSites: JobSite[] = storedJobs ? JSON.parse(storedJobs) : [];
-    const newJobSites = currentJobSites.filter((job) => job.contractorId !== id);
+    const newJobSites = jobSites.filter((job) => job.contractorId !== id);
     await saveJobSites(newJobSites);
   };
 
@@ -873,26 +843,19 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addJobSite = async (jobSite: JobSite) => {
-    const storedData = await AsyncStorage.getItem(JOB_SITES_KEY);
-    const currentJobSites: JobSite[] = storedData ? JSON.parse(storedData) : [];
-    const newJobSites = [...currentJobSites, jobSite];
+    const newJobSites = [...jobSites, jobSite];
     await saveJobSites(newJobSites);
   };
 
   const updateJobSite = async (id: string, updates: Partial<JobSite>) => {
-    const storedData = await AsyncStorage.getItem(JOB_SITES_KEY);
-    const currentJobSites: JobSite[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newJobSites = currentJobSites.map((jobSite) =>
+    const newJobSites = jobSites.map((jobSite) =>
       jobSite.id === id ? { ...jobSite, ...updates, updatedAt: new Date().toISOString() } : jobSite
     );
     await saveJobSites(newJobSites);
   };
 
   const deleteJobSite = async (id: string) => {
-    const storedData = await AsyncStorage.getItem(JOB_SITES_KEY);
-    const currentJobSites: JobSite[] = storedData ? JSON.parse(storedData) : [];
-    const newJobSites = currentJobSites.filter((jobSite) => jobSite.id !== id);
+    const newJobSites = jobSites.filter((jobSite) => jobSite.id !== id);
     await saveJobSites(newJobSites);
   };
 
@@ -915,26 +878,19 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addDieselPerformanceTest = async (test: DieselPerformanceTest) => {
-    const storedData = await AsyncStorage.getItem(DIESEL_TESTS_KEY);
-    const currentTests: DieselPerformanceTest[] = storedData ? JSON.parse(storedData) : [];
-    const newTests = [...currentTests, test];
+    const newTests = [...dieselPerformanceTests, test];
     await saveDieselPerformanceTests(newTests);
   };
 
   const updateDieselPerformanceTest = async (id: string, updates: Partial<DieselPerformanceTest>) => {
-    const storedData = await AsyncStorage.getItem(DIESEL_TESTS_KEY);
-    const currentTests: DieselPerformanceTest[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newTests = currentTests.map((test) =>
+    const newTests = dieselPerformanceTests.map((test) =>
       test.id === id ? { ...test, ...updates, updatedAt: new Date().toISOString() } : test
     );
     await saveDieselPerformanceTests(newTests);
   };
 
   const deleteDieselPerformanceTest = async (id: string) => {
-    const storedData = await AsyncStorage.getItem(DIESEL_TESTS_KEY);
-    const currentTests: DieselPerformanceTest[] = storedData ? JSON.parse(storedData) : [];
-    const newTests = currentTests.filter((test) => test.id !== id);
+    const newTests = dieselPerformanceTests.filter((test) => test.id !== id);
     await saveDieselPerformanceTests(newTests);
   };
 
@@ -953,26 +909,19 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   };
 
   const addElectricPerformanceTest = async (test: PerformanceTest) => {
-    const storedData = await AsyncStorage.getItem(ELECTRIC_TESTS_KEY);
-    const currentTests: PerformanceTest[] = storedData ? JSON.parse(storedData) : [];
-    const newTests = [...currentTests, test];
+    const newTests = [...electricPerformanceTests, test];
     await saveElectricPerformanceTests(newTests);
   };
 
   const updateElectricPerformanceTest = async (id: string, updates: Partial<PerformanceTest>) => {
-    const storedData = await AsyncStorage.getItem(ELECTRIC_TESTS_KEY);
-    const currentTests: PerformanceTest[] = storedData ? JSON.parse(storedData) : [];
-    
-    const newTests = currentTests.map((test) =>
+    const newTests = electricPerformanceTests.map((test) =>
       test.id === id ? { ...test, ...updates, updatedAt: new Date().toISOString() } : test
     );
     await saveElectricPerformanceTests(newTests);
   };
 
   const deleteElectricPerformanceTest = async (id: string) => {
-    const storedData = await AsyncStorage.getItem(ELECTRIC_TESTS_KEY);
-    const currentTests: PerformanceTest[] = storedData ? JSON.parse(storedData) : [];
-    const newTests = currentTests.filter((test) => test.id !== id);
+    const newTests = electricPerformanceTests.filter((test) => test.id !== id);
     await saveElectricPerformanceTests(newTests);
   };
 
@@ -992,10 +941,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const createOrUpdateScheduleForInspection = async (inspection: Inspection, language: "en" | "pt-BR") => {
     try {
-      const storedData = await AsyncStorage.getItem(SCHEDULES_KEY);
-      const currentSchedules: InspectionSchedule[] = storedData ? JSON.parse(storedData) : [];
-
-      const existingSchedule = currentSchedules.find(
+      const existingSchedule = schedules.find(
         (s) =>
           s.isActive &&
           s.inspectionType === inspection.type &&
@@ -1014,7 +960,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
       if (existingSchedule) {
         scheduleId = existingSchedule.id;
-        newSchedules = currentSchedules.map((s) =>
+        newSchedules = schedules.map((s) =>
           s.id === existingSchedule.id
             ? {
                 ...s,
@@ -1040,7 +986,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
           createdAt: now,
           updatedAt: now,
         };
-        newSchedules = [...currentSchedules, newSchedule];
+        newSchedules = [...schedules, newSchedule];
       }
 
       await saveSchedules(newSchedules);
