@@ -493,9 +493,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   };
 
   const handleSaveDraft = async () => {
+    console.log("handleSaveDraft called, isSaving:", isSaving);
+    if (isSaving) return;
     setIsSaving(true);
     try {
+      console.log("Saving draft...", test.id);
       await saveDraft();
+      console.log("Draft saved successfully");
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -504,6 +508,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         t.performanceTest?.draftSaved || "Draft saved successfully"
       );
     } catch (error) {
+      console.error("Error in handleSaveDraft:", error);
       Alert.alert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving draft");
     } finally {
       setIsSaving(false);
@@ -511,6 +516,9 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   };
 
   const handleSubmit = async () => {
+    console.log("handleSubmit called, isSaving:", isSaving);
+    if (isSaving) return;
+    
     if (!test.contractorInfo?.companyName?.trim()) {
       Alert.alert(t.common?.error || "Error", t.performanceTest?.contractorRequired || "Contractor information is required");
       return;
@@ -520,6 +528,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       return;
     }
 
+    console.log("Submitting test...", test.id);
     isSubmittingRef.current = true;
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
@@ -533,10 +542,15 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       };
       
       const existingTest = getDieselPerformanceTestById(finalTest.id);
+      console.log("Existing test:", existingTest ? "found" : "not found");
       if (existingTest) {
+        console.log("Updating existing test:", finalTest.id);
         await updateDieselPerformanceTest(finalTest.id, finalTest);
+        console.log("Test updated successfully");
       } else {
+        console.log("Adding new test:", finalTest.id);
         await addDieselPerformanceTest(finalTest);
+        console.log("Test added successfully");
       }
 
       const getLocalDateString = (d: Date = new Date()): string => {
