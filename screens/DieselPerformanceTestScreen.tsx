@@ -129,7 +129,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump, addInspection } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getDieselPerformanceTestById, addDieselPerformanceTest, updateDieselPerformanceTest, getPanelsByPump, addInspection, updateInspection, inspections } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -560,8 +560,11 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         return `${year}-${month}-${day}`;
       };
 
+      const inspectionId = `insp-diesel-${finalTest.id}`;
+      const existingInspection = inspections.find(i => i.id === inspectionId);
+      
       const inspectionRecord: Inspection = {
-        id: `insp-diesel-${finalTest.id}`,
+        id: inspectionId,
         type: "diesel_pump",
         status: "completed",
         propertyName: finalTest.jobInfo?.jobName || "",
@@ -577,11 +580,15 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         photos: [],
         geoLocation: null,
         performanceTestId: finalTest.id,
-        createdAt: finalTest.createdAt || new Date().toISOString(),
+        createdAt: existingInspection?.createdAt || finalTest.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       
-      await addInspection(inspectionRecord);
+      if (existingInspection) {
+        await updateInspection(inspectionId, inspectionRecord);
+      } else {
+        await addInspection(inspectionRecord);
+      }
       
       await clearDraft();
       
@@ -842,11 +849,11 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           />
           <Spacer height={Spacing.md} />
           <SelectPicker
-            title={dt?.selectCompany || t.inspection?.selectCompany || "Select Company"}
+            title={dt?.selectCompany || "Select Company"}
             options={companyOptions}
             selectedId={selectedCompanyId}
             onSelect={handleCompanySelect}
-            placeholder={dt?.selectCompany || t.inspection?.selectCompany || "Select Company"}
+            placeholder={dt?.selectCompany || "Select Company"}
           />
           <Spacer height={Spacing.md} />
           <SelectPicker

@@ -136,7 +136,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const { testId } = route.params || {};
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById, addInspection } = useInspections();
+  const { contractors, jobSites, appUsers, firePumps, firePumpPanels, companies, getJobSitesByContractor, getPanelsByPump, addElectricPerformanceTest, updateElectricPerformanceTest, getElectricPerformanceTestById, addInspection, updateInspection, inspections } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -628,8 +628,11 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         return `${year}-${month}-${day}`;
       };
 
+      const inspectionId = `insp-electric-${finalTest.id}`;
+      const existingInspection = inspections.find(i => i.id === inspectionId);
+      
       const inspectionRecord: Inspection = {
-        id: `insp-electric-${finalTest.id}`,
+        id: inspectionId,
         type: "electric_pump",
         status: "completed",
         propertyName: finalTest.jobInfo?.jobName || "",
@@ -645,11 +648,15 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         photos: [],
         geoLocation: null,
         performanceTestId: finalTest.id,
-        createdAt: finalTest.createdAt || new Date().toISOString(),
+        createdAt: existingInspection?.createdAt || finalTest.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       
-      await addInspection(inspectionRecord);
+      if (existingInspection) {
+        await updateInspection(inspectionId, inspectionRecord);
+      } else {
+        await addInspection(inspectionRecord);
+      }
       
       await clearDraft();
       

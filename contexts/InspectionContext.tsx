@@ -511,7 +511,22 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
           await AsyncStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
         }
         
-        setInspections(parsedInspections);
+        const seenIds = new Set<string>();
+        const deduplicatedInspections = parsedInspections.filter((insp: Inspection) => {
+          if (seenIds.has(insp.id)) {
+            console.log("Removing duplicate inspection:", insp.id);
+            return false;
+          }
+          seenIds.add(insp.id);
+          return true;
+        });
+        
+        if (deduplicatedInspections.length !== parsedInspections.length) {
+          console.log(`Removed ${parsedInspections.length - deduplicatedInspections.length} duplicate inspections`);
+          await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(deduplicatedInspections));
+        }
+        
+        setInspections(deduplicatedInspections);
       }
       const sampleDataLoaded = await AsyncStorage.getItem(SAMPLE_DATA_LOADED_KEY);
       const shouldLoadSampleData = !sampleDataLoaded && !storedCompanies && !storedAppUsers && !storedProperties;
