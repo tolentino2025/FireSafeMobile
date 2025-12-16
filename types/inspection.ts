@@ -317,7 +317,7 @@ export interface Inspection {
   id: string;
   type: InspectionType;
   status: InspectionStatus;
-  propertyId: string;
+  propertyId?: string;
   propertyName: string;
   propertyAddress: string;
   propertyPhone: string;
@@ -342,6 +342,7 @@ export interface Inspection {
   firePumpData?: FirePump;
   firePumpPanelId?: string;
   firePumpPanelData?: FirePumpControlPanel;
+  performanceTestId?: string;
   geoLocation?: GeoLocation | null;
   createdAt: string;
   updatedAt: string;

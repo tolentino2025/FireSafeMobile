@@ -16,6 +16,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections } from "@/contexts/InspectionContext";
+import { Inspection } from "@/types/inspection";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import {
@@ -599,28 +600,28 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         return `${year}-${month}-${day}`;
       };
 
-      const inspectionRecord = {
+      const inspectionRecord: Inspection = {
         id: `insp-electric-${finalTest.id}`,
-        type: "electric_pump" as const,
+        type: "electric_pump",
+        status: "completed",
         propertyName: finalTest.jobInfo?.jobName || "",
         propertyAddress: `${finalTest.jobInfo?.address || ""}, ${finalTest.jobInfo?.city || ""}, ${finalTest.jobInfo?.state || ""}`.trim().replace(/^,\s*|,\s*$/g, ""),
         propertyPhone: "",
         inspectorName: finalTest.signatures?.conductedBy?.name || "",
         contractNo: finalTest.jobInfo?.jobNumber || "",
         date: finalTest.jobInfo?.testDate || getLocalDateString(),
-        frequency: "annually" as const,
+        frequency: "annually",
         checklist: [],
         observations: finalTest.observationsDeficiencies?.generalObservations || "",
         signature: finalTest.signatures?.conductedBy?.signatureData || null,
         photos: [],
         geoLocation: null,
-        status: "completed" as const,
         performanceTestId: finalTest.id,
         createdAt: finalTest.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       
-      await addInspection(inspectionRecord as any);
+      await addInspection(inspectionRecord);
       
       await clearDraft();
       
