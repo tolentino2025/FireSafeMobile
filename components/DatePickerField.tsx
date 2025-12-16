@@ -6,6 +6,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { parseLocalYMD, getLocalTimeZone } from "@/utils/dateUtils";
 
 interface DatePickerFieldProps {
   value: string;
@@ -20,40 +21,16 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
   const [showPicker, setShowPicker] = useState(false);
   const [tempDate, setTempDate] = useState<Date>(new Date());
 
-  const parseDate = (dateStr: string): Date => {
-    if (!dateStr) return new Date();
-    // Parse YYYY-MM-DD as local date, not UTC
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        return new Date(year, month - 1, day, 12, 0, 0); // noon to avoid timezone edge cases
-      }
-    }
-    const parsed = new Date(dateStr);
-    return isNaN(parsed.getTime()) ? new Date() : parsed;
-  };
-
-  const formatDate = (date: Date): string => {
+  const formatDateYMD = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
-  const getLocalTimeZone = (): string | undefined => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      return undefined;
-    }
-  };
-
   const formatDisplayDate = (dateStr: string): string => {
     if (!dateStr) return "";
-    const date = parseDate(dateStr);
+    const date = parseLocalYMD(dateStr);
     const timeZone = getLocalTimeZone();
     if (language === "pt-BR") {
       return date.toLocaleDateString("pt-BR", { timeZone });
@@ -63,14 +40,14 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
 
   useEffect(() => {
     if (showPicker) {
-      setTempDate(parseDate(value));
+      setTempDate(parseLocalYMD(value));
     }
   }, [showPicker, value]);
 
   const handleDateChangeAndroid = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowPicker(false);
     if (event.type === "set" && selectedDate) {
-      onChange(formatDate(selectedDate));
+      onChange(formatDateYMD(selectedDate));
     }
   };
 
@@ -81,7 +58,7 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
   };
 
   const handleConfirmIOS = () => {
-    onChange(formatDate(tempDate));
+    onChange(formatDateYMD(tempDate));
     setShowPicker(false);
   };
 
@@ -151,7 +128,7 @@ export function DatePickerField({ value, onChange, placeholder, label }: DatePic
 
       {showPicker && Platform.OS === "android" ? (
         <DateTimePicker
-          value={parseDate(value)}
+          value={parseLocalYMD(value)}
           mode="date"
           display="default"
           onChange={handleDateChangeAndroid}

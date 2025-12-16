@@ -115,7 +115,7 @@ export async function scheduleInspectionReminder(
     return null;
   }
 
-  const reminderDate = new Date(scheduledDate);
+  const reminderDate = parseLocalYMD(scheduledDate);
   reminderDate.setDate(reminderDate.getDate() - settings.reminderDaysBefore);
   reminderDate.setHours(9, 0, 0, 0);
 

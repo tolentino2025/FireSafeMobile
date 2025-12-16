@@ -12,6 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Inspection } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { parseLocalYMD } from "@/utils/dateUtils";
 
 interface InspectionCardProps {
   inspection: Inspection;
@@ -110,21 +111,7 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
   };
 
   const formatDate = (dateString: string) => {
-    // Parse YYYY-MM-DD as local date, not UTC
-    const parts = dateString.split('-');
-    let date: Date;
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        date = new Date(year, month - 1, day, 12, 0, 0);
-      } else {
-        date = new Date(dateString);
-      }
-    } else {
-      date = new Date(dateString);
-    }
+    const date = parseLocalYMD(dateString);
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "short",

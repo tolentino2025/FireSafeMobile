@@ -16,6 +16,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
+import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
 
@@ -39,21 +40,8 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     );
   }
 
-  const parseLocalDate = (dateString: string): Date => {
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        return new Date(year, month - 1, day, 12, 0, 0);
-      }
-    }
-    return new Date(dateString);
-  };
-
   const formatDate = (dateString: string) => {
-    const date = parseLocalDate(dateString);
+    const date = parseLocalYMD(dateString);
     const locale = language === "pt-BR" ? "pt-BR" : "en-US";
     return date.toLocaleDateString(locale, {
       day: "2-digit",
