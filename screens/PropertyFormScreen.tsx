@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from "react";
-import { View, StyleSheet, TextInput, Alert } from "react-native";
+import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -32,15 +32,21 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
   } = useInspections();
 
   const isEditing = mode === "company" ? !!companyId : !!propertyId;
-  const existingItem =
-    mode === "company"
-      ? companies.find((c) => c.id === companyId)
-      : properties.find((p) => p.id === propertyId);
+  const existingCompany = mode === "company" ? companies.find((c) => c.id === companyId) : undefined;
+  const existingProperty = mode === "property" ? properties.find((p) => p.id === propertyId) : undefined;
 
-  const [name, setName] = useState(existingItem?.name || "");
-  const [address, setAddress] = useState(existingItem?.address || "");
-  const [phone, setPhone] = useState(existingItem?.phone || "");
-  const [contact, setContact] = useState(existingItem?.contact || "");
+  const [name, setName] = useState(
+    mode === "company" ? (existingCompany?.name || "") : (existingProperty?.name || "")
+  );
+  const [address, setAddress] = useState(
+    mode === "company" ? (existingCompany?.address || "") : (existingProperty?.address || "")
+  );
+  const [phone, setPhone] = useState(
+    mode === "company" ? (existingCompany?.contactPhone || "") : (existingProperty?.phone || "")
+  );
+  const [contact, setContact] = useState(
+    mode === "company" ? (existingCompany?.contactName || "") : (existingProperty?.contact || "")
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -62,31 +68,38 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
 
     try {
       if (mode === "company") {
-        const companyData: Company = {
-          id: existingItem?.id || Date.now().toString(),
+        const companyData: Partial<Company> = {
+          id: existingCompany?.id || Date.now().toString(),
           name,
           address,
-          phone,
-          contact,
+          contactPhone: phone,
+          contactName: contact,
+          cnpj: existingCompany?.cnpj || "",
+          city: existingCompany?.city || "",
+          state: existingCompany?.state || "",
+          zipCode: existingCompany?.zipCode || "",
+          contactEmail: existingCompany?.contactEmail || "",
+          createdAt: existingCompany?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
 
-        if (isEditing && existingItem) {
-          await updateCompany(existingItem.id, companyData);
+        if (isEditing && existingCompany) {
+          await updateCompany(existingCompany.id, companyData);
         } else {
-          await addCompany(companyData);
+          await addCompany(companyData as Company);
         }
       } else {
         const propertyData: Property = {
-          id: existingItem?.id || Date.now().toString(),
+          id: existingProperty?.id || Date.now().toString(),
           name,
           address,
           phone,
           contact,
-          companyId: "",
+          companyId: existingProperty?.companyId || "",
         };
 
-        if (isEditing && existingItem) {
-          await updateProperty(existingItem.id, propertyData);
+        if (isEditing && existingProperty) {
+          await updateProperty(existingProperty.id, propertyData);
         } else {
           await addProperty(propertyData);
         }
@@ -98,9 +111,10 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
   };
 
   const handleDelete = () => {
+    const itemName = mode === "company" ? existingCompany?.name : existingProperty?.name;
     Alert.alert(
-      t.common.delete,
-      `Are you sure you want to delete this ${mode}?`,
+      t.common.confirm,
+      `${t.common.delete} "${itemName}"?`,
       [
         { text: t.common.cancel, style: "cancel" },
         {
@@ -108,10 +122,10 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
           style: "destructive",
           onPress: async () => {
             try {
-              if (mode === "company" && existingItem) {
-                await deleteCompany(existingItem.id);
-              } else if (mode === "property" && existingItem) {
-                await deleteProperty(existingItem.id);
+              if (mode === "company" && existingCompany) {
+                await deleteCompany(existingCompany.id);
+              } else if (mode === "property" && existingProperty) {
+                await deleteProperty(existingProperty.id);
               }
               navigation.goBack();
             } catch (error) {
@@ -185,24 +199,24 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSave} variant="save">
-        <View style={styles.saveButtonContent}>
-          <Feather name="save" size={18} color="#111827" />
-          <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
-        </View>
-      </Button>
-
-      {isEditing ? (
-        <>
-          <Spacer height={Spacing.lg} />
-          <Button
-            onPress={handleDelete}
-            style={{ backgroundColor: AppColors.error }}
-          >
-            {t.common.delete}
+      <View style={styles.buttonRow}>
+        <View style={styles.saveButtonContainer}>
+          <Button onPress={handleSave} variant="save">
+            <View style={styles.saveButtonContent}>
+              <Feather name="save" size={18} color="#111827" />
+              <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
+            </View>
           </Button>
-        </>
-      ) : null}
+        </View>
+        {isEditing ? (
+          <Pressable
+            onPress={handleDelete}
+            style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}
+          >
+            <Feather name="trash-2" size={20} color="#FFFFFF" />
+          </Pressable>
+        ) : null}
+      </View>
 
       <Spacer height={Spacing["4xl"]} />
     </ScreenKeyboardAwareScrollView>
@@ -216,6 +230,21 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
     fontSize: 16,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  saveButtonContainer: {
+    flex: 1,
+  },
+  deleteButton: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonContent: {
     flexDirection: "row",
