@@ -156,20 +156,20 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
   const SubSectionHeader = ({ title, section }: { title: string; section: string }) => (
     <Pressable
-      style={[styles.subSectionHeader, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+      style={[styles.subSectionHeader, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}
       onPress={() => toggleSubSection(section)}
     >
-      <ThemedText type="h4">{title}</ThemedText>
+      <ThemedText type="h3" style={styles.subSectionTitle}>{title}</ThemedText>
       <Feather
         name={expandedSubSections[section] ? "chevron-up" : "chevron-down"}
-        size={20}
-        color={theme.text}
+        size={22}
+        color={fullTheme.colors.primary}
       />
     </Pressable>
   );
 
   const YesNoSelector = ({ value, onChange, label }: { value: YesNo; onChange: (v: YesNo) => void; label: string }) => (
-    <View style={styles.yesNoRow}>
+    <View style={[styles.yesNoRow, { borderBottomColor: fullTheme.colors.border }]}>
       <ThemedText style={styles.yesNoLabel}>{label}</ThemedText>
       <View style={styles.yesNoButtons}>
         {(['Y', 'N'] as YesNo[]).map((opt) => (
@@ -179,12 +179,12 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={[
               styles.yesNoButton,
               { 
-                backgroundColor: value === opt ? AppColors.primary : theme.backgroundDefault,
-                borderColor: value === opt ? AppColors.primary : theme.border,
+                backgroundColor: value === opt ? fullTheme.colors.primary : fullTheme.colors.cardBackground,
+                borderColor: value === opt ? fullTheme.colors.primary : fullTheme.colors.border,
               }
             ]}
           >
-            <ThemedText style={{ color: value === opt ? '#FFFFFF' : theme.text, fontWeight: '600' }}>
+            <ThemedText style={{ color: value === opt ? '#FFFFFF' : fullTheme.colors.textPrimary, fontWeight: '600' }}>
               {opt === 'Y' ? (language === 'pt-BR' ? 'Sim' : 'Yes') : (language === 'pt-BR' ? 'Nao' : 'No')}
             </ThemedText>
           </Pressable>
@@ -345,8 +345,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
         {expandedSubSections.sprinklers && (
           <View style={styles.sectionContent}>
             {certificate.sprinklers.map((item, idx) => (
-              <View key={idx} style={[styles.tableRow, { borderColor: theme.border }]}>
-                <View style={styles.tableRowHeader}>
+              <View key={idx} style={[styles.tableRow, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
+                <View style={[styles.tableRowHeader, { borderBottomColor: fullTheme.colors.border }]}>
                   <ThemedText type="small" style={{ fontWeight: '600' }}>
                     {(fm85a.sprinkler || "Sprinkler")} #{idx + 1}
                   </ThemedText>
@@ -413,8 +413,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
         {expandedSubSections.pipe && (
           <View style={styles.sectionContent}>
             {certificate.pipe.map((item: FM85APipe, idx: number) => (
-              <View key={idx} style={[styles.tableRow, { borderColor: theme.border }]}>
-                <View style={styles.tableRowHeader}>
+              <View key={idx} style={[styles.tableRow, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
+                <View style={[styles.tableRowHeader, { borderBottomColor: fullTheme.colors.border }]}>
                   <ThemedText type="small" style={{ fontWeight: '600' }}>{(fm85a.pipe || "Pipe")} #{idx + 1}</ThemedText>
                   <Pressable onPress={() => removePipe(idx)} style={styles.removeBtn}>
                     <Feather name="trash-2" size={16} color={AppColors.error} />
@@ -475,8 +475,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
         {expandedSubSections.alarmValves && (
           <View style={styles.sectionContent}>
             {certificate.alarmCheckDryPipeReleaseValves.map((item, idx) => (
-              <View key={idx} style={[styles.tableRow, { borderColor: theme.border }]}>
-                <View style={styles.tableRowHeader}>
+              <View key={idx} style={[styles.tableRow, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
+                <View style={[styles.tableRowHeader, { borderBottomColor: fullTheme.colors.border }]}>
                   <ThemedText type="small" style={{ fontWeight: '600' }}>{(fm85a.valve || "Valve")} #{idx + 1}</ThemedText>
                   <Pressable onPress={() => removeValve(idx)} style={styles.removeBtn}>
                     <Feather name="trash-2" size={16} color={AppColors.error} />
@@ -585,7 +585,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
         {expandedSubSections.miscComponents && (
           <View style={styles.sectionContent}>
             {miscItems.map(({ key, label }) => (
-              <View key={key} style={[styles.miscItem, { borderColor: theme.border }]}>
+              <View key={key} style={[styles.miscItem, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
                 <ThemedText style={styles.miscLabel}>{label}</ThemedText>
                 <View style={styles.row}>
                   <View style={styles.thirdField}>
@@ -897,7 +897,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
           {renderAdditionalNotesSection()}
           
           <Spacer height={Spacing.lg} />
-          <View style={styles.actionButtonsRow}>
+          <View style={[styles.actionButtonsRow, { borderTopColor: fullTheme.colors.border }]}>
             <Pressable
               onPress={handleSave}
               disabled={isSaving}
@@ -979,17 +979,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.sm,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     marginBottom: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  subSectionTitle: {
+    flex: 1,
+    fontSize: 16,
   },
   sectionContent: {
-    paddingHorizontal: Spacing.sm,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   input: {
-    height: 44,
+    height: 48,
     borderWidth: 1,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
@@ -999,10 +1005,12 @@ const styles = StyleSheet.create({
   textArea: {
     height: 80,
     paddingTop: Spacing.md,
+    textAlignVertical: 'top',
   },
   largeTextArea: {
     height: 120,
     paddingTop: Spacing.md,
+    textAlignVertical: 'top',
   },
   row: {
     flexDirection: 'row',
@@ -1016,7 +1024,7 @@ const styles = StyleSheet.create({
   },
   tableRow: {
     borderWidth: 1,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
@@ -1025,6 +1033,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.sm,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
   },
   removeBtn: {
     padding: Spacing.xs,
@@ -1034,29 +1044,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.md,
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: BorderRadius.md,
     borderStyle: 'dashed',
+    marginTop: Spacing.sm,
   },
   yesNoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
   },
   yesNoLabel: {
     flex: 1,
     fontSize: 14,
+    fontWeight: '500',
   },
   yesNoButtons: {
     flexDirection: 'row',
     gap: Spacing.sm,
   },
   yesNoButton: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
+    minWidth: 70,
+    alignItems: 'center',
   },
   optionRow: {
     flexDirection: 'row',
@@ -1072,32 +1087,32 @@ const styles = StyleSheet.create({
   },
   miscItem: {
     borderWidth: 1,
-    borderRadius: BorderRadius.sm,
-    padding: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
   miscLabel: {
     fontWeight: '600',
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
+    fontSize: 14,
   },
   actionButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: Spacing.md,
-    marginTop: Spacing.md,
+    paddingTop: Spacing.lg,
+    marginTop: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
+    flex: 1,
     marginHorizontal: Spacing.xs,
-    minWidth: 90,
   },
 });
