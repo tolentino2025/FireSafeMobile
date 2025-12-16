@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { ScreenFlatList } from "@/components/ScreenFlatList";
 import { ThemedText } from "@/components/ThemedText";
@@ -13,7 +14,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { InspectionsStackParamList } from "@/navigation/InspectionsStackNavigator";
 import { InspectionSchedule } from "@/types/inspection";
 import { getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
-import { parseLocalYMD } from "@/utils/dateUtils";
+import { parseLocalYMD, getLocalDateString } from "@/utils/dateUtils";
 
 type InspectionScheduleScreenProps = {
   navigation: NativeStackNavigationProp<InspectionsStackParamList, "InspectionSchedule">;
@@ -27,8 +28,13 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
   const { schedules, companies, properties, firePumps } = useInspections();
 
   const [filter, setFilter] = useState<ScheduleFilter>("all");
+  const [todayString, setTodayString] = useState(() => getLocalDateString());
 
-  const today = useMemo(() => new Date(), []);
+  useFocusEffect(
+    useCallback(() => {
+      setTodayString(getLocalDateString());
+    }, [])
+  );
 
   const getDisplayName = (schedule: InspectionSchedule): string => {
     if (schedule.propertyId) {
@@ -46,9 +52,10 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
     return getInspectionTypeLabel(schedule.inspectionType, language);
   };
 
-  const isOverdue = (schedule: InspectionSchedule): boolean => {
-    return parseLocalYMD(schedule.nextDueDate) < today;
-  };
+  const isOverdue = useCallback((schedule: InspectionSchedule): boolean => {
+    const dueDate = schedule.nextDueDate.split('T')[0];
+    return dueDate < todayString;
+  }, [todayString]);
 
   const filteredSchedules = useMemo(() => {
     let result = schedules.filter((s) => s.isActive);
@@ -62,7 +69,7 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
     return result.sort(
       (a, b) => parseLocalYMD(a.nextDueDate).getTime() - parseLocalYMD(b.nextDueDate).getTime()
     );
-  }, [schedules, filter, today]);
+  }, [schedules, filter, isOverdue]);
 
   const formatDate = (dateString: string): string => {
     const date = parseLocalYMD(dateString);
