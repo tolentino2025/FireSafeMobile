@@ -25,7 +25,7 @@ type NewInspectionScreenProps = {
 };
 
 interface InspectionTypeItem {
-  type: InspectionType | "performance_test" | "diesel_performance_test";
+  type: InspectionType | "performance_test" | "diesel_performance_test" | "fm85a";
   icon: keyof typeof Feather.glyphMap;
   labelKey: keyof typeof import("@/constants/i18n").translations["en"]["inspectionTypes"];
   nfpaRef: string;
@@ -66,6 +66,12 @@ const inspectionCategories = [
     items: [
       { type: "water_tank" as const, icon: "database" as const, labelKey: "waterTank" as const, nfpaRef: "NFPA 25" },
       { type: "hazard_eval" as const, icon: "alert-triangle" as const, labelKey: "hazardEval" as const, nfpaRef: "NFPA 25" },
+    ],
+  },
+  {
+    categoryKey: "certificates" as const,
+    items: [
+      { type: "fm85a" as const, icon: "file-text" as const, labelKey: "fm85a" as const, nfpaRef: "FM Global" },
     ],
   },
 ];
@@ -126,11 +132,13 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
-  const handleTypeSelect = (type: InspectionType | "performance_test" | "diesel_performance_test") => {
+  const handleTypeSelect = (type: InspectionType | "performance_test" | "diesel_performance_test" | "fm85a") => {
     if (type === "performance_test") {
       navigation.navigate("PerformanceTest", {});
     } else if (type === "diesel_performance_test") {
       navigation.navigate("DieselPerformanceTest", {});
+    } else if (type === "fm85a") {
+      navigation.navigate("FM85AForm", {});
     } else {
       navigation.replace("InspectionForm", { type });
     }

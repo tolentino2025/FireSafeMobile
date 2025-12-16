@@ -7,6 +7,7 @@ import InspectionDetailScreen from "@/screens/InspectionDetailScreen";
 import PerformanceTestScreen from "@/screens/PerformanceTestScreen";
 import DieselPerformanceTestScreen from "@/screens/DieselPerformanceTestScreen";
 import PumpCurveChartScreen from "@/screens/PumpCurveChartScreen";
+import FM85AFormScreen from "@/screens/FM85AFormScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
@@ -21,6 +22,7 @@ export type HomeStackParamList = {
   PerformanceTest: { testId?: string };
   DieselPerformanceTest: { testId?: string };
   PumpCurveChart: { readings: DieselTestReading[]; pumpTag: string; ratedFlowGpm: string; ratedPressurePsi: string };
+  FM85AForm: { certificateId?: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -88,6 +90,14 @@ export default function HomeStackNavigator() {
           ...getCommonScreenOptions({ theme, isDark, transparent: false }),
           headerTitle: "Pump Curve",
           presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="FM85AForm"
+        component={FM85AFormScreen}
+        options={{
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+          headerTitle: "FM85A Certificate",
         }}
       />
     </Stack.Navigator>

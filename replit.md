@@ -17,6 +17,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
    - Fire Pumps (Weekly, Monthly, Annual)
    - Hydrants & Piping (Aboveground, Underground, Flow Test, Standpipe)
    - Tanks & Certificates (Water Tank, Hazard Evaluation)
+   - FM Global Certificates (FM85A)
 3. **Company Management**: Register and manage companies with full contact information (CNPJ, address, phone, email)
 4. **Inspector Management**: Register inspectors with role and contact details
 5. **Property Management**: Track properties linked to companies
@@ -88,7 +89,8 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 │   ├── ProfileScreen.tsx
 │   ├── PropertiesScreen.tsx     # 3-tab view: Companies, Inspectors, Properties
 │   ├── PropertyFormScreen.tsx
-│   └── UserFormScreen.tsx       # Create/edit inspectors
+│   ├── UserFormScreen.tsx       # Create/edit inspectors
+│   └── FM85AFormScreen.tsx      # FM Global FM85A Certificate form
 └── utils/
     ├── checklistTemplates.ts    # NFPA 25 checklist templates
     ├── notifications.ts         # Push notification scheduling
@@ -112,6 +114,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - **NumericField**: id, labelKey, type (NumericFieldType), value, unit
 - **NumericFieldType**: static_psi, residual_psi, psi, seconds, minutes, gpm, rpm, voltage, amperage, percent, temperature, gallons
 - **InspectionSchedule**: id, companyId, propertyId, firePumpId, inspectionType, frequency, startDate, lastInspectionDate, nextDueDate, notificationId, isActive, createdAt, updatedAt
+- **FM85ACertificate**: Complete data model for FM Global Certificate of Materials and Tests (types/fm85a.ts)
 
 ### Design System - Red/Black Professional Theme
 - **Primary Color**: Fire Red (#DC2626)
