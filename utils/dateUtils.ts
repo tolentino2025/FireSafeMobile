@@ -91,6 +91,23 @@ export function getLocalDateString(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+export function parseLocalYMD(ymd: string): Date {
+  if (!ymd || typeof ymd !== 'string') {
+    return new Date();
+  }
+  const parts = ymd.split('-');
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return new Date(year, month - 1, day, 12, 0, 0);
+    }
+  }
+  const parsed = new Date(ymd);
+  return isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
 export function getLocalISOString(date: Date = new Date()): string {
   const tzOffset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date.getTime() - tzOffset);

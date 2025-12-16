@@ -13,6 +13,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { InspectionsStackParamList } from "@/navigation/InspectionsStackNavigator";
 import { InspectionSchedule } from "@/types/inspection";
 import { getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
+import { parseLocalYMD } from "@/utils/dateUtils";
 
 type InspectionScheduleScreenProps = {
   navigation: NativeStackNavigationProp<InspectionsStackParamList, "InspectionSchedule">;
@@ -46,7 +47,7 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
   };
 
   const isOverdue = (schedule: InspectionSchedule): boolean => {
-    return new Date(schedule.nextDueDate) < today;
+    return parseLocalYMD(schedule.nextDueDate) < today;
   };
 
   const filteredSchedules = useMemo(() => {
@@ -59,25 +60,12 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
     }
 
     return result.sort(
-      (a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime()
+      (a, b) => parseLocalYMD(a.nextDueDate).getTime() - parseLocalYMD(b.nextDueDate).getTime()
     );
   }, [schedules, filter, today]);
 
-  const parseLocalDate = (dateString: string): Date => {
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        return new Date(year, month - 1, day, 12, 0, 0);
-      }
-    }
-    return new Date(dateString);
-  };
-
   const formatDate = (dateString: string): string => {
-    const date = parseLocalDate(dateString);
+    const date = parseLocalYMD(dateString);
     return date.toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
       day: "2-digit",
       month: "2-digit",

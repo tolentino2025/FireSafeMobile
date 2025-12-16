@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cancelInspectionReminder, scheduleNotificationForSchedule, cancelScheduleNotification } from "@/utils/notifications";
 import { addInterval, generateScheduleId, getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
+import { parseLocalYMD } from "@/utils/dateUtils";
 import { 
   Inspection, 
   Property, 
@@ -1004,7 +1005,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
           (s.firePumpId || "") === (inspection.firePumpId || "")
       );
 
-      const inspectionDate = new Date(inspection.date);
+      const inspectionDate = parseLocalYMD(inspection.date);
       const nextDueDate = addInterval(inspectionDate, inspection.frequency);
       const now = new Date().toISOString();
 

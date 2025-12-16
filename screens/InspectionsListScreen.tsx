@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { InspectionsStackParamList } from "@/navigation/InspectionsStackNavigator";
+import { parseLocalYMD } from "@/utils/dateUtils";
 
 type InspectionsListScreenProps = {
   navigation: NativeStackNavigationProp<InspectionsStackParamList, "InspectionsList">;
@@ -43,7 +44,7 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
     }
 
     return result.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => parseLocalYMD(b.date).getTime() - parseLocalYMD(a.date).getTime()
     );
   }, [inspections, searchQuery, statusFilter]);
 

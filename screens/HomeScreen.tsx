@@ -19,6 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
+import { parseLocalYMD } from "@/utils/dateUtils";
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<HomeStackParamList, "Home">;
@@ -62,12 +63,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const thisWeekInspections = inspections.filter((insp) => {
-    const date = new Date(insp.date);
+    const date = parseLocalYMD(insp.date);
     return date >= startOfWeek;
   });
 
   const thisMonthInspections = inspections.filter((insp) => {
-    const date = new Date(insp.date);
+    const date = parseLocalYMD(insp.date);
     return date >= startOfMonth;
   });
 

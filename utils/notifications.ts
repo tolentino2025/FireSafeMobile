@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { parseLocalYMD } from "@/utils/dateUtils";
 
 const NOTIFICATION_SETTINGS_KEY = "@firesafe_notification_settings";
 
@@ -292,7 +293,7 @@ export async function scheduleNotificationForSchedule(
     return null;
   }
 
-  const reminderDate = new Date(nextDueDate);
+  const reminderDate = typeof nextDueDate === 'string' ? parseLocalYMD(nextDueDate) : new Date(nextDueDate);
   reminderDate.setDate(reminderDate.getDate() - settings.reminderDaysBefore);
   reminderDate.setHours(9, 0, 0, 0);
 
@@ -376,7 +377,7 @@ export async function rescheduleAllScheduleNotifications(
       scheduleId: schedule.id,
       inspectionType: schedule.inspectionType,
       frequency: schedule.frequency,
-      nextDueDate: new Date(schedule.nextDueDate),
+      nextDueDate: parseLocalYMD(schedule.nextDueDate),
       companyName: company?.name,
       propertyName: property?.name,
       language,
@@ -437,7 +438,7 @@ export async function scheduleLicenseExpirationReminders(
 
   await cancelLicenseExpirationReminders();
 
-  const expDate = new Date(expirationDate);
+  const expDate = parseLocalYMD(expirationDate);
   const now = new Date();
 
   const reminderDays = [30, 14, 7, 3, 1];
