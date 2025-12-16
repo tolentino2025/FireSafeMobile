@@ -17,6 +17,7 @@ import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
 import { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
+import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -231,6 +232,40 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     } finally {
       setIsGeneratingPdf(false);
     }
+  };
+
+  const handleFM85APdf = async (action: 'print' | 'share') => {
+    if (!inspection.fm85aCertificate) return;
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      const options = {
+        certificate: inspection.fm85aCertificate,
+        language: language as "en" | "pt-BR",
+      };
+      if (action === 'print') {
+        await generateAndPrintFM85APdf(options);
+      } else {
+        await generateAndShareFM85APdf(options);
+      }
+    } catch (error) {
+      console.error("Error generating FM85A PDF:", error);
+      Alert.alert(t.common.error, t.report.shareError);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const showFM85AOptions = () => {
+    Alert.alert(
+      "FM Global Certificate FM85A",
+      "",
+      [
+        { text: t.report.generate, onPress: () => handleFM85APdf('print') },
+        { text: t.report.share, onPress: () => handleFM85APdf('share') },
+        { text: t.common.cancel, style: "cancel" },
+      ]
+    );
   };
 
   const showShareOptions = () => {
@@ -461,6 +496,33 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           </>
         ) : null}
 
+        {inspection.fm85aCertificate ? (
+          <>
+            <Spacer height={Spacing["2xl"]} />
+            <ThemedText type="h2">FM Global Certificate FM85A</ThemedText>
+            <Spacer height={Spacing.md} />
+            <View style={[styles.infoCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+              <View style={[styles.infoRow, { borderBottomColor: fullTheme.colors.border }]}>
+                <View style={styles.infoRowLeft}>
+                  <Feather name="file-text" size={18} color={fullTheme.colors.textSecondary} />
+                  <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm }}>
+                    {language === "pt-BR" ? "Certificado disponível" : "Certificate available"}
+                  </ThemedText>
+                </View>
+                <View style={{ flexDirection: "row", gap: Spacing.sm }}>
+                  <Pressable
+                    style={[styles.fm85aBtn, { backgroundColor: fullTheme.colors.primary }]}
+                    onPress={showFM85AOptions}
+                  >
+                    <Feather name="printer" size={16} color="#FFF" />
+                    <ThemedText type="small" style={{ color: "#FFF", marginLeft: 4 }}>PDF</ThemedText>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </>
+        ) : null}
+
         {inspection.signature ? (
           <>
             <Spacer height={Spacing["2xl"]} />
@@ -667,5 +729,12 @@ const styles = StyleSheet.create({
   photoCaption: {
     padding: Spacing.sm,
     fontSize: 11,
+  },
+  fm85aBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
   },
 });
