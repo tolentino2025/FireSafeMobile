@@ -1,0 +1,39 @@
+ATENÇÃO – REGRA OBRIGATÓRIA:
+NÃO alterar em hipótese alguma o padrão dos PDFs do sistema:
+- layout, estrutura, HTML, CSS, fontes, cores, ordem dos campos, cabeçalho/rodapé, logos e textos fixos.
+A mudança deve ser APENAS na ORIGEM DO DADO e na FUNÇÃO chamada para gerar o PDF.
+
+Problema:
+- Para inspeções do tipo "Bomba de Incêndio Diesel" e "Bomba de Incêndio Elétrica" que possuem performanceTestId,
+  o módulo Inspeções está gerando PDF pelo utils/pdfGenerator.ts (Relatório NFPA25 genérico).
+- O inspectionRecord gerado pelo DieselPerformanceTestScreen.tsx tem checklist vazio, então o PDF sai sem os dados do teste
+  e não é espelho do que o usuário preencheu.
+
+Objetivo:
+- Quando a inspeção for de bomba (diesel/elétrica) e tiver performanceTestId, o botão de PDF no detalhe de inspeção deve gerar
+  o PDF do teste de bomba usando utils/performanceTestPdfGenerator.ts, carregando o teste salvo pelo ID.
+
+Implementação (mínima, sem mudar fluxos):
+1) Em screens/InspectionDetailScreen.tsx:
+   - Importar:
+     - { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
+   - Acessar do contexto:
+     - getDieselPerformanceTestById
+     - getElectricPerformanceTestById
+   - No handlePrintPdf e handleSharePdf:
+     - Se inspection.performanceTestId existir E inspection.type indicar bomba diesel:
+         - const saved = getDieselPerformanceTestById(inspection.performanceTestId)
+         - chamar await generateDieselPumpPdf(saved ?? {}, language as "en" | "pt-BR")
+         - tratar retorno {success,message} com Alert se falhar
+         - return (não chamar generateAndPrintPdf/SharePdf genérico)
+     - Se for bomba elétrica:
+         - const saved = getElectricPerformanceTestById(inspection.performanceTestId)
+         - await generateElectricPumpPdf(saved ?? {}, language)
+         - return
+     - Caso contrário: manter o comportamento atual (generateAndPrintPdf / generateAndSharePdf do pdfGenerator).
+2) NÃO alterar qualquer template/HTML/CSS de PDF.
+3) NÃO alterar telas, navegação, textos, nem o fluxo do usuário.
+
+Resultado esperado:
+- Em Inspeções → item "Bomba Diesel" → Gerar PDF/Compartilhar: gera o PDF do teste diesel com os dados preenchidos (espelho),
+  usando o template já existente do performance test.

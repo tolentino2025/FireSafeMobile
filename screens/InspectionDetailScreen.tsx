@@ -16,6 +16,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
+import { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -26,7 +27,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   const { inspectionId } = route.params;
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { inspections, deleteInspection } = useInspections();
+  const { inspections, deleteInspection, getDieselPerformanceTestById, getElectricPerformanceTestById } = useInspections();
   const insets = useSafeAreaInsets();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -139,6 +140,24 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     if (isGeneratingPdf) return;
     setIsGeneratingPdf(true);
     try {
+      if (inspection.performanceTestId) {
+        if (inspection.type === "diesel_pump") {
+          const saved = getDieselPerformanceTestById(inspection.performanceTestId);
+          const result = await generateDieselPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
+          if (!result.success) {
+            Alert.alert(t.common.error, result.message || t.report.shareError);
+          }
+          return;
+        }
+        if (inspection.type === "electric_pump") {
+          const saved = getElectricPerformanceTestById(inspection.performanceTestId);
+          const result = await generateElectricPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
+          if (!result.success) {
+            Alert.alert(t.common.error, result.message || t.report.shareError);
+          }
+          return;
+        }
+      }
       await generateAndPrintPdf({
         inspection,
         language: language as "en" | "pt-BR",
@@ -155,6 +174,24 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     if (isGeneratingPdf) return;
     setIsGeneratingPdf(true);
     try {
+      if (inspection.performanceTestId) {
+        if (inspection.type === "diesel_pump") {
+          const saved = getDieselPerformanceTestById(inspection.performanceTestId);
+          const result = await generateDieselPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
+          if (!result.success) {
+            Alert.alert(t.common.error, result.message || t.report.shareError);
+          }
+          return;
+        }
+        if (inspection.type === "electric_pump") {
+          const saved = getElectricPerformanceTestById(inspection.performanceTestId);
+          const result = await generateElectricPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
+          if (!result.success) {
+            Alert.alert(t.common.error, result.message || t.report.shareError);
+          }
+          return;
+        }
+      }
       await generateAndSharePdf({
         inspection,
         language: language as "en" | "pt-BR",
