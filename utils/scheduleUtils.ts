@@ -16,8 +16,14 @@ export function addInterval(date: Date, frequency: InspectionFrequency): Date {
     case "quarterly":
       d.setMonth(d.getMonth() + 3);
       break;
+    case "semiannually":
+      d.setMonth(d.getMonth() + 6);
+      break;
     case "annually":
       d.setFullYear(d.getFullYear() + 1);
+      break;
+    case "three_years":
+      d.setFullYear(d.getFullYear() + 3);
       break;
     case "five_years":
       d.setFullYear(d.getFullYear() + 5);
@@ -32,13 +38,15 @@ export function generateScheduleId(): string {
 }
 
 export function getFrequencyLabel(frequency: InspectionFrequency, language: "en" | "pt-BR"): string {
-  const labels = {
+  const labels: Record<"en" | "pt-BR", Record<InspectionFrequency, string>> = {
     en: {
       daily: "Daily",
       weekly: "Weekly",
       monthly: "Monthly",
       quarterly: "Quarterly",
+      semiannually: "Semi-Annual",
       annually: "Annual",
+      three_years: "3-Year",
       five_years: "5-Year",
     },
     "pt-BR": {
@@ -46,7 +54,9 @@ export function getFrequencyLabel(frequency: InspectionFrequency, language: "en"
       weekly: "Semanal",
       monthly: "Mensal",
       quarterly: "Trimestral",
+      semiannually: "Semestral",
       annually: "Anual",
+      three_years: "3 Anos",
       five_years: "5 Anos",
     },
   };
