@@ -23,8 +23,10 @@ import { PhotoCapture } from "@/components/PhotoCapture";
 import { SelectPicker } from "@/components/SelectPicker";
 import { DatePickerField } from "@/components/DatePickerField";
 import { FM85ASection } from "@/components/FM85ASection";
+import { HydrostaticTestSection } from "@/components/inspections/HydrostaticTestSection";
 import Spacer from "@/components/Spacer";
 import { FM85ACertificate, createEmptyFM85ACertificate } from "@/types/fm85a";
+import { HydrostaticTest, createEmptyHydrostaticTest } from "@/types/hydrostaticTest";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel, GeoLocation } from "@/contexts/InspectionContext";
@@ -56,6 +58,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [selectedInspectorId, setSelectedInspectorId] = useState<string | undefined>(existingInspection?.inspectorId);
   
   const isFM85A = type === "fm85a";
+  const isHydrostatic = type === "hydrostatic_test";
   const [selectedFirePumpId, setSelectedFirePumpId] = useState<string | undefined>(existingInspection?.firePumpId);
   const [selectedFirePumpPanelId, setSelectedFirePumpPanelId] = useState<string | undefined>(existingInspection?.firePumpPanelId);
   const [propertyName, setPropertyName] = useState(existingInspection?.propertyName || "");
@@ -85,6 +88,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [isSaving, setIsSaving] = useState(false);
   const [fm85aCertificate, setFm85aCertificate] = useState<FM85ACertificate>(
     existingInspection?.fm85aCertificate || createEmptyFM85ACertificate()
+  );
+  const [hydrostaticTest, setHydrostaticTest] = useState<HydrostaticTest>(
+    existingInspection?.hydrostaticTest || createEmptyHydrostaticTest()
   );
   
   const autoSaveOpacity = useSharedValue(0);
@@ -326,6 +332,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
       geoLocation,
       fm85aCertificate: fm85aCertificate,
+      hydrostaticTest: isHydrostatic ? hydrostaticTest : undefined,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -380,6 +387,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
         geoLocation,
         fm85aCertificate: fm85aCertificate,
+        hydrostaticTest: isHydrostatic ? hydrostaticTest : undefined,
         createdAt: existingInspection?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -441,6 +449,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
       geoLocation,
       fm85aCertificate: fm85aCertificate,
+      hydrostaticTest: isHydrostatic ? hydrostaticTest : undefined,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -595,6 +604,55 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           </Pressable>
           <Pressable
             onPress={handleFM85APdf}
+            style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+          >
+            <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
+            <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
+          </Pressable>
+        </View>
+      </>
+    );
+  }
+
+  if (isHydrostatic) {
+    return (
+      <>
+        <ScreenKeyboardAwareScrollView>
+          <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>
+            <Feather name="check-circle" size={14} color={AppColors.success} />
+            <ThemedText type="small" style={{ color: AppColors.success, marginLeft: Spacing.xs }}>
+              {t.form.autoSaved}
+            </ThemedText>
+          </Animated.View>
+
+          <HydrostaticTestSection
+            hydrostaticTest={hydrostaticTest}
+            onHydrostaticTestChange={setHydrostaticTest}
+            photos={photos}
+            onPhotosChange={setPhotos}
+          />
+
+          <Spacer height={100 + Spacing["4xl"]} />
+        </ScreenKeyboardAwareScrollView>
+
+        <View style={[styles.stickyBottomBar, { backgroundColor: fullTheme.colors.cardBackground, borderTopColor: fullTheme.colors.border, paddingBottom: Spacing.md, bottom: tabBarHeight }]}>
+          <Pressable
+            onPress={handleSaveDraft}
+            disabled={isSaving}
+            style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+          >
+            <Feather name="save" size={18} color={fullTheme.colors.textPrimary} />
+            <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>{language === 'pt-BR' ? 'Salvar' : 'Save'}</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleSubmit}
+            style={[styles.actionButton, styles.submitButton, { backgroundColor: fullTheme.colors.primary }]}
+          >
+            <Feather name="check-circle" size={18} color="#FFFFFF" />
+            <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: "#FFFFFF" }}>{language === 'pt-BR' ? 'Concluir' : 'Complete'}</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleSaveDraft}
             style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
           >
             <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />

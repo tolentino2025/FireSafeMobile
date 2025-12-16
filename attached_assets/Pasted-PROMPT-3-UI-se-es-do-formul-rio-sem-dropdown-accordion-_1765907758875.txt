@@ -1,0 +1,115 @@
+PROMPT 3 — UI: seções do formulário (sem dropdown/accordion indevido)
+
+Objetivo: criar o layout do Teste Hidrostático dentro do InspectionFormScreen, mantendo padrão visual (cards/seções). Sem accordion e sem dropdown além do que você decidir (ex.: empresa/inspetor se já existir no app; aqui o teste tem dados próprios, então tudo é input).
+
+Faça:
+
+Criar componente:
+
+components/inspections/HydrostaticTestSection.tsx
+
+No InspectionFormScreen.tsx:
+
+Detectar isHydrostatic = type === "hydrostatic_test"
+
+Renderizar HydrostaticTestSection no lugar do checklist
+
+HydrostaticTestSection deve renderizar as seções:
+
+Identificação do Teste
+
+Tipo de sistema (hidrantes/sprinklers) = segmented control / radio buttons (obrigatório)
+
+Dados gerais: systemName, buildingType, protectedArea
+
+Normas: multi-select por checkboxes (NFPA 13/14/25, FM Global, NBR)
+
+se marcar FM Global → mostrar input fmDataSheet
+
+se marcar NBR → mostrar input nbrStandard
+
+Projeto aprovado por: 3 radios (CB/FM/Outro) e se Outro → texto
+
+Data do teste + hora início/fim (usar DatePickerField e TimePicker padrão do app)
+
+Clima (opcional)
+
+Partes envolvidas
+
+Proprietário (inputs)
+
+Empresa executora (inputs + CNPJ com máscara se já houver)
+
+Responsável técnico (name, CREA/CAU, ART/RRT opcional)
+
+Inspetor (name, função) + assinatura (se o app tem assinatura)
+
+Preparação
+
+6 checkboxes de condições prévias
+
+Instrumentação (manômetro: marca, modelo, faixa, certificado)
+
+Ponto de leitura (radios) + “Outro” com texto
+
+Execução
+
+Enchimento: método (radios)
+
+Eliminação de ar: 2 checkboxes
+
+Pressão de trabalho/teste (inputs + unidades bar/psi como toggle)
+
+Critério normativo aplicado: text area
+
+Tempo mínimo: valor + unidade
+
+4.3 Monitoramento
+
+hora estabilização inicial, hora final, pressão inicial/final, variação
+
+Resultados
+
+Estanqueidade (checkboxes “não houve…”)
+
+Ocorrências (checkboxes “houve vazamento…”)
+
+Campo descrição condicional quando marcar vazamento/falha
+
+5.2 Registro fotográfico (obrigatório)
+
+Use o mesmo componente de upload de fotos do app
+
+Separar por blocos:
+
+Início: manômetro + visão geral
+
+Durante (opcional)
+
+Final: manômetro + condição final
+
+Conclusão técnica
+
+Status aprovado/reprovado (radio)
+
+Texto livre obrigatório (multiline)
+
+Declaração e assinaturas
+
+Checkbox “declaração aceita” obrigatório
+
+Assinaturas (se vocês usam componente de assinatura, repetir padrão)
+
+Regra visual:
+
+Nada de dropdown em seções
+
+Nada de accordion (tudo rolagem)
+
+Critérios de aceite:
+
+Tela fica igual às inspeções existentes, porém com seções abertas
+
+Somente “Tipo de Sistema” e “Aprovado por” usam radios/segment
+
+Fotos obrigatórias com validação
