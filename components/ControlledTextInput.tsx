@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { TextInput, TextInputProps } from "react-native";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { TextInput, TextInputProps, Platform } from "react-native";
 
 interface ControlledTextInputProps extends Omit<TextInputProps, "value" | "onChangeText"> {
   value: string;
@@ -14,33 +14,47 @@ export function ControlledTextInput({
   ...props
 }: ControlledTextInputProps) {
   const [localValue, setLocalValue] = useState(value);
+  const isFocusedRef = useRef(false);
+  const hasChangedRef = useRef(false);
 
   useEffect(() => {
-    setLocalValue(value);
+    if (!isFocusedRef.current) {
+      setLocalValue(value);
+    }
   }, [value]);
 
   const handleChangeText = useCallback((text: string) => {
     const transformed = transform ? transform(text) : text;
     setLocalValue(transformed);
+    hasChangedRef.current = true;
   }, [transform]);
 
-  const handleEndEditing = useCallback(() => {
-    if (localValue !== value) {
+  const handleFocus = useCallback(() => {
+    isFocusedRef.current = true;
+  }, []);
+
+  const syncValue = useCallback(() => {
+    isFocusedRef.current = false;
+    if (hasChangedRef.current && localValue !== value) {
       onValueChange(localValue);
+      hasChangedRef.current = false;
     }
   }, [localValue, value, onValueChange]);
 
+  const handleEndEditing = useCallback(() => {
+    syncValue();
+  }, [syncValue]);
+
   const handleBlur = useCallback(() => {
-    if (localValue !== value) {
-      onValueChange(localValue);
-    }
-  }, [localValue, value, onValueChange]);
+    syncValue();
+  }, [syncValue]);
 
   return (
     <TextInput
       {...props}
       value={localValue}
       onChangeText={handleChangeText}
+      onFocus={handleFocus}
       onEndEditing={handleEndEditing}
       onBlur={handleBlur}
     />
