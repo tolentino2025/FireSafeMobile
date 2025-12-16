@@ -1,0 +1,87 @@
+Corrigir “tela dentro da outra” removendo ActionBar duplicado e ajustando layout
+
+Objetivo: no InspectionFormScreen (e no FM85A também), garantir que exista apenas 1 barra de ações (Salvar/Concluir/PDF), fixa no rodapé, sem duplicação, e com espaçamento correto acima da TabBar.
+
+1) Encontrar onde o ActionBar está duplicado
+
+Arquivo: screens/InspectionFormScreen.tsx (ou equivalente)
+
+Procure por componentes/trechos como:
+
+<InspectionActions ... />
+
+<BottomActionBar ... />
+
+<ActionButtons ... />
+
+<Footer ... />
+
+ou os próprios botões “Salvar / Concluir / PDF”
+
+Regra: deve existir apenas 1 render desses botões.
+
+2) Remover o ActionBar que está dentro do ScrollView
+
+Se hoje o seu JSX estiver algo assim:
+
+<ScrollView>
+  ...
+  <ActionBar />   // <-- REMOVER este (o que aparece “no meio” da tela)
+</ScrollView>
+
+<ActionBar />     // <-- MANTER este (o fixo)
+
+
+Remova o ActionBar de dentro do ScrollView.
+
+Mantenha apenas o ActionBar fora do ScrollView, fixo.
+
+3) Fixar o ActionBar corretamente (sem sobrepor conteúdo)
+
+Envolva a tela em um container flex: 1.
+
+Use o ActionBar com position: "absolute" e bottom: 0, ou use um layout com View fixa fora do scroll.
+
+Exemplo padrão:
+
+<View style={{ flex: 1 }}>
+  <ScrollView
+    contentContainerStyle={{ paddingBottom: ACTION_BAR_HEIGHT + TAB_BAR_HEIGHT + 16 }}
+  >
+    ...conteúdo...
+  </ScrollView>
+
+  <View style={styles.actionBar}>
+    ...Salvar / Concluir / PDF...
+  </View>
+</View>
+
+
+Importante: paddingBottom precisa considerar:
+
+altura do ActionBar fixo (ex.: 76–96)
+
+altura da TabBar (ex.: ~60)
+
+safe area (iPhone)
+
+Se você já tem helper tipo useSafeAreaInsets(), use:
+
+const insets = useSafeAreaInsets();
+const bottomPadding = ACTION_BAR_HEIGHT + TAB_BAR_HEIGHT + insets.bottom + 16;
+
+4) Garantir que a TabBar não crie “segunda barra”
+
+Se você estiver usando tabBarStyle custom ou um wrapper com bottom fixo, confirme que não existe outro componente de botões na tab.
+
+O ActionBar deve ser somente do screen, não do TabNavigator.
+
+Critérios de aceite
+
+Na tela de inspeção, aparece apenas um conjunto de botões (Salvar/Concluir/PDF).
+
+O conjunto fica sempre fixo no rodapé (acima da tab bar).
+
+O campo “Notas Adicionais / Comentários” não fica escondido atrás dos botões.
+
+Não existe mais “duplicação” visual.

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, TextInput, StyleSheet, Pressable, ScrollView, Alert, ActivityIndicator } from "react-native";
+import { View, TextInput, StyleSheet, Pressable, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { DatePickerField } from "@/components/DatePickerField";
@@ -9,8 +9,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
-import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
-import * as Haptics from "expo-haptics";
 import {
   FM85ACertificate,
   FM85ASprinkler,
@@ -56,9 +54,6 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
   const { t, language } = useLanguage();
   const fm85a = (t as any).fm85a || {};
 
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
   const [expandedSubSections, setExpandedSubSections] = useState<Record<string, boolean>>({
     contractor: true,
     client: true,
@@ -90,69 +85,6 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
   const updateCertificate = useCallback((updates: Partial<FM85ACertificate>) => {
     onCertificateChange({ ...certificate, ...updates });
   }, [certificate, onCertificateChange]);
-
-  const handleSave = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      if (onSave) {
-        await onSave();
-      }
-      Alert.alert(
-        language === 'pt-BR' ? 'Sucesso' : 'Success',
-        language === 'pt-BR' ? 'Certificado FM85A salvo com sucesso!' : 'FM85A Certificate saved successfully!'
-      );
-    } catch (error) {
-      console.error("Error saving FM85A:", error);
-      Alert.alert(
-        t.common?.error || 'Error',
-        language === 'pt-BR' ? 'Erro ao salvar certificado' : 'Error saving certificate'
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handlePrintPdf = async () => {
-    if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await generateAndPrintFM85APdf({
-        certificate,
-        language: language as "en" | "pt-BR",
-      });
-    } catch (error) {
-      console.error("Error generating FM85A PDF:", error);
-      Alert.alert(
-        t.common?.error || 'Error',
-        t.report?.shareError || 'Error generating PDF'
-      );
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
-
-  const handleSharePdf = async () => {
-    if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await generateAndShareFM85APdf({
-        certificate,
-        language: language as "en" | "pt-BR",
-      });
-    } catch (error) {
-      console.error("Error sharing FM85A PDF:", error);
-      Alert.alert(
-        t.common?.error || 'Error',
-        t.report?.shareError || 'Error sharing PDF'
-      );
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
 
   const SubSectionHeader = ({ title, section }: { title: string; section: string }) => (
     <Pressable
@@ -895,56 +827,6 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
           {renderTestsSection()}
           {renderSignaturesSection()}
           {renderAdditionalNotesSection()}
-          
-          <Spacer height={Spacing.lg} />
-          <View style={[styles.actionButtonsRow, { borderTopColor: fullTheme.colors.border }]}>
-            <Pressable
-              onPress={handleSave}
-              disabled={isSaving}
-              style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
-            >
-              {isSaving ? (
-                <ActivityIndicator size="small" color={fullTheme.colors.textPrimary} />
-              ) : (
-                <>
-                  <Feather name="save" size={18} color={fullTheme.colors.textPrimary} />
-                  <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>
-                    {language === 'pt-BR' ? 'Salvar' : 'Save'}
-                  </ThemedText>
-                </>
-              )}
-            </Pressable>
-            <Pressable
-              onPress={handleSharePdf}
-              disabled={isGeneratingPdf}
-              style={[styles.actionButton, { backgroundColor: fullTheme.colors.primary }]}
-            >
-              {isGeneratingPdf ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Feather name="check-circle" size={18} color="#FFFFFF" />
-                  <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: "#FFFFFF" }}>
-                    {language === 'pt-BR' ? 'Enviar' : 'Send'}
-                  </ThemedText>
-                </>
-              )}
-            </Pressable>
-            <Pressable
-              onPress={handlePrintPdf}
-              disabled={isGeneratingPdf}
-              style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
-            >
-              {isGeneratingPdf ? (
-                <ActivityIndicator size="small" color={fullTheme.colors.textPrimary} />
-              ) : (
-                <>
-                  <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
-                  <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
-                </>
-              )}
-            </Pressable>
-          </View>
         </View>
       )}
     </View>
@@ -1095,24 +977,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: Spacing.sm,
     fontSize: 14,
-  },
-  actionButtonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: Spacing.lg,
-    marginTop: Spacing.lg,
-    borderTopWidth: 1,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    flex: 1,
-    marginHorizontal: Spacing.xs,
   },
 });

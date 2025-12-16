@@ -396,7 +396,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       }
       Alert.alert(
         t.common.success,
-        t.form.draftSaved || "Rascunho salvo com sucesso"
+        language === "pt-BR" ? "Rascunho salvo com sucesso" : "Draft saved successfully"
       );
     } catch (error) {
       console.error("Error saving draft:", error);
@@ -450,7 +450,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       await generateAndPrintPdf({ inspection: inspectionData, language: language as "en" | "pt-BR" });
     } catch (error) {
       console.error("Error generating PDF:", error);
-      Alert.alert(t.common.error, t.report.pdfError || "Erro ao gerar PDF");
+      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
     }
   };
 
@@ -459,7 +459,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       await generateAndShareFM85APdf({ certificate: fm85aCertificate, language: language as "en" | "pt-BR" });
     } catch (error) {
       console.error("Error generating FM85A PDF:", error);
-      Alert.alert(t.common.error, t.report.pdfError || "Erro ao gerar PDF");
+      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
     }
   };
 
@@ -861,7 +861,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
       >
         <Feather name="save" size={18} color={fullTheme.colors.textPrimary} />
-        <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>{t.form.saveDraft || "Salvar"}</ThemedText>
+        <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>{t.form.save}</ThemedText>
       </Pressable>
       <Pressable
         onPress={handleSubmit}
