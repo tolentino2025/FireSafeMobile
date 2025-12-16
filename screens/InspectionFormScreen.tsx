@@ -37,6 +37,7 @@ import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
+import { generateAndPrintHydrostaticTestPdf, generateAndShareHydrostaticTestPdf, generateAndEmailHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -469,7 +470,16 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     };
 
     try {
-      await generateAndPrintPdf({ inspection: inspectionData, language: language as "en" | "pt-BR" });
+      if (isHydrostatic) {
+        await generateAndPrintHydrostaticTestPdf({
+          inspection: inspectionData,
+          hydrostaticTest,
+          photos,
+          language: language as "en" | "pt-BR",
+        });
+      } else {
+        await generateAndPrintPdf({ inspection: inspectionData, language: language as "en" | "pt-BR" });
+      }
     } catch (error) {
       console.error("Error generating PDF:", error);
       Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
@@ -482,6 +492,103 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     } catch (error) {
       console.error("Error generating FM85A PDF:", error);
       Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
+    }
+  };
+
+  const handleHydrostaticSharePdf = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    
+    const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
+    const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+
+    const inspectionData: Inspection = {
+      id: existingInspection?.id || Date.now().toString(),
+      type,
+      status: existingInspection?.status || "draft",
+      propertyId: "",
+      propertyName: hydrostaticTest.owner.corporateName || "",
+      propertyAddress: hydrostaticTest.owner.address || "",
+      propertyPhone: hydrostaticTest.owner.contact || "",
+      inspectorName: hydrostaticTest.inspector.name || "",
+      contractNo,
+      date: hydrostaticTest.testDate || date,
+      frequency,
+      checklist,
+      observations,
+      signature,
+      photos,
+      companyId: selectedCompanyId,
+      companyData: selectedCompany,
+      inspectorId: selectedInspectorId,
+      inspectorData: selectedInspector,
+      geoLocation,
+      fm85aCertificate,
+      hydrostaticTest,
+      createdAt: existingInspection?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await generateAndShareHydrostaticTestPdf({
+        inspection: inspectionData,
+        hydrostaticTest,
+        photos,
+        language: language as "en" | "pt-BR",
+      });
+    } catch (error) {
+      console.error("Error sharing hydrostatic PDF:", error);
+      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao compartilhar PDF" : "Error sharing PDF");
+    }
+  };
+
+  const handleHydrostaticEmailPdf = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    
+    const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
+    const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+
+    const inspectionData: Inspection = {
+      id: existingInspection?.id || Date.now().toString(),
+      type,
+      status: existingInspection?.status || "draft",
+      propertyId: "",
+      propertyName: hydrostaticTest.owner.corporateName || "",
+      propertyAddress: hydrostaticTest.owner.address || "",
+      propertyPhone: hydrostaticTest.owner.contact || "",
+      inspectorName: hydrostaticTest.inspector.name || "",
+      contractNo,
+      date: hydrostaticTest.testDate || date,
+      frequency,
+      checklist,
+      observations,
+      signature,
+      photos,
+      companyId: selectedCompanyId,
+      companyData: selectedCompany,
+      inspectorId: selectedInspectorId,
+      inspectorData: selectedInspector,
+      geoLocation,
+      fm85aCertificate,
+      hydrostaticTest,
+      createdAt: existingInspection?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await generateAndEmailHydrostaticTestPdf({
+        inspection: inspectionData,
+        hydrostaticTest,
+        photos,
+        language: language as "en" | "pt-BR",
+        recipientEmail: hydrostaticTest.owner.contact.includes("@") ? hydrostaticTest.owner.contact : undefined,
+      });
+    } catch (error) {
+      console.error("Error emailing hydrostatic PDF:", error);
+      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao enviar email" : "Error sending email");
     }
   };
 
@@ -666,11 +773,23 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
             <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: "#FFFFFF" }}>{language === 'pt-BR' ? 'Concluir' : 'Complete'}</ThemedText>
           </Pressable>
           <Pressable
-            onPress={handleSaveDraft}
+            onPress={handleExportPdf}
             style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
           >
             <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
             <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleHydrostaticSharePdf}
+            style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+          >
+            <Feather name="share-2" size={18} color={fullTheme.colors.textPrimary} />
+          </Pressable>
+          <Pressable
+            onPress={handleHydrostaticEmailPdf}
+            style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border }]}
+          >
+            <Feather name="mail" size={18} color={fullTheme.colors.textPrimary} />
           </Pressable>
         </View>
       </>
