@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import { View, TextInput, StyleSheet, Pressable, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -42,38 +42,15 @@ import {
 interface FM85ASectionProps {
   certificate: FM85ACertificate;
   onCertificateChange: (certificate: FM85ACertificate) => void;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
   onSave?: () => Promise<void>;
 }
 
 type YesNo = 'Y' | 'N' | '';
 
-export function FM85ASection({ certificate, onCertificateChange, isExpanded, onToggleExpand, onSave }: FM85ASectionProps) {
+export function FM85ASection({ certificate, onCertificateChange, onSave }: FM85ASectionProps) {
   const { theme, fullTheme } = useTheme();
   const { t, language } = useLanguage();
   const fm85a = (t as any).fm85a || {};
-
-  const [expandedSubSections, setExpandedSubSections] = useState<Record<string, boolean>>({
-    contractor: true,
-    client: true,
-    sprinklers: false,
-    pipe: false,
-    pipeConnections: false,
-    pipeHangers: false,
-    alarmValves: false,
-    detectionValves: false,
-    controlValves: false,
-    checkValves: false,
-    miscComponents: false,
-    otherComponents: false,
-    tests: false,
-    signatures: false,
-  });
-
-  const toggleSubSection = (section: string) => {
-    setExpandedSubSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
 
   const inputStyle = [
     styles.input,
@@ -86,18 +63,10 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
     onCertificateChange({ ...certificate, ...updates });
   }, [certificate, onCertificateChange]);
 
-  const SubSectionHeader = ({ title, section }: { title: string; section: string }) => (
-    <Pressable
-      style={[styles.subSectionHeader, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}
-      onPress={() => toggleSubSection(section)}
-    >
+  const SubSectionHeader = ({ title }: { title: string }) => (
+    <View style={[styles.subSectionHeader, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
       <ThemedText type="h3" style={styles.subSectionTitle}>{title}</ThemedText>
-      <Feather
-        name={expandedSubSections[section] ? "chevron-up" : "chevron-down"}
-        size={22}
-        color={fullTheme.colors.primary}
-      />
-    </Pressable>
+    </View>
   );
 
   const YesNoSelector = ({ value, onChange, label }: { value: YesNo; onChange: (v: YesNo) => void; label: string }) => (
@@ -127,9 +96,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
   const renderContractorSection = () => (
     <>
-      <SubSectionHeader title={fm85a.contractorInfo || "Contractor Information"} section="contractor" />
-      {expandedSubSections.contractor && (
-        <View style={styles.sectionContent}>
+      <SubSectionHeader title={fm85a.contractorInfo || "Contractor Information"}  />
+      <View style={styles.sectionContent}>
           <ThemedText type="small">{fm85a.date || "Date"}</ThemedText>
           <DatePickerField
             value={certificate.contractorInfo.date}
@@ -160,16 +128,14 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             placeholder={fm85a.contractorCompanyAddress || "Contractor Company Address"}
             placeholderTextColor={theme.placeholder}
           />
-        </View>
-      )}
+      </View>
     </>
   );
 
   const renderClientSection = () => (
     <>
-      <SubSectionHeader title={fm85a.clientInfo || "FM Global Client Information"} section="client" />
-      {expandedSubSections.client && (
-        <View style={styles.sectionContent}>
+      <SubSectionHeader title={fm85a.clientInfo || "FM Global Client Information"}  />
+      <View style={styles.sectionContent}>
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{fm85a.indexNo || "Index No"}</ThemedText>
@@ -249,8 +215,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             placeholderTextColor={theme.placeholder}
             multiline
           />
-        </View>
-      )}
+      </View>
     </>
   );
 
@@ -273,9 +238,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
     return (
       <>
-        <SubSectionHeader title={fm85a.sprinklersSection || "Automatic Sprinklers"} section="sprinklers" />
-        {expandedSubSections.sprinklers && (
-          <View style={styles.sectionContent}>
+        <SubSectionHeader title={fm85a.sprinklersSection || "Automatic Sprinklers"}  />
+        <View style={styles.sectionContent}>
             {certificate.sprinklers.map((item, idx) => (
               <View key={idx} style={[styles.tableRow, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
                 <View style={[styles.tableRowHeader, { borderBottomColor: fullTheme.colors.border }]}>
@@ -324,8 +288,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
               <Feather name="plus" size={16} color={AppColors.primary} />
               <ThemedText style={{ color: AppColors.primary, marginLeft: Spacing.xs }}>{fm85a.addRow || "+ Add Row"}</ThemedText>
             </Pressable>
-          </View>
-        )}
+        </View>
       </>
     );
   };
@@ -341,9 +304,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
     return (
       <>
-        <SubSectionHeader title={fm85a.pipeSection || "Automatic Sprinkler Pipe"} section="pipe" />
-        {expandedSubSections.pipe && (
-          <View style={styles.sectionContent}>
+        <SubSectionHeader title={fm85a.pipeSection || "Automatic Sprinkler Pipe"}  />
+        <View style={styles.sectionContent}>
             {certificate.pipe.map((item: FM85APipe, idx: number) => (
               <View key={idx} style={[styles.tableRow, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
                 <View style={[styles.tableRowHeader, { borderBottomColor: fullTheme.colors.border }]}>
@@ -386,8 +348,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
               <Feather name="plus" size={16} color={AppColors.primary} />
               <ThemedText style={{ color: AppColors.primary, marginLeft: Spacing.xs }}>{fm85a.addRow || "+ Add Row"}</ThemedText>
             </Pressable>
-          </View>
-        )}
+        </View>
       </>
     );
   };
@@ -403,9 +364,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
     return (
       <>
-        <SubSectionHeader title={fm85a.alarmValvesSection || "Alarm-Check/Dry-Pipe/Auto-Release Valves"} section="alarmValves" />
-        {expandedSubSections.alarmValves && (
-          <View style={styles.sectionContent}>
+        <SubSectionHeader title={fm85a.alarmValvesSection || "Alarm-Check/Dry-Pipe/Auto-Release Valves"}  />
+        <View style={styles.sectionContent}>
             {certificate.alarmCheckDryPipeReleaseValves.map((item, idx) => (
               <View key={idx} style={[styles.tableRow, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
                 <View style={[styles.tableRowHeader, { borderBottomColor: fullTheme.colors.border }]}>
@@ -494,8 +454,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 automaticReleaseValveQuestions: { ...certificate.automaticReleaseValveQuestions, manualOperationArranged: v }
               })}
             />
-          </View>
-        )}
+        </View>
       </>
     );
   };
@@ -513,9 +472,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
     return (
       <>
-        <SubSectionHeader title={fm85a.miscComponentsSection || "Miscellaneous Components"} section="miscComponents" />
-        {expandedSubSections.miscComponents && (
-          <View style={styles.sectionContent}>
+        <SubSectionHeader title={fm85a.miscComponentsSection || "Miscellaneous Components"}  />
+        <View style={styles.sectionContent}>
             {miscItems.map(({ key, label }) => (
               <View key={key} style={[styles.miscItem, { borderColor: fullTheme.colors.border, backgroundColor: fullTheme.colors.cardBackground }]}>
                 <ThemedText style={styles.miscLabel}>{label}</ThemedText>
@@ -566,17 +524,15 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 </View>
               </View>
             ))}
-          </View>
-        )}
+        </View>
       </>
     );
   };
 
   const renderTestsSection = () => (
     <>
-      <SubSectionHeader title={fm85a.testsSection || "Tests"} section="tests" />
-      {expandedSubSections.tests && (
-        <View style={styles.sectionContent}>
+      <SubSectionHeader title={fm85a.testsSection || "Tests"}  />
+      <View style={styles.sectionContent}>
           <ThemedText type="h4">{fm85a.hydrostaticTest || "Hydrostatic Test"}</ThemedText>
           <View style={styles.row}>
             <View style={styles.thirdField}>
@@ -711,16 +667,14 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             })}
             placeholder={fm85a.dateSystemLeftInService || "Date"}
           />
-        </View>
-      )}
+      </View>
     </>
   );
 
   const renderSignaturesSection = () => (
     <>
-      <SubSectionHeader title={fm85a.signaturesSection || "Signatures"} section="signatures" />
-      {expandedSubSections.signatures && (
-        <View style={styles.sectionContent}>
+      <SubSectionHeader title={fm85a.signaturesSection || "Signatures"}  />
+      <View style={styles.sectionContent}>
           <ThemedText type="h4">{fm85a.propertyOwnerAgent || "Property Owner/Authorized Agent"}</ThemedText>
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.name || "Name"}</ThemedText>
@@ -778,8 +732,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             })}
             placeholder={fm85a.date || "Date"}
           />
-        </View>
-      )}
+      </View>
     </>
   );
 
@@ -802,33 +755,23 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
 
   return (
     <View style={styles.container}>
-      <Pressable
-        style={[styles.mainHeader, { backgroundColor: fullTheme.colors.primary }]}
-        onPress={onToggleExpand}
-      >
+      <View style={[styles.mainHeader, { backgroundColor: fullTheme.colors.primary }]}>
         <ThemedText style={styles.mainHeaderText}>
           {fm85a.title || "CERTIFICATE OF MATERIALS AND TESTS FM GLOBAL (FM85A)"}
         </ThemedText>
-        <Feather
-          name={isExpanded ? "chevron-up" : "chevron-down"}
-          size={24}
-          color="#FFFFFF"
-        />
-      </Pressable>
+      </View>
       
-      {isExpanded && (
-        <View style={[styles.content, { borderColor: fullTheme.colors.border }]}>
-          {renderContractorSection()}
-          {renderClientSection()}
-          {renderSprinklersSection()}
-          {renderPipeSection()}
-          {renderAlarmValvesSection()}
-          {renderMiscComponentsSection()}
-          {renderTestsSection()}
-          {renderSignaturesSection()}
-          {renderAdditionalNotesSection()}
-        </View>
-      )}
+      <View style={[styles.content, { borderColor: fullTheme.colors.border }]}>
+        {renderContractorSection()}
+        {renderClientSection()}
+        {renderSprinklersSection()}
+        {renderPipeSection()}
+        {renderAlarmValvesSection()}
+        {renderMiscComponentsSection()}
+        {renderTestsSection()}
+        {renderSignaturesSection()}
+        {renderAdditionalNotesSection()}
+      </View>
     </View>
   );
 }

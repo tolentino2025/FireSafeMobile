@@ -86,8 +86,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [fm85aCertificate, setFm85aCertificate] = useState<FM85ACertificate>(
     existingInspection?.fm85aCertificate || createEmptyFM85ACertificate()
   );
-  const [fm85aExpanded, setFm85aExpanded] = useState(type === "fm85a");
-
+  
   const autoSaveOpacity = useSharedValue(0);
 
   const autoSaveStyle = useAnimatedStyle(() => ({
@@ -572,8 +571,6 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           <FM85ASection
             certificate={fm85aCertificate}
             onCertificateChange={setFm85aCertificate}
-            isExpanded={fm85aExpanded}
-            onToggleExpand={() => setFm85aExpanded(!fm85aExpanded)}
           />
 
           <Spacer height={100 + Spacing["4xl"]} />
@@ -816,8 +813,6 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       <FM85ASection
         certificate={fm85aCertificate}
         onCertificateChange={setFm85aCertificate}
-        isExpanded={fm85aExpanded}
-        onToggleExpand={() => setFm85aExpanded(!fm85aExpanded)}
       />
 
       <Spacer height={Spacing["2xl"]} />
