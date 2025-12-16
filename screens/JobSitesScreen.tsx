@@ -32,7 +32,7 @@ function JobSiteCard({
   onPress: () => void;
   onDelete: () => void;
 }) {
-  const { theme } = useTheme();
+  const { fullTheme } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -52,25 +52,39 @@ function JobSiteCard({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onLongPress={onDelete}
-      style={[styles.card, { backgroundColor: theme.backgroundDefault }, animatedStyle]}
+      style={[styles.card, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border, borderWidth: 1 }, animatedStyle]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${AppColors.primary}15` }]}>
-        <Feather name="map-pin" size={24} color={AppColors.primary} />
+      <View style={[styles.iconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+        <Feather name="map-pin" size={24} color={fullTheme.colors.primary} />
       </View>
       <View style={styles.cardContent}>
         <ThemedText type="h4" numberOfLines={1}>{jobSite.jobName}</ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+        <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary }} numberOfLines={1}>
           {jobSite.jobNumber ? `#${jobSite.jobNumber}` : "-"}
         </ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+        <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary }} numberOfLines={1}>
           {contractor?.name || "-"}
         </ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary }} numberOfLines={1}>
+        <ThemedText type="small" style={{ color: fullTheme.colors.textSecondary }} numberOfLines={1}>
           {jobSite.city ? `${jobSite.city}, ${jobSite.state}` : jobSite.address || "-"}
         </ThemedText>
       </View>
-      <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+      <View style={styles.actionButtons}>
+        <Pressable
+          onPress={onPress}
+          style={[styles.actionButton, { backgroundColor: `${fullTheme.colors.primary}15` }]}
+          hitSlop={8}
+        >
+          <Feather name="edit-2" size={18} color={fullTheme.colors.primary} />
+        </Pressable>
+        <Pressable
+          onPress={onDelete}
+          style={[styles.actionButton, { backgroundColor: `${fullTheme.colors.error}15` }]}
+          hitSlop={8}
+        >
+          <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+        </Pressable>
+      </View>
     </AnimatedPressable>
   );
 }
@@ -189,6 +203,18 @@ const styles = StyleSheet.create({
   cardContent: {
     flex: 1,
     marginLeft: Spacing.md,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  actionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyContainer: {
     alignItems: "center",

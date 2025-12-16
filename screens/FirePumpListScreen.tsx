@@ -31,17 +31,9 @@ function PumpCard({
 }) {
   const { fullTheme } = useTheme();
 
-  const handleLongPress = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    onDelete();
-  };
-
   return (
     <Pressable
       onPress={onPress}
-      onLongPress={handleLongPress}
       style={[styles.pumpCard, { 
         backgroundColor: fullTheme.colors.cardBackground,
         borderColor: fullTheme.colors.border,
@@ -72,7 +64,22 @@ function PumpCard({
           </View>
         ) : null}
       </View>
-      <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+      <View style={styles.actionButtons}>
+        <Pressable
+          onPress={onPress}
+          style={[styles.actionButton, { backgroundColor: `${fullTheme.colors.primary}15` }]}
+          hitSlop={8}
+        >
+          <Feather name="edit-2" size={18} color={fullTheme.colors.primary} />
+        </Pressable>
+        <Pressable
+          onPress={onDelete}
+          style={[styles.actionButton, { backgroundColor: `${fullTheme.colors.error}15` }]}
+          hitSlop={8}
+        >
+          <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+        </Pressable>
+      </View>
     </Pressable>
   );
 }
@@ -299,6 +306,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: Spacing.xs,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  actionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyContainer: {
     alignItems: "center",
