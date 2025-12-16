@@ -22,7 +22,9 @@ import { SignatureCapture } from "@/components/SignatureCapture";
 import { PhotoCapture } from "@/components/PhotoCapture";
 import { SelectPicker } from "@/components/SelectPicker";
 import { DatePickerField } from "@/components/DatePickerField";
+import { FM85ASection } from "@/components/FM85ASection";
 import Spacer from "@/components/Spacer";
+import { FM85ACertificate, createEmptyFM85ACertificate } from "@/types/fm85a";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel, GeoLocation } from "@/contexts/InspectionContext";
@@ -77,6 +79,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [autoSaved, setAutoSaved] = useState(false);
   const [isNewInspection] = useState(!existingInspection);
   const [isSaving, setIsSaving] = useState(false);
+  const [fm85aCertificate, setFm85aCertificate] = useState<FM85ACertificate>(
+    existingInspection?.fm85aCertificate || createEmptyFM85ACertificate()
+  );
+  const [fm85aExpanded, setFm85aExpanded] = useState(false);
 
   const autoSaveOpacity = useSharedValue(0);
 
@@ -276,6 +282,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
       firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
       geoLocation,
+      fm85aCertificate: fm85aCertificate,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -329,6 +336,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
         firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
         geoLocation,
+        fm85aCertificate: fm85aCertificate,
         createdAt: existingInspection?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -389,6 +397,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
       firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
       geoLocation,
+      fm85aCertificate: fm85aCertificate,
       createdAt: existingInspection?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -657,6 +666,15 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           showNotes={true}
         />
       ))}
+
+      <Spacer height={Spacing["2xl"]} />
+
+      <FM85ASection
+        certificate={fm85aCertificate}
+        onCertificateChange={setFm85aCertificate}
+        isExpanded={fm85aExpanded}
+        onToggleExpand={() => setFm85aExpanded(!fm85aExpanded)}
+      />
 
       <Spacer height={Spacing["2xl"]} />
 

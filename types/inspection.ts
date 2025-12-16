@@ -313,6 +313,8 @@ export interface GeoLocation {
   timestamp: number;
 }
 
+import { FM85ACertificate } from "./fm85a";
+
 export interface Inspection {
   id: string;
   type: InspectionType;
@@ -344,6 +346,7 @@ export interface Inspection {
   firePumpPanelData?: FirePumpControlPanel;
   performanceTestId?: string;
   geoLocation?: GeoLocation | null;
+  fm85aCertificate?: FM85ACertificate;
   createdAt: string;
   updatedAt: string;
   version?: number;

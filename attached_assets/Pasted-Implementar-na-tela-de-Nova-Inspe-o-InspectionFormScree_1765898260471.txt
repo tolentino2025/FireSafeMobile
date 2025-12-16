@@ -1,0 +1,53 @@
+Implementar na tela de Nova Inspeção (InspectionFormScreen.tsx) uma NOVA seção chamada:
+"CERTIFICADO DE MATERIAIS E TESTES FM GLOBAL (FM85A)"
+com todos os campos do documento FM85A, 100% fiel.
+
+Regras:
+- Não alterar fluxo atual das inspeções.
+- Não alterar outras seções existentes.
+- Não alterar templates/PDFs existentes.
+- Apenas adicionar uma seção nova, com UI padronizada (mesmos componentes do app: ThemedText, TextInput, SelectPicker, DatePickerField, etc.).
+
+Requisitos de UI:
+1) Seção deve ser colapsável/expansível (como outras seções do app, se já existir padrão).
+2) Todos campos devem existir exatamente como no documento (labels iguais).
+3) Tabelas devem permitir adicionar/remover linhas (botões "+ Adicionar linha" / "Remover").
+4) Campos numéricos devem aceitar números (psi, hours, quantity etc).
+5) Campos Yes/No devem ser seletor (Y/N) ou toggle (padronizado).
+6) Datas devem usar DatePickerField e salvar como "YYYY-MM-DD".
+
+Tabelas e campos (obrigatório incluir tudo):
+- Contractor Information (Date, Contractor Company Name, Contractor Company Address)
+- FM Global Client Information (Index No, Account No, Owner/Tenant Y/N, Building Name/No, Client Name, Client Address, Occupancy Description)
+- Automatic Sprinklers (tabela com colunas manufacturer/model/k-factor/temperature/SIN/year/quantity)
+- Automatic Sprinkler Pipe (tabela manufacturer/model/product description/schedule/connection type/max working pressure)
+- Automatic Sprinkler Pipe Connection (tabela manufacturer/model/product description/pipe ends/max working pressure)
+- Automatic Sprinkler Pipe Hangers (tabela manufacturer/model/product description/hanger rod size/component description/nominal pipe size)
+- Alarm-Check/Dry-Pipe/Automatic-Release Type Valves (tabela type/manufacturer/model/serial/quantity)
+- Perguntas “If Automatic-Release Type Valve” (detection type, interlock, supervised? manual operation?)
+- Detection for Automatic-Release Type Valves (tabela type/manufacturer/model/protected area/linear spacing/area spacing/quantity)
+- Perguntas “If detection is electric” (circuitry supervised DS 5-40? control panel make/model? solenoid release valve make/model?)
+- Control or Pressure-Reducing Type Valves (tabela type/manufacturer/model/serial/quantity)
+- Check or Backflow Preventer Type Valves (tabela type/manufacturer/model/serial/quantity)
+- Miscellaneous Components (Waterflow Alarm, Quick Opening Device, Pressure Gauge, FDC, Relief Valve, Test Connection, Drain Valve – cada um com manufacturer/model/quantity)
+- Other Components (tabela component/manufacturer/model/quantity)
+- Tests: Hydrostatic (psi/hours/psi drop), Pneumatic (psi/hours/psi drop), Waterflow Alarms (total tested / >60s)
+- Dry Pipe/Automatic Release Testing (tabela completa system/no name + pressures + required times + without/with QOD)
+- Perguntas “If Automatic-Release Type Valve: operated manually/automatically? detection units tested?”
+- Pressure-Reducing Valve Testing (tabela location/make/model/setting + inlet/outlet for static/residual + flow rate)
+- Blank Testing Gaskets (tabela number used/location/number removed)
+- Welded Pipe Connections (3 perguntas Y/N)
+- Drain Tests (tabela system name/no + static + residual + static afterwards)
+- Underground Mains (verified on FM85B Y/N + if no what form + contractor flushed)
+- Instruction Materials (2 perguntas Y/N + if no explain)
+- Date system left in service with all control valves open (date)
+- Signatures (Property Owner/Agent name + signature + title + date; Sprinkler Contractor name + signature + title + date)
+- Additional Explanations/Comments/Notes (texto longo)
+
+Persistência:
+- Ao salvar inspeção/draft/concluir, fm85aCertificate deve ser salvo junto sem perda.
+- Ao reabrir inspeção, os campos devem carregar exatamente o que foi preenchido.
+
+Entregável:
+- Implementação funcional e completa da seção FM85A.
+- Sem mudanças em fluxo das demais inspeções.
