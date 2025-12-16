@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert } from "react-native";
+import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -20,7 +20,7 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
   const { userId } = route.params || {};
   const { theme, fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { appUsers, addAppUser, updateAppUser } = useInspections();
+  const { appUsers, addAppUser, updateAppUser, deleteAppUser } = useInspections();
 
   const existingUser = userId ? appUsers.find((u) => u.id === userId) : undefined;
 
@@ -118,12 +118,40 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSubmit} variant="save">
-        <View style={styles.saveButtonContent}>
-          <Feather name="save" size={18} color="#111827" />
-          <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
+      <View style={styles.buttonRow}>
+        <View style={styles.saveButtonContainer}>
+          <Button onPress={handleSubmit} variant="save">
+            <View style={styles.saveButtonContent}>
+              <Feather name="save" size={18} color="#111827" />
+              <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
+            </View>
+          </Button>
         </View>
-      </Button>
+        {existingUser ? (
+          <Pressable
+            onPress={() => {
+              Alert.alert(
+                t.common.confirm,
+                `${t.common.delete} "${existingUser.name}"?`,
+                [
+                  { text: t.common.cancel, style: "cancel" },
+                  {
+                    text: t.common.delete,
+                    style: "destructive",
+                    onPress: async () => {
+                      await deleteAppUser(existingUser.id);
+                      navigation.goBack();
+                    },
+                  },
+                ]
+              );
+            }}
+            style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}
+          >
+            <Feather name="trash-2" size={20} color="#FFFFFF" />
+          </Pressable>
+        ) : null}
+      </View>
 
       <Spacer height={Spacing["4xl"]} />
     </ScreenKeyboardAwareScrollView>
@@ -137,6 +165,21 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
     fontSize: 16,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  saveButtonContainer: {
+    flex: 1,
+  },
+  deleteButton: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonContent: {
     flexDirection: "row",

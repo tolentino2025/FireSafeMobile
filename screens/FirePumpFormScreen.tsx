@@ -985,21 +985,24 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSubmit} variant="save">
-        <View style={styles.saveButtonContent}>
-          <Feather name="save" size={18} color="#111827" />
-          <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
-        </View>
-      </Button>
-
-      {existingPump ? (
-        <>
-          <Spacer height={Spacing.lg} />
-          <Button variant="outline" onPress={handleDeletePump}>
-            {t.common.delete}
+      <View style={styles.buttonRow}>
+        <View style={styles.saveButtonContainer}>
+          <Button onPress={handleSubmit} variant="save">
+            <View style={styles.saveButtonContent}>
+              <Feather name="save" size={18} color="#111827" />
+              <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
+            </View>
           </Button>
-        </>
-      ) : null}
+        </View>
+        {existingPump ? (
+          <Pressable
+            onPress={handleDeletePump}
+            style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}
+          >
+            <Feather name="trash-2" size={20} color="#FFFFFF" />
+          </Pressable>
+        ) : null}
+      </View>
 
       {existingPump ? (
         <>
@@ -1109,6 +1112,21 @@ const styles = StyleSheet.create({
   noPanels: {
     alignItems: "center",
     paddingVertical: Spacing.xl,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  saveButtonContainer: {
+    flex: 1,
+  },
+  deleteButton: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonContent: {
     flexDirection: "row",
