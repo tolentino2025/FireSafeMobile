@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { View, TextInput, StyleSheet, Pressable, Platform } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, TextInput, StyleSheet, Pressable, Platform, Alert, Linking } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ControlledTextInput } from "@/components/ControlledTextInput";
@@ -330,6 +330,35 @@ export function HydrostaticTestSection({
   };
 
   const takePhoto = async (category: string) => {
+    // Request camera permission first
+    const { status, canAskAgain } = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (status !== "granted") {
+      if (!canAskAgain && Platform.OS !== "web") {
+        // Permission denied permanently - show alert to open settings
+        Alert.alert(
+          language === "pt-BR" ? "Permissao Necessaria" : "Permission Required",
+          language === "pt-BR" 
+            ? "A permissao de camera e necessaria para tirar fotos. Por favor, habilite nas configuracoes."
+            : "Camera permission is required to take photos. Please enable it in settings.",
+          [
+            { text: language === "pt-BR" ? "Cancelar" : "Cancel", style: "cancel" },
+            { 
+              text: language === "pt-BR" ? "Abrir Configuracoes" : "Open Settings", 
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  // openSettings not supported on this platform
+                }
+              }
+            }
+          ]
+        );
+      }
+      return;
+    }
+    
     const result = await ImagePicker.launchCameraAsync({
       quality: 0.8,
     });
