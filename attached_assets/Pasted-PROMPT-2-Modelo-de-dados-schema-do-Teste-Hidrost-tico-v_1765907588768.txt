@@ -1,0 +1,197 @@
+PROMPT 2 — Modelo de dados (schema) do Teste Hidrostático + validações
+
+Objetivo: criar um objeto hydrostaticTest dentro da inspeção (igual o padrão de outros formulários), com campos do roteiro, flags obrigatórias e condicionais.
+
+Faça:
+
+Criar types:
+
+Arquivo: types/hydrostaticTest.ts (ou pasta types/inspections/)
+
+Definir:
+
+export type HydrostaticSystemType = "hydrants" | "sprinklers";
+
+export type HydrostaticNormRef =
+  | "NFPA_13"
+  | "NFPA_14"
+  | "NFPA_25"
+  | "FM_GLOBAL"
+  | "NBR";
+
+export type HydrostaticTest = {
+  // 1) Identificação do teste
+  systemType: HydrostaticSystemType; // obrigatório
+  systemName: string;
+  buildingType: string;
+  protectedArea: string; // área/setor/pavimento
+  normRefs: HydrostaticNormRef[]; // obrigatório (>=1)
+  fmDataSheet?: string; // se FM_GLOBAL marcado
+  nbrStandard?: string; // se NBR marcado
+  approvedBy?: "CB" | "FM" | "OUTRO";
+  approvedByOtherText?: string;
+
+  testDate: string; // ISO date
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+  weather?: string;
+
+  // 2) Partes envolvidas
+  owner: {
+    corporateName: string;
+    address: string;
+    localResponsible: string;
+    role: string;
+    contact: string;
+  };
+
+  executorCompany: {
+    corporateName: string;
+    cnpj: string;
+    address: string;
+
+    technicalResponsible: {
+      name: string;
+      creaCau: string;
+      artRrt?: string;
+    };
+  };
+
+  inspector: {
+    name: string;
+    role: string;
+    signatureId?: string; // se vocês usam assinatura salva
+    signedAt?: string; // ISO datetime
+  };
+
+  // 3) Preparação
+  preChecks: {
+    installedAsApprovedProject: boolean;
+    pipesAnchoredAndSupported: boolean;
+    valvesCorrectlyInstalled: boolean;
+    visibleConnectionsAccessible: boolean;
+    untestedSectionsIsolated: boolean;
+    sensitiveEquipmentProtected: boolean;
+  };
+
+  instrumentation: {
+    manometerBrand: string;
+    manometerModel: string;
+    measurementRange: string; // “0–25 bar” etc
+    calibrationCertificate?: string;
+    pressureReadingPoint: "HIGHEST_POINT" | "NEAR_PUMP" | "OTHER";
+    pressureReadingPointOther?: string;
+  };
+
+  // 4) Execução
+  filling: {
+    method: "GRADUAL" | "BY_SECTOR";
+    airElimination: {
+      reliefValvesOpen: boolean;
+      purgersUsed: boolean;
+    };
+  };
+
+  pressure: {
+    workingPressureValue: string; // string para permitir “10.5”
+    workingPressureUnit: "bar" | "psi";
+    testPressureValue: string;
+    testPressureUnit: "bar" | "psi";
+    normativeCriteriaText: string; // texto livre NFPA/FM/NBR aplicável
+    minimumTestTimeValue: string;
+    minimumTestTimeUnit: "minutes" | "hours";
+  };
+
+  monitoring: {
+    stabilizationStartTime: string; // HH:mm
+    testEndTime: string;            // HH:mm
+    initialPressureValue: string;
+    initialPressureUnit: "bar" | "psi";
+    finalPressureValue: string;
+    finalPressureUnit: "bar" | "psi";
+    pressureVariationValue: string;
+    pressureVariationUnit: "bar" | "psi";
+  };
+
+  // 5) Resultados
+  results: {
+    noLeaks: boolean;
+    noPressureDrop: boolean;
+    noVisibleDeformation: boolean;
+
+    leaksFound: boolean;
+    leaksDescription?: string;
+
+    pressureDropAboveAllowed: boolean;
+    structuralFailure: boolean;
+    failureDescription?: string;
+  };
+
+  // 6) Conclusão
+  conclusion: {
+    status: "APPROVED" | "REPROVED";
+    technicalConclusionText: string; // livre, obrigatório
+  };
+
+  // 7) Declaração/assinaturas
+  declarationAccepted: boolean; // checkbox obrigatório
+
+  signatures: {
+    technicalResponsibleSignatureId?: string;
+    inspectorSignatureId?: string;
+    ownerRepSignatureId?: string; // opcional
+    dates: {
+      technicalResponsibleDate?: string;
+      inspectorDate?: string;
+      ownerRepDate?: string;
+    };
+  };
+
+  // 5.2 Fotos
+  photoEvidence: {
+    initialGaugePhotoIds: string[]; // obrigatório >=1
+    initialGeneralPhotoIds: string[]; // obrigatório >=1
+    duringTestPhotoIds: string[]; // opcional
+    finalGaugePhotoIds: string[]; // obrigatório >=1
+    finalGeneralPhotoIds: string[]; // obrigatório >=1
+  };
+};
+
+
+Conectar no modelo de inspeção existente:
+
+Arquivo: types/inspection.ts
+
+Adicionar opcional: hydrostaticTest?: HydrostaticTest;
+
+Validação:
+
+Criar utils/validators/hydrostaticTestValidator.ts com função validateHydrostaticTest(data) retornando lista de erros.
+
+Regras obrigatórias:
+
+systemType
+
+normRefs.length >= 1
+
+testDate, startTime, endTime
+
+owner corporatename + address + responsible + role + contact
+
+executorCompany corporatename + cnpj + address
+
+technicalResponsible name + creaCau
+
+inspector name + role
+
+technicalConclusionText obrigatório
+
+declarationAccepted === true
+
+fotos: inicial/final gauge + geral (>=1 cada)
+
+Critérios de aceite:
+
+Não permite “Concluir” sem os obrigatórios
+
+Mantém “Salvar rascunho” mesmo incompleto

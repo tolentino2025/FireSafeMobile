@@ -315,6 +315,7 @@ export interface GeoLocation {
 }
 
 import { FM85ACertificate } from "./fm85a";
+import { HydrostaticTest } from "./hydrostaticTest";
 
 export interface Inspection {
   id: string;
@@ -348,6 +349,7 @@ export interface Inspection {
   performanceTestId?: string;
   geoLocation?: GeoLocation | null;
   fm85aCertificate?: FM85ACertificate;
+  hydrostaticTest?: HydrostaticTest;
   createdAt: string;
   updatedAt: string;
   version?: number;
