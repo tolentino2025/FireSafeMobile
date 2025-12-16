@@ -1,0 +1,96 @@
+Criar os tipos (TypeScript) e o schema de dados para uma nova seção de inspeção:
+"CERTIFICADO DE MATERIAIS E TESTES FM GLOBAL (FM85A)".
+
+Regras:
+- Não alterar fluxos existentes.
+- Não alterar PDFs já existentes.
+- Apenas adicionar novos types/fields.
+
+Criar types:
+1) FM85AContractorInfo:
+   - date (YYYY-MM-DD)
+   - contractorCompanyName
+   - contractorCompanyAddress
+2) FM85AClientInfo:
+   - fmGlobalIndexNo
+   - fmGlobalAccountNo
+   - isBuildingOwnerOrTenant (Y/N)
+   - buildingNameOrNo
+   - fmGlobalClientName
+   - fmGlobalClientAddress
+   - occupancyDescription
+3) Component tables (listas de linhas dinâmicas):
+   - sprinklers[]: { manufacturer, modelTradeName, kFactor, temperatureRating, sin, yearOfManufacture, quantity }
+   - pipe[]: { manufacturer, modelTradeName, productDescription, schedule, connectionType, maxWorkingPressure }
+   - pipeConnections[]: { manufacturer, modelTradeName, productDescription, pipeEnds, maxWorkingPressure }
+   - pipeHangers[]: { manufacturer, modelTradeName, productDescription, hangerRodSize, componentDescription, nominalPipeSize }
+   - alarmCheckDryPipeReleaseValves[]: { type, manufacturer, model, serialNumber, quantity }
+   - detectionReleaseValves[]: { type, manufacturer, model, protectedArea, linearSpacing, areaSpacing, quantity }
+   - controlOrPressureReducingValves[]: { type, manufacturer, model, serialNumber, quantity }
+   - checkOrBackflowValves[]: { type, manufacturer, model, serialNumber, quantity }
+   - miscComponents: { 
+        waterflowAlarm:{manufacturer,model,quantity},
+        quickOpeningDevice:{manufacturer,model,quantity},
+        pressureGauge:{manufacturer,model,quantity},
+        fireDepartmentConnection:{manufacturer,model,quantity},
+        reliefValve:{manufacturer,model,quantity},
+        testConnection:{manufacturer,model,quantity},
+        drainValve:{manufacturer,model,quantity}
+     }
+   - otherComponents[]: { component, manufacturer, model, quantity }
+4) Perguntas específicas:
+   - automaticReleaseValveQuestions:
+     - detectionType (electronic/hydraulic/pneumatic)
+     - interlockArrangement (single/double/non-interlock)
+     - airPressureSupervised (Y/N)
+     - manualOperationArranged (Y/N)
+   - detectionElectricQuestions:
+     - circuitrySupervisedPerDS540 (Y/N)
+     - automaticReleaseControlPanelMakeModel
+     - solenoidReleaseValveMakeModel
+5) Tests:
+   - hydrostatic: { testedPressurePsi, durationHours, pressureDropPsi }
+   - pneumatic: { testedPressurePsi, durationHours, pressureDropPsi }
+   - waterflowAlarm: { totalDevicesTested, devicesOver60Seconds }
+   - dryPipeOrAutoReleaseTesting[]: { systemNoName, waterPressureBelowValve, systemAirPressure, minPressureReqAtSprinkler, requiredWaterDeliveryTime, withoutQOD, withQOD }
+   - autoReleaseValveTestQuestions:
+     - valveOperatedManuallyAndAutomatically (Y/N)
+     - ifDetectionElectronicWereAllUnitsTested (Y/N)
+   - pressureReducingValveTesting[]: {
+       location, make, model, setting,
+       staticPressureInlet, staticPressureOutlet,
+       residualPressureInlet, residualPressureOutlet,
+       flowRate
+     }
+   - blankTestingGaskets[]: { numberUsed, location, numberRemoved }
+   - weldedPipeConnectionsYesNo:
+     - weldingProceduresComplied (Y/N)
+     - weldersQualified (Y/N)
+     - qcProcedureEnsuredDiscsCouponsRetrievedAndClean (Y/N)
+   - drainTests[]: { systemNameNo, staticPressure, residualPressure, staticPressureAfterwards }
+   - undergroundMains:
+     - verifiedOnFM85B (Y/N)
+     - ifNoWhatFormUsed
+     - whatContractorFlushed
+   - instructionMaterialsYesNo:
+     - personInChargeInstructed (Y/N)
+     - copiesLeftOnPremises (Y/N)
+     - ifNoExplain
+   - dateSystemLeftInServiceAllValvesOpen (YYYY-MM-DD)
+6) Signatures:
+   - propertyOwnerAuthorizedAgentName
+   - propertyOwnerSignature (imagem/base64 ou path)
+   - propertyOwnerSignatureTitle
+   - propertyOwnerDate (YYYY-MM-DD)
+   - sprinklerContractorName
+   - sprinklerContractorSignature
+   - sprinklerContractorSignatureTitle
+   - sprinklerContractorDate
+7) additionalNotes
+
+Integrar no Inspection model:
+- Adicionar campo opcional: fm85aCertificate?: FM85ACertificate
+
+Entregável:
+- Types completos e consistentes (sem any).
+- Sem remover/alterar campos existentes do app.
