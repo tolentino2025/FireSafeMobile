@@ -30,7 +30,7 @@ import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
-import { generatePdf } from "@/utils/pdfGenerator";
+import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -394,7 +394,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     };
 
     try {
-      await generatePdf(inspectionData, language as "en" | "pt-BR");
+      await generateAndPrintPdf({ inspection: inspectionData, language: language as "en" | "pt-BR" });
     } catch (error) {
       console.error("Error generating PDF:", error);
       Alert.alert(t.common.error, t.report.pdfError || "Erro ao gerar PDF");
