@@ -139,6 +139,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const [selectedInspectorId, setSelectedInspectorId] = useState<string>("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSubmittingRef = useRef<boolean>(false);
 
   const allDieselPumps = firePumps.filter(p => p.type === "diesel_main");
   const dieselPumps = selectedCompanyId 
@@ -170,11 +171,16 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   }, [testId]);
 
   useEffect(() => {
+    if (isSubmittingRef.current) {
+      return;
+    }
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
     autoSaveTimerRef.current = setTimeout(() => {
-      saveDraft();
+      if (!isSubmittingRef.current) {
+        saveDraft();
+      }
     }, AUTO_SAVE_DELAY);
 
     return () => {
@@ -514,6 +520,10 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       return;
     }
 
+    isSubmittingRef.current = true;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
     setIsSaving(true);
     try {
       const finalTest: DieselPerformanceTest = {

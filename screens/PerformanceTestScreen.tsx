@@ -146,6 +146,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const [selectedInspectorId, setSelectedInspectorId] = useState<string>("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSubmittingRef = useRef<boolean>(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const allElectricPumps = firePumps.filter(p => p.type === "electric_main");
@@ -193,11 +194,16 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   }, [testId]);
 
   useEffect(() => {
+    if (isSubmittingRef.current) {
+      return;
+    }
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
     autoSaveTimerRef.current = setTimeout(() => {
-      saveDraft();
+      if (!isSubmittingRef.current) {
+        saveDraft();
+      }
     }, AUTO_SAVE_DELAY);
 
     return () => {
@@ -596,6 +602,10 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       return;
     }
 
+    isSubmittingRef.current = true;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
     setIsSaving(true);
     try {
       const finalTest: PerformanceTest = {
