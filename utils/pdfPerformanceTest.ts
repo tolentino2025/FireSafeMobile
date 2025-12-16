@@ -10,6 +10,7 @@ import {
   ElectricDriverInfo,
   DieselDriverInfo,
 } from "@/types/performanceTest";
+import { parseLocalYMD, getLocalTimeZone } from "@/utils/dateUtils";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -415,32 +416,9 @@ interface GeneratePerformanceTestPdfOptions {
   language: "en" | "pt-BR";
 }
 
-const getLocalTimeZone = (): string | undefined => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch {
-    return undefined;
-  }
-};
-
-const parseLocalDate = (dateString: string): Date => {
-  if (!dateString) return new Date();
-  const parts = dateString.split('-');
-  if (parts.length === 3) {
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-      return new Date(year, month - 1, day, 12, 0, 0);
-    }
-  }
-  const parsed = new Date(dateString);
-  return isNaN(parsed.getTime()) ? new Date() : parsed;
-};
-
 const formatDate = (dateString: string, language: string): string => {
   if (!dateString) return "-";
-  const date = parseLocalDate(dateString);
+  const date = parseLocalYMD(dateString);
   if (isNaN(date.getTime())) return dateString;
   
   const timeZone = getLocalTimeZone();
