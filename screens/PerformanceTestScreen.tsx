@@ -171,8 +171,26 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   };
 
   useEffect(() => {
-    loadDraft();
-  }, []);
+    const loadInitialData = async () => {
+      if (testId) {
+        const existingTest = getElectricPerformanceTestById(testId);
+        if (existingTest) {
+          setTest(existingTest);
+          const testData = existingTest as any;
+          if (testData.pumpEquipment?.pumpId) {
+            setSelectedPumpId(testData.pumpEquipment.pumpId);
+          }
+          if (testData.signatures?.conductedBy?.userId) {
+            setSelectedInspectorId(testData.signatures.conductedBy.userId);
+          }
+          activeDraftKeyRef.current = getDraftStorageKey(testId);
+          return;
+        }
+      }
+      loadDraft();
+    };
+    loadInitialData();
+  }, [testId]);
 
   useEffect(() => {
     if (autoSaveTimerRef.current) {
