@@ -8,6 +8,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { toUpperIfNotEmail } from "@/utils/textTransform";
 import {
   FM85ACertificate,
   FM85ASprinkler,
@@ -78,6 +79,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
     { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.border },
   ];
 
+  const toUpper = (v: string) => toUpperIfNotEmail(v, "text");
+
   const updateCertificate = useCallback((updates: Partial<FM85ACertificate>) => {
     onCertificateChange({ ...certificate, ...updates });
   }, [certificate, onCertificateChange]);
@@ -140,7 +143,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={inputStyle}
             value={certificate.contractorInfo.contractorCompanyName}
             onChangeText={(v) => updateCertificate({
-              contractorInfo: { ...certificate.contractorInfo, contractorCompanyName: v }
+              contractorInfo: { ...certificate.contractorInfo, contractorCompanyName: toUpper(v) }
             })}
             placeholder={fm85a.contractorCompanyName || "Contractor Company Name"}
             placeholderTextColor={theme.placeholder}
@@ -151,7 +154,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={inputStyle}
             value={certificate.contractorInfo.contractorCompanyAddress}
             onChangeText={(v) => updateCertificate({
-              contractorInfo: { ...certificate.contractorInfo, contractorCompanyAddress: v }
+              contractorInfo: { ...certificate.contractorInfo, contractorCompanyAddress: toUpper(v) }
             })}
             placeholder={fm85a.contractorCompanyAddress || "Contractor Company Address"}
             placeholderTextColor={theme.placeholder}
@@ -173,7 +176,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 style={inputStyle}
                 value={certificate.clientInfo.fmGlobalIndexNo}
                 onChangeText={(v) => updateCertificate({
-                  clientInfo: { ...certificate.clientInfo, fmGlobalIndexNo: v }
+                  clientInfo: { ...certificate.clientInfo, fmGlobalIndexNo: toUpper(v) }
                 })}
                 placeholder={fm85a.indexNo || "Index No"}
                 placeholderTextColor={theme.placeholder}
@@ -185,7 +188,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 style={inputStyle}
                 value={certificate.clientInfo.fmGlobalAccountNo}
                 onChangeText={(v) => updateCertificate({
-                  clientInfo: { ...certificate.clientInfo, fmGlobalAccountNo: v }
+                  clientInfo: { ...certificate.clientInfo, fmGlobalAccountNo: toUpper(v) }
                 })}
                 placeholder={fm85a.accountNo || "Account No"}
                 placeholderTextColor={theme.placeholder}
@@ -206,7 +209,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={inputStyle}
             value={certificate.clientInfo.buildingNameOrNo}
             onChangeText={(v) => updateCertificate({
-              clientInfo: { ...certificate.clientInfo, buildingNameOrNo: v }
+              clientInfo: { ...certificate.clientInfo, buildingNameOrNo: toUpper(v) }
             })}
             placeholder={fm85a.buildingNameNo || "Building Name/No"}
             placeholderTextColor={theme.placeholder}
@@ -217,7 +220,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={inputStyle}
             value={certificate.clientInfo.fmGlobalClientName}
             onChangeText={(v) => updateCertificate({
-              clientInfo: { ...certificate.clientInfo, fmGlobalClientName: v }
+              clientInfo: { ...certificate.clientInfo, fmGlobalClientName: toUpper(v) }
             })}
             placeholder={fm85a.clientName || "Client Name"}
             placeholderTextColor={theme.placeholder}
@@ -228,7 +231,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={inputStyle}
             value={certificate.clientInfo.fmGlobalClientAddress}
             onChangeText={(v) => updateCertificate({
-              clientInfo: { ...certificate.clientInfo, fmGlobalClientAddress: v }
+              clientInfo: { ...certificate.clientInfo, fmGlobalClientAddress: toUpper(v) }
             })}
             placeholder={fm85a.clientAddress || "Client Address"}
             placeholderTextColor={theme.placeholder}
@@ -239,7 +242,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             style={[inputStyle, styles.textArea]}
             value={certificate.clientInfo.occupancyDescription}
             onChangeText={(v) => updateCertificate({
-              clientInfo: { ...certificate.clientInfo, occupancyDescription: v }
+              clientInfo: { ...certificate.clientInfo, occupancyDescription: toUpper(v) }
             })}
             placeholder={fm85a.occupancyDescription || "Occupancy Description"}
             placeholderTextColor={theme.placeholder}
@@ -285,11 +288,11 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 <View style={styles.row}>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.manufacturer || "Manufacturer"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.manufacturer} onChangeText={(v) => updateSprinkler(idx, 'manufacturer', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.manufacturer} onChangeText={(v) => updateSprinkler(idx, 'manufacturer', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.model || "Model"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.modelTradeName} onChangeText={(v) => updateSprinkler(idx, 'modelTradeName', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.modelTradeName} onChangeText={(v) => updateSprinkler(idx, 'modelTradeName', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.kFactor || "K-Factor"}</ThemedText>
@@ -300,11 +303,11 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 <View style={styles.row}>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.temperature || "Temp"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.temperatureRating} onChangeText={(v) => updateSprinkler(idx, 'temperatureRating', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.temperatureRating} onChangeText={(v) => updateSprinkler(idx, 'temperatureRating', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.sin || "SIN"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.sin} onChangeText={(v) => updateSprinkler(idx, 'sin', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.sin} onChangeText={(v) => updateSprinkler(idx, 'sin', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.year || "Year"}</ThemedText>
@@ -351,25 +354,25 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 <View style={styles.row}>
                   <View style={styles.halfField}>
                     <ThemedText type="small">{fm85a.manufacturer || "Manufacturer"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.manufacturer} onChangeText={(v) => updatePipe(idx, 'manufacturer', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.manufacturer} onChangeText={(v) => updatePipe(idx, 'manufacturer', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.halfField}>
                     <ThemedText type="small">{fm85a.model || "Model"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.modelTradeName} onChangeText={(v) => updatePipe(idx, 'modelTradeName', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.modelTradeName} onChangeText={(v) => updatePipe(idx, 'modelTradeName', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                 </View>
                 <Spacer height={Spacing.sm} />
                 <ThemedText type="small">{fm85a.productDescription || "Product Description"}</ThemedText>
-                <TextInput style={inputStyle} value={item.productDescription} onChangeText={(v) => updatePipe(idx, 'productDescription', v)} placeholderTextColor={theme.placeholder} />
+                <TextInput style={inputStyle} value={item.productDescription} onChangeText={(v) => updatePipe(idx, 'productDescription', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                 <Spacer height={Spacing.sm} />
                 <View style={styles.row}>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.schedule || "Schedule"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.schedule} onChangeText={(v) => updatePipe(idx, 'schedule', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.schedule} onChangeText={(v) => updatePipe(idx, 'schedule', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.connectionType || "Conn Type"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.connectionType} onChangeText={(v) => updatePipe(idx, 'connectionType', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.connectionType} onChangeText={(v) => updatePipe(idx, 'connectionType', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.maxPressure || "Max PSI"}</ThemedText>
@@ -413,22 +416,22 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
                 <View style={styles.row}>
                   <View style={styles.halfField}>
                     <ThemedText type="small">{fm85a.type || "Type"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.type} onChangeText={(v) => updateValve(idx, 'type', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.type} onChangeText={(v) => updateValve(idx, 'type', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.halfField}>
                     <ThemedText type="small">{fm85a.manufacturer || "Manufacturer"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.manufacturer} onChangeText={(v) => updateValve(idx, 'manufacturer', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.manufacturer} onChangeText={(v) => updateValve(idx, 'manufacturer', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                 </View>
                 <Spacer height={Spacing.sm} />
                 <View style={styles.row}>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.model || "Model"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.model} onChangeText={(v) => updateValve(idx, 'model', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.model} onChangeText={(v) => updateValve(idx, 'model', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.serialNumber || "Serial"}</ThemedText>
-                    <TextInput style={inputStyle} value={item.serialNumber} onChangeText={(v) => updateValve(idx, 'serialNumber', v)} placeholderTextColor={theme.placeholder} />
+                    <TextInput style={inputStyle} value={item.serialNumber} onChangeText={(v) => updateValve(idx, 'serialNumber', toUpper(v))} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
                   </View>
                   <View style={styles.thirdField}>
                     <ThemedText type="small">{fm85a.quantity || "Qty"}</ThemedText>
@@ -666,15 +669,15 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             <>
               <ThemedText type="small">{fm85a.ifNoWhatForm || "If No, what form used?"}</ThemedText>
               <TextInput style={inputStyle} value={certificate.tests.undergroundMains.ifNoWhatFormUsed} onChangeText={(v) => updateCertificate({
-                tests: { ...certificate.tests, undergroundMains: { ...certificate.tests.undergroundMains, ifNoWhatFormUsed: v } }
-              })} placeholderTextColor={theme.placeholder} />
+                tests: { ...certificate.tests, undergroundMains: { ...certificate.tests.undergroundMains, ifNoWhatFormUsed: toUpper(v) } }
+              })} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
             </>
           )}
           <Spacer height={Spacing.md} />
           <ThemedText type="small">{fm85a.contractorFlushed || "What contractor flushed?"}</ThemedText>
           <TextInput style={inputStyle} value={certificate.tests.undergroundMains.whatContractorFlushed} onChangeText={(v) => updateCertificate({
-            tests: { ...certificate.tests, undergroundMains: { ...certificate.tests.undergroundMains, whatContractorFlushed: v } }
-          })} placeholderTextColor={theme.placeholder} />
+            tests: { ...certificate.tests, undergroundMains: { ...certificate.tests.undergroundMains, whatContractorFlushed: toUpper(v) } }
+          })} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
           <Spacer height={Spacing.md} />
           <YesNoSelector
             label={fm85a.personInstructed || "Person in charge instructed?"}
@@ -694,8 +697,8 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
             <>
               <ThemedText type="small">{fm85a.ifNoExplain || "If No, explain"}</ThemedText>
               <TextInput style={[inputStyle, styles.textArea]} value={certificate.tests.instructionMaterialsYesNo.ifNoExplain} onChangeText={(v) => updateCertificate({
-                tests: { ...certificate.tests, instructionMaterialsYesNo: { ...certificate.tests.instructionMaterialsYesNo, ifNoExplain: v } }
-              })} multiline placeholderTextColor={theme.placeholder} />
+                tests: { ...certificate.tests, instructionMaterialsYesNo: { ...certificate.tests.instructionMaterialsYesNo, ifNoExplain: toUpper(v) } }
+              })} multiline placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
             </>
           )}
           <Spacer height={Spacing.md} />
@@ -721,13 +724,13 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.name || "Name"}</ThemedText>
           <TextInput style={inputStyle} value={certificate.signatures.propertyOwnerAuthorizedAgentName} onChangeText={(v) => updateCertificate({
-            signatures: { ...certificate.signatures, propertyOwnerAuthorizedAgentName: v }
-          })} placeholderTextColor={theme.placeholder} />
+            signatures: { ...certificate.signatures, propertyOwnerAuthorizedAgentName: toUpper(v) }
+          })} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.title || "Title"}</ThemedText>
           <TextInput style={inputStyle} value={certificate.signatures.propertyOwnerSignatureTitle} onChangeText={(v) => updateCertificate({
-            signatures: { ...certificate.signatures, propertyOwnerSignatureTitle: v }
-          })} placeholderTextColor={theme.placeholder} />
+            signatures: { ...certificate.signatures, propertyOwnerSignatureTitle: toUpper(v) }
+          })} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.signature || "Signature"}</ThemedText>
           <SignatureCapture
@@ -750,13 +753,13 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.name || "Name"}</ThemedText>
           <TextInput style={inputStyle} value={certificate.signatures.sprinklerContractorName} onChangeText={(v) => updateCertificate({
-            signatures: { ...certificate.signatures, sprinklerContractorName: v }
-          })} placeholderTextColor={theme.placeholder} />
+            signatures: { ...certificate.signatures, sprinklerContractorName: toUpper(v) }
+          })} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.title || "Title"}</ThemedText>
           <TextInput style={inputStyle} value={certificate.signatures.sprinklerContractorSignatureTitle} onChangeText={(v) => updateCertificate({
-            signatures: { ...certificate.signatures, sprinklerContractorSignatureTitle: v }
-          })} placeholderTextColor={theme.placeholder} />
+            signatures: { ...certificate.signatures, sprinklerContractorSignatureTitle: toUpper(v) }
+          })} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
           <Spacer height={Spacing.sm} />
           <ThemedText type="small">{fm85a.signature || "Signature"}</ThemedText>
           <SignatureCapture
@@ -786,7 +789,7 @@ export function FM85ASection({ certificate, onCertificateChange, isExpanded, onT
       <TextInput
         style={[inputStyle, styles.largeTextArea]}
         value={certificate.additionalNotes}
-        onChangeText={(v) => updateCertificate({ additionalNotes: v })}
+        onChangeText={(v) => updateCertificate({ additionalNotes: toUpper(v) })}
         placeholder={fm85a.additionalNotesPlaceholder || "Enter additional comments..."}
         placeholderTextColor={theme.placeholder}
         multiline
