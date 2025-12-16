@@ -906,7 +906,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.driverInfo?.serialNumber || "", (v) => updateDriverInfo("serialNumber", v))}
           {renderInputField(dt?.horsepower || "Horsepower", test.driverInfo?.horsePower || "", (v) => updateDriverInfo("horsePower", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.ratedSpeed || "Rated Speed (RPM)", test.driverInfo?.ratedRpm || "", (v) => updateDriverInfo("ratedRpm", v), { keyboardType: "numeric" })}
-          {renderInputField("Number of Cylinders", test.driverInfo?.numberOfCylinders || "", (v) => updateDriverInfo("numberOfCylinders", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.numberOfCylinders || "Número de Cilindros", test.driverInfo?.numberOfCylinders || "", (v) => updateDriverInfo("numberOfCylinders", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.fuelType || "Fuel Type", test.driverInfo?.fuelTankCapacityGal || "", (v) => updateDriverInfo("fuelTankCapacityGal", v))}
         </SectionCard>
 
@@ -919,7 +919,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           {renderInputField(t.performanceTest?.serialNumber || "Serial Number", test.controllerInfo?.serialNumber || "", (v) => updateControllerInfo("serialNumber", v))}
           {renderInputField(dt?.turnsOnAt || "Turns On At (PSI)", test.controllerInfo?.pressureSettingStart || "", (v) => updateControllerInfo("pressureSettingStart", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.turnsOffAt || "Turns Off At (PSI)", test.controllerInfo?.pressureSettingStop || "", (v) => updateControllerInfo("pressureSettingStop", v), { keyboardType: "numeric" })}
-          {renderSwitchField("Automatic Transfer", test.controllerInfo?.hasAutomaticTransfer || false, (v) => updateControllerInfo("hasAutomaticTransfer", v))}
+          {renderSwitchField(dt?.automaticTransfer || "Transferência Automática", test.controllerInfo?.hasAutomaticTransfer || false, (v) => updateControllerInfo("hasAutomaticTransfer", v))}
         </SectionCard>
 
         <Spacer height={Spacing.md} />
@@ -927,8 +927,8 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         {/* Section 5: Battery Information */}
         <SectionCard title={dt?.sections?.power || "5. Power Supply (Batteries)"}>
           {renderInputField(dt?.startingBatteriesType || "Starting Batteries Type", test.batteryInfo?.startingBatteriesType || "", (v) => updateBatteryInfo("startingBatteriesType", v))}
-          {renderInputField(dt?.batteryVoltage || "Battery 1 Voltage", test.batteryInfo?.battery1Voltage || "", (v) => updateBatteryInfo("battery1Voltage", v), { keyboardType: "numeric" })}
-          {renderInputField(dt?.batteryVoltage || "Battery 2 Voltage", test.batteryInfo?.battery2Voltage || "", (v) => updateBatteryInfo("battery2Voltage", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.battery1Voltage || "Tensão Bateria 1", test.batteryInfo?.battery1Voltage || "", (v) => updateBatteryInfo("battery1Voltage", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.battery2Voltage || "Tensão Bateria 2", test.batteryInfo?.battery2Voltage || "", (v) => updateBatteryInfo("battery2Voltage", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.batteryChargerType || "Battery Charger Type", test.batteryInfo?.chargerType || "", (v) => updateBatteryInfo("chargerType", v))}
           {renderInputField(dt?.batteryChargerVoltage || "Charger Voltage", test.batteryInfo?.chargerVoltage || "", (v) => updateBatteryInfo("chargerVoltage", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.alternatePowerSource || "Alternate Power Source", test.batteryInfo?.alternatePowerSource || "", (v) => updateBatteryInfo("alternatePowerSource", v))}
@@ -948,7 +948,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
           <Spacer height={Spacing.md} />
           {renderInputField(t.performanceTest?.staticPressure || "Static Pressure (PSI)", test.supplyConditions?.staticPressurePsi || "", (v) => updateSupplyConditions("staticPressurePsi", v), { keyboardType: "numeric" })}
           {renderInputField(t.performanceTest?.residualPressure || "Residual Pressure (PSI)", test.supplyConditions?.residualPressurePsi || "", (v) => updateSupplyConditions("residualPressurePsi", v), { keyboardType: "numeric" })}
-          {renderInputField("Water Temperature (F)", test.supplyConditions?.waterTemperatureF || "", (v) => updateSupplyConditions("waterTemperatureF", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.waterTemperature || "Temperatura da Água (F)", test.supplyConditions?.waterTemperatureF || "", (v) => updateSupplyConditions("waterTemperatureF", v), { keyboardType: "numeric" })}
         </SectionCard>
 
         <Spacer height={Spacing.md} />
@@ -957,8 +957,8 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         <SectionCard title={dt?.sections?.demand || "7. System Demand"}>
           {renderInputField(dt?.systemDemandFlow || "System Demand Flow (GPM)", test.systemDemand?.systemDemandGpm || "", (v) => updateSystemDemand("systemDemandGpm", v), { keyboardType: "numeric" })}
           {renderInputField(dt?.systemDemandPressure || "System Demand Pressure (PSI)", test.systemDemand?.systemDemandPsi || "", (v) => updateSystemDemand("systemDemandPsi", v), { keyboardType: "numeric" })}
-          {renderInputField("Hose Demand (GPM)", test.systemDemand?.hoseDemandGpm || "", (v) => updateSystemDemand("hoseDemandGpm", v), { keyboardType: "numeric" })}
-          {renderInputField("Total Demand (GPM)", test.systemDemand?.totalDemandGpm || "", (v) => updateSystemDemand("totalDemandGpm", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.hoseDemand || "Demanda de Mangueira (GPM)", test.systemDemand?.hoseDemandGpm || "", (v) => updateSystemDemand("hoseDemandGpm", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.totalDemand || "Demanda Total (GPM)", test.systemDemand?.totalDemandGpm || "", (v) => updateSystemDemand("totalDemandGpm", v), { keyboardType: "numeric" })}
         </SectionCard>
 
         <Spacer height={Spacing.md} />
@@ -1015,13 +1015,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         <Spacer height={Spacing.md} />
 
         {/* Section 10: Multiple Pump Operation */}
-        <SectionCard title={dt?.sections?.multiplePump || "10. Multiple Pump Operation"}>
-          {renderSwitchField("Is Multiple Pump System?", test.multiplePumpOperation?.isMultiplePumpSystem || false, (v) => updateMultiplePumpOperation("isMultiplePumpSystem", v))}
+        <SectionCard title={dt?.sections?.multiplePump || "10. Operação de Múltiplas Bombas"}>
+          {renderSwitchField(dt?.isMultiplePumpSystem || "Sistema de Múltiplas Bombas?", test.multiplePumpOperation?.isMultiplePumpSystem || false, (v) => updateMultiplePumpOperation("isMultiplePumpSystem", v))}
           {test.multiplePumpOperation?.isMultiplePumpSystem ? (
             <>
-              {renderInputField("Number of Pumps", test.multiplePumpOperation?.numberOfPumps || "", (v) => updateMultiplePumpOperation("numberOfPumps", v), { keyboardType: "numeric" })}
-              {renderInputField("Operation Sequence", test.multiplePumpOperation?.pumpOperationSequence || "", (v) => updateMultiplePumpOperation("pumpOperationSequence", v), { multiline: true })}
-              {renderSwitchField("All Pumps Tested Individually?", test.multiplePumpOperation?.allPumpsTestedIndividually || false, (v) => updateMultiplePumpOperation("allPumpsTestedIndividually", v))}
+              {renderInputField(dt?.numberOfPumps || "Número de Bombas", test.multiplePumpOperation?.numberOfPumps || "", (v) => updateMultiplePumpOperation("numberOfPumps", v), { keyboardType: "numeric" })}
+              {renderInputField(dt?.operationSequence || "Sequência de Operação", test.multiplePumpOperation?.pumpOperationSequence || "", (v) => updateMultiplePumpOperation("pumpOperationSequence", v), { multiline: true })}
+              {renderSwitchField(dt?.allPumpsTestedIndividually || "Todas as Bombas Testadas Individualmente?", test.multiplePumpOperation?.allPumpsTestedIndividually || false, (v) => updateMultiplePumpOperation("allPumpsTestedIndividually", v))}
             </>
           ) : null}
         </SectionCard>
@@ -1029,13 +1029,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         <Spacer height={Spacing.md} />
 
         {/* Section 11: Transfer Switch Test */}
-        <SectionCard title={dt?.sections?.transferSwitch || "11. Additional Tests - Transfer Switch"}>
-          {renderSwitchField("Has Transfer Switch?", test.transferSwitchTest?.hasTransferSwitch || false, (v) => updateTransferSwitchTest("hasTransferSwitch", v))}
+        <SectionCard title={dt?.sections?.transferSwitch || "11. Testes Adicionais - Chave de Transferência"}>
+          {renderSwitchField(dt?.hasTransferSwitch || "Possui Chave de Transferência?", test.transferSwitchTest?.hasTransferSwitch || false, (v) => updateTransferSwitchTest("hasTransferSwitch", v))}
           {test.transferSwitchTest?.hasTransferSwitch ? (
             <>
-              {renderInputField("Transfer Switch Type", test.transferSwitchTest?.transferSwitchType || "", (v) => updateTransferSwitchTest("transferSwitchType", v))}
-              {renderInputField("Normal to Emergency (seconds)", test.transferSwitchTest?.normalToEmergencySeconds || "", (v) => updateTransferSwitchTest("normalToEmergencySeconds", v), { keyboardType: "numeric" })}
-              {renderInputField("Emergency to Normal (seconds)", test.transferSwitchTest?.emergencyToNormalSeconds || "", (v) => updateTransferSwitchTest("emergencyToNormalSeconds", v), { keyboardType: "numeric" })}
+              {renderInputField(dt?.transferSwitchType || "Tipo de Chave de Transferência", test.transferSwitchTest?.transferSwitchType || "", (v) => updateTransferSwitchTest("transferSwitchType", v))}
+              {renderInputField(dt?.normalToEmergency || "Normal para Emergência (segundos)", test.transferSwitchTest?.normalToEmergencySeconds || "", (v) => updateTransferSwitchTest("normalToEmergencySeconds", v), { keyboardType: "numeric" })}
+              {renderInputField(dt?.emergencyToNormal || "Emergência para Normal (segundos)", test.transferSwitchTest?.emergencyToNormalSeconds || "", (v) => updateTransferSwitchTest("emergencyToNormalSeconds", v), { keyboardType: "numeric" })}
             </>
           ) : null}
         </SectionCard>
@@ -1043,12 +1043,12 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         <Spacer height={Spacing.md} />
 
         {/* Section 12: Results Summary */}
-        <SectionCard title={dt?.sections?.results || "12. Results Summary"}>
-          {renderInputField("Shutoff Pressure Actual (PSI)", test.resultsSummary?.shutoffPressureActual || "", (v) => updateResultsSummary("shutoffPressureActual", v), { keyboardType: "numeric" })}
-          {renderInputField("Rated Flow Pressure Actual (PSI)", test.resultsSummary?.ratedFlowPressureActual || "", (v) => updateResultsSummary("ratedFlowPressureActual", v), { keyboardType: "numeric" })}
-          {renderInputField("Peak Flow Pressure Actual (PSI)", test.resultsSummary?.peakFlowPressureActual || "", (v) => updateResultsSummary("peakFlowPressureActual", v), { keyboardType: "numeric" })}
+        <SectionCard title={dt?.sections?.results || "12. Resumo dos Resultados"}>
+          {renderInputField(dt?.shutoffPressureActual || "Pressão de Fechamento Real (PSI)", test.resultsSummary?.shutoffPressureActual || "", (v) => updateResultsSummary("shutoffPressureActual", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.ratedFlowPressureActual || "Pressão na Vazão Nominal Real (PSI)", test.resultsSummary?.ratedFlowPressureActual || "", (v) => updateResultsSummary("ratedFlowPressureActual", v), { keyboardType: "numeric" })}
+          {renderInputField(dt?.peakFlowPressureActual || "Pressão na Vazão Máxima Real (PSI)", test.resultsSummary?.peakFlowPressureActual || "", (v) => updateResultsSummary("peakFlowPressureActual", v), { keyboardType: "numeric" })}
           <View style={styles.resultRow}>
-            <ThemedText type="body">{"Overall Result"}:</ThemedText>
+            <ThemedText type="body">{dt?.overallResult || "Resultado Geral"}:</ThemedText>
             <ThemedText 
               type="h3" 
               style={{ 
@@ -1059,7 +1059,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
                   : fullTheme.colors.error 
               }}
             >
-              {test.resultsSummary?.overallResult?.toUpperCase() || "PENDING"}
+              {test.resultsSummary?.overallResult === "pass" 
+                ? (dt?.pass || "APROVADO")
+                : test.resultsSummary?.overallResult === "fail"
+                ? (dt?.fail || "REPROVADO")
+                : test.resultsSummary?.overallResult === "conditional"
+                ? (dt?.conditional || "CONDICIONAL")
+                : (dt?.pending || "PENDENTE")}
             </ThemedText>
           </View>
         </SectionCard>
