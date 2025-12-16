@@ -1,9 +1,9 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as MailComposer from "expo-mail-composer";
-import * as FileSystem from "expo-file-system";
 import { HydrostaticTest } from "@/types/hydrostaticTest";
 import { Inspection, InspectionPhoto } from "@/contexts/InspectionContext";
+import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -235,23 +235,10 @@ const translations = {
   },
 };
 
-const getPhotoBase64 = async (uri: string): Promise<string | null> => {
-  try {
-    if (uri.startsWith("data:")) {
-      return uri;
-    }
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: "base64",
-    });
-    return `data:image/jpeg;base64,${base64}`;
-  } catch (error) {
-    console.error("Error reading photo:", error);
-    return null;
-  }
-};
-
 const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => {
   const { hydrostaticTest, photos, language } = options;
+  
+  const photosWithBase64 = await ensureAllPhotosBase64(photos);
   const t = translations[language];
   const h = hydrostaticTest;
 
@@ -288,18 +275,14 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     return ref;
   }).join(", ");
 
-  const getPhotosForCategory = (categoryIds: string[]): InspectionPhoto[] => {
-    return photos.filter(p => categoryIds.includes(p.id));
-  };
-
-  const renderPhotoGrid = async (categoryIds: string[], caption: string): Promise<string> => {
-    const categoryPhotos = getPhotosForCategory(categoryIds);
+  const renderPhotoGrid = (categoryIds: string[], caption: string): string => {
+    const categoryPhotos = photosWithBase64.filter(p => categoryIds.includes(p.id));
     if (categoryPhotos.length === 0) return "";
 
     let html = `<div class="photo-section"><h4>${sanitizeHtml(caption)}</h4><div class="photo-grid">`;
     
     for (const photo of categoryPhotos) {
-      const base64 = await getPhotoBase64(photo.uri);
+      const base64 = photo.base64 || (photo.uri && photo.uri.startsWith("data:") ? photo.uri : null);
       if (base64) {
         html += `<div class="photo-item"><img src="${base64}" alt="${sanitizeHtml(caption)}" /><p class="photo-caption">${sanitizeHtml(caption)}</p></div>`;
       }
@@ -309,11 +292,11 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     return html;
   };
 
-  const initialGaugePhotosHtml = await renderPhotoGrid(h.photoEvidence.initialGaugePhotoIds || [], t.initialGaugePhotos);
-  const initialGeneralPhotosHtml = await renderPhotoGrid(h.photoEvidence.initialGeneralPhotoIds || [], t.initialGeneralPhotos);
-  const duringTestPhotosHtml = await renderPhotoGrid(h.photoEvidence.duringTestPhotoIds || [], t.duringTestPhotos);
-  const finalGaugePhotosHtml = await renderPhotoGrid(h.photoEvidence.finalGaugePhotoIds || [], t.finalGaugePhotos);
-  const finalGeneralPhotosHtml = await renderPhotoGrid(h.photoEvidence.finalGeneralPhotoIds || [], t.finalGeneralPhotos);
+  const initialGaugePhotosHtml = renderPhotoGrid(h.photoEvidence.initialGaugePhotoIds || [], t.initialGaugePhotos);
+  const initialGeneralPhotosHtml = renderPhotoGrid(h.photoEvidence.initialGeneralPhotoIds || [], t.initialGeneralPhotos);
+  const duringTestPhotosHtml = renderPhotoGrid(h.photoEvidence.duringTestPhotoIds || [], t.duringTestPhotos);
+  const finalGaugePhotosHtml = renderPhotoGrid(h.photoEvidence.finalGaugePhotoIds || [], t.finalGaugePhotos);
+  const finalGeneralPhotosHtml = renderPhotoGrid(h.photoEvidence.finalGeneralPhotoIds || [], t.finalGeneralPhotos);
 
   const statusClass = h.conclusion.status === "APPROVED" ? "status-approved" : "status-reproved";
   const statusText = h.conclusion.status === "APPROVED" ? t.approved : t.reproved;
@@ -424,7 +407,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
         <div class="col-2">
           <div class="field">
             <div class="field-label">${t.approvedBy}</div>
-            <div class="field-value">${formatApprovedBy(h.approvedBy)}${h.approvedBy === "OUTRO" && h.approvedByOtherText ? `: ${sanitizeHtml(h.approvedByOtherText)}` : ""}</div>
+            <div class="field-value">${formatApprovedBy(h.approvedBy || "")}${h.approvedBy === "OUTRO" && h.approvedByOtherText ? `: ${sanitizeHtml(h.approvedByOtherText)}` : ""}</div>
           </div>
         </div>
       </div>
