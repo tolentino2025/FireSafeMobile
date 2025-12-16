@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { View, TextInput, StyleSheet, Pressable, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
+import { ControlledTextInput } from "@/components/ControlledTextInput";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { SignatureCapture } from "@/components/SignatureCapture";
@@ -395,15 +396,15 @@ export function HydrostaticTestSection({
         <Spacer height={Spacing.md} />
 
         <ThemedText type="small">{t.systemName}</ThemedText>
-        <TextInput style={inputStyle} value={hydrostaticTest.systemName} onChangeText={(v) => update({ systemName: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+        <ControlledTextInput style={inputStyle} value={hydrostaticTest.systemName} onValueChange={(v) => update({ systemName: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
         <Spacer height={Spacing.md} />
 
         <ThemedText type="small">{t.buildingType}</ThemedText>
-        <TextInput style={inputStyle} value={hydrostaticTest.buildingType} onChangeText={(v) => update({ buildingType: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+        <ControlledTextInput style={inputStyle} value={hydrostaticTest.buildingType} onValueChange={(v) => update({ buildingType: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
         <Spacer height={Spacing.md} />
 
         <ThemedText type="small">{t.protectedArea}</ThemedText>
-        <TextInput style={inputStyle} value={hydrostaticTest.protectedArea} onChangeText={(v) => update({ protectedArea: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+        <ControlledTextInput style={inputStyle} value={hydrostaticTest.protectedArea} onValueChange={(v) => update({ protectedArea: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
         <Spacer height={Spacing.lg} />
 
         <ThemedText type="body" style={{ fontWeight: '600', marginBottom: Spacing.sm }}>{t.normativeReferences} *</ThemedText>
@@ -427,7 +428,7 @@ export function HydrostaticTestSection({
           <>
             <Spacer height={Spacing.sm} />
             <ThemedText type="small">{t.fmDataSheet}</ThemedText>
-            <TextInput style={inputStyle} value={hydrostaticTest.fmDataSheet} onChangeText={(v) => update({ fmDataSheet: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+            <ControlledTextInput style={inputStyle} value={hydrostaticTest.fmDataSheet || ""} onValueChange={(v) => update({ fmDataSheet: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           </>
         )}
         <Checkbox checked={hydrostaticTest.normRefs.includes("NBR")} onToggle={() => {
@@ -438,7 +439,7 @@ export function HydrostaticTestSection({
           <>
             <Spacer height={Spacing.sm} />
             <ThemedText type="small">{t.nbrStandard}</ThemedText>
-            <TextInput style={inputStyle} value={hydrostaticTest.nbrStandard} onChangeText={(v) => update({ nbrStandard: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+            <ControlledTextInput style={inputStyle} value={hydrostaticTest.nbrStandard || ""} onValueChange={(v) => update({ nbrStandard: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           </>
         )}
         <Spacer height={Spacing.lg} />
@@ -453,7 +454,7 @@ export function HydrostaticTestSection({
           <>
             <Spacer height={Spacing.sm} />
             <ThemedText type="small">{t.specifyOther}</ThemedText>
-            <TextInput style={inputStyle} value={hydrostaticTest.approvedByOtherText} onChangeText={(v) => update({ approvedByOtherText: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+            <ControlledTextInput style={inputStyle} value={hydrostaticTest.approvedByOtherText || ""} onValueChange={(v) => update({ approvedByOtherText: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           </>
         )}
         <Spacer height={Spacing.lg} />
@@ -475,7 +476,7 @@ export function HydrostaticTestSection({
         <Spacer height={Spacing.md} />
 
         <ThemedText type="small">{t.weather}</ThemedText>
-        <TextInput style={inputStyle} value={hydrostaticTest.weather} onChangeText={(v) => update({ weather: toUpper(v) })} placeholderTextColor={theme.placeholder} />
+        <ControlledTextInput style={inputStyle} value={hydrostaticTest.weather || ""} onValueChange={(v) => update({ weather: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
       </View>
 
       <Spacer height={Spacing.lg} />
@@ -484,19 +485,19 @@ export function HydrostaticTestSection({
         <SubSectionHeader title={t.owner} />
         <View style={styles.subSectionContent}>
           <ThemedText type="small">{t.corporateName} *</ThemedText>
-          <TextInput style={inputStyle} value={hydrostaticTest.owner.corporateName} onChangeText={(v) => update({ owner: { ...hydrostaticTest.owner, corporateName: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+          <ControlledTextInput style={inputStyle} value={hydrostaticTest.owner.corporateName} onValueChange={(v) => update({ owner: { ...hydrostaticTest.owner, corporateName: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           <Spacer height={Spacing.md} />
           <ThemedText type="small">{t.address} *</ThemedText>
-          <TextInput style={inputStyle} value={hydrostaticTest.owner.address} onChangeText={(v) => update({ owner: { ...hydrostaticTest.owner, address: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+          <ControlledTextInput style={inputStyle} value={hydrostaticTest.owner.address} onValueChange={(v) => update({ owner: { ...hydrostaticTest.owner, address: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           <Spacer height={Spacing.md} />
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.localResponsible} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.owner.localResponsible} onChangeText={(v) => update({ owner: { ...hydrostaticTest.owner, localResponsible: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.owner.localResponsible} onValueChange={(v) => update({ owner: { ...hydrostaticTest.owner, localResponsible: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.role} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.owner.role} onChangeText={(v) => update({ owner: { ...hydrostaticTest.owner, role: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.owner.role} onValueChange={(v) => update({ owner: { ...hydrostaticTest.owner, role: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
           </View>
           <Spacer height={Spacing.md} />
@@ -507,7 +508,7 @@ export function HydrostaticTestSection({
         <SubSectionHeader title={t.executorCompany} />
         <View style={styles.subSectionContent}>
           <ThemedText type="small">{t.corporateName} *</ThemedText>
-          <TextInput style={inputStyle} value={hydrostaticTest.executorCompany.corporateName} onChangeText={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, corporateName: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+          <ControlledTextInput style={inputStyle} value={hydrostaticTest.executorCompany.corporateName} onValueChange={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, corporateName: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           <Spacer height={Spacing.md} />
           <View style={styles.row}>
             <View style={styles.halfField}>
@@ -516,7 +517,7 @@ export function HydrostaticTestSection({
             </View>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.address} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.executorCompany.address} onChangeText={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, address: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.executorCompany.address} onValueChange={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, address: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
           </View>
         </View>
@@ -526,16 +527,16 @@ export function HydrostaticTestSection({
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.name} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.executorCompany.technicalResponsible.name} onChangeText={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, technicalResponsible: { ...hydrostaticTest.executorCompany.technicalResponsible, name: toUpper(v) } } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.executorCompany.technicalResponsible.name} onValueChange={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, technicalResponsible: { ...hydrostaticTest.executorCompany.technicalResponsible, name: v } } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.creaCau} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.executorCompany.technicalResponsible.creaCau} onChangeText={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, technicalResponsible: { ...hydrostaticTest.executorCompany.technicalResponsible, creaCau: toUpper(v) } } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.executorCompany.technicalResponsible.creaCau} onValueChange={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, technicalResponsible: { ...hydrostaticTest.executorCompany.technicalResponsible, creaCau: v } } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
           </View>
           <Spacer height={Spacing.md} />
           <ThemedText type="small">{t.artRrt}</ThemedText>
-          <TextInput style={inputStyle} value={hydrostaticTest.executorCompany.technicalResponsible.artRrt} onChangeText={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, technicalResponsible: { ...hydrostaticTest.executorCompany.technicalResponsible, artRrt: toUpper(v) } } })} placeholderTextColor={theme.placeholder} />
+          <ControlledTextInput style={inputStyle} value={hydrostaticTest.executorCompany.technicalResponsible.artRrt || ""} onValueChange={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, technicalResponsible: { ...hydrostaticTest.executorCompany.technicalResponsible, artRrt: v } } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
         </View>
 
         <SubSectionHeader title={t.inspector} />
@@ -543,11 +544,11 @@ export function HydrostaticTestSection({
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.name} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.inspector.name} onChangeText={(v) => update({ inspector: { ...hydrostaticTest.inspector, name: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.inspector.name} onValueChange={(v) => update({ inspector: { ...hydrostaticTest.inspector, name: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.role} *</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.inspector.role} onChangeText={(v) => update({ inspector: { ...hydrostaticTest.inspector, role: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.inspector.role} onValueChange={(v) => update({ inspector: { ...hydrostaticTest.inspector, role: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
           </View>
         </View>
@@ -571,22 +572,22 @@ export function HydrostaticTestSection({
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.manometerBrand}</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.instrumentation.manometerBrand} onChangeText={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, manometerBrand: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.instrumentation.manometerBrand} onValueChange={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, manometerBrand: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.manometerModel}</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.instrumentation.manometerModel} onChangeText={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, manometerModel: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.instrumentation.manometerModel} onValueChange={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, manometerModel: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
           </View>
           <Spacer height={Spacing.md} />
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.measurementRange}</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.instrumentation.measurementRange} onChangeText={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, measurementRange: toUpper(v) } })} placeholder="0-25 bar" placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.instrumentation.measurementRange} onValueChange={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, measurementRange: v } })} transform={toUpper} placeholder="0-25 bar" placeholderTextColor={theme.placeholder} />
             </View>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.calibrationCertificate}</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.instrumentation.calibrationCertificate} onChangeText={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, calibrationCertificate: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.instrumentation.calibrationCertificate || ""} onValueChange={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, calibrationCertificate: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </View>
           </View>
           <Spacer height={Spacing.md} />
@@ -600,7 +601,7 @@ export function HydrostaticTestSection({
             <>
               <Spacer height={Spacing.sm} />
               <ThemedText type="small">{t.specifyPoint}</ThemedText>
-              <TextInput style={inputStyle} value={hydrostaticTest.instrumentation.pressureReadingPointOther} onChangeText={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, pressureReadingPointOther: toUpper(v) } })} placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={inputStyle} value={hydrostaticTest.instrumentation.pressureReadingPointOther || ""} onValueChange={(v) => update({ instrumentation: { ...hydrostaticTest.instrumentation, pressureReadingPointOther: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
             </>
           )}
         </View>
@@ -642,7 +643,7 @@ export function HydrostaticTestSection({
           </View>
           <Spacer height={Spacing.md} />
           <ThemedText type="small">{t.normativeCriteria}</ThemedText>
-          <TextInput style={[inputStyle, styles.textArea]} value={hydrostaticTest.pressure.normativeCriteriaText} onChangeText={(v) => update({ pressure: { ...hydrostaticTest.pressure, normativeCriteriaText: toUpper(v) } })} multiline placeholderTextColor={theme.placeholder} />
+          <ControlledTextInput style={[inputStyle, styles.textArea]} value={hydrostaticTest.pressure.normativeCriteriaText || ""} onValueChange={(v) => update({ pressure: { ...hydrostaticTest.pressure, normativeCriteriaText: v } })} transform={toUpper} multiline placeholderTextColor={theme.placeholder} />
           <Spacer height={Spacing.md} />
           <ThemedText type="small">{t.minimumTestTime}</ThemedText>
           <View style={styles.inputWithUnit}>
@@ -706,7 +707,7 @@ export function HydrostaticTestSection({
             <>
               <Spacer height={Spacing.sm} />
               <ThemedText type="small">{t.leaksDescription}</ThemedText>
-              <TextInput style={[inputStyle, styles.textArea]} value={hydrostaticTest.results.leaksDescription} onChangeText={(v) => update({ results: { ...hydrostaticTest.results, leaksDescription: toUpper(v) } })} multiline placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={[inputStyle, styles.textArea]} value={hydrostaticTest.results.leaksDescription || ""} onValueChange={(v) => update({ results: { ...hydrostaticTest.results, leaksDescription: v } })} transform={toUpper} multiline placeholderTextColor={theme.placeholder} />
             </>
           )}
           <Checkbox checked={hydrostaticTest.results.pressureDropAboveAllowed} onToggle={() => update({ results: { ...hydrostaticTest.results, pressureDropAboveAllowed: !hydrostaticTest.results.pressureDropAboveAllowed } })} label={t.pressureDropAboveAllowed} />
@@ -715,7 +716,7 @@ export function HydrostaticTestSection({
             <>
               <Spacer height={Spacing.sm} />
               <ThemedText type="small">{t.failureDescription}</ThemedText>
-              <TextInput style={[inputStyle, styles.textArea]} value={hydrostaticTest.results.failureDescription} onChangeText={(v) => update({ results: { ...hydrostaticTest.results, failureDescription: toUpper(v) } })} multiline placeholderTextColor={theme.placeholder} />
+              <ControlledTextInput style={[inputStyle, styles.textArea]} value={hydrostaticTest.results.failureDescription || ""} onValueChange={(v) => update({ results: { ...hydrostaticTest.results, failureDescription: v } })} transform={toUpper} multiline placeholderTextColor={theme.placeholder} />
             </>
           )}
         </View>
@@ -745,7 +746,7 @@ export function HydrostaticTestSection({
         </View>
         <Spacer height={Spacing.md} />
         <ThemedText type="small">{t.technicalConclusion} *</ThemedText>
-        <TextInput style={[inputStyle, styles.largeTextArea]} value={hydrostaticTest.conclusion.technicalConclusionText} onChangeText={(v) => update({ conclusion: { ...hydrostaticTest.conclusion, technicalConclusionText: toUpper(v) } })} multiline numberOfLines={6} textAlignVertical="top" placeholderTextColor={theme.placeholder} />
+        <ControlledTextInput style={[inputStyle, styles.largeTextArea]} value={hydrostaticTest.conclusion.technicalConclusionText || ""} onValueChange={(v) => update({ conclusion: { ...hydrostaticTest.conclusion, technicalConclusionText: v } })} transform={toUpper} multiline numberOfLines={6} textAlignVertical="top" placeholderTextColor={theme.placeholder} />
       </View>
 
       <Spacer height={Spacing.lg} />
