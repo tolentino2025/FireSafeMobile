@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as MailComposer from "expo-mail-composer";
