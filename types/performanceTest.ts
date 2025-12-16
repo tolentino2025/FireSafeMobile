@@ -34,6 +34,7 @@ export interface JobInfo {
 }
 
 export interface PumpEquipmentInfo {
+  pumpId?: string;
   pumpTag: string;
   manufacturer: string;
   model: string;
@@ -478,6 +479,7 @@ export interface ObservationsDeficiencies {
 }
 
 export interface TestSignature {
+  userId?: string;
   name: string;
   title: string;
   company: string;
