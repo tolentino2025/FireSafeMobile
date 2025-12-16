@@ -132,13 +132,11 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
-  const handleTypeSelect = (type: InspectionType | "performance_test" | "diesel_performance_test" | "fm85a") => {
+  const handleTypeSelect = (type: InspectionType | "performance_test" | "diesel_performance_test") => {
     if (type === "performance_test") {
       navigation.navigate("PerformanceTest", {});
     } else if (type === "diesel_performance_test") {
       navigation.navigate("DieselPerformanceTest", {});
-    } else if (type === "fm85a") {
-      navigation.navigate("FM85AForm", {});
     } else {
       navigation.replace("InspectionForm", { type });
     }

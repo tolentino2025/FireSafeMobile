@@ -82,7 +82,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [fm85aCertificate, setFm85aCertificate] = useState<FM85ACertificate>(
     existingInspection?.fm85aCertificate || createEmptyFM85ACertificate()
   );
-  const [fm85aExpanded, setFm85aExpanded] = useState(false);
+  const [fm85aExpanded, setFm85aExpanded] = useState(type === "fm85a");
 
   const autoSaveOpacity = useSharedValue(0);
 
@@ -421,6 +421,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       pump_weekly: "pumpWeekly",
       pump_monthly: "pumpMonthly",
       pump_annual: "pumpAnnual",
+      electric_pump: "electricPump",
+      diesel_pump: "dieselPump",
       aboveground: "aboveground",
       underground: "underground",
       hydrant_flow: "hydrantFlow",
@@ -428,6 +430,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       hazard_eval: "hazardEval",
       standpipe: "standpipe",
       fire_service_mains: "standpipe",
+      fm85a: "fm85a",
     };
     return mapping[type];
   };
