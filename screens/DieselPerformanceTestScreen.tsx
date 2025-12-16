@@ -594,7 +594,8 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     }
     
     try {
-      const result = await generateDieselPumpPdf(test, language);
+      const pdfSource = testId ? (getDieselPerformanceTestById(testId) || test) : test;
+      const result = await generateDieselPumpPdf(pdfSource, language);
       
       if (!result.success) {
         Alert.alert(

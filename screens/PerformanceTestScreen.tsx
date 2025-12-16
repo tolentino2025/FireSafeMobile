@@ -676,7 +676,8 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     }
     
     try {
-      const result = await generateElectricPumpPdf(test, language);
+      const pdfSource = testId ? (getElectricPerformanceTestById(testId) || test) : test;
+      const result = await generateElectricPumpPdf(pdfSource, language);
       
       if (!result.success) {
         Alert.alert(
