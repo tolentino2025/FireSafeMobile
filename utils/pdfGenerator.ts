@@ -3,16 +3,17 @@ import * as Sharing from "expo-sharing";
 import { Inspection, InspectionType } from "@/contexts/InspectionContext";
 import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
 import { parseLocalYMD, getLocalTimeZone } from "@/utils/dateUtils";
-
-const sanitizeHtml = (text: string | null | undefined): string => {
-  if (!text) return "";
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-};
+import { 
+  PDF_THEME, 
+  getBaseCss, 
+  sanitizeHtml, 
+  getChecklistValueSymbol 
+} from "@/utils/pdf/pdfTheme";
+import { 
+  renderHeader, 
+  renderFooter, 
+  wrapDocument 
+} from "@/utils/pdf/pdfLayout";
 
 const INSPECTION_TYPE_NAMES: Record<InspectionType, { en: string; pt: string }> = {
   wet_pipe: { en: "Wet Pipe Sprinkler System", pt: "Sistema de Sprinkler Tubo Molhado" },
@@ -33,6 +34,8 @@ const INSPECTION_TYPE_NAMES: Record<InspectionType, { en: string; pt: string }> 
   hazard_eval: { en: "Hazard Evaluation", pt: "Avaliação de Riscos" },
   standpipe: { en: "Standpipe & Hose System", pt: "Sistema de Standpipe e Mangueiras" },
   fire_service_mains: { en: "Fire Service Mains", pt: "Rede Principal de Incêndio" },
+  fm85a: { en: "FM Global Certificate FM85A", pt: "Certificado FM Global FM85A" },
+  hydrostatic_test: { en: "Hydrostatic Test", pt: "Teste Hidrostático" },
 };
 
 interface GeneratePdfOptions {
@@ -65,18 +68,6 @@ const formatDate = (dateString: string, language: string): string => {
   });
 };
 
-const getChecklistValueSymbol = (value: "yes" | "no" | "na" | null): string => {
-  switch (value) {
-    case "yes":
-      return '<span style="color: #22863A; font-weight: bold;">&#10004;</span>';
-    case "no":
-      return '<span style="color: #DC2626; font-weight: bold;">&#10008;</span>';
-    case "na":
-      return '<span style="color: #6B7280;">N/A</span>';
-    default:
-      return '<span style="color: #9CA3AF;">-</span>';
-  }
-};
 
 const numericFieldLabels = {
   en: {
@@ -562,274 +553,135 @@ const generateInspectionPdfHtmlWithPhotos = (
     `
     : "";
 
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        body {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          font-size: 12px;
-          line-height: 1.5;
-          color: #1F2937;
-          background: white;
-        }
-        .page {
-          padding: 40px;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          border-bottom: 3px solid #FF6B00;
-          padding-bottom: 20px;
-          margin-bottom: 30px;
-        }
-        .logo-section {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .logo-icon {
-          width: 48px;
-          height: 48px;
-          background: linear-gradient(135deg, #FF6B00 0%, #FF8533 100%);
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 24px;
-          font-weight: bold;
-        }
-        .company-name {
-          font-size: 24px;
-          font-weight: bold;
-          color: #1A365D;
-        }
-        .compliance-badge {
-          background: #22863A;
-          color: white;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 600;
-        }
-        .report-title {
-          font-size: 14px;
-          color: #6B7280;
-          margin-top: 5px;
-        }
-        .section {
-          margin-bottom: 25px;
-        }
-        .section-title {
-          color: #1A365D;
-          font-size: 16px;
-          font-weight: 600;
-          border-bottom: 2px solid #FF6B00;
-          padding-bottom: 8px;
-          margin-bottom: 15px;
-        }
-        .info-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 15px;
-        }
-        .info-item {
-          background: #F9FAFB;
-          padding: 12px;
-          border-radius: 8px;
-          border-left: 3px solid #FF6B00;
-        }
-        .info-label {
-          font-size: 10px;
-          color: #6B7280;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 4px;
-        }
-        .info-value {
-          font-size: 13px;
-          font-weight: 500;
-          color: #1F2937;
-        }
-        .checklist-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 10px;
-        }
-        .checklist-table th {
-          background: #1A365D;
-          color: white;
-          padding: 12px;
-          text-align: left;
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .checklist-table th:nth-child(2) {
-          text-align: center;
-          width: 80px;
-        }
-        ${hasAnyPsi ? `
-        .checklist-table th:nth-child(3) {
-          text-align: center;
-          width: 80px;
-        }
-        ` : ""}
-        .checklist-table td {
-          font-size: 12px;
-        }
-        .observations-box {
-          background: #FEF3C7;
-          border: 1px solid #F59E0B;
-          border-radius: 8px;
-          padding: 15px;
-          margin-top: 10px;
-        }
-        .footer {
-          margin-top: 40px;
-          padding-top: 20px;
-          border-top: 1px solid #E5E7EB;
-          text-align: center;
-          font-size: 10px;
-          color: #9CA3AF;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="page">
-        <div class="header">
-          <div>
-            <div class="logo-section">
-              <div class="logo-icon">F</div>
-              <div>
-                <div class="company-name">${companyName}</div>
-                <div class="report-title">${t.inspectionReport}</div>
-              </div>
-            </div>
-          </div>
-          <div class="compliance-badge">${t.nfpaCompliance}</div>
+  const extraCss = hasAnyPsi ? `
+    .checklist-table th:nth-child(3) {
+      text-align: center;
+      width: 80px;
+    }
+  ` : "";
+
+  const headerHtml = renderHeader({
+    companyName,
+    reportTitle: t.inspectionReport,
+    badgeText: t.nfpaCompliance,
+    showBadge: true,
+  });
+
+  const bodyHtml = `
+    ${companySection}
+
+    ${inspectorSection}
+
+    ${firePumpSection}
+
+    ${firePumpPanelSection}
+
+    <div class="section">
+      <h2 class="section-title">${t.inspectionDetails}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.inspectionType}</div>
+          <div class="info-value">${typeName}</div>
         </div>
-
-        ${companySection}
-
-        ${inspectorSection}
-
-        ${firePumpSection}
-
-        ${firePumpPanelSection}
-
-        <div class="section">
-          <h2 class="section-title">${t.inspectionDetails}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.inspectionType}</div>
-              <div class="info-value">${typeName}</div>
-            </div>
-            ${!inspectorData ? `
-            <div class="info-item">
-              <div class="info-label">${t.inspector}</div>
-              <div class="info-value">${sanitizeHtml(inspection.inspectorName) || "-"}</div>
-            </div>
-            ` : `
-            <div class="info-item">
-              <div class="info-label">${t.contractNo}</div>
-              <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
-            </div>
-            `}
-            <div class="info-item">
-              <div class="info-label">${t.date}</div>
-              <div class="info-value">${formatDate(inspection.date, language)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.frequency}</div>
-              <div class="info-value">${freq}</div>
-            </div>
-          </div>
+        ${!inspectorData ? `
+        <div class="info-item">
+          <div class="info-label">${t.inspector}</div>
+          <div class="info-value">${sanitizeHtml(inspection.inspectorName) || "-"}</div>
         </div>
-
-        <div class="section" style="page-break-inside: avoid;">
-          <h2 class="section-title">${t.checklistResults}</h2>
-          <table class="checklist-table">
-            <thead>
-              <tr>
-                <th>${t.item}</th>
-                <th>${t.status}</th>
-                ${hasAnyPsi ? `<th>${t.psi}</th>` : ""}
-              </tr>
-            </thead>
-            <tbody>
-              ${checklistRows}
-            </tbody>
-          </table>
+        ` : `
+        <div class="info-item">
+          <div class="info-label">${t.contractNo}</div>
+          <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
         </div>
-
-        ${
-          inspection.geoLocation
-            ? `
-        <div class="section" style="page-break-inside: avoid;">
-          <h2 class="section-title">${t.geolocation}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.latitude}</div>
-              <div class="info-value">${inspection.geoLocation.latitude.toFixed(6)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.longitude}</div>
-              <div class="info-value">${inspection.geoLocation.longitude.toFixed(6)}</div>
-            </div>
-            ${
-              inspection.geoLocation.accuracy
-                ? `
-            <div class="info-item">
-              <div class="info-label">${t.accuracy}</div>
-              <div class="info-value">${inspection.geoLocation.accuracy.toFixed(1)} ${t.meters}</div>
-            </div>
-            `
-                : ""
-            }
-          </div>
+        `}
+        <div class="info-item">
+          <div class="info-label">${t.date}</div>
+          <div class="info-value">${formatDate(inspection.date, language)}</div>
         </div>
-        `
-            : ""
-        }
-
-        ${
-          inspection.observations
-            ? `
-        <div class="section" style="page-break-inside: avoid;">
-          <h2 class="section-title">${t.observations}</h2>
-          <div class="observations-box">
-            ${sanitizeHtml(inspection.observations)}
-          </div>
-        </div>
-        `
-            : ""
-        }
-
-        ${photosHtml}
-
-        ${signatureHtml}
-
-        <div class="footer">
-          <p>${t.generatedOn}: ${formatDate(new Date().toISOString(), language)}</p>
-          <p style="margin-top: 5px;">FireSafe ITM - Fire Protection System Inspection, Testing & Maintenance</p>
+        <div class="info-item">
+          <div class="info-label">${t.frequency}</div>
+          <div class="info-value">${freq}</div>
         </div>
       </div>
-    </body>
-    </html>
+    </div>
+
+    <div class="section" style="page-break-inside: avoid;">
+      <h2 class="section-title">${t.checklistResults}</h2>
+      <table class="checklist-table">
+        <thead>
+          <tr>
+            <th>${t.item}</th>
+            <th>${t.status}</th>
+            ${hasAnyPsi ? `<th>${t.psi}</th>` : ""}
+          </tr>
+        </thead>
+        <tbody>
+          ${checklistRows}
+        </tbody>
+      </table>
+    </div>
+
+    ${
+      inspection.geoLocation
+        ? `
+    <div class="section" style="page-break-inside: avoid;">
+      <h2 class="section-title">${t.geolocation}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">${t.latitude}</div>
+          <div class="info-value">${inspection.geoLocation.latitude.toFixed(6)}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">${t.longitude}</div>
+          <div class="info-value">${inspection.geoLocation.longitude.toFixed(6)}</div>
+        </div>
+        ${
+          inspection.geoLocation.accuracy
+            ? `
+        <div class="info-item">
+          <div class="info-label">${t.accuracy}</div>
+          <div class="info-value">${inspection.geoLocation.accuracy.toFixed(1)} ${t.meters}</div>
+        </div>
+        `
+            : ""
+        }
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${
+      inspection.observations
+        ? `
+    <div class="section" style="page-break-inside: avoid;">
+      <h2 class="section-title">${t.observations}</h2>
+      <div class="observations-box">
+        ${sanitizeHtml(inspection.observations)}
+      </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${photosHtml}
+
+    ${signatureHtml}
   `;
+
+  const footerHtml = renderFooter({
+    generatedText: t.generatedOn,
+    dateText: formatDate(new Date().toISOString(), language),
+    tagline: "FireSafe ITM - Fire Protection System Inspection, Testing & Maintenance",
+  });
+
+  return wrapDocument({
+    title: `${t.inspectionReport} - ${inspection.propertyName || "Inspection"}`,
+    headerHtml,
+    bodyHtml,
+    footerHtml,
+    extraCss,
+  });
 };
 
 export const generateAndPrintPdf = async (options: GeneratePdfOptions): Promise<void> => {
