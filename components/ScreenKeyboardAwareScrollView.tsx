@@ -21,8 +21,9 @@ export function ScreenKeyboardAwareScrollView({
 
   /**
    * KeyboardAwareScrollView isn't compatible with web (it relies on native APIs), so the code falls back to ScreenScrollView on web to avoid runtime errors.
+   * On Android, KeyboardAwareScrollView from react-native-keyboard-controller causes text duplication bugs with IME (Gboard/SwiftKey), so we use ScreenScrollView instead.
    */
-  if (Platform.OS === "web") {
+  if (Platform.OS === "web" || Platform.OS === "android") {
     return (
       <ScreenScrollView
         style={style}

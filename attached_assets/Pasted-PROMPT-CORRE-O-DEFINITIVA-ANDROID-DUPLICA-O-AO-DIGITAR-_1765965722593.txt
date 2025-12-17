@@ -1,0 +1,110 @@
+PROMPT — CORREÇÃO DEFINITIVA (ANDROID) DUPLICAÇÃO AO DIGITAR
+
+Temos um bug crítico no Android: em qualquer formulário (ex.: Inspeções → Teste Hidrostático), ao digitar em TextInput ocorre duplicação (ex.: “HID” vira “HIHID”). Isso ocorre em todos os campos, então é um problema global.
+
+Contexto técnico do projeto
+
+O app usa react-native-keyboard-controller globalmente:
+
+App.tsx envolve tudo com <KeyboardProvider />
+
+As telas usam KeyboardAwareScrollView do mesmo pacote via components/ScreenKeyboardAwareScrollView.tsx
+
+Já foi aplicado o ajuste no components/ControlledTextInput.tsx para não aplicar transform no onChangeText, mas o bug persiste no Android.
+
+Hipótese confirmada a testar e corrigir
+
+O bug está no conflito entre Android IME (Gboard/SwiftKey) + react-native-keyboard-controller (KeyboardProvider/KeyboardAwareScrollView). Esse conflito gera eventos repetidos e texto duplicado enquanto o IME está em composição.
+
+Objetivo (correção definitiva)
+
+No ANDROID:
+
+Remover/Desativar KeyboardProvider
+
+Não usar KeyboardAwareScrollView do react-native-keyboard-controller
+
+Usar fallback seguro:
+
+ScrollView nativo (react-native)
+
+ou KeyboardAvoidingView + ScrollView (sem libs)
+
+Manter o comportamento atual no iOS se desejado.
+
+✅ Alterações obrigatórias
+(A) App.tsx — KeyboardProvider somente no iOS
+
+Modificar App.tsx para envolver com KeyboardProvider apenas em iOS e usar um wrapper neutro no Android.
+
+Exemplo:
+
+import { Platform } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+
+function KeyboardRoot({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === "ios") return <KeyboardProvider>{children}</KeyboardProvider>;
+  return <>{children}</>; // ANDROID sem keyboard-controller
+}
+
+
+E substituir:
+
+<KeyboardProvider>
+  ...
+</KeyboardProvider>
+
+
+por:
+
+<KeyboardRoot>
+  ...
+</KeyboardRoot>
+
+(B) ScreenKeyboardAwareScrollView.tsx — no Android NÃO usar KeyboardAwareScrollView do pacote
+
+Modificar components/ScreenKeyboardAwareScrollView.tsx:
+
+Hoje ele usa KeyboardAwareScrollView no mobile (Android/iOS)
+
+Alterar para:
+
+iOS → manter KeyboardAwareScrollView (se quiser)
+
+Android → usar ScreenScrollView (ou ScrollView nativo), sem keyboard-controller
+
+Exemplo:
+
+if (Platform.OS === "web" || Platform.OS === "android") {
+  return (
+    <ScreenScrollView
+      style={style}
+      contentContainerStyle={contentContainerStyle}
+      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      {...scrollViewProps}
+    >
+      {children}
+    </ScreenScrollView>
+  );
+}
+
+
+Assim, no Android o app não usa o scroll “aware” do keyboard-controller.
+
+✅ Validação obrigatória
+
+Depois das mudanças:
+
+Rodar no Android (emulador e dispositivo, se possível)
+
+Testar digitação rápida e lenta com Gboard
+
+Confirmar que:
+
+não duplica caracteres
+
+backspace funciona normal
+
+colar texto funciona normal
+
+foco entre campos funciona normal

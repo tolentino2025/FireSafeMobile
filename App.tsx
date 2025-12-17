@@ -1,10 +1,17 @@
 import React from "react";
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+
+function KeyboardRoot({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === "ios") {
+    return <KeyboardProvider>{children}</KeyboardProvider>;
+  }
+  return <>{children}</>;
+}
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
 import LicenseScreen from "@/screens/LicenseScreen";
@@ -58,7 +65,7 @@ export default function App() {
     <ErrorBoundary>
       <SafeAreaProvider>
         <GestureHandlerRootView style={styles.root}>
-          <KeyboardProvider>
+          <KeyboardRoot>
             <ThemeProvider>
               <LanguageProvider>
                 <LicenseProvider>
@@ -68,7 +75,7 @@ export default function App() {
                 </LicenseProvider>
               </LanguageProvider>
             </ThemeProvider>
-          </KeyboardProvider>
+          </KeyboardRoot>
         </GestureHandlerRootView>
       </SafeAreaProvider>
     </ErrorBoundary>
