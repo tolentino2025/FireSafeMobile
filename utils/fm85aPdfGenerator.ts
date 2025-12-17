@@ -12,9 +12,11 @@ const sanitizeHtml = (text: string | null | undefined): string => {
     .replace(/'/g, "&#039;");
 };
 
-const formatYesNo = (value: 'Y' | 'N' | '' | undefined): string => {
-  if (value === 'Y') return '<span style="font-weight: bold;">Y</span>';
-  if (value === 'N') return '<span style="font-weight: bold;">N</span>';
+const formatYesNo = (value: 'Y' | 'N' | '' | undefined, language: 'en' | 'pt-BR'): string => {
+  const yesLabel = language === 'pt-BR' ? 'S' : 'Y';
+  const noLabel = language === 'pt-BR' ? 'N' : 'N';
+  if (value === 'Y') return `<span style="font-weight: bold;">${yesLabel}</span>`;
+  if (value === 'N') return `<span style="font-weight: bold;">${noLabel}</span>`;
   return '';
 };
 
@@ -395,7 +397,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
               </div>
               <div class="info-row">
                 <span class="info-label">${t.buildingOwnerTenant}:</span>
-                <span class="info-value">${formatYesNo(c.clientInfo.isBuildingOwnerOrTenant)}</span>
+                <span class="info-value">${formatYesNo(c.clientInfo.isBuildingOwnerOrTenant, language)}</span>
               </div>
             </div>
             <div>
@@ -752,11 +754,11 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
           </div>
           <div class="question-row">
             <span class="question-label">${t.airPressureSupervised}:</span>
-            <span class="question-value">${formatYesNo(c.automaticReleaseValveQuestions.airPressureSupervised)}</span>
+            <span class="question-value">${formatYesNo(c.automaticReleaseValveQuestions.airPressureSupervised, language)}</span>
           </div>
           <div class="question-row">
             <span class="question-label">${t.manualOperationArranged}:</span>
-            <span class="question-value">${formatYesNo(c.automaticReleaseValveQuestions.manualOperationArranged)}</span>
+            <span class="question-value">${formatYesNo(c.automaticReleaseValveQuestions.manualOperationArranged, language)}</span>
           </div>
         </div>
 
@@ -765,7 +767,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
           <div class="section-title">${t.detectionElectricQuestions}</div>
           <div class="question-row">
             <span class="question-label">${t.circuitrySupervised}:</span>
-            <span class="question-value">${formatYesNo(c.detectionElectricQuestions.circuitrySupervisedPerDS540)}</span>
+            <span class="question-value">${formatYesNo(c.detectionElectricQuestions.circuitrySupervisedPerDS540, language)}</span>
           </div>
           <div class="info-row">
             <span class="info-label">${t.controlPanelMakeModel}:</span>
@@ -846,11 +848,11 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
           <!-- Auto Release Valve Test Questions -->
           <div class="question-row">
             <span class="question-label">${t.valveOperatedManAuto}:</span>
-            <span class="question-value">${formatYesNo(c.tests.autoReleaseValveTestQuestions.valveOperatedManuallyAndAutomatically)}</span>
+            <span class="question-value">${formatYesNo(c.tests.autoReleaseValveTestQuestions.valveOperatedManuallyAndAutomatically, language)}</span>
           </div>
           <div class="question-row">
             <span class="question-label">${t.allUnitsTested}:</span>
-            <span class="question-value">${formatYesNo(c.tests.autoReleaseValveTestQuestions.ifDetectionElectronicWereAllUnitsTested)}</span>
+            <span class="question-value">${formatYesNo(c.tests.autoReleaseValveTestQuestions.ifDetectionElectronicWereAllUnitsTested, language)}</span>
           </div>
 
           <!-- Pressure Reducing Valve Testing -->
@@ -911,15 +913,15 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
           <strong style="margin-top: 10px; display: block;">${t.weldedPipeConnections}</strong>
           <div class="question-row">
             <span class="question-label">${t.weldingProceduresComplied}:</span>
-            <span class="question-value">${formatYesNo(c.tests.weldedPipeConnectionsYesNo.weldingProceduresComplied)}</span>
+            <span class="question-value">${formatYesNo(c.tests.weldedPipeConnectionsYesNo.weldingProceduresComplied, language)}</span>
           </div>
           <div class="question-row">
             <span class="question-label">${t.weldersQualified}:</span>
-            <span class="question-value">${formatYesNo(c.tests.weldedPipeConnectionsYesNo.weldersQualified)}</span>
+            <span class="question-value">${formatYesNo(c.tests.weldedPipeConnectionsYesNo.weldersQualified, language)}</span>
           </div>
           <div class="question-row">
             <span class="question-label">${t.qcProcedure}:</span>
-            <span class="question-value">${formatYesNo(c.tests.weldedPipeConnectionsYesNo.qcProcedureEnsuredDiscsCouponsRetrievedAndClean)}</span>
+            <span class="question-value">${formatYesNo(c.tests.weldedPipeConnectionsYesNo.qcProcedureEnsuredDiscsCouponsRetrievedAndClean, language)}</span>
           </div>
 
           <!-- Drain Tests -->
@@ -949,7 +951,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
           <strong style="margin-top: 10px; display: block;">${t.undergroundMains}</strong>
           <div class="question-row">
             <span class="question-label">${t.verifiedOnFM85B}:</span>
-            <span class="question-value">${formatYesNo(c.tests.undergroundMains.verifiedOnFM85B)}</span>
+            <span class="question-value">${formatYesNo(c.tests.undergroundMains.verifiedOnFM85B, language)}</span>
           </div>
           <div class="info-row">
             <span class="info-label">${t.ifNoFormUsed}:</span>
@@ -964,11 +966,11 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
           <strong style="margin-top: 10px; display: block;">${t.instructionMaterials}</strong>
           <div class="question-row">
             <span class="question-label">${t.personInstructed}:</span>
-            <span class="question-value">${formatYesNo(c.tests.instructionMaterialsYesNo.personInChargeInstructed)}</span>
+            <span class="question-value">${formatYesNo(c.tests.instructionMaterialsYesNo.personInChargeInstructed, language)}</span>
           </div>
           <div class="question-row">
             <span class="question-label">${t.copiesLeft}:</span>
-            <span class="question-value">${formatYesNo(c.tests.instructionMaterialsYesNo.copiesLeftOnPremises)}</span>
+            <span class="question-value">${formatYesNo(c.tests.instructionMaterialsYesNo.copiesLeftOnPremises, language)}</span>
           </div>
           <div class="info-row">
             <span class="info-label">${t.ifNoExplain}:</span>
