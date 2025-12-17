@@ -1,0 +1,99 @@
+PROMPT — CORREÇÃO DE DUPLICAÇÃO DE TEXTO (ANDROID)
+
+Estamos enfrentando um bug crítico no Android no módulo Inspeções → Teste Hidrostático.
+
+❌ Problema observado
+
+Ao digitar em qualquer campo de texto (ex.: “Nome do Sistema”), ocorre duplicação de caracteres.
+Exemplo:
+
+Digitar HID resulta em HIHID
+
+O problema se repete em todos os campos de entrada de dados.
+
+Isso ocorre apenas no Android e afeta toda a experiência de preenchimento do formulário.
+
+🎯 Causa técnica identificada
+
+O componente ControlledTextInput está:
+
+Controlando o valor (value)
+
+Aplicando transform={toUpper} a cada tecla digitada
+
+Atualizando o estado interno durante a composição do teclado (IME – Gboard / SwiftKey)
+
+No Android, isso gera conflito com o texto em composição do IME, causando reenvio parcial do texto e duplicação (HI + HID).
+
+✅ Correção obrigatória
+
+NÃO aplicar transformações (uppercase, trim, etc.) durante o onChangeText.
+A transformação deve ocorrer apenas ao sair do campo (onBlur ou onEndEditing).
+
+🔁 Alteração necessária
+
+Arquivo alvo:
+
+components/ControlledTextInput.tsx
+
+❌ Comportamento atual (problemático)
+
+Aplica transform() dentro do onChangeText
+
+Atualiza estado e valor pai a cada tecla
+
+✅ Comportamento esperado (corrigido)
+
+Durante a digitação:
+
+Apenas atualizar localValue
+
+Nenhuma transformação
+
+Ao sair do campo:
+
+Aplicar transform (ex.: toUpper)
+
+Sincronizar com o valor do formulário uma única vez
+
+🧩 Implementação esperada (exemplo)
+const handleChangeText = useCallback((text: string) => {
+  // NÃO aplicar transform aqui (evita bug do IME no Android)
+  setLocalValue(text);
+  hasChangedRef.current = true;
+}, []);
+
+const syncValue = useCallback(() => {
+  isFocusedRef.current = false;
+
+  if (!hasChangedRef.current) return;
+
+  const finalValue = transform ? transform(localValue) : localValue;
+
+  if (finalValue !== value) {
+    onValueChange(finalValue);
+  }
+
+  // Atualiza o valor exibido já normalizado após sair do campo
+  setLocalValue(finalValue);
+
+  hasChangedRef.current = false;
+}, [localValue, value, onValueChange, transform]);
+
+📌 Regras finais
+
+❌ Nunca aplicar transform dentro de onChangeText
+
+✅ Aplicar transform apenas em onBlur ou onEndEditing
+
+⚠️ Garantir que syncValue() não gere loop ou dupla execução
+
+🎯 Solução deve funcionar corretamente em Android e iOS
+
+📍 Resultado esperado
+
+Digitação normal no Android (sem duplicação)
+
+Campos continuam padronizados em uppercase
+
+Formulário de Teste Hidrostático funcional e estável

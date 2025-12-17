@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { TextInput, TextInputProps, Platform } from "react-native";
+import { TextInput, TextInputProps } from "react-native";
 
 interface ControlledTextInputProps extends Omit<TextInputProps, "value" | "onChangeText"> {
   value: string;
@@ -24,10 +24,11 @@ export function ControlledTextInput({
   }, [value]);
 
   const handleChangeText = useCallback((text: string) => {
-    const transformed = transform ? transform(text) : text;
-    setLocalValue(transformed);
+    // DO NOT apply transform here - causes IME conflicts on Android
+    // Transform is applied only on blur/endEditing
+    setLocalValue(text);
     hasChangedRef.current = true;
-  }, [transform]);
+  }, []);
 
   const handleFocus = useCallback(() => {
     isFocusedRef.current = true;
@@ -35,11 +36,21 @@ export function ControlledTextInput({
 
   const syncValue = useCallback(() => {
     isFocusedRef.current = false;
-    if (hasChangedRef.current && localValue !== value) {
-      onValueChange(localValue);
-      hasChangedRef.current = false;
+
+    if (!hasChangedRef.current) return;
+
+    // Apply transform only when exiting the field
+    const finalValue = transform ? transform(localValue) : localValue;
+
+    if (finalValue !== value) {
+      onValueChange(finalValue);
     }
-  }, [localValue, value, onValueChange]);
+
+    // Update displayed value with normalized text after leaving field
+    setLocalValue(finalValue);
+
+    hasChangedRef.current = false;
+  }, [localValue, value, onValueChange, transform]);
 
   const handleEndEditing = useCallback(() => {
     syncValue();
