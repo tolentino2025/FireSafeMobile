@@ -6,6 +6,7 @@ import { Inspection, InspectionPhoto } from "@/contexts/InspectionContext";
 import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
 import { sanitizeHtml, PDF_THEME } from "./pdfTheme";
 import { renderHeader, renderFooter, wrapDocument } from "./pdfLayout";
+import { getLogoDataUri } from "./pdfAssets";
 
 interface HydrostaticPdfOptions {
   inspection: Inspection;
@@ -250,7 +251,10 @@ const translations = {
 const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => {
   const { inspection, hydrostaticTest, photos, language } = options;
   
-  const photosWithBase64 = await ensureAllPhotosBase64(photos);
+  const [photosWithBase64, logoDataUri] = await Promise.all([
+    ensureAllPhotosBase64(photos),
+    getLogoDataUri(),
+  ]);
   const geoLocation = inspection?.geoLocation || hydrostaticTest.geoLocation;
   const t = translations[language];
   const h = hydrostaticTest;
@@ -347,6 +351,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     companyName: t.title,
     reportTitle: t.subtitle,
     showBadge: false,
+    logoDataUri,
   });
 
   const bodyHtml = `

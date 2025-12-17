@@ -14,6 +14,7 @@ import {
   renderFooter, 
   wrapDocument 
 } from "@/utils/pdf/pdfLayout";
+import { getLogoDataUri } from "@/utils/pdf/pdfAssets";
 
 const INSPECTION_TYPE_NAMES: Record<InspectionType, { en: string; pt: string }> = {
   wet_pipe: { en: "Wet Pipe Sprinkler System", pt: "Sistema de Sprinkler Tubo Molhado" },
@@ -271,7 +272,8 @@ interface PhotoWithBase64 {
 
 const generateInspectionPdfHtmlWithPhotos = (
   options: GeneratePdfOptions,
-  photosWithBase64: PhotoWithBase64[]
+  photosWithBase64: PhotoWithBase64[],
+  logoDataUri: string | null = null
 ): string => {
   const { inspection, language, companyName = "FireSafe ITM" } = options;
   const t = translations[language];
@@ -565,6 +567,7 @@ const generateInspectionPdfHtmlWithPhotos = (
     reportTitle: t.inspectionReport,
     badgeText: t.nfpaCompliance,
     showBadge: true,
+    logoDataUri,
   });
 
   const bodyHtml = `
@@ -690,8 +693,11 @@ export const generateAndPrintPdf = async (options: GeneratePdfOptions): Promise<
 };
 
 export const generatePdfUri = async (options: GeneratePdfOptions): Promise<string> => {
-  const photosWithBase64 = await ensureAllPhotosBase64(options.inspection.photos || []);
-  const html = generateInspectionPdfHtmlWithPhotos(options, photosWithBase64);
+  const [photosWithBase64, logoDataUri] = await Promise.all([
+    ensureAllPhotosBase64(options.inspection.photos || []),
+    getLogoDataUri(),
+  ]);
+  const html = generateInspectionPdfHtmlWithPhotos(options, photosWithBase64, logoDataUri);
   const { uri } = await Print.printToFileAsync({ html });
   return uri;
 };

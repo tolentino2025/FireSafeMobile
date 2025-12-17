@@ -60,6 +60,11 @@ export const getBaseCss = (): string => {
       font-size: 24px;
       font-weight: bold;
     }
+    .brand-logo {
+      height: 48px;
+      width: auto;
+      border-radius: 10px;
+    }
     .company-name {
       font-size: 24px;
       font-weight: bold;

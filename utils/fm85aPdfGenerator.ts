@@ -1,6 +1,7 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { FM85ACertificate } from "@/types/fm85a";
+import { getLogoDataUri } from "@/utils/pdf/pdfAssets";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -282,10 +283,14 @@ const translations = {
   },
 };
 
-const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
+const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | null = null): string => {
   const { certificate, language } = options;
   const t = translations[language];
   const c = certificate;
+  
+  const logoHtml = logoDataUri 
+    ? `<img src="${logoDataUri}" class="brand-logo" alt="FireSafe ITM" />`
+    : '<div class="logo-icon">F</div>';
 
   const renderTableRows = (items: any[], minRows: number, renderRow: (item: any, idx: number) => string, emptyRow: string): string => {
     let html = items.map((item, idx) => renderRow(item, idx)).join('');
@@ -345,7 +350,8 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
         .footer { text-align: center; margin-top: 20px; font-size: 9px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
         .notes-box { border: 1px solid #ccc; min-height: 60px; padding: 8px; margin-top: 5px; white-space: pre-wrap; }
         .logo-section { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
-        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #DC2626, #991B1B); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #FF6B00, #FF8533); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+        .brand-logo { height: 40px; width: auto; border-radius: 8px; }
         .geo-grid { display: flex; flex-wrap: wrap; gap: 15px; }
         .geo-item { flex: 1; min-width: 120px; }
         .geo-label { font-size: 9px; color: #666; text-transform: uppercase; }
@@ -356,7 +362,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
       <div class="page">
         <div class="header">
           <div class="logo-section">
-            <div class="logo-icon">F</div>
+            ${logoHtml}
             <div>
               <h1 style="margin: 0;">${t.title}</h1>
               <h2 style="margin: 0;">${t.subtitle}</h2>
@@ -1069,7 +1075,8 @@ const generateFM85APdfHtml = (options: FM85APdfOptions): string => {
 };
 
 export const generateFM85APdfUri = async (options: FM85APdfOptions): Promise<string> => {
-  const html = generateFM85APdfHtml(options);
+  const logoDataUri = await getLogoDataUri();
+  const html = generateFM85APdfHtml(options, logoDataUri);
   const { uri } = await Print.printToFileAsync({ html });
   return uri;
 };

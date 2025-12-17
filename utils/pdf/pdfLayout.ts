@@ -5,6 +5,7 @@ export interface HeaderParams {
   reportTitle: string;
   badgeText?: string;
   showBadge?: boolean;
+  logoDataUri?: string | null;
 }
 
 export interface FooterParams {
@@ -26,14 +27,19 @@ export const renderHeader = (params: HeaderParams): string => {
     companyName = "FireSafe ITM", 
     reportTitle, 
     badgeText,
-    showBadge = true 
+    showBadge = true,
+    logoDataUri
   } = params;
+  
+  const logoHtml = logoDataUri 
+    ? `<img src="${logoDataUri}" class="brand-logo" alt="FireSafe ITM" />`
+    : `<div class="logo-icon">F</div>`;
   
   return `
     <div class="header">
       <div>
         <div class="logo-section">
-          <div class="logo-icon">F</div>
+          ${logoHtml}
           <div>
             <div class="company-name">${companyName}</div>
             <div class="report-title">${reportTitle}</div>
