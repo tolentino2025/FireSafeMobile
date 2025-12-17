@@ -23,7 +23,8 @@
 16. [Agenda de Inspecoes](#16-agenda-de-inspecoes)
 17. [Notificacoes](#17-notificacoes)
 18. [Configuracoes](#18-configuracoes)
-19. [Solucao de Problemas](#19-solucao-de-problemas)
+19. [Backup de Dados](#19-backup-de-dados)
+20. [Solucao de Problemas](#20-solucao-de-problemas)
 
 ### English
 1. [Overview](#1-overview)
@@ -44,7 +45,8 @@
 16. [Inspection Schedule](#16-inspection-schedule)
 17. [Notifications](#17-notifications)
 18. [Settings](#18-settings)
-19. [Troubleshooting](#19-troubleshooting)
+19. [Data Backup](#19-data-backup)
+20. [Troubleshooting](#20-troubleshooting)
 
 ---
 
@@ -454,7 +456,57 @@ Para alterar: Perfil > Tema > Selecione a opcao
 
 ---
 
-## 19. Solucao de Problemas
+## 19. Backup de Dados
+
+O FireSafe ITM permite exportar e importar todos os seus dados, garantindo que voce nunca perca suas inspecoes, empresas e inspetores cadastrados.
+
+### Por que fazer Backup?
+
+- **Seguranca**: Proteja seus dados contra perda acidental
+- **Atualizacao do App**: Preserve seus dados ao atualizar ou reinstalar o aplicativo
+- **Troca de Dispositivo**: Transfira seus dados para um novo celular
+- **Arquivamento**: Mantenha copias de seguranca em local seguro
+
+### Exportar Dados (Criar Backup):
+
+1. Va para a aba "Perfil"
+2. Role ate a secao "Backup de Dados"
+3. Toque em "Exportar Dados"
+4. Aguarde a geracao do arquivo
+5. Escolha onde salvar ou compartilhar:
+   - **Email**: Envie para seu email como anexo
+   - **WhatsApp**: Envie para voce mesmo ou outro contato
+   - **Google Drive/iCloud**: Salve na nuvem
+   - **Arquivos**: Salve no dispositivo
+
+### Importar Dados (Restaurar Backup):
+
+1. Va para a aba "Perfil"
+2. Role ate a secao "Backup de Dados"
+3. Toque em "Importar Dados"
+4. Confirme que deseja substituir os dados atuais
+5. Selecione o arquivo de backup (.json)
+6. Aguarde a restauracao
+7. Os dados serao carregados automaticamente
+
+### Informacoes Importantes:
+
+- O backup inclui: inspecoes, empresas, inspetores, propriedades e configuracoes
+- Ao importar, os dados atuais serao substituidos pelo backup
+- Faca backup regularmente, especialmente antes de atualizar o app
+- Guarde o arquivo de backup em local seguro (email, nuvem)
+- O formato do arquivo e .json
+
+### Dicas de Boas Praticas:
+
+1. **Backup Semanal**: Faca backup toda semana se usar o app frequentemente
+2. **Antes de Atualizar**: Sempre exporte seus dados antes de atualizar o aplicativo
+3. **Multiplas Copias**: Mantenha copias em diferentes locais (email, nuvem, computador)
+4. **Nomeie os Arquivos**: O arquivo ja vem com data, facilitando identificacao
+
+---
+
+## 20. Solucao de Problemas
 
 ### Problema: App nao abre
 **Solucao**: 
@@ -488,9 +540,17 @@ Para alterar: Perfil > Tema > Selecione a opcao
 
 ### Problema: Dados perdidos
 **Solucao**:
-- Os dados sao salvos localmente no dispositivo
-- Nao desinstale o app sem backup
-- Entre em contato com suporte para recuperacao
+- Verifique se possui um arquivo de backup salvo
+- Va em Perfil > Backup de Dados > Importar Dados
+- Selecione o arquivo de backup para restaurar
+- Se nao tiver backup, entre em contato com suporte@firesafeitm.com
+
+### Problema: Erro ao importar backup
+**Solucao**:
+- Verifique se o arquivo e um backup valido do FireSafe ITM
+- O arquivo deve ter extensao .json
+- Certifique-se de que o arquivo nao foi corrompido
+- Tente baixar o arquivo novamente do local onde foi salvo
 
 ---
 
@@ -905,7 +965,57 @@ To change: Profile > Theme > Select option
 
 ---
 
-## 19. Troubleshooting
+## 19. Data Backup
+
+FireSafe ITM allows you to export and import all your data, ensuring you never lose your inspections, companies, and registered inspectors.
+
+### Why Backup?
+
+- **Security**: Protect your data against accidental loss
+- **App Update**: Preserve your data when updating or reinstalling the app
+- **Device Change**: Transfer your data to a new phone
+- **Archiving**: Keep backup copies in a safe location
+
+### Export Data (Create Backup):
+
+1. Go to the "Profile" tab
+2. Scroll to the "Data Backup" section
+3. Tap "Export Data"
+4. Wait for file generation
+5. Choose where to save or share:
+   - **Email**: Send to your email as attachment
+   - **WhatsApp**: Send to yourself or another contact
+   - **Google Drive/iCloud**: Save to the cloud
+   - **Files**: Save on device
+
+### Import Data (Restore Backup):
+
+1. Go to the "Profile" tab
+2. Scroll to the "Data Backup" section
+3. Tap "Import Data"
+4. Confirm that you want to replace current data
+5. Select the backup file (.json)
+6. Wait for restoration
+7. Data will be loaded automatically
+
+### Important Information:
+
+- Backup includes: inspections, companies, inspectors, properties, and settings
+- When importing, current data will be replaced by the backup
+- Backup regularly, especially before updating the app
+- Store the backup file in a safe location (email, cloud)
+- File format is .json
+
+### Best Practice Tips:
+
+1. **Weekly Backup**: Backup every week if you use the app frequently
+2. **Before Updating**: Always export your data before updating the app
+3. **Multiple Copies**: Keep copies in different locations (email, cloud, computer)
+4. **File Names**: The file already includes the date for easy identification
+
+---
+
+## 20. Troubleshooting
 
 ### Problem: App won't open
 **Solution**: 
@@ -939,9 +1049,17 @@ To change: Profile > Theme > Select option
 
 ### Problem: Lost data
 **Solution**:
-- Data is saved locally on the device
-- Don't uninstall the app without backup
-- Contact support for recovery
+- Check if you have a saved backup file
+- Go to Profile > Data Backup > Import Data
+- Select the backup file to restore
+- If you don't have a backup, contact suporte@firesafeitm.com
+
+### Problem: Error importing backup
+**Solution**:
+- Verify the file is a valid FireSafe ITM backup
+- The file must have .json extension
+- Make sure the file is not corrupted
+- Try downloading the file again from where it was saved
 
 ---
 

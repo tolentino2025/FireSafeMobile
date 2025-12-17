@@ -220,7 +220,8 @@ export async function generateUserManualPdf(language: 'pt-BR' | 'en' = 'pt-BR'):
     <div class="toc-item"><span>16. ${isPtBR ? 'Agenda de Inspeções' : 'Inspection Schedule'}</span><span>14</span></div>
     <div class="toc-item"><span>17. ${isPtBR ? 'Notificações' : 'Notifications'}</span><span>14</span></div>
     <div class="toc-item"><span>18. ${isPtBR ? 'Configurações' : 'Settings'}</span><span>15</span></div>
-    <div class="toc-item"><span>19. ${isPtBR ? 'Solução de Problemas' : 'Troubleshooting'}</span><span>16</span></div>
+    <div class="toc-item"><span>19. ${isPtBR ? 'Backup de Dados' : 'Data Backup'}</span><span>16</span></div>
+    <div class="toc-item"><span>20. ${isPtBR ? 'Solução de Problemas' : 'Troubleshooting'}</span><span>17</span></div>
   </div>
 
   <!-- Content -->
@@ -566,7 +567,50 @@ export async function generateUserManualPdf(language: 'pt-BR' | 'en' = 'pt-BR'):
   </div>
 
   <div class="page-break"></div>
-  <h1>19. ${isPtBR ? 'Solução de Problemas' : 'Troubleshooting'}</h1>
+  <h1>19. ${isPtBR ? 'Backup de Dados' : 'Data Backup'}</h1>
+  <div class="section">
+    <p>${isPtBR 
+      ? 'O FireSafe ITM permite exportar e importar todos os seus dados, garantindo que você nunca perca suas inspeções.'
+      : 'FireSafe ITM allows you to export and import all your data, ensuring you never lose your inspections.'
+    }</p>
+
+    <h3>${isPtBR ? 'Por que fazer Backup?' : 'Why Backup?'}</h3>
+    <ul>
+      <li><strong>${isPtBR ? 'Segurança' : 'Security'}:</strong> ${isPtBR ? 'Proteja seus dados contra perda acidental' : 'Protect your data against accidental loss'}</li>
+      <li><strong>${isPtBR ? 'Atualização do App' : 'App Update'}:</strong> ${isPtBR ? 'Preserve seus dados ao atualizar o aplicativo' : 'Preserve your data when updating the app'}</li>
+      <li><strong>${isPtBR ? 'Troca de Dispositivo' : 'Device Change'}:</strong> ${isPtBR ? 'Transfira seus dados para um novo celular' : 'Transfer your data to a new phone'}</li>
+      <li><strong>${isPtBR ? 'Arquivamento' : 'Archiving'}:</strong> ${isPtBR ? 'Mantenha cópias de segurança em local seguro' : 'Keep backup copies in a safe location'}</li>
+    </ul>
+
+    <h3>${isPtBR ? 'Exportar Dados (Criar Backup)' : 'Export Data (Create Backup)'}</h3>
+    <ol class="step-list">
+      <li>${isPtBR ? 'Vá para a aba "Perfil"' : 'Go to the "Profile" tab'}</li>
+      <li>${isPtBR ? 'Role até a seção "Backup de Dados"' : 'Scroll to the "Data Backup" section'}</li>
+      <li>${isPtBR ? 'Toque em "Exportar Dados"' : 'Tap "Export Data"'}</li>
+      <li>${isPtBR ? 'Escolha onde salvar: Email, WhatsApp, Google Drive, iCloud, ou Arquivos' : 'Choose where to save: Email, WhatsApp, Google Drive, iCloud, or Files'}</li>
+    </ol>
+
+    <h3>${isPtBR ? 'Importar Dados (Restaurar Backup)' : 'Import Data (Restore Backup)'}</h3>
+    <ol class="step-list">
+      <li>${isPtBR ? 'Vá para a aba "Perfil"' : 'Go to the "Profile" tab'}</li>
+      <li>${isPtBR ? 'Role até a seção "Backup de Dados"' : 'Scroll to the "Data Backup" section'}</li>
+      <li>${isPtBR ? 'Toque em "Importar Dados"' : 'Tap "Import Data"'}</li>
+      <li>${isPtBR ? 'Confirme que deseja substituir os dados atuais' : 'Confirm that you want to replace current data'}</li>
+      <li>${isPtBR ? 'Selecione o arquivo de backup (.json)' : 'Select the backup file (.json)'}</li>
+    </ol>
+
+    <div class="important">
+      <strong>${isPtBR ? 'Dicas de Boas Práticas:' : 'Best Practice Tips:'}</strong>
+      <ul>
+        <li>${isPtBR ? 'Faça backup toda semana se usar o app frequentemente' : 'Backup every week if you use the app frequently'}</li>
+        <li>${isPtBR ? 'Sempre exporte seus dados antes de atualizar o aplicativo' : 'Always export your data before updating the app'}</li>
+        <li>${isPtBR ? 'Mantenha cópias em diferentes locais (email, nuvem, computador)' : 'Keep copies in different locations (email, cloud, computer)'}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+  <h1>20. ${isPtBR ? 'Solução de Problemas' : 'Troubleshooting'}</h1>
   <div class="section">
     <div class="warning">
       <h3>${isPtBR ? 'App não abre' : 'App won\'t open'}</h3>
@@ -611,8 +655,16 @@ export async function generateUserManualPdf(language: 'pt-BR' | 'en' = 'pt-BR'):
     <div class="warning">
       <h3>${isPtBR ? 'Dados perdidos' : 'Lost data'}</h3>
       <p>${isPtBR 
-        ? 'Os dados são salvos localmente no dispositivo. Não desinstale o app sem backup. Contate suporte para recuperação.'
-        : 'Data is saved locally on the device. Don\'t uninstall the app without backup. Contact support for recovery.'
+        ? 'Verifique se possui um arquivo de backup salvo. Vá em Perfil > Backup de Dados > Importar Dados para restaurar. Se não tiver backup, contate suporte@firesafeitm.com.'
+        : 'Check if you have a saved backup file. Go to Profile > Data Backup > Import Data to restore. If you don\'t have a backup, contact suporte@firesafeitm.com.'
+      }</p>
+    </div>
+
+    <div class="warning">
+      <h3>${isPtBR ? 'Erro ao importar backup' : 'Error importing backup'}</h3>
+      <p>${isPtBR 
+        ? 'Verifique se o arquivo é um backup válido do FireSafe ITM (.json). Certifique-se de que o arquivo não foi corrompido.'
+        : 'Verify the file is a valid FireSafe ITM backup (.json). Make sure the file is not corrupted.'
       }</p>
     </div>
   </div>
