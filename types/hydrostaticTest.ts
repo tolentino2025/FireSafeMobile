@@ -17,6 +17,7 @@ export type FillingMethod = "GRADUAL" | "BY_SECTOR";
 export type ConclusionStatus = "APPROVED" | "REPROVED";
 
 export interface HydrostaticOwner {
+  companyId?: string;
   corporateName: string;
   address: string;
   localResponsible: string;
@@ -25,12 +26,14 @@ export interface HydrostaticOwner {
 }
 
 export interface HydrostaticTechnicalResponsible {
+  technicalResponsibleId?: string;
   name: string;
   creaCau: string;
   artRrt?: string;
 }
 
 export interface HydrostaticExecutorCompany {
+  contractorId?: string;
   corporateName: string;
   cnpj: string;
   address: string;

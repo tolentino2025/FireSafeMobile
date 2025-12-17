@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import { View, TextInput, StyleSheet, Pressable, Platform, Alert, Linking } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -6,9 +6,11 @@ import { ControlledTextInput } from "@/components/ControlledTextInput";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { SignatureCapture } from "@/components/SignatureCapture";
+import { SelectPicker } from "@/components/SelectPicker";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useInspections } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
 import {
@@ -41,6 +43,81 @@ export function HydrostaticTestSection({
 }: HydrostaticTestSectionProps) {
   const { theme, fullTheme } = useTheme();
   const { language } = useLanguage();
+  const { companies, contractors, technicalResponsibles } = useInspections();
+
+  const companyOptions = useMemo(() => 
+    companies.map((c) => ({
+      id: c.id,
+      label: c.name,
+      sublabel: c.cnpj || c.address || undefined,
+    })),
+  [companies]);
+
+  const contractorOptions = useMemo(() => 
+    contractors.map((c) => ({
+      id: c.id,
+      label: c.name,
+      sublabel: c.licenseNumber || c.city || undefined,
+    })),
+  [contractors]);
+
+  const techResponsibleOptions = useMemo(() => 
+    technicalResponsibles.map((tr) => ({
+      id: tr.id,
+      label: tr.name,
+      sublabel: tr.creaCAU || tr.role || undefined,
+    })),
+  [technicalResponsibles]);
+
+  const handleOwnerSelect = (companyId: string) => {
+    const company = companies.find((c) => c.id === companyId);
+    if (company) {
+      const fullAddress = [company.address, company.city, company.state].filter(Boolean).join(", ");
+      update({
+        owner: {
+          ...hydrostaticTest.owner,
+          companyId: companyId,
+          corporateName: company.name || "",
+          address: fullAddress || "",
+          localResponsible: company.contactName || "",
+          contact: company.contactPhone || company.contactEmail || "",
+        },
+      });
+    }
+  };
+
+  const handleContractorSelect = (contractorId: string) => {
+    const contractor = contractors.find((c) => c.id === contractorId);
+    if (contractor) {
+      const fullAddress = [contractor.address, contractor.city, contractor.state].filter(Boolean).join(", ");
+      update({
+        executorCompany: {
+          ...hydrostaticTest.executorCompany,
+          contractorId: contractorId,
+          corporateName: contractor.name || "",
+          cnpj: contractor.licenseNumber || "",
+          address: fullAddress || "",
+        },
+      });
+    }
+  };
+
+  const handleTechResponsibleSelect = (trId: string) => {
+    const tr = technicalResponsibles.find((t) => t.id === trId);
+    if (tr) {
+      update({
+        executorCompany: {
+          ...hydrostaticTest.executorCompany,
+          technicalResponsible: {
+            ...hydrostaticTest.executorCompany.technicalResponsible,
+            technicalResponsibleId: trId,
+            name: tr.name || "",
+            creaCau: tr.creaCAU || "",
+          },
+        },
+      });
+    }
+  };
 
   const t = language === "pt-BR" ? {
     testIdentification: "IDENTIFICACAO DO TESTE",
@@ -64,14 +141,23 @@ export function HydrostaticTestSection({
     weather: "Condicoes Climaticas",
     partiesInvolved: "PARTES ENVOLVIDAS",
     owner: "Proprietario/Contratante",
+    selectCompany: "Selecionar Empresa",
+    selectCompanyTitle: "Selecione a Empresa",
+    noCompanies: "Nenhuma empresa cadastrada",
     corporateName: "Razao Social",
     address: "Endereco",
     localResponsible: "Responsavel Local",
     role: "Cargo/Funcao",
     contact: "Contato (Telefone/Email)",
     executorCompany: "Empresa Executora",
+    selectContractor: "Selecionar Prestadora",
+    selectContractorTitle: "Selecione a Prestadora",
+    noContractors: "Nenhuma prestadora cadastrada",
     cnpj: "CNPJ",
     technicalResponsible: "Responsavel Tecnico",
+    selectTechResponsible: "Selecionar Resp. Tecnico",
+    selectTechResponsibleTitle: "Selecione o Resp. Tecnico",
+    noTechResponsibles: "Nenhum resp. tecnico cadastrado",
     name: "Nome",
     creaCau: "CREA/CAU",
     artRrt: "ART/RRT",
@@ -170,14 +256,23 @@ export function HydrostaticTestSection({
     weather: "Weather Conditions",
     partiesInvolved: "PARTIES INVOLVED",
     owner: "Owner/Client",
+    selectCompany: "Select Company",
+    selectCompanyTitle: "Select Company",
+    noCompanies: "No companies registered",
     corporateName: "Corporate Name",
     address: "Address",
     localResponsible: "Local Responsible",
     role: "Role/Position",
     contact: "Contact (Phone/Email)",
     executorCompany: "Executor Company",
+    selectContractor: "Select Contractor",
+    selectContractorTitle: "Select Contractor",
+    noContractors: "No contractors registered",
     cnpj: "CNPJ/Tax ID",
     technicalResponsible: "Technical Responsible",
+    selectTechResponsible: "Select Tech. Responsible",
+    selectTechResponsibleTitle: "Select Tech. Responsible",
+    noTechResponsibles: "No tech. responsibles registered",
     name: "Name",
     creaCau: "CREA/CAU",
     artRrt: "ART/RRT",
@@ -521,6 +616,15 @@ export function HydrostaticTestSection({
       <View style={[styles.sectionContent, { borderColor: fullTheme.colors.border }]}>
         <SubSectionHeader title={t.owner} />
         <View style={styles.subSectionContent}>
+          <SelectPicker
+            options={companyOptions}
+            selectedId={hydrostaticTest.owner.companyId}
+            onSelect={handleOwnerSelect}
+            placeholder={t.selectCompany}
+            title={t.selectCompanyTitle}
+            emptyText={t.noCompanies}
+          />
+          <Spacer height={Spacing.md} />
           <ThemedText type="small">{t.corporateName} *</ThemedText>
           <ControlledTextInput style={inputStyle} value={hydrostaticTest.owner.corporateName} onValueChange={(v) => update({ owner: { ...hydrostaticTest.owner, corporateName: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           <Spacer height={Spacing.md} />
@@ -544,6 +648,15 @@ export function HydrostaticTestSection({
 
         <SubSectionHeader title={t.executorCompany} />
         <View style={styles.subSectionContent}>
+          <SelectPicker
+            options={contractorOptions}
+            selectedId={hydrostaticTest.executorCompany.contractorId}
+            onSelect={handleContractorSelect}
+            placeholder={t.selectContractor}
+            title={t.selectContractorTitle}
+            emptyText={t.noContractors}
+          />
+          <Spacer height={Spacing.md} />
           <ThemedText type="small">{t.corporateName} *</ThemedText>
           <ControlledTextInput style={inputStyle} value={hydrostaticTest.executorCompany.corporateName} onValueChange={(v) => update({ executorCompany: { ...hydrostaticTest.executorCompany, corporateName: v } })} transform={toUpper} placeholderTextColor={theme.placeholder} />
           <Spacer height={Spacing.md} />
@@ -561,6 +674,15 @@ export function HydrostaticTestSection({
 
         <SubSectionHeader title={t.technicalResponsible} />
         <View style={styles.subSectionContent}>
+          <SelectPicker
+            options={techResponsibleOptions}
+            selectedId={hydrostaticTest.executorCompany.technicalResponsible.technicalResponsibleId}
+            onSelect={handleTechResponsibleSelect}
+            placeholder={t.selectTechResponsible}
+            title={t.selectTechResponsibleTitle}
+            emptyText={t.noTechResponsibles}
+          />
+          <Spacer height={Spacing.md} />
           <View style={styles.row}>
             <View style={styles.halfField}>
               <ThemedText type="small">{t.name} *</ThemedText>
