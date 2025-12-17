@@ -300,9 +300,13 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
     ? `<img src="${logoDataUri}" class="brand-logo" alt="FireSafe ITM" />`
     : '<div class="logo-icon">F</div>';
 
-  const renderTableRows = (items: any[], minRows: number, renderRow: (item: any, idx: number) => string, emptyRow: string): string => {
-    let html = items.map((item, idx) => renderRow(item, idx)).join('');
-    const remaining = Math.max(0, minRows - items.length);
+  // Safe array access with fallback to empty array
+  const safeArray = <T>(arr: T[] | undefined | null): T[] => arr ?? [];
+
+  const renderTableRows = (items: any[] | undefined | null, minRows: number, renderRow: (item: any, idx: number) => string, emptyRow: string): string => {
+    const safeItems = safeArray(items);
+    let html = safeItems.map((item, idx) => renderRow(item, idx)).join('');
+    const remaining = Math.max(0, minRows - safeItems.length);
     for (let i = 0; i < remaining; i++) {
       html += emptyRow;
     }
@@ -451,7 +455,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.sprinklers, 3,
+              ${renderTableRows(c.sprinklers, 5,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
                   <td>${sanitizeHtml(item.modelTradeName)}</td>
@@ -482,7 +486,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.pipe, 3,
+              ${renderTableRows(c.pipe, 4,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
                   <td>${sanitizeHtml(item.modelTradeName)}</td>
@@ -511,7 +515,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.pipeConnections, 2,
+              ${renderTableRows(c.pipeConnections, 3,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
                   <td>${sanitizeHtml(item.modelTradeName)}</td>
@@ -540,7 +544,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.pipeHangers, 2,
+              ${renderTableRows(c.pipeHangers, 3,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
                   <td>${sanitizeHtml(item.modelTradeName)}</td>
@@ -569,7 +573,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.alarmCheckDryPipeReleaseValves, 2,
+              ${renderTableRows(c.alarmCheckDryPipeReleaseValves, 3,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.type)}</td>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
@@ -599,7 +603,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.detectionReleaseValves, 2,
+              ${renderTableRows(c.detectionReleaseValves, 3,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.type)}</td>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
@@ -629,7 +633,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.controlOrPressureReducingValves, 2,
+              ${renderTableRows(c.controlOrPressureReducingValves, 3,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.type)}</td>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
@@ -657,7 +661,7 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${renderTableRows(c.checkOrBackflowValves, 2,
+              ${renderTableRows(c.checkOrBackflowValves, 3,
                 (item) => `<tr>
                   <td>${sanitizeHtml(item.type)}</td>
                   <td>${sanitizeHtml(item.manufacturer)}</td>
@@ -731,7 +735,6 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
         </div>
 
         <!-- Other Components Table -->
-        ${c.otherComponents.length > 0 ? `
         <div class="section">
           <div class="section-title">${t.otherComponentsSection}</div>
           <table>
@@ -744,16 +747,18 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${c.otherComponents.map(item => `<tr>
-                <td>${sanitizeHtml(item.component)}</td>
-                <td>${sanitizeHtml(item.manufacturer)}</td>
-                <td>${sanitizeHtml(item.model)}</td>
-                <td>${sanitizeHtml(item.quantity)}</td>
-              </tr>`).join('')}
+              ${renderTableRows(c.otherComponents, 3,
+                (item) => `<tr>
+                  <td>${sanitizeHtml(item.component)}</td>
+                  <td>${sanitizeHtml(item.manufacturer)}</td>
+                  <td>${sanitizeHtml(item.model)}</td>
+                  <td>${sanitizeHtml(item.quantity)}</td>
+                </tr>`,
+                '<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>'
+              )}
             </tbody>
           </table>
         </div>
-        ` : ''}
 
         <!-- Automatic Release Valve Questions -->
         <div class="section">
@@ -831,7 +836,6 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
           </div>
 
           <!-- Dry Pipe/Auto Release Testing -->
-          ${c.tests.dryPipeOrAutoReleaseTesting.length > 0 ? `
           <strong>${t.dryPipeAutoReleaseTest}</strong>
           <table>
             <thead>
@@ -846,18 +850,20 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${c.tests.dryPipeOrAutoReleaseTesting.map(item => `<tr>
-                <td>${sanitizeHtml(item.systemNoName)}</td>
-                <td>${sanitizeHtml(item.waterPressureBelowValve)}</td>
-                <td>${sanitizeHtml(item.systemAirPressure)}</td>
-                <td>${sanitizeHtml(item.minPressureReqAtSprinkler)}</td>
-                <td>${sanitizeHtml(item.requiredWaterDeliveryTime)}</td>
-                <td>${sanitizeHtml(item.withoutQOD)}</td>
-                <td>${sanitizeHtml(item.withQOD)}</td>
-              </tr>`).join('')}
+              ${renderTableRows(c.tests.dryPipeOrAutoReleaseTesting, 3,
+                (item) => `<tr>
+                  <td>${sanitizeHtml(item.systemNoName)}</td>
+                  <td>${sanitizeHtml(item.waterPressureBelowValve)}</td>
+                  <td>${sanitizeHtml(item.systemAirPressure)}</td>
+                  <td>${sanitizeHtml(item.minPressureReqAtSprinkler)}</td>
+                  <td>${sanitizeHtml(item.requiredWaterDeliveryTime)}</td>
+                  <td>${sanitizeHtml(item.withoutQOD)}</td>
+                  <td>${sanitizeHtml(item.withQOD)}</td>
+                </tr>`,
+                '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'
+              )}
             </tbody>
           </table>
-          ` : ''}
 
           <!-- Auto Release Valve Test Questions -->
           <div class="question-row">
@@ -870,7 +876,6 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
           </div>
 
           <!-- Pressure Reducing Valve Testing -->
-          ${c.tests.pressureReducingValveTesting.length > 0 ? `
           <strong style="margin-top: 10px; display: block;">${t.pressureReducingTest}</strong>
           <table>
             <thead>
@@ -887,23 +892,24 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${c.tests.pressureReducingValveTesting.map(item => `<tr>
-                <td>${sanitizeHtml(item.location)}</td>
-                <td>${sanitizeHtml(item.make)}</td>
-                <td>${sanitizeHtml(item.model)}</td>
-                <td>${sanitizeHtml(item.setting)}</td>
-                <td>${sanitizeHtml(item.staticPressureInlet)}</td>
-                <td>${sanitizeHtml(item.staticPressureOutlet)}</td>
-                <td>${sanitizeHtml(item.residualPressureInlet)}</td>
-                <td>${sanitizeHtml(item.residualPressureOutlet)}</td>
-                <td>${sanitizeHtml(item.flowRate)}</td>
-              </tr>`).join('')}
+              ${renderTableRows(c.tests.pressureReducingValveTesting, 3,
+                (item) => `<tr>
+                  <td>${sanitizeHtml(item.location)}</td>
+                  <td>${sanitizeHtml(item.make)}</td>
+                  <td>${sanitizeHtml(item.model)}</td>
+                  <td>${sanitizeHtml(item.setting)}</td>
+                  <td>${sanitizeHtml(item.staticPressureInlet)}</td>
+                  <td>${sanitizeHtml(item.staticPressureOutlet)}</td>
+                  <td>${sanitizeHtml(item.residualPressureInlet)}</td>
+                  <td>${sanitizeHtml(item.residualPressureOutlet)}</td>
+                  <td>${sanitizeHtml(item.flowRate)}</td>
+                </tr>`,
+                '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'
+              )}
             </tbody>
           </table>
-          ` : ''}
 
           <!-- Blank Testing Gaskets -->
-          ${c.tests.blankTestingGaskets.length > 0 ? `
           <strong style="margin-top: 10px; display: block;">${t.blankTestingGaskets}</strong>
           <table>
             <thead>
@@ -914,14 +920,16 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${c.tests.blankTestingGaskets.map(item => `<tr>
-                <td>${sanitizeHtml(item.numberUsed)}</td>
-                <td>${sanitizeHtml(item.location)}</td>
-                <td>${sanitizeHtml(item.numberRemoved)}</td>
-              </tr>`).join('')}
+              ${renderTableRows(c.tests.blankTestingGaskets, 3,
+                (item) => `<tr>
+                  <td>${sanitizeHtml(item.numberUsed)}</td>
+                  <td>${sanitizeHtml(item.location)}</td>
+                  <td>${sanitizeHtml(item.numberRemoved)}</td>
+                </tr>`,
+                '<tr><td>&nbsp;</td><td></td><td></td></tr>'
+              )}
             </tbody>
           </table>
-          ` : ''}
 
           <!-- Welded Pipe Connections -->
           <strong style="margin-top: 10px; display: block;">${t.weldedPipeConnections}</strong>
@@ -939,7 +947,6 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
           </div>
 
           <!-- Drain Tests -->
-          ${c.tests.drainTests.length > 0 ? `
           <strong style="margin-top: 10px; display: block;">${t.drainTests}</strong>
           <table>
             <thead>
@@ -951,15 +958,17 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
               </tr>
             </thead>
             <tbody>
-              ${c.tests.drainTests.map(item => `<tr>
-                <td>${sanitizeHtml(item.systemNameNo)}</td>
-                <td>${sanitizeHtml(item.staticPressure)}</td>
-                <td>${sanitizeHtml(item.residualPressure)}</td>
-                <td>${sanitizeHtml(item.staticPressureAfterwards)}</td>
-              </tr>`).join('')}
+              ${renderTableRows(c.tests.drainTests, 3,
+                (item) => `<tr>
+                  <td>${sanitizeHtml(item.systemNameNo)}</td>
+                  <td>${sanitizeHtml(item.staticPressure)}</td>
+                  <td>${sanitizeHtml(item.residualPressure)}</td>
+                  <td>${sanitizeHtml(item.staticPressureAfterwards)}</td>
+                </tr>`,
+                '<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>'
+              )}
             </tbody>
           </table>
-          ` : ''}
 
           <!-- Underground Mains -->
           <strong style="margin-top: 10px; display: block;">${t.undergroundMains}</strong>
@@ -1044,12 +1053,10 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
         </div>
 
         <!-- Additional Notes -->
-        ${c.additionalNotes ? `
         <div class="section">
           <div class="section-title">${t.additionalNotes}</div>
-          <div class="notes-box">${sanitizeHtml(c.additionalNotes)}</div>
+          <div class="notes-box">${sanitizeHtml(c.additionalNotes) || '&nbsp;'}</div>
         </div>
-        ` : ''}
 
         ${c.geoLocation && typeof c.geoLocation.latitude === 'number' && typeof c.geoLocation.longitude === 'number' ? `
         <div class="section">
