@@ -1,3 +1,5 @@
+import { GeoLocation } from "./inspection";
+
 export type HydrostaticSystemType = "hydrants" | "sprinklers";
 
 export type HydrostaticNormRef =
@@ -159,6 +161,7 @@ export interface HydrostaticTest {
   declarationAccepted: boolean;
   signatures: HydrostaticSignatures;
   photoEvidence: HydrostaticPhotoEvidence;
+  geoLocation?: GeoLocation;
 }
 
 export function createEmptyHydrostaticTest(): HydrostaticTest {
@@ -287,5 +290,6 @@ export function createEmptyHydrostaticTest(): HydrostaticTest {
       finalGaugePhotoIds: [],
       finalGeneralPhotoIds: [],
     },
+    geoLocation: undefined,
   };
 }

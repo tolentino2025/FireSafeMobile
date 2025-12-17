@@ -1,3 +1,5 @@
+import { GeoLocation } from "./inspection";
+
 export interface FM85AContractorInfo {
   date: string;
   contractorCompanyName: string;
@@ -249,6 +251,8 @@ export interface FM85ACertificate {
   signatures: FM85ASignatures;
   
   additionalNotes: string;
+  
+  geoLocation?: GeoLocation;
 }
 
 export const createEmptyFM85ACertificate = (): FM85ACertificate => ({
@@ -349,6 +353,8 @@ export const createEmptyFM85ACertificate = (): FM85ACertificate => ({
   },
   
   additionalNotes: '',
+  
+  geoLocation: undefined,
 });
 
 export const createEmptySprinkler = (): FM85ASprinkler => ({
