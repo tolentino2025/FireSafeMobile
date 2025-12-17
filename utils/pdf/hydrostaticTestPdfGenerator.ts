@@ -292,6 +292,26 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     return html;
   };
 
+  const getSignatureImage = (signatureData: string | undefined): string => {
+    if (!signatureData) return "";
+    
+    // Check if signatureData is already a base64 data URI (signature captured directly)
+    if (signatureData.startsWith("data:")) {
+      return `<img src="${signatureData}" alt="Signature" style="max-width: 200px; max-height: 80px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;" />`;
+    }
+    
+    // Otherwise, try to find it in the photos array by ID
+    const signaturePhoto = photosWithBase64.find(p => p.id === signatureData);
+    if (!signaturePhoto) return "";
+    const base64 = signaturePhoto.base64 || (signaturePhoto.uri && signaturePhoto.uri.startsWith("data:") ? signaturePhoto.uri : null);
+    if (!base64) return "";
+    return `<img src="${base64}" alt="Signature" style="max-width: 200px; max-height: 80px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;" />`;
+  };
+
+  const technicalResponsibleSignatureHtml = getSignatureImage(h.signatures.technicalResponsibleSignatureId);
+  const inspectorSignatureHtml = getSignatureImage(h.signatures.inspectorSignatureId);
+  const ownerRepSignatureHtml = getSignatureImage(h.signatures.ownerRepSignatureId);
+
   const initialGaugePhotosHtml = renderPhotoGrid(h.photoEvidence.initialGaugePhotoIds || [], t.initialGaugePhotos);
   const initialGeneralPhotosHtml = renderPhotoGrid(h.photoEvidence.initialGeneralPhotoIds || [], t.initialGeneralPhotos);
   const duringTestPhotosHtml = renderPhotoGrid(h.photoEvidence.duringTestPhotoIds || [], t.duringTestPhotos);
@@ -710,6 +730,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       <div class="signature-section">
         <div class="signature-row">
           <div class="signature-box">
+            ${technicalResponsibleSignatureHtml}
             <div class="signature-line">
               <div class="signature-label">${t.technicalResponsibleSignature}</div>
               <div style="font-size: 10px; margin-top: 4px;">${sanitizeHtml(h.executorCompany.technicalResponsible.name)}</div>
@@ -717,6 +738,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
             </div>
           </div>
           <div class="signature-box">
+            ${inspectorSignatureHtml}
             <div class="signature-line">
               <div class="signature-label">${t.inspectorSignature}</div>
               <div style="font-size: 10px; margin-top: 4px;">${sanitizeHtml(h.inspector.name)}</div>
@@ -726,6 +748,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
         </div>
         <div class="signature-row">
           <div class="signature-box">
+            ${ownerRepSignatureHtml}
             <div class="signature-line">
               <div class="signature-label">${t.ownerRepSignature}</div>
               <div style="font-size: 10px; margin-top: 4px;">${sanitizeHtml(h.owner.localResponsible)}</div>
