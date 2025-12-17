@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
 import { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
+import { generateAndPrintHydrostaticTestPdf, generateAndShareHydrostaticTestPdf, generateHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -159,6 +160,15 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           return;
         }
       }
+      if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
+        await generateAndPrintHydrostaticTestPdf({
+          inspection,
+          hydrostaticTest: inspection.hydrostaticTest,
+          photos: inspection.photos || [],
+          language: language as "en" | "pt-BR",
+        });
+        return;
+      }
       await generateAndPrintPdf({
         inspection,
         language: language as "en" | "pt-BR",
@@ -193,6 +203,15 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           return;
         }
       }
+      if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
+        await generateAndShareHydrostaticTestPdf({
+          inspection,
+          hydrostaticTest: inspection.hydrostaticTest,
+          photos: inspection.photos || [],
+          language: language as "en" | "pt-BR",
+        });
+        return;
+      }
       await generateAndSharePdf({
         inspection,
         language: language as "en" | "pt-BR",
@@ -216,10 +235,20 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         return;
       }
 
-      const pdfUri = await generatePdfUri({
-        inspection,
-        language: language as "en" | "pt-BR",
-      });
+      let pdfUri: string;
+      if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
+        pdfUri = await generateHydrostaticTestPdf({
+          inspection,
+          hydrostaticTest: inspection.hydrostaticTest,
+          photos: inspection.photos || [],
+          language: language as "en" | "pt-BR",
+        });
+      } else {
+        pdfUri = await generatePdfUri({
+          inspection,
+          language: language as "en" | "pt-BR",
+        });
+      }
 
       await MailComposer.composeAsync({
         subject: `${t.report.title} - ${inspection.propertyName}`,
