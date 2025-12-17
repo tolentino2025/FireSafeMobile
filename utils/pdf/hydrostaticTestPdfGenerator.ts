@@ -44,6 +44,11 @@ const translations = {
     startTime: "Start Time",
     endTime: "End Time",
     weather: "Weather Conditions",
+    weatherSunny: "Sunny",
+    weatherCloudy: "Cloudy",
+    weatherRainy: "Rainy",
+    weatherPartlyCloudy: "Partly Cloudy",
+    weatherStormy: "Stormy",
     partiesInvolved: "PARTIES INVOLVED",
     owner: "Owner/Client",
     corporateName: "Corporate Name",
@@ -154,6 +159,11 @@ const translations = {
     startTime: "Hora Inicio",
     endTime: "Hora Termino",
     weather: "Condicoes Climaticas",
+    weatherSunny: "Ensolarado",
+    weatherCloudy: "Nublado",
+    weatherRainy: "Chuvoso",
+    weatherPartlyCloudy: "Parcialmente Nublado",
+    weatherStormy: "Tempestuoso",
     partiesInvolved: "PARTES ENVOLVIDAS",
     owner: "Proprietario/Contratante",
     corporateName: "Razao Social",
@@ -275,6 +285,15 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     if (approvedBy === "FM") return t.fm;
     if (approvedBy === "OUTRO") return t.other;
     return approvedBy;
+  };
+
+  const formatWeather = (weather: string) => {
+    if (weather === "ENSOLARADO") return t.weatherSunny;
+    if (weather === "NUBLADO") return t.weatherCloudy;
+    if (weather === "CHUVOSO") return t.weatherRainy;
+    if (weather === "PARCIALMENTE_NUBLADO") return t.weatherPartlyCloudy;
+    if (weather === "TEMPESTUOSO") return t.weatherStormy;
+    return weather;
   };
 
   const normRefs = h.normRefs.map(ref => {
@@ -453,7 +472,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
           </div>
         </div>
       </div>
-      ${h.weather ? `<div class="field"><div class="field-label">${t.weather}</div><div class="field-value">${sanitizeHtml(h.weather)}</div></div>` : ""}
+      ${h.weather ? `<div class="field"><div class="field-label">${t.weather}</div><div class="field-value">${sanitizeHtml(formatWeather(h.weather))}</div></div>` : ""}
     </div>
   </div>
 

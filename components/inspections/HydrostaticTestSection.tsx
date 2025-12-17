@@ -139,6 +139,12 @@ export function HydrostaticTestSection({
     startTime: "Hora Inicio",
     endTime: "Hora Termino",
     weather: "Condicoes Climaticas",
+    selectWeather: "Selecionar Condicao",
+    weatherSunny: "Ensolarado",
+    weatherCloudy: "Nublado",
+    weatherRainy: "Chuvoso",
+    weatherPartlyCloudy: "Parcialmente Nublado",
+    weatherStormy: "Tempestuoso",
     partiesInvolved: "PARTES ENVOLVIDAS",
     owner: "Proprietario/Contratante",
     selectCompany: "Selecionar Empresa",
@@ -254,6 +260,12 @@ export function HydrostaticTestSection({
     startTime: "Start Time",
     endTime: "End Time",
     weather: "Weather Conditions",
+    selectWeather: "Select Condition",
+    weatherSunny: "Sunny",
+    weatherCloudy: "Cloudy",
+    weatherRainy: "Rainy",
+    weatherPartlyCloudy: "Partly Cloudy",
+    weatherStormy: "Stormy",
     partiesInvolved: "PARTIES INVOLVED",
     owner: "Owner/Client",
     selectCompany: "Select Company",
@@ -361,6 +373,14 @@ export function HydrostaticTestSection({
   const update = useCallback((updates: Partial<HydrostaticTest>) => {
     onHydrostaticTestChange({ ...hydrostaticTest, ...updates });
   }, [hydrostaticTest, onHydrostaticTestChange]);
+
+  const weatherOptions = useMemo(() => [
+    { id: "ENSOLARADO", label: t.weatherSunny },
+    { id: "NUBLADO", label: t.weatherCloudy },
+    { id: "CHUVOSO", label: t.weatherRainy },
+    { id: "PARCIALMENTE_NUBLADO", label: t.weatherPartlyCloudy },
+    { id: "TEMPESTUOSO", label: t.weatherStormy },
+  ], [t]);
 
   const SectionHeader = ({ title }: { title: string }) => (
     <View style={[styles.sectionHeader, { backgroundColor: fullTheme.colors.primary }]}>
@@ -608,7 +628,13 @@ export function HydrostaticTestSection({
         <Spacer height={Spacing.md} />
 
         <ThemedText type="small">{t.weather}</ThemedText>
-        <ControlledTextInput style={inputStyle} value={hydrostaticTest.weather || ""} onValueChange={(v) => update({ weather: v })} transform={toUpper} placeholderTextColor={theme.placeholder} />
+        <SelectPicker
+          options={weatherOptions}
+          selectedId={hydrostaticTest.weather || ""}
+          onSelect={(v) => update({ weather: v })}
+          placeholder={t.selectWeather}
+          title={t.weather}
+        />
       </View>
 
       <Spacer height={Spacing.lg} />
