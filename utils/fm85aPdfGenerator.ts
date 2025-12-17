@@ -288,6 +288,14 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
   const t = translations[language];
   const c = certificate;
   
+  // Debug logging to trace data flow
+  console.log("[FM85A PDF] Certificate data received:", JSON.stringify({
+    contractorInfo: c.contractorInfo,
+    clientInfo: c.clientInfo,
+    sprinklersCount: c.sprinklers?.length || 0,
+    pipeCount: c.pipe?.length || 0,
+  }, null, 2));
+  
   const logoHtml = logoDataUri 
     ? `<img src="${logoDataUri}" class="brand-logo" alt="FireSafe ITM" />`
     : '<div class="logo-icon">F</div>';

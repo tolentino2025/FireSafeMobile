@@ -264,9 +264,16 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   };
 
   const handleFM85APdf = async (action: 'print' | 'share') => {
-    if (!inspection.fm85aCertificate) return;
+    if (!inspection.fm85aCertificate) {
+      console.log("[FM85A Detail] No fm85aCertificate found in inspection");
+      return;
+    }
     if (isGeneratingPdf) return;
     setIsGeneratingPdf(true);
+    console.log("[FM85A Detail] Generating PDF with certificate:", JSON.stringify({
+      contractorInfo: inspection.fm85aCertificate.contractorInfo,
+      clientInfo: inspection.fm85aCertificate.clientInfo,
+    }, null, 2));
     try {
       const options = {
         certificate: inspection.fm85aCertificate,

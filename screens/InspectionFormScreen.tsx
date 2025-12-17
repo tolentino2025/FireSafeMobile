@@ -502,6 +502,10 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   };
 
   const handleFM85APdf = async () => {
+    console.log("[FM85A Form] Generating PDF with certificate:", JSON.stringify({
+      contractorInfo: fm85aCertificate.contractorInfo,
+      clientInfo: fm85aCertificate.clientInfo,
+    }, null, 2));
     try {
       await generateAndShareFM85APdf({ certificate: fm85aCertificate, language: language as "en" | "pt-BR" });
     } catch (error) {
