@@ -60,8 +60,12 @@ export function ControlledTextInput({
     syncValue();
   }, [syncValue]);
 
+  // If transform includes uppercase conversion, set autoCapitalize to force keyboard to show uppercase
+  const shouldAutoCapitalize = transform !== undefined;
+
   return (
     <TextInput
+      autoCapitalize={shouldAutoCapitalize ? "characters" : props.autoCapitalize}
       {...props}
       value={localValue}
       onChangeText={handleChangeText}
