@@ -9,6 +9,7 @@ import { ThemedText } from "@/components/ThemedText";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useInspections } from "@/contexts/InspectionContext";
 import { ThemeMode } from "@/contexts/ThemeContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
@@ -19,6 +20,7 @@ import {
   sendTestNotification,
 } from "@/utils/notifications";
 import { shareUserManualPdf } from "@/utils/manualPdfGenerator";
+import { exportAllData, importAllData } from "@/utils/backupUtils";
 
 const ADMIN_EMAIL = "suporte@firesafeitm.com";
 
@@ -27,11 +29,14 @@ type HelpType = "question" | "comment" | "suggestion" | "bugReport" | "other";
 export default function ProfileScreen() {
   const { fullTheme, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
+  const { refreshData } = useInspections();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
   const [generatingManual, setGeneratingManual] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     loadNotificationSettings();
@@ -165,6 +170,71 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleExportData = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    setIsExporting(true);
+    try {
+      const result = await exportAllData();
+      if (result.success) {
+        Alert.alert(t.common.success, t.profile.exportSuccess);
+      } else {
+        Alert.alert(t.common.error, t.profile.exportError);
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      Alert.alert(t.common.error, t.profile.exportError);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportData = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+
+    Alert.alert(
+      t.profile.importConfirmTitle,
+      t.profile.importConfirmMessage,
+      [
+        { text: t.common.cancel, style: "cancel" },
+        {
+          text: t.common.confirm,
+          style: "destructive",
+          onPress: async () => {
+            setIsImporting(true);
+            try {
+              const result = await importAllData();
+              if (result.success && result.counts) {
+                await refreshData();
+                Alert.alert(
+                  t.common.success,
+                  `${t.profile.dataRestored}:\n` +
+                  `${result.counts.inspections} ${language === "pt-BR" ? "inspeções" : "inspections"}\n` +
+                  `${result.counts.companies} ${language === "pt-BR" ? "empresas" : "companies"}\n` +
+                  `${result.counts.appUsers} ${language === "pt-BR" ? "inspetores" : "inspectors"}`
+                );
+              } else if (result.error === "cancelled") {
+                // User cancelled, do nothing
+              } else if (result.error === "invalid_format") {
+                Alert.alert(t.common.error, t.profile.importInvalidFormat);
+              } else {
+                Alert.alert(t.common.error, t.profile.importError);
+              }
+            } catch (error) {
+              console.error("Import error:", error);
+              Alert.alert(t.common.error, t.profile.importError);
+            } finally {
+              setIsImporting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const version = Constants.expoConfig?.version || "1.0.0";
 
   return (
@@ -269,6 +339,29 @@ export default function ProfileScreen() {
           icon="help-circle"
           label={t.profile.help}
           onPress={handleHelp}
+          isLast
+        />
+      </View>
+
+      <Spacer height={Spacing["3xl"]} />
+
+      <ThemedText type="h3" style={styles.sectionTitle}>
+        {t.profile.backup}
+      </ThemedText>
+      <Spacer height={Spacing.md} />
+
+      <View style={[styles.settingsCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+        <SettingsRow
+          icon="upload"
+          label={t.profile.exportData}
+          value={isExporting ? t.profile.exporting : undefined}
+          onPress={isExporting ? undefined : handleExportData}
+        />
+        <SettingsRow
+          icon="download"
+          label={t.profile.importData}
+          value={isImporting ? t.profile.importing : undefined}
+          onPress={isImporting ? undefined : handleImportData}
           isLast
         />
       </View>
