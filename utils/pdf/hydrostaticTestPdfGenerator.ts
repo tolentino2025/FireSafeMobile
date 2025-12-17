@@ -4,16 +4,8 @@ import * as MailComposer from "expo-mail-composer";
 import { HydrostaticTest } from "@/types/hydrostaticTest";
 import { Inspection, InspectionPhoto } from "@/contexts/InspectionContext";
 import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
-
-const sanitizeHtml = (text: string | null | undefined): string => {
-  if (!text) return "";
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-};
+import { sanitizeHtml, PDF_THEME } from "./pdfTheme";
+import { renderHeader, renderFooter, wrapDocument } from "./pdfLayout";
 
 interface HydrostaticPdfOptions {
   inspection: Inspection;
@@ -264,8 +256,8 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   const h = hydrostaticTest;
 
   const checkIcon = (checked: boolean) => checked 
-    ? '<span style="color: #10B981; font-weight: bold;">[X]</span>' 
-    : '<span style="color: #6B7280;">[ ]</span>';
+    ? '<span class="check-icon-yes">[X]</span>' 
+    : '<span class="check-icon-no">[ ]</span>';
 
   const formatPressureReading = (point: string) => {
     if (point === "HIGHEST_POINT") return t.highestPoint;
@@ -327,7 +319,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     
     // Check if signatureData is already a base64 data URI (signature captured directly)
     if (signatureData.startsWith("data:")) {
-      return `<img src="${signatureData}" alt="Signature" style="max-width: 200px; max-height: 80px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;" />`;
+      return `<img src="${signatureData}" alt="Signature" class="signature-img" />`;
     }
     
     // Otherwise, try to find it in the photos array by ID
@@ -335,7 +327,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     if (!signaturePhoto) return "";
     const base64 = signaturePhoto.base64 || (signaturePhoto.uri && signaturePhoto.uri.startsWith("data:") ? signaturePhoto.uri : null);
     if (!base64) return "";
-    return `<img src="${base64}" alt="Signature" style="max-width: 200px; max-height: 80px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;" />`;
+    return `<img src="${base64}" alt="Signature" class="signature-img" />`;
   };
 
   const technicalResponsibleSignatureHtml = getSignatureImage(h.signatures.technicalResponsibleSignatureId);
@@ -351,72 +343,15 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   const statusClass = h.conclusion.status === "APPROVED" ? "status-approved" : "status-reproved";
   const statusText = h.conclusion.status === "APPROVED" ? t.approved : t.reproved;
 
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 1.4; color: #1F2937; padding: 20px; }
-    .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #DC2626; }
-    .header h1 { color: #DC2626; font-size: 22px; font-weight: 700; margin-bottom: 5px; }
-    .header h2 { color: #374151; font-size: 14px; font-weight: 400; }
-    .section { margin-bottom: 15px; page-break-inside: avoid; }
-    .section-header { background: #DC2626; color: white; padding: 8px 12px; font-weight: 700; font-size: 12px; margin-bottom: 0; }
-    .section-content { border: 1px solid #E5E7EB; border-top: none; padding: 12px; }
-    .subsection { margin-bottom: 12px; }
-    .subsection-header { background: #F3F4F6; padding: 6px 10px; font-weight: 600; font-size: 11px; border: 1px solid #E5E7EB; margin-bottom: 8px; }
-    .row { display: flex; flex-wrap: wrap; margin-bottom: 6px; }
-    .col-2 { width: 50%; padding-right: 10px; }
-    .col-3 { width: 33.33%; padding-right: 10px; }
-    .col-4 { width: 25%; padding-right: 10px; }
-    .field { margin-bottom: 8px; }
-    .field-label { font-size: 9px; color: #6B7280; text-transform: uppercase; margin-bottom: 2px; }
-    .field-value { font-size: 11px; font-weight: 500; color: #1F2937; }
-    .check-item { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .table th, .table td { border: 1px solid #E5E7EB; padding: 6px 8px; text-align: left; font-size: 10px; }
-    .table th { background: #F9FAFB; font-weight: 600; }
-    .status-approved { background: #10B981; color: white; padding: 8px 16px; display: inline-block; font-weight: 700; font-size: 14px; }
-    .status-reproved { background: #EF4444; color: white; padding: 8px 16px; display: inline-block; font-weight: 700; font-size: 14px; }
-    .conclusion-text { background: #F9FAFB; padding: 12px; border: 1px solid #E5E7EB; margin-top: 10px; white-space: pre-wrap; }
-    .signature-section { margin-top: 15px; }
-    .signature-row { display: flex; gap: 20px; margin-bottom: 20px; }
-    .signature-box { flex: 1; text-align: center; }
-    .signature-line { border-top: 1px solid #1F2937; margin-top: 40px; padding-top: 5px; }
-    .signature-label { font-size: 10px; color: #6B7280; }
-    .photo-section { margin-bottom: 15px; page-break-inside: avoid; }
-    .photo-section h4 { font-size: 11px; font-weight: 600; margin-bottom: 8px; color: #374151; }
-    .photo-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-    .photo-item { width: calc(50% - 5px); }
-    .photo-item img { width: 100%; height: 150px; object-fit: cover; border: 1px solid #E5E7EB; }
-    .photo-caption { font-size: 9px; color: #6B7280; text-align: center; margin-top: 4px; }
-    .footer { margin-top: 30px; text-align: center; font-size: 9px; color: #9CA3AF; padding-top: 15px; border-top: 1px solid #E5E7EB; }
-    .declaration { background: #FEF3C7; border: 1px solid #F59E0B; padding: 10px; margin-bottom: 15px; font-size: 10px; }
-    .logo-section { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px; }
-    .logo-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #DC2626, #991B1B); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; }
-    .info-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-    .info-item { flex: 1; min-width: 150px; }
-    .info-label { font-size: 9px; color: #6B7280; text-transform: uppercase; }
-    .info-value { font-size: 11px; font-weight: 500; color: #1F2937; }
-    @media print { .section { page-break-inside: avoid; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="logo-section">
-      <div class="logo-icon">F</div>
-      <div>
-        <h1 style="margin: 0; font-size: 22px;">${t.title}</h1>
-        <h2 style="margin: 0; font-size: 14px;">${t.subtitle}</h2>
-      </div>
-    </div>
-  </div>
+  const headerHtml = renderHeader({
+    companyName: t.title,
+    reportTitle: t.subtitle,
+    showBadge: false,
+  });
 
-  <div class="section">
-    <div class="section-header">${t.testIdentification}</div>
+  const bodyHtml = `
+    <div class="section">
+      <h2 class="section-title">${t.testIdentification}</h2>
     <div class="section-content">
       <div class="row">
         <div class="col-3">
@@ -477,10 +412,10 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.partiesInvolved}</div>
+    <h2 class="section-title">${t.partiesInvolved}</h2>
     <div class="section-content">
       <div class="subsection">
-        <div class="subsection-header">${t.owner}</div>
+        <div class="subsection-title">${t.owner}</div>
         <div class="row">
           <div class="col-2">
             <div class="field">
@@ -518,7 +453,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.executorCompany}</div>
+        <div class="subsection-title">${t.executorCompany}</div>
         <div class="row">
           <div class="col-2">
             <div class="field">
@@ -540,7 +475,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.technicalResponsible}</div>
+        <div class="subsection-title">${t.technicalResponsible}</div>
         <div class="row">
           <div class="col-3">
             <div class="field">
@@ -564,7 +499,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.inspector}</div>
+        <div class="subsection-title">${t.inspector}</div>
         <div class="row">
           <div class="col-2">
             <div class="field">
@@ -584,10 +519,10 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.preparation}</div>
+    <h2 class="section-title">${t.preparation}</h2>
     <div class="section-content">
       <div class="subsection">
-        <div class="subsection-header">${t.preChecks}</div>
+        <div class="subsection-title">${t.preChecks}</div>
         <div class="check-item">${checkIcon(h.preChecks.installedAsApprovedProject)} ${t.installedAsApprovedProject}</div>
         <div class="check-item">${checkIcon(h.preChecks.pipesAnchoredAndSupported)} ${t.pipesAnchoredAndSupported}</div>
         <div class="check-item">${checkIcon(h.preChecks.valvesCorrectlyInstalled)} ${t.valvesCorrectlyInstalled}</div>
@@ -597,7 +532,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.instrumentation}</div>
+        <div class="subsection-title">${t.instrumentation}</div>
         <div class="row">
           <div class="col-4">
             <div class="field">
@@ -633,10 +568,10 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.execution}</div>
+    <h2 class="section-title">${t.execution}</h2>
     <div class="section-content">
       <div class="subsection">
-        <div class="subsection-header">${t.filling}</div>
+        <div class="subsection-title">${t.filling}</div>
         <div class="row">
           <div class="col-2">
             <div class="field">
@@ -655,7 +590,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.pressure}</div>
+        <div class="subsection-title">${t.pressure}</div>
         <div class="row">
           <div class="col-2">
             <div class="field">
@@ -682,7 +617,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.monitoring}</div>
+        <div class="subsection-title">${t.monitoring}</div>
         <div class="row">
           <div class="col-2">
             <div class="field">
@@ -722,17 +657,17 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.results}</div>
+    <h2 class="section-title">${t.results}</h2>
     <div class="section-content">
       <div class="subsection">
-        <div class="subsection-header">${t.tightness}</div>
+        <div class="subsection-title">${t.tightness}</div>
         <div class="check-item">${checkIcon(h.results.noLeaks)} ${t.noLeaks}</div>
         <div class="check-item">${checkIcon(h.results.noPressureDrop)} ${t.noPressureDrop}</div>
         <div class="check-item">${checkIcon(h.results.noVisibleDeformation)} ${t.noVisibleDeformation}</div>
       </div>
 
       <div class="subsection">
-        <div class="subsection-header">${t.occurrences}</div>
+        <div class="subsection-title">${t.occurrences}</div>
         <div class="check-item">${checkIcon(h.results.leaksFound)} ${t.leaksFound}</div>
         ${h.results.leaksFound && h.results.leaksDescription ? `<div class="field"><div class="field-label">${t.leaksDescription}</div><div class="field-value">${sanitizeHtml(h.results.leaksDescription)}</div></div>` : ""}
         <div class="check-item">${checkIcon(h.results.pressureDropAboveAllowed)} ${t.pressureDropAboveAllowed}</div>
@@ -743,7 +678,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.photoEvidence}</div>
+    <h2 class="section-title">${t.photoEvidence}</h2>
     <div class="section-content">
       ${initialGaugePhotosHtml}
       ${initialGeneralPhotosHtml}
@@ -754,9 +689,9 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.conclusion}</div>
+    <h2 class="section-title">${t.conclusion}</h2>
     <div class="section-content">
-      <div style="text-align: center; margin-bottom: 15px;">
+      <div class="status-container">
         <span class="${statusClass}">${statusText}</span>
       </div>
       <div class="conclusion-text">${sanitizeHtml(h.conclusion.technicalConclusionText)}</div>
@@ -764,7 +699,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   <div class="section">
-    <div class="section-header">${t.declarationSignatures}</div>
+    <h2 class="section-title">${t.declarationSignatures}</h2>
     <div class="section-content">
       <div class="declaration">${t.declarationText}</div>
       
@@ -774,16 +709,16 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
             ${technicalResponsibleSignatureHtml}
             <div class="signature-line">
               <div class="signature-label">${t.technicalResponsibleSignature}</div>
-              <div style="font-size: 10px; margin-top: 4px;">${sanitizeHtml(h.executorCompany.technicalResponsible.name)}</div>
-              ${h.signatures.dates.technicalResponsibleDate ? `<div style="font-size: 9px; color: #6B7280;">${t.date}: ${sanitizeHtml(h.signatures.dates.technicalResponsibleDate)}</div>` : ""}
+              <div class="signature-name">${sanitizeHtml(h.executorCompany.technicalResponsible.name)}</div>
+              ${h.signatures.dates.technicalResponsibleDate ? `<div class="signature-date">${t.date}: ${sanitizeHtml(h.signatures.dates.technicalResponsibleDate)}</div>` : ""}
             </div>
           </div>
           <div class="signature-box">
             ${inspectorSignatureHtml}
             <div class="signature-line">
               <div class="signature-label">${t.inspectorSignature}</div>
-              <div style="font-size: 10px; margin-top: 4px;">${sanitizeHtml(h.inspector.name)}</div>
-              ${h.signatures.dates.inspectorDate ? `<div style="font-size: 9px; color: #6B7280;">${t.date}: ${sanitizeHtml(h.signatures.dates.inspectorDate)}</div>` : ""}
+              <div class="signature-name">${sanitizeHtml(h.inspector.name)}</div>
+              ${h.signatures.dates.inspectorDate ? `<div class="signature-date">${t.date}: ${sanitizeHtml(h.signatures.dates.inspectorDate)}</div>` : ""}
             </div>
           </div>
         </div>
@@ -792,8 +727,8 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
             ${ownerRepSignatureHtml}
             <div class="signature-line">
               <div class="signature-label">${t.ownerRepSignature}</div>
-              <div style="font-size: 10px; margin-top: 4px;">${sanitizeHtml(h.owner.localResponsible)}</div>
-              ${h.signatures.dates.ownerRepDate ? `<div style="font-size: 9px; color: #6B7280;">${t.date}: ${sanitizeHtml(h.signatures.dates.ownerRepDate)}</div>` : ""}
+              <div class="signature-name">${sanitizeHtml(h.owner.localResponsible)}</div>
+              ${h.signatures.dates.ownerRepDate ? `<div class="signature-date">${t.date}: ${sanitizeHtml(h.signatures.dates.ownerRepDate)}</div>` : ""}
             </div>
           </div>
         </div>
@@ -802,9 +737,8 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   </div>
 
   ${geoLocation && typeof geoLocation.latitude === 'number' && typeof geoLocation.longitude === 'number' ? `
-  <div class="section">
-    <div class="section-header">${t.geolocation}</div>
-    <div class="section-content">
+    <div class="section">
+      <h2 class="section-title">${t.geolocation}</h2>
       <div class="info-grid">
         <div class="info-item">
           <div class="info-label">${t.latitude}</div>
@@ -822,15 +756,21 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
         ` : ""}
       </div>
     </div>
-  </div>
   ` : ""}
-
-  <div class="footer">
-    <p>${t.generatedBy} - ${new Date().toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US")}</p>
-  </div>
-</body>
-</html>
   `;
+
+  const footerHtml = renderFooter({
+    generatedText: t.generatedBy,
+    dateText: new Date().toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US"),
+    tagline: "",
+  });
+
+  return wrapDocument({
+    title: `${t.title} - ${h.owner.corporateName}`,
+    headerHtml,
+    bodyHtml,
+    footerHtml,
+  });
 };
 
 export async function generateHydrostaticTestPdf(options: HydrostaticPdfOptions): Promise<string> {

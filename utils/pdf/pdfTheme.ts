@@ -234,6 +234,171 @@ export const getBaseCss = (): string => {
       font-weight: 500;
       color: ${PDF_THEME.text};
     }
+    .subsection {
+      margin-bottom: 15px;
+    }
+    .subsection-title {
+      background: ${PDF_THEME.bgSoft};
+      padding: 8px 12px;
+      font-weight: 600;
+      font-size: 12px;
+      border: 1px solid ${PDF_THEME.border};
+      border-left: 3px solid ${PDF_THEME.brandAccent};
+      margin-bottom: 10px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .col-2 { width: 50%; padding-right: 12px; }
+    .col-3 { width: 33.33%; padding-right: 12px; }
+    .col-4 { width: 25%; padding-right: 12px; }
+    .field { margin-bottom: 10px; }
+    .field-label {
+      font-size: 10px;
+      color: ${PDF_THEME.muted};
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+    .field-value {
+      font-size: 12px;
+      font-weight: 500;
+      color: ${PDF_THEME.text};
+    }
+    .check-item {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .status-approved {
+      background: ${PDF_THEME.success};
+      color: ${PDF_THEME.white};
+      padding: 10px 20px;
+      display: inline-block;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    .status-reproved {
+      background: ${PDF_THEME.error};
+      color: ${PDF_THEME.white};
+      padding: 10px 20px;
+      display: inline-block;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    .conclusion-text {
+      background: ${PDF_THEME.bgSoft};
+      padding: 15px;
+      border: 1px solid ${PDF_THEME.border};
+      border-radius: 8px;
+      margin-top: 12px;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .declaration {
+      background: ${PDF_THEME.warningBg};
+      border: 1px solid ${PDF_THEME.warning};
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 11px;
+      border-radius: 8px;
+    }
+    .photo-section {
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+    }
+    .photo-section h4 {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: ${PDF_THEME.brandPrimary};
+    }
+    .photo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .photo-item {
+      width: calc(50% - 6px);
+    }
+    .photo-item img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border: 1px solid ${PDF_THEME.border};
+      border-radius: 4px;
+    }
+    .photo-caption {
+      font-size: 10px;
+      color: ${PDF_THEME.muted};
+      text-align: center;
+      margin-top: 6px;
+    }
+    .signature-section {
+      margin-top: 20px;
+    }
+    .signature-row {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 25px;
+    }
+    .signature-box-container {
+      flex: 1;
+      text-align: center;
+    }
+    .signature-line {
+      border-top: 1px solid ${PDF_THEME.text};
+      margin-top: 50px;
+      padding-top: 8px;
+    }
+    .signature-label {
+      font-size: 11px;
+      color: ${PDF_THEME.muted};
+      font-weight: 600;
+    }
+    .signature-name {
+      font-size: 10px;
+      margin-top: 4px;
+    }
+    .signature-date {
+      font-size: 9px;
+      color: ${PDF_THEME.muted};
+    }
+    .signature-img {
+      max-width: 200px;
+      max-height: 80px;
+      margin-bottom: 5px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .status-container {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .check-icon-yes {
+      color: ${PDF_THEME.success};
+      font-weight: bold;
+    }
+    .check-icon-no {
+      color: ${PDF_THEME.muted};
+    }
+    .section-content {
+      border: 1px solid ${PDF_THEME.border};
+      padding: 15px;
+      border-radius: 0 0 8px 8px;
+      margin-top: -1px;
+    }
+    @media print {
+      .section { page-break-inside: avoid; }
+    }
   `;
 };
 
