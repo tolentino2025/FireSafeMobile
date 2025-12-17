@@ -1,4 +1,4 @@
-import { writeAsStringAsync, readAsStringAsync, cacheDirectory } from "expo-file-system";
+import { Paths, File } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -51,10 +51,10 @@ export async function exportAllData(): Promise<{ success: boolean; filePath?: st
     const jsonString = JSON.stringify(backupData, null, 2);
     const dateStr = new Date().toISOString().split("T")[0].replace(/-/g, "");
     const fileName = `FireSafeITM_Backup_${dateStr}.json`;
-    const docDir = cacheDirectory || "";
-    const filePath = `${docDir}${fileName}`;
-
-    await writeAsStringAsync(filePath, jsonString);
+    
+    const file = new File(Paths.cache, fileName);
+    await file.write(jsonString);
+    const filePath = file.uri;
 
     if (Platform.OS !== "web") {
       const isAvailable = await Sharing.isAvailableAsync();
@@ -96,7 +96,8 @@ export async function importAllData(): Promise<{
     }
 
     const fileUri = result.assets[0].uri;
-    const fileContent = await readAsStringAsync(fileUri);
+    const importedFile = new File(fileUri);
+    const fileContent = await importedFile.text();
 
     const backupData: BackupData = JSON.parse(fileContent);
 
