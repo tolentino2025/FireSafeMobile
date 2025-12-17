@@ -143,19 +143,34 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         const location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
-        setGeoLocation({
+        const geoData = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
           accuracy: location.coords.accuracy ?? undefined,
           timestamp: location.timestamp,
-        });
+        };
+        setGeoLocation(geoData);
+        
+        if (isFM85A) {
+          setFm85aCertificate(prev => ({
+            ...prev,
+            geoLocation: geoData,
+          }));
+        }
+        
+        if (isHydrostatic) {
+          setHydrostaticTest(prev => ({
+            ...prev,
+            geoLocation: geoData,
+          }));
+        }
       } catch (error) {
         console.log("Error getting location:", error);
         setGeoLocation(null);
       }
     };
     captureLocation();
-  }, []);
+  }, [isFM85A, isHydrostatic]);
 
   const handleCompanySelect = (companyId: string) => {
     setSelectedCompanyId(companyId);
