@@ -315,11 +315,15 @@ export function HydrostaticTestSection({
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
+      base64: true,
     });
     if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const base64Data = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined;
       const newPhoto: InspectionPhoto = {
         id: `${category}_${Date.now()}`,
-        uri: result.assets[0].uri,
+        uri: asset.uri,
+        base64: base64Data,
         caption: category,
         timestamp: new Date().toISOString(),
       };
@@ -361,11 +365,15 @@ export function HydrostaticTestSection({
     
     const result = await ImagePicker.launchCameraAsync({
       quality: 0.8,
+      base64: true,
     });
     if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const base64Data = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined;
       const newPhoto: InspectionPhoto = {
         id: `${category}_${Date.now()}`,
-        uri: result.assets[0].uri,
+        uri: asset.uri,
+        base64: base64Data,
         caption: category,
         timestamp: new Date().toISOString(),
       };
