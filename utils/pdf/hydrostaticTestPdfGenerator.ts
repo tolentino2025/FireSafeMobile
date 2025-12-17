@@ -782,7 +782,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     </div>
   </div>
 
-  ${geoLocation ? `
+  ${geoLocation && typeof geoLocation.latitude === 'number' && typeof geoLocation.longitude === 'number' ? `
   <div class="section">
     <div class="section-header">${t.geolocation}</div>
     <div class="section-content">
@@ -795,7 +795,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
           <div class="info-label">${t.longitude}</div>
           <div class="info-value">${geoLocation.longitude.toFixed(6)}</div>
         </div>
-        ${geoLocation.accuracy ? `
+        ${typeof geoLocation.accuracy === 'number' ? `
         <div class="info-item">
           <div class="info-label">${t.accuracy}</div>
           <div class="info-value">${geoLocation.accuracy.toFixed(1)} ${t.meters}</div>
