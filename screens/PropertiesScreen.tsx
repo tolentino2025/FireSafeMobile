@@ -11,7 +11,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useInspections, Property, Company, AppUser, FirePump, Contractor, JobSite } from "@/contexts/InspectionContext";
+import { useInspections, Property, Company, AppUser, TechnicalResponsible, FirePump, Contractor, JobSite } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 
@@ -19,7 +19,7 @@ type PropertiesScreenProps = {
   navigation: NativeStackNavigationProp<PropertiesStackParamList, "PropertiesList">;
 };
 
-type TabType = "companies" | "contractors" | "properties" | "inspectors" | "pumps" | "jobSites";
+type TabType = "companies" | "contractors" | "properties" | "inspectors" | "techResponsible" | "pumps" | "jobSites";
 
 function UserCard({
   user,
@@ -177,7 +177,7 @@ function JobSiteCard({
 export default function PropertiesScreen({ navigation }: PropertiesScreenProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
-  const { properties, companies, appUsers, firePumps, contractors, jobSites, getContractorById } = useInspections();
+  const { properties, companies, appUsers, technicalResponsibles, firePumps, contractors, jobSites, getContractorById } = useInspections();
   const { width: screenWidth } = useWindowDimensions();
   
   const numColumns = screenWidth < 380 ? 2 : screenWidth < 640 ? 3 : 4;
@@ -231,6 +231,18 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
     );
   }, [appUsers, searchQuery]);
 
+  const filteredTechResponsibles = useMemo(() => {
+    if (!searchQuery.trim()) return technicalResponsibles;
+    const query = searchQuery.toLowerCase();
+    return technicalResponsibles.filter(
+      (tr) =>
+        tr.name.toLowerCase().includes(query) ||
+        (tr.creaCAU && tr.creaCAU.toLowerCase().includes(query)) ||
+        (tr.email && tr.email.toLowerCase().includes(query)) ||
+        (tr.role && tr.role.toLowerCase().includes(query))
+    );
+  }, [technicalResponsibles, searchQuery]);
+
   const filteredPumps = useMemo(() => {
     if (!searchQuery.trim()) return firePumps;
     const query = searchQuery.toLowerCase();
@@ -279,6 +291,8 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
       navigation.navigate("CompanyForm", {});
     } else if (activeTab === "inspectors") {
       navigation.navigate("UserForm", {});
+    } else if (activeTab === "techResponsible") {
+      navigation.navigate("TechnicalResponsibleForm", {});
     } else if (activeTab === "pumps") {
       navigation.navigate("FirePumpList");
     } else if (activeTab === "contractors") {
@@ -300,6 +314,10 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
 
   const handleInspectorPress = (user: AppUser) => {
     navigation.navigate("UserForm", { userId: user.id });
+  };
+
+  const handleTechResponsiblePress = (tr: TechnicalResponsible) => {
+    navigation.navigate("TechnicalResponsibleForm", { techResponsibleId: tr.id });
   };
 
   const handlePumpPress = (pump: FirePump) => {
@@ -331,6 +349,36 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   const renderInspectorItem = ({ item }: { item: AppUser }) => (
     <>
       <UserCard user={item} onPress={() => handleInspectorPress(item)} />
+      <Spacer height={Spacing.md} />
+    </>
+  );
+
+  const renderTechResponsibleItem = ({ item }: { item: TechnicalResponsible }) => (
+    <>
+      <Pressable
+        onPress={() => handleTechResponsiblePress(item)}
+        style={[styles.userCard, { 
+          backgroundColor: fullTheme.colors.cardBackground,
+          borderColor: fullTheme.colors.border,
+        }]}
+      >
+        <View style={[styles.userIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
+          <Feather name="award" size={24} color={fullTheme.colors.primary} />
+        </View>
+        <View style={styles.userCardContent}>
+          <ThemedText type="h4" numberOfLines={1}>{item.name}</ThemedText>
+          <ThemedText type="small" secondary numberOfLines={1}>
+            {item.creaCAU || "-"}
+          </ThemedText>
+          <ThemedText type="small" secondary numberOfLines={1}>
+            {item.role || "-"}
+          </ThemedText>
+          <ThemedText type="small" secondary numberOfLines={1}>
+            {item.phone || item.email || "-"}
+          </ThemedText>
+        </View>
+        <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
+      </Pressable>
       <Spacer height={Spacing.md} />
     </>
   );
@@ -387,6 +435,7 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         {[
           { id: "companies" as TabType, icon: "briefcase" as const, label: t.properties.companies },
           { id: "inspectors" as TabType, icon: "users" as const, label: t.users?.title || "Inspetores" },
+          { id: "techResponsible" as TabType, icon: "award" as const, label: t.technicalResponsible?.title || "Resp. Técnico" },
           { id: "pumps" as TabType, icon: "activity" as const, label: t.firePumps?.title || "Bombas" },
           { id: "contractors" as TabType, icon: "tool" as const, label: t.contractors?.title || "Prestadoras" },
           { id: "jobSites" as TabType, icon: "map-pin" as const, label: t.jobSites?.title || "Locais" },
@@ -431,12 +480,15 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   );
 
   const renderEmpty = () => {
-    let icon: "briefcase" | "users" | "home" | "activity" | "tool" | "map-pin" = "briefcase";
+    let icon: "briefcase" | "users" | "home" | "activity" | "tool" | "map-pin" | "award" = "briefcase";
     let message = t.companies?.noResults || t.properties.noResults;
     
     if (activeTab === "inspectors") {
       icon = "users";
       message = t.users?.noResults || "Nenhum inspetor cadastrado";
+    } else if (activeTab === "techResponsible") {
+      icon = "award";
+      message = t.technicalResponsible?.noResults || "Nenhum responsável técnico cadastrado";
     } else if (activeTab === "properties") {
       icon = "home";
       message = t.properties.noResults;
@@ -477,6 +529,15 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
         <ScreenFlatList
           data={filteredInspectors}
           renderItem={renderInspectorItem}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmpty}
+          contentContainerStyle={styles.listContent}
+        />
+      ) : activeTab === "techResponsible" ? (
+        <ScreenFlatList
+          data={filteredTechResponsibles}
+          renderItem={renderTechResponsibleItem}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderEmpty}

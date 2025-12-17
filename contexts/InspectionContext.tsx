@@ -8,6 +8,7 @@ import {
   Property, 
   Company, 
   AppUser, 
+  TechnicalResponsible,
   FirePump,
   FirePumpControlPanel,
   PumpType,
@@ -59,6 +60,7 @@ export type {
   Property,
   Company,
   AppUser,
+  TechnicalResponsible,
   Inspection,
   SystemInfo,
   GeoLocation,
@@ -89,6 +91,7 @@ interface InspectionContextType {
   properties: Property[];
   companies: Company[];
   appUsers: AppUser[];
+  technicalResponsibles: TechnicalResponsible[];
   firePumps: FirePump[];
   firePumpPanels: FirePumpControlPanel[];
   schedules: InspectionSchedule[];
@@ -111,6 +114,10 @@ interface InspectionContextType {
   addAppUser: (user: AppUser) => Promise<void>;
   updateAppUser: (id: string, updates: Partial<AppUser>) => Promise<void>;
   deleteAppUser: (id: string) => Promise<void>;
+  addTechnicalResponsible: (techResp: TechnicalResponsible) => Promise<void>;
+  updateTechnicalResponsible: (id: string, updates: Partial<TechnicalResponsible>) => Promise<void>;
+  deleteTechnicalResponsible: (id: string) => Promise<void>;
+  getTechnicalResponsibleById: (id: string) => TechnicalResponsible | undefined;
   addFirePump: (pump: FirePump) => Promise<void>;
   updateFirePump: (id: string, updates: Partial<FirePump>) => Promise<void>;
   deleteFirePump: (id: string) => Promise<void>;
@@ -151,6 +158,7 @@ const INSPECTIONS_KEY = "@firesafe_inspections";
 const PROPERTIES_KEY = "@firesafe_properties";
 const COMPANIES_KEY = "@firesafe_companies";
 const APP_USERS_KEY = "@firesafe_app_users";
+const TECHNICAL_RESPONSIBLES_KEY = "@firesafe_technical_responsibles";
 const FIRE_PUMPS_KEY = "@firesafe_fire_pumps";
 const FIRE_PUMP_PANELS_KEY = "@firesafe_fire_pump_panels";
 const SCHEDULES_KEY = "@firesafe_schedules";
@@ -467,6 +475,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [appUsers, setAppUsers] = useState<AppUser[]>([]);
+  const [technicalResponsibles, setTechnicalResponsibles] = useState<TechnicalResponsible[]>([]);
   const [firePumps, setFirePumps] = useState<FirePump[]>([]);
   const [firePumpPanels, setFirePumpPanels] = useState<FirePumpControlPanel[]>([]);
   const [schedules, setSchedules] = useState<InspectionSchedule[]>([]);
@@ -488,11 +497,12 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
       const version = storedVersion ? parseInt(storedVersion, 10) : 1;
       
-      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedFirePumps, storedFirePumpPanels, storedSchedules, storedContractors, storedJobSites, storedDieselTests, storedElectricTests] = await Promise.all([
+      const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedTechnicalResponsibles, storedFirePumps, storedFirePumpPanels, storedSchedules, storedContractors, storedJobSites, storedDieselTests, storedElectricTests] = await Promise.all([
         AsyncStorage.getItem(INSPECTIONS_KEY),
         AsyncStorage.getItem(PROPERTIES_KEY),
         AsyncStorage.getItem(COMPANIES_KEY),
         AsyncStorage.getItem(APP_USERS_KEY),
+        AsyncStorage.getItem(TECHNICAL_RESPONSIBLES_KEY),
         AsyncStorage.getItem(FIRE_PUMPS_KEY),
         AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY),
         AsyncStorage.getItem(SCHEDULES_KEY),
@@ -548,6 +558,9 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       } else if (shouldLoadSampleData) {
         await AsyncStorage.setItem(APP_USERS_KEY, JSON.stringify(sampleAppUsers));
         setAppUsers(sampleAppUsers);
+      }
+      if (storedTechnicalResponsibles) {
+        setTechnicalResponsibles(JSON.parse(storedTechnicalResponsibles));
       }
       if (storedFirePumps) {
         let parsedFirePumps: FirePump[] = JSON.parse(storedFirePumps);
@@ -715,6 +728,15 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       setAppUsers(newAppUsers);
     } catch (error) {
       console.error("Error saving app users:", error);
+    }
+  };
+
+  const saveTechnicalResponsibles = async (newTechResps: TechnicalResponsible[]) => {
+    try {
+      await AsyncStorage.setItem(TECHNICAL_RESPONSIBLES_KEY, JSON.stringify(newTechResps));
+      setTechnicalResponsibles(newTechResps);
+    } catch (error) {
+      console.error("Error saving technical responsibles:", error);
       throw error;
     }
   };
@@ -738,6 +760,27 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const getAppUserById = (id: string) => {
     return appUsers.find((user) => user.id === id);
+  };
+
+  const addTechnicalResponsible = async (techResp: TechnicalResponsible) => {
+    const newTechResps = [...technicalResponsibles, techResp];
+    await saveTechnicalResponsibles(newTechResps);
+  };
+
+  const updateTechnicalResponsible = async (id: string, updates: Partial<TechnicalResponsible>) => {
+    const newTechResps = technicalResponsibles.map((tr) =>
+      tr.id === id ? { ...tr, ...updates, updatedAt: new Date().toISOString() } : tr
+    );
+    await saveTechnicalResponsibles(newTechResps);
+  };
+
+  const deleteTechnicalResponsible = async (id: string) => {
+    const newTechResps = technicalResponsibles.filter((tr) => tr.id !== id);
+    await saveTechnicalResponsibles(newTechResps);
+  };
+
+  const getTechnicalResponsibleById = (id: string) => {
+    return technicalResponsibles.find((tr) => tr.id === id);
   };
 
   const saveFirePumps = async (newFirePumps: FirePump[]) => {
@@ -1037,6 +1080,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         properties,
         companies,
         appUsers,
+        technicalResponsibles,
         firePumps,
         firePumpPanels,
         schedules,
@@ -1059,6 +1103,10 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         addAppUser,
         updateAppUser,
         deleteAppUser,
+        addTechnicalResponsible,
+        updateTechnicalResponsible,
+        deleteTechnicalResponsible,
+        getTechnicalResponsibleById,
         addFirePump,
         updateFirePump,
         deleteFirePump,

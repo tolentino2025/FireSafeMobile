@@ -286,6 +286,17 @@ export interface AppUser {
   updatedAt: string;
 }
 
+export interface TechnicalResponsible {
+  id: string;
+  name: string;
+  creaCAU: string;
+  email: string;
+  phone: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Property {
   id: string;
   name: string;

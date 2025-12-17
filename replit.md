@@ -20,7 +20,8 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
    - FM Global Certificates (FM85A)
 3. **Company Management**: Register and manage companies with full contact information (CNPJ, address, phone, email)
 4. **Inspector Management**: Register inspectors with role and contact details
-5. **Property Management**: Track properties linked to companies
+5. **Technical Responsible Management**: Register technical responsibles with CREA/CAU, email, phone, and role
+6. **Property Management**: Track properties linked to companies
 6. **Dropdown Selection**: Select companies and inspectors via dropdowns during inspection creation with auto-fill
 7. **Digital Signatures**: Capture signatures on inspection forms
 8. **Checklist System**: Yes/No/N/A responses with PSI value inputs, frequency-based filtering (NFPA 25 compliant)
