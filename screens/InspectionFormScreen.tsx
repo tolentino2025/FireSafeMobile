@@ -1021,13 +1021,6 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
 
       <Spacer height={Spacing["2xl"]} />
 
-      <FM85ASection
-        certificate={fm85aCertificate}
-        onCertificateChange={setFm85aCertificate}
-      />
-
-      <Spacer height={Spacing["2xl"]} />
-
       <ThemedText type="h3">{t.form.photos}</ThemedText>
       <Spacer height={Spacing.sm} />
       <PhotoCapture photos={photos} onPhotosChange={setPhotos} />
