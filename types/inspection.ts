@@ -128,6 +128,14 @@ export interface NumericField {
   unit?: string;
 }
 
+export interface ChecklistItemPhoto {
+  id: string;
+  uri: string;
+  base64?: string;
+  caption: string;
+  timestamp: string;
+}
+
 export interface ChecklistItem {
   id: string;
   labelKey: string;
@@ -137,6 +145,7 @@ export interface ChecklistItem {
   notes?: string;
   numericFields?: NumericField[];
   textFields?: TextFieldData[];
+  photos?: ChecklistItemPhoto[];
   sectionId?: string;
 }
 
@@ -405,6 +414,7 @@ export function migrateInspection(inspection: any): Inspection {
       labelKey: item.labelKey || "",
       numericFields: item.numericFields || [],
       textFields: item.textFields || [],
+      photos: item.photos || [],
     })),
   };
   return migrated;
