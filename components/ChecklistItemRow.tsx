@@ -3,9 +3,10 @@ import { View, StyleSheet, Pressable, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
+import { ChecklistItemPhoto } from "@/components/ChecklistItemPhoto";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChecklistItem, NumericField } from "@/types/inspection";
+import { ChecklistItem, NumericField, ChecklistItemPhoto as PhotoType } from "@/types/inspection";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface ChecklistItemRowProps {
@@ -14,7 +15,9 @@ interface ChecklistItemRowProps {
   onPsiChange?: (psi: string) => void;
   onNumericFieldChange?: (fieldId: string, value: string) => void;
   onNotesChange?: (notes: string) => void;
+  onPhotosChange?: (photos: PhotoType[]) => void;
   showNotes?: boolean;
+  showPhotos?: boolean;
 }
 
 function ChecklistItemRowComponent({ 
@@ -23,7 +26,9 @@ function ChecklistItemRowComponent({
   onPsiChange,
   onNumericFieldChange,
   onNotesChange,
+  onPhotosChange,
   showNotes = false,
+  showPhotos = true,
 }: ChecklistItemRowProps) {
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
@@ -79,6 +84,7 @@ function ChecklistItemRowComponent({
     item.label.toLowerCase().includes("pressure");
   
   const hasNumericFields = item.numericFields && item.numericFields.length > 0;
+  const hasPhotos = item.photos && item.photos.length > 0;
 
   const getFieldLabel = (field: NumericField): string => {
     const key = field.labelKey as keyof typeof t.checklistItems;
@@ -91,18 +97,31 @@ function ChecklistItemRowComponent({
         <ThemedText type="body" style={styles.label}>
           {item.label}
         </ThemedText>
-        {showNotes && (
-          <Pressable 
-            onPress={() => setShowNotesInput(!showNotesInput)}
-            style={styles.notesToggle}
-          >
-            <Feather 
-              name="message-square" 
-              size={16} 
-              color={item.notes ? fullTheme.colors.primary : fullTheme.colors.textSecondary} 
-            />
-          </Pressable>
-        )}
+        <View style={styles.toggleButtons}>
+          {showPhotos && (
+            <View style={styles.photoBadge}>
+              {hasPhotos && (
+                <View style={[styles.badgeCount, { backgroundColor: fullTheme.colors.primary }]}>
+                  <ThemedText type="small" style={styles.badgeText}>
+                    {item.photos!.length}
+                  </ThemedText>
+                </View>
+              )}
+            </View>
+          )}
+          {showNotes && (
+            <Pressable 
+              onPress={() => setShowNotesInput(!showNotesInput)}
+              style={styles.notesToggle}
+            >
+              <Feather 
+                name="message-square" 
+                size={16} 
+                color={item.notes ? fullTheme.colors.primary : fullTheme.colors.textSecondary} 
+              />
+            </Pressable>
+          )}
+        </View>
       </View>
       
       <View style={styles.buttonsRow}>
@@ -233,8 +252,17 @@ function ChecklistItemRowComponent({
             multiline
             numberOfLines={2}
             textAlignVertical="top"
+            autoCapitalize="characters"
           />
         </View>
+      )}
+
+      {showPhotos && onPhotosChange && (
+        <ChecklistItemPhoto
+          photos={item.photos || []}
+          onPhotosChange={onPhotosChange}
+          maxPhotos={3}
+        />
       )}
     </View>
   );
@@ -255,8 +283,27 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: Spacing.md,
   },
+  toggleButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
   notesToggle: {
     padding: Spacing.xs,
+  },
+  photoBadge: {
+    minWidth: 20,
+    alignItems: "center",
+  },
+  badgeCount: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  badgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "600",
   },
   buttonsRow: {
     flexDirection: "row",
@@ -336,6 +383,8 @@ export const ChecklistItemRow = memo(ChecklistItemRowComponent, (prevProps, next
     prevProps.item.psiValue === nextProps.item.psiValue &&
     prevProps.item.notes === nextProps.item.notes &&
     prevProps.showNotes === nextProps.showNotes &&
-    JSON.stringify(prevProps.item.numericFields) === JSON.stringify(nextProps.item.numericFields)
+    prevProps.showPhotos === nextProps.showPhotos &&
+    JSON.stringify(prevProps.item.numericFields) === JSON.stringify(nextProps.item.numericFields) &&
+    JSON.stringify(prevProps.item.photos) === JSON.stringify(nextProps.item.photos)
   );
 });
