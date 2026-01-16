@@ -316,6 +316,22 @@ const generateInspectionPdfHtmlWithPhotos = (
     return `<div style="margin-top: 6px; font-size: 11px; color: #4B5563; background: #F3F4F6; padding: 6px 8px; border-radius: 4px; font-style: italic;">${sanitizeHtml(notes)}</div>`;
   };
 
+  const getItemPhotosHtml = (photos: any[] | undefined): string => {
+    if (!photos || photos.length === 0) return "";
+    const validPhotos = photos.filter((p) => p.base64);
+    if (validPhotos.length === 0) return "";
+    return `
+      <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+        ${validPhotos.map((photo) => `
+          <div style="width: 100px; border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden; background: #F9FAFB;">
+            <img src="${photo.base64}" style="width: 100%; height: 75px; object-fit: cover;" />
+            ${photo.caption ? `<p style="margin: 0; padding: 4px 6px; font-size: 9px; color: #4B5563; word-break: break-word;">${sanitizeHtml(photo.caption)}</p>` : ""}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  };
+
   const hasAnyPsi = inspection.checklist.some(
     (item: any) =>
       item.psiValue ||
@@ -335,12 +351,13 @@ const generateInspectionPdfHtmlWithPhotos = (
 
   const checklistRows = inspection.checklist
     .map(
-      (item) => `
+      (item: any) => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #E5E7EB;">
           ${sanitizeHtml(item.label)}
           ${getNumericFieldsHtml(item, hasAnyPsi)}
           ${getNotesHtml(item.notes)}
+          ${getItemPhotosHtml(item.photos)}
         </td>
         <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getChecklistValueSymbol(item.value)}</td>
         ${hasAnyPsi ? `<td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getPsiCellValue(item)}</td>` : ""}
@@ -697,7 +714,26 @@ export const generatePdfUri = async (options: GeneratePdfOptions): Promise<strin
     ensureAllPhotosBase64(options.inspection.photos || []),
     getLogoDataUri(),
   ]);
-  const html = generateInspectionPdfHtmlWithPhotos(options, photosWithBase64, logoDataUri);
+
+  const checklistWithPhotos = await Promise.all(
+    (options.inspection.checklist || []).map(async (item) => {
+      if (!item.photos || item.photos.length === 0) return item;
+      const photosWithBase64Item = await ensureAllPhotosBase64(item.photos as any);
+      return { ...item, photos: photosWithBase64Item };
+    })
+  );
+
+  const inspectionWithProcessedPhotos = {
+    ...options.inspection,
+    checklist: checklistWithPhotos,
+  };
+
+  const optionsWithProcessedPhotos = {
+    ...options,
+    inspection: inspectionWithProcessedPhotos,
+  };
+
+  const html = generateInspectionPdfHtmlWithPhotos(optionsWithProcessedPhotos, photosWithBase64, logoDataUri);
   const { uri } = await Print.printToFileAsync({ html });
   return uri;
 };
