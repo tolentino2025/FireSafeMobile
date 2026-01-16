@@ -31,6 +31,7 @@ import { validateHydrostaticTest } from "@/utils/validators/hydrostaticTestValid
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel, GeoLocation } from "@/contexts/InspectionContext";
+import { ChecklistItemPhoto } from "@/types/inspection";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
@@ -309,6 +310,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const handleNotesChange = useCallback((itemId: string, notes: string) => {
     setChecklist((prev) =>
       prev.map((item) => (item.id === itemId ? { ...item, notes } : item))
+    );
+  }, []);
+
+  const handleChecklistPhotosChange = useCallback((itemId: string, photos: ChecklistItemPhoto[]) => {
+    setChecklist((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, photos } : item))
     );
   }, []);
 
@@ -1015,7 +1022,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           onPsiChange={(psi) => handleChecklistPsiChange(item.id, psi)}
           onNumericFieldChange={(fieldId, value) => handleNumericFieldChange(item.id, fieldId, value)}
           onNotesChange={(notes) => handleNotesChange(item.id, notes)}
+          onPhotosChange={(photos) => handleChecklistPhotosChange(item.id, photos)}
           showNotes={true}
+          showPhotos={true}
         />
       ))}
 
