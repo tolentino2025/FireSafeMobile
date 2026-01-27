@@ -8,7 +8,7 @@ FireSafe ITM is a mobile application for fire protection systems Inspection, Tes
 - **Platform**: iOS, Android, Web (Expo)
 - **Language Support**: Portuguese (BR) and English
 - **Theme Support**: Light, Dark, and System automatic modes
-- **Architecture**: Offline-first with AsyncStorage - all data saved locally on device
+- **Architecture**: Offline-first with AsyncStorage + Cloud Sync to PostgreSQL/App Storage
 
 ## Key Features
 1. **Inspection Management**: Create, view, edit, and delete fire safety inspections
@@ -224,7 +224,35 @@ Scan the QR code with Expo Go (iOS/Android) or open web version at localhost:808
   - Implemented frequency-based checklist filtering per NFPA 25 standards
   - Added 100+ translation keys for comprehensive checklist coverage
 
+## Cloud Sync Architecture (January 2026)
+
+### Database Schema (PostgreSQL)
+- **companies**: id, name, cnpj, address, city, state, zip_code, contact_name, contact_phone, contact_email
+- **inspectors**: id, name, email, phone, role, crea_cau
+- **properties**: id, name, address, phone, contact, company_id
+- **inspections**: id, type, frequency, date, property_id, inspector_id, company_id, checklist (JSONB), signature, observations, geo_location, fire_pump_data, fm85a_data, status
+- **inspection_photos**: id, inspection_id, checklist_item_id, storage_key, caption, mime_type, size_bytes
+- **inspection_schedules**: id, company_id, property_id, fire_pump_id, inspection_type, frequency, start_date, next_due_date, is_active
+
+### API Endpoints (server/index.js)
+- `POST /api/sync` - Push local data to cloud
+- `GET /api/sync/pull` - Pull new data from cloud
+- `POST /api/photos/upload` - Upload compressed photo to App Storage
+- `GET /api/photos/:id` - Download photo from App Storage
+- `GET /api/companies|inspectors|properties|inspections|schedules` - List entities
+
+### App Utilities
+- **utils/imageCompressor.ts**: Compress images to 1200x1200px, 70-75% quality (~100KB per photo)
+- **utils/syncService.ts**: Offline-first sync service with pending queue
+- **components/SyncStatus.tsx**: UI component showing online/offline status and pending sync count
+
+### Sync Flow
+1. App saves data locally to AsyncStorage (immediate)
+2. Data added to pending sync queue
+3. When online, sync service pushes data to API
+4. Photos compressed before upload (1200x1200, 70% quality)
+5. Pull sync fetches updates since last sync timestamp
+
 ## Future Enhancements
-- Cloud sync and backup with external API
 - Multi-inspector team collaboration
 - Barcode/QR code scanning for equipment identification
