@@ -13,6 +13,7 @@ import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { StatCard } from "@/components/StatCard";
 import { InspectionCard } from "@/components/InspectionCard";
+import { SyncStatus } from "@/components/SyncStatus";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -101,6 +102,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             </ThemedText>
           </Pressable>
         </View>
+
+        <Spacer height={Spacing.lg} />
+
+        <SyncStatus />
 
         <Spacer height={Spacing.xl} />
 

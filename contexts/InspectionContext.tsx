@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cancelInspectionReminder, scheduleNotificationForSchedule, cancelScheduleNotification } from "@/utils/notifications";
 import { addInterval, generateScheduleId, getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
 import { parseLocalYMD } from "@/utils/dateUtils";
+import { addToPendingSync, syncPendingData, addPhotoToPendingSync } from "@/utils/syncService";
 import { 
   Inspection, 
   Property, 
@@ -638,13 +639,20 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
     const inspectionWithVersion = { ...inspection, version: CURRENT_DATA_VERSION };
     const newInspections = [...inspections, inspectionWithVersion];
     await saveInspections(newInspections);
+    await addToPendingSync('inspections', inspectionWithVersion);
+    syncPendingData().catch(console.error);
   };
 
   const updateInspection = async (id: string, updates: Partial<Inspection>) => {
+    const updatedInspection = inspections.find((insp) => insp.id === id);
     const newInspections = inspections.map((insp) =>
       insp.id === id ? { ...insp, ...updates, updatedAt: new Date().toISOString() } : insp
     );
     await saveInspections(newInspections);
+    if (updatedInspection) {
+      await addToPendingSync('inspections', { ...updatedInspection, ...updates, updatedAt: new Date().toISOString() });
+      syncPendingData().catch(console.error);
+    }
   };
 
   const deleteInspection = async (id: string) => {
@@ -673,13 +681,20 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const addProperty = async (property: Property) => {
     const newProperties = [...properties, property];
     await saveProperties(newProperties);
+    await addToPendingSync('properties', property);
+    syncPendingData().catch(console.error);
   };
 
   const updateProperty = async (id: string, updates: Partial<Property>) => {
+    const existingProperty = properties.find((prop) => prop.id === id);
     const newProperties = properties.map((prop) =>
       prop.id === id ? { ...prop, ...updates } : prop
     );
     await saveProperties(newProperties);
+    if (existingProperty) {
+      await addToPendingSync('properties', { ...existingProperty, ...updates });
+      syncPendingData().catch(console.error);
+    }
   };
 
   const deleteProperty = async (id: string) => {
@@ -704,13 +719,20 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const addCompany = async (company: Company) => {
     const newCompanies = [...companies, company];
     await saveCompanies(newCompanies);
+    await addToPendingSync('companies', company);
+    syncPendingData().catch(console.error);
   };
 
   const updateCompany = async (id: string, updates: Partial<Company>) => {
+    const existingCompany = companies.find((comp) => comp.id === id);
     const newCompanies = companies.map((comp) =>
       comp.id === id ? { ...comp, ...updates, updatedAt: new Date().toISOString() } : comp
     );
     await saveCompanies(newCompanies);
+    if (existingCompany) {
+      await addToPendingSync('companies', { ...existingCompany, ...updates, updatedAt: new Date().toISOString() });
+      syncPendingData().catch(console.error);
+    }
   };
 
   const deleteCompany = async (id: string) => {
@@ -744,13 +766,20 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const addAppUser = async (user: AppUser) => {
     const newAppUsers = [...appUsers, user];
     await saveAppUsers(newAppUsers);
+    await addToPendingSync('inspectors', user);
+    syncPendingData().catch(console.error);
   };
 
   const updateAppUser = async (id: string, updates: Partial<AppUser>) => {
+    const existingUser = appUsers.find((user) => user.id === id);
     const newAppUsers = appUsers.map((user) =>
       user.id === id ? { ...user, ...updates, updatedAt: new Date().toISOString() } : user
     );
     await saveAppUsers(newAppUsers);
+    if (existingUser) {
+      await addToPendingSync('inspectors', { ...existingUser, ...updates, updatedAt: new Date().toISOString() });
+      syncPendingData().catch(console.error);
+    }
   };
 
   const deleteAppUser = async (id: string) => {

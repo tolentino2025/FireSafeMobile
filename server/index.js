@@ -7,7 +7,18 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const storageClient = new Client();
+let storageClient = null;
+async function getStorageClient() {
+  if (!storageClient) {
+    try {
+      storageClient = new Client();
+    } catch (error) {
+      console.error('Object storage not configured:', error.message);
+      return null;
+    }
+  }
+  return storageClient;
+}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -296,13 +307,18 @@ app.post('/api/photos/upload', async (req, res) => {
   try {
     const { inspection_id, checklist_item_id, base64, caption, mime_type } = req.body;
     
+    const storage = await getStorageClient();
+    if (!storage) {
+      return res.status(503).json({ error: 'Object storage not configured' });
+    }
+    
     const photoId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const storageKey = `photos/${inspection_id}/${photoId}.jpg`;
     
     const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
     
-    const { ok, error } = await storageClient.uploadFromBytes(storageKey, buffer);
+    const { ok, error } = await storage.uploadFromBytes(storageKey, buffer);
     if (!ok) {
       return res.status(500).json({ error: `Upload failed: ${error}` });
     }
@@ -322,13 +338,18 @@ app.post('/api/photos/upload', async (req, res) => {
 
 app.get('/api/photos/:id', async (req, res) => {
   try {
+    const storage = await getStorageClient();
+    if (!storage) {
+      return res.status(503).json({ error: 'Object storage not configured' });
+    }
+    
     const result = await pool.query('SELECT * FROM inspection_photos WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Photo not found' });
     }
     
     const photo = result.rows[0];
-    const { ok, value, error } = await storageClient.downloadAsBytes(photo.storage_key);
+    const { ok, value, error } = await storage.downloadAsBytes(photo.storage_key);
     if (!ok) {
       return res.status(500).json({ error: `Download failed: ${error}` });
     }
