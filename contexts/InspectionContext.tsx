@@ -1077,6 +1077,12 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
 
       await saveSchedules(newSchedules);
+      
+      const scheduleToSync = newSchedules.find((s) => s.id === scheduleId);
+      if (scheduleToSync) {
+        await addToPendingSync('schedules', scheduleToSync);
+        syncPendingData().catch(console.error);
+      }
 
       const company = inspection.companyId ? companies.find((c) => c.id === inspection.companyId) : undefined;
       const property = inspection.propertyId ? properties.find((p) => p.id === inspection.propertyId) : undefined;
