@@ -93,3 +93,6 @@ value = "0"
 
 [userenv.development]
 EXPO_PUBLIC_API_URL = "http://localhost:3001"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-07526e45-c8fe-4237-8869-7986d338204f"
