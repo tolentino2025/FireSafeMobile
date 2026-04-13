@@ -20,8 +20,7 @@
       "bundleIdentifier": "com.firesafe.itm",
       "buildNumber": "2",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "FireSafe ITM uses your location to automatically record the GPS coordinates of inspection sites when generating fire safety inspection reports. For example, the app saves the inspection location to ensure accurate documentation and compliance records.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "FireSafe ITM uses your location in the background to automatically record the GPS coordinates of inspection sites when generating fire safety inspection reports. For example, the app saves the inspection location to ensure accurate documentation and compliance records.",
+        "NSLocationWhenInUseUsageDescription": "FireSafe ITM requests your location only while you are actively using the app to record the GPS coordinates of the inspection site on your report. Location is used solely for documentation purposes and is never collected in the background.",
         "NSCameraUsageDescription": "FireSafe ITM uses the camera to capture photos of fire protection equipment, such as sprinklers, fire pumps, and hydrants, during on-site inspections. These photos are attached to inspection reports for documentation and compliance with NFPA 25 standards.",
         "NSPhotoLibraryUsageDescription": "FireSafe ITM accesses your photo library so you can select existing photos of fire protection equipment to attach to inspection reports. This helps document equipment conditions for compliance with NFPA 25 standards.",
         "NSPhotoLibraryAddUsageDescription": "FireSafe ITM saves inspection photos to your photo library so you can keep a local copy of equipment documentation captured during fire safety inspections."
