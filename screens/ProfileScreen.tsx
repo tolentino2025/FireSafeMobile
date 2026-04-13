@@ -10,6 +10,7 @@ import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections } from "@/contexts/InspectionContext";
+import { useSubscription, FREE_INSPECTION_LIMIT } from "@/contexts/SubscriptionContext";
 import { ThemeMode } from "@/contexts/ThemeContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
@@ -29,7 +30,8 @@ type HelpType = "question" | "comment" | "suggestion" | "bugReport" | "other";
 export default function ProfileScreen() {
   const { fullTheme, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
-  const { refreshData } = useInspections();
+  const { inspections, refreshData } = useInspections();
+  const { isPremium, activePlan, showPaywall } = useSubscription();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
@@ -349,6 +351,61 @@ export default function ProfileScreen() {
           onPress={handleHelp}
           isLast
         />
+      </View>
+
+      <Spacer height={Spacing["3xl"]} />
+
+      <ThemedText type="h3" style={styles.sectionTitle}>
+        {t.subscription.sectionTitle}
+      </ThemedText>
+      <Spacer height={Spacing.md} />
+
+      <View style={[styles.subscriptionCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: isPremium ? fullTheme.colors.success : fullTheme.colors.border }]}>
+        <View style={styles.subscriptionTop}>
+          <View style={[styles.subscriptionBadge, { backgroundColor: isPremium ? `${fullTheme.colors.success}20` : `${fullTheme.colors.primary}15` }]}>
+            <Feather
+              name={isPremium ? "star" : "lock"}
+              size={20}
+              color={isPremium ? fullTheme.colors.success : fullTheme.colors.primary}
+            />
+          </View>
+          <View style={styles.subscriptionInfo}>
+            <ThemedText type="h4">
+              {isPremium
+                ? (activePlan === "annual" ? t.subscription.annualPlan : t.subscription.monthlyPlan) + " — " + t.subscription.premiumPlan
+                : t.subscription.freePlan}
+            </ThemedText>
+            <ThemedText type="small" secondary>
+              {isPremium
+                ? t.subscription.featureUnlimited
+                : `${inspections.length}/${FREE_INSPECTION_LIMIT} ${t.subscription.usage}`}
+            </ThemedText>
+          </View>
+          {!isPremium ? (
+            <Pressable
+              onPress={showPaywall}
+              style={[styles.upgradeBtn, { backgroundColor: fullTheme.colors.primary }]}
+            >
+              <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "700" }}>
+                {t.subscription.upgradeButton}
+              </ThemedText>
+            </Pressable>
+          ) : null}
+        </View>
+
+        {!isPremium ? (
+          <View style={[styles.usageBar, { backgroundColor: fullTheme.colors.border }]}>
+            <View
+              style={[
+                styles.usageBarFill,
+                {
+                  backgroundColor: inspections.length >= FREE_INSPECTION_LIMIT ? fullTheme.colors.error : fullTheme.colors.primary,
+                  width: `${Math.min((inspections.length / FREE_INSPECTION_LIMIT) * 100, 100)}%`,
+                },
+              ]}
+            />
+          </View>
+        ) : null}
       </View>
 
       <Spacer height={Spacing["3xl"]} />
@@ -740,6 +797,42 @@ const styles = StyleSheet.create({
   },
   versionContainer: {
     alignItems: "center",
+  },
+  subscriptionCard: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  subscriptionTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  subscriptionBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subscriptionInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  upgradeBtn: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+  },
+  usageBar: {
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  usageBarFill: {
+    height: "100%",
+    borderRadius: 3,
   },
   modalContainer: {
     flex: 1,

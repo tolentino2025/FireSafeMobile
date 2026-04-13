@@ -14,7 +14,8 @@ import { ThemedView } from "@/components/ThemedView";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { InspectionType } from "@/contexts/InspectionContext";
+import { InspectionType, useInspections } from "@/contexts/InspectionContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
@@ -137,8 +138,14 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
   const { fullTheme } = useTheme();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
+  const { inspections } = useInspections();
+  const { canCreateInspection, showPaywall } = useSubscription();
 
   const handleTypeSelect = (type: InspectionType | "performance_test" | "diesel_performance_test") => {
+    if (!canCreateInspection(inspections.length)) {
+      showPaywall();
+      return;
+    }
     if (type === "performance_test") {
       navigation.navigate("PerformanceTest", {});
     } else if (type === "diesel_performance_test") {
