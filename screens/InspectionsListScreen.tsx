@@ -6,6 +6,7 @@ import { Feather } from "@expo/vector-icons";
 import { ScreenFlatList } from "@/components/ScreenFlatList";
 import { ThemedText } from "@/components/ThemedText";
 import { InspectionCard } from "@/components/InspectionCard";
+import { FilterChip } from "@/components/FilterChip";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -99,36 +100,20 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
 
       <View style={styles.filterRow}>
         {(["completed", "in_progress", "pending", "draft"] as const).map((status) => (
-          <Pressable
+          <FilterChip
             key={status}
+            active={statusFilter === status}
             onPress={() => setStatusFilter(statusFilter === status ? null : status)}
-            style={[
-              styles.filterChip,
-              {
-                backgroundColor:
-                  statusFilter === status
-                    ? fullTheme.colors.primary
-                    : fullTheme.colors.cardBackground,
-                borderColor: fullTheme.colors.border,
-              },
-            ]}
-          >
-            <ThemedText
-              type="small"
-              style={{
-                color: statusFilter === status ? "#FFFFFF" : fullTheme.colors.textPrimary,
-                fontWeight: "600",
-              }}
-            >
-              {status === "completed"
+            label={
+              status === "completed"
                 ? t.inspections.status.completed
                 : status === "in_progress"
-                ? t.inspections.status.inProgress
-                : status === "draft"
-                ? t.inspections.status.draft
-                : t.inspections.status.pending}
-            </ThemedText>
-          </Pressable>
+                  ? t.inspections.status.inProgress
+                  : status === "draft"
+                    ? t.inspections.status.draft
+                    : t.inspections.status.pending
+            }
+          />
         ))}
       </View>
 

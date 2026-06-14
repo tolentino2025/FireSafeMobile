@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { DatePickerField } from "@/components/DatePickerField";
+import { FilterChip } from "@/components/FilterChip";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -251,62 +252,19 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterContent}
         >
-          <Pressable
+          <FilterChip
+            active={freq === "all"}
             onPress={() => setFreq("all")}
-            style={[
-              styles.chip,
-              {
-                backgroundColor:
-                  freq === "all"
-                    ? fullTheme.colors.primary
-                    : fullTheme.colors.cardBackground,
-                borderColor:
-                  freq === "all"
-                    ? fullTheme.colors.primary
-                    : fullTheme.colors.border,
-              },
-            ]}
-          >
-            <ThemedText
-              type="small"
-              style={{
-                color: freq === "all" ? "#FFFFFF" : fullTheme.colors.textPrimary,
-                fontWeight: "600",
-              }}
-            >
-              {t.itm.freq.all} ({totalTodasFreq})
-            </ThemedText>
-          </Pressable>
-          {frequenciasDisponiveis.map((f) => {
-            const ativo = freq === f.key;
-            return (
-              <Pressable
-                key={f.key}
-                onPress={() => setFreq(f.key)}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: ativo
-                      ? fullTheme.colors.primary
-                      : fullTheme.colors.cardBackground,
-                    borderColor: ativo
-                      ? fullTheme.colors.primary
-                      : fullTheme.colors.border,
-                  },
-                ]}
-              >
-                <ThemedText
-                  type="small"
-                  style={{
-                    color: ativo ? "#FFFFFF" : fullTheme.colors.textPrimary,
-                    fontWeight: "600",
-                  }}
-                >
-                  {rotuloFrequencia(f.key, language)} ({f.count})
-                </ThemedText>
-              </Pressable>
-            );
-          })}
+            label={`${t.itm.freq.all} (${totalTodasFreq})`}
+          />
+          {frequenciasDisponiveis.map((f) => (
+            <FilterChip
+              key={f.key}
+              active={freq === f.key}
+              onPress={() => setFreq(f.key)}
+              label={`${rotuloFrequencia(f.key, language)} (${f.count})`}
+            />
+          ))}
         </ScrollView>
 
         {/* Linha 2 — Status */}
@@ -315,36 +273,14 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterContent}
         >
-          {filtros.map((f) => {
-            const ativo = filtro === f.key;
-            return (
-              <Pressable
-                key={f.key}
-                onPress={() => setFiltro(f.key)}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: ativo
-                      ? fullTheme.colors.primary
-                      : fullTheme.colors.cardBackground,
-                    borderColor: ativo
-                      ? fullTheme.colors.primary
-                      : fullTheme.colors.border,
-                  },
-                ]}
-              >
-                <ThemedText
-                  type="small"
-                  style={{
-                    color: ativo ? "#FFFFFF" : fullTheme.colors.textPrimary,
-                    fontWeight: "600",
-                  }}
-                >
-                  {f.label}
-                </ThemedText>
-              </Pressable>
-            );
-          })}
+          {filtros.map((f) => (
+            <FilterChip
+              key={f.key}
+              active={filtro === f.key}
+              onPress={() => setFiltro(f.key)}
+              label={f.label}
+            />
+          ))}
         </ScrollView>
       </View>
 
