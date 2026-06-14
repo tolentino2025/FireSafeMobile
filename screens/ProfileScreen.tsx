@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useAuth } from "@/contexts/AuthContext";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
 
@@ -32,6 +33,7 @@ export default function ProfileScreen() {
   const { t, language, setLanguage } = useLanguage();
   const { inspections, refreshData } = useInspections();
   const { isPremium, activePlan, showPaywall } = useSubscription();
+  const { user, isConfigured, signOut } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
@@ -245,6 +247,26 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleSignOut = () => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    Alert.alert(
+      "Sair da conta",
+      "Tem certeza que deseja sair?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: async () => {
+            await signOut();
+          },
+        },
+      ]
+    );
+  };
+
   const version = Constants.expoConfig?.version || "1.0.0";
 
   return (
@@ -432,6 +454,32 @@ export default function ProfileScreen() {
       </View>
 
       <Spacer height={Spacing["3xl"]} />
+
+      {isConfigured && user ? (
+        <>
+          <Pressable
+            onPress={handleSignOut}
+            style={({ pressed }) => [
+              styles.signOutButton,
+              {
+                backgroundColor: `${fullTheme.colors.error}12`,
+                borderColor: fullTheme.colors.error,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+          >
+            <Feather name="log-out" size={18} color={fullTheme.colors.error} />
+            <ThemedText type="body" style={[styles.signOutText, { color: fullTheme.colors.error }]}>
+              Sair
+            </ThemedText>
+          </Pressable>
+          <Spacer height={Spacing.md} />
+          <ThemedText type="small" secondary style={styles.accountEmail}>
+            {user.email}
+          </ThemedText>
+          <Spacer height={Spacing["3xl"]} />
+        </>
+      ) : null}
 
       <View style={styles.versionContainer}>
         <ThemedText type="small" secondary>
@@ -914,5 +962,20 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
+  },
+  signOutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  signOutText: {
+    fontWeight: "600",
+  },
+  accountEmail: {
+    textAlign: "center",
   },
 });
