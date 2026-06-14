@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const { Client } = require('@replit/object-storage');
+const { requireAuth } = require('./middleware/auth');
 
 const app = express();
 app.use(cors());
@@ -63,7 +64,7 @@ async function ensureItmTables() {
   }
 }
 
-const SECRET_KEY = 'FIRESAFE_ITM_LICENSE_SECRET_2025_NFPA25';
+const SECRET_KEY = process.env.LICENSE_SECRET_KEY || 'FIRESAFE_ITM_LICENSE_SECRET_2025_NFPA25';
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function decodeBase32Custom(str) {
@@ -342,7 +343,7 @@ app.get('/api/schedules', async (req, res) => {
   }
 });
 
-app.post('/api/photos/upload', async (req, res) => {
+app.post('/api/photos/upload', requireAuth, async (req, res) => {
   try {
     const { inspection_id, checklist_item_id, base64, caption, mime_type } = req.body;
     
@@ -375,7 +376,7 @@ app.post('/api/photos/upload', async (req, res) => {
   }
 });
 
-app.get('/api/photos/:id', async (req, res) => {
+app.get('/api/photos/:id', requireAuth, async (req, res) => {
   try {
     const storage = await getStorageClient();
     if (!storage) {
@@ -400,7 +401,7 @@ app.get('/api/photos/:id', async (req, res) => {
   }
 });
 
-app.get('/api/photos/inspection/:inspection_id', async (req, res) => {
+app.get('/api/photos/inspection/:inspection_id', requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM inspection_photos WHERE inspection_id = $1 ORDER BY created_at',
@@ -526,7 +527,7 @@ app.patch('/api/itm/occurrences/:id', async (req, res) => {
   }
 });
 
-app.post('/api/sync', async (req, res) => {
+app.post('/api/sync', requireAuth, async (req, res) => {
   try {
     const { companies, inspectors, properties, inspections, schedules, itm_plans, itm_occurrences, lastSyncAt } = req.body;
     const results = { companies: 0, inspectors: 0, properties: 0, inspections: 0, schedules: 0, itm_plans: 0, itm_occurrences: 0 };
@@ -653,7 +654,7 @@ app.post('/api/sync', async (req, res) => {
   }
 });
 
-app.get('/api/sync/pull', async (req, res) => {
+app.get('/api/sync/pull', requireAuth, async (req, res) => {
   try {
     const lastSyncAt = req.query.lastSyncAt || '1970-01-01';
     
