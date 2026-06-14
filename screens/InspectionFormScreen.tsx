@@ -32,7 +32,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Inspection, ChecklistItem, InspectionType, InspectionFrequency, InspectionPhoto, Company, AppUser, FirePump, FirePumpControlPanel, GeoLocation } from "@/contexts/InspectionContext";
 import { ChecklistItemPhoto } from "@/types/inspection";
-import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { Spacing, BorderRadius, AppColors, Fonts } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
@@ -672,7 +672,12 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
 
   const inputStyle = [
     styles.input,
-    { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.border },
+    {
+      backgroundColor: theme.inputBackground,
+      color: theme.text,
+      borderColor: fullTheme.colors.borderStrong,
+      fontFamily: Fonts?.sans,
+    },
   ];
 
   if (isFM85A) {
@@ -1100,9 +1105,10 @@ const styles = StyleSheet.create({
   input: {
     height: Spacing.inputHeight,
     borderWidth: 1,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    fontSize: 16,
+    // Instrument v1.0: input = radius 12, fonte 14
+    borderRadius: 12,
+    paddingHorizontal: 13,
+    fontSize: 14,
   },
   row: {
     flexDirection: "row",

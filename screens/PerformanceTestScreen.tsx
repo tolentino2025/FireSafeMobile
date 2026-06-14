@@ -1646,9 +1646,10 @@ const styles = StyleSheet.create({
   input: {
     height: Spacing.inputHeight,
     borderWidth: 1,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    fontSize: 16,
+    // Instrument v1.0: input = radius 12, fonte 14
+    borderRadius: 12,
+    paddingHorizontal: 13,
+    fontSize: 14,
   },
   textArea: {
     height: 100,
