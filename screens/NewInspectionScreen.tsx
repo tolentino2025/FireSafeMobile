@@ -114,22 +114,41 @@ function TypeCard({ item, onPress }: TypeCardProps) {
       onPressOut={handlePressOut}
       style={[
         styles.typeCard,
-        { 
+        {
           backgroundColor: fullTheme.colors.cardBackground,
           borderColor: fullTheme.colors.border,
         },
         animatedStyle,
       ]}
     >
-      <View style={[styles.typeIconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
-        <Feather name={item.icon} size={28} color={fullTheme.colors.primary} />
+      <View style={styles.typeTopRow}>
+        <View
+          style={[
+            styles.typeIconContainer,
+            { backgroundColor: fullTheme.colors.primarySoft },
+          ]}
+        >
+          <Feather name={item.icon} size={24} color={fullTheme.colors.primary} />
+        </View>
+        <View
+          style={[
+            styles.nfpaBadge,
+            { backgroundColor: fullTheme.colors.surfaceAlt },
+          ]}
+        >
+          <ThemedText mono secondary style={styles.nfpaBadgeText}>
+            NFPA 25
+          </ThemedText>
+        </View>
       </View>
-      <ThemedText type="h4" style={styles.typeName}>
-        {t.inspectionTypes[item.labelKey]}
-      </ThemedText>
-      <ThemedText type="small" secondary>
-        {item.nfpaRef}
-      </ThemedText>
+      <View>
+        <ThemedText type="h4" numberOfLines={2}>
+          {t.inspectionTypes[item.labelKey]}
+        </ThemedText>
+        <ThemedText mono secondary style={styles.typeRef}>
+          {item.nfpaRef}
+        </ThemedText>
+      </View>
     </AnimatedPressable>
   );
 }
@@ -209,21 +228,38 @@ const styles = StyleSheet.create({
   },
   typeCard: {
     width: "47%",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    alignItems: "center",
+    padding: 15,
+    // Instrument v1.0: card de categoria = radius 18, minHeight 128
+    borderRadius: 18,
     borderWidth: 1,
+    minHeight: 128,
+    justifyContent: "space-between",
+    gap: 13,
+  },
+  typeTopRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
   typeIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 46,
+    height: 46,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: Spacing.md,
   },
-  typeName: {
-    textAlign: "center",
-    marginBottom: Spacing.xs,
+  nfpaBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  nfpaBadgeText: {
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  typeRef: {
+    fontSize: 10,
+    letterSpacing: 1,
+    marginTop: 5,
   },
 });
