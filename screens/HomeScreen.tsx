@@ -65,7 +65,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   return (
     <ScreenScrollView>
       <View style={styles.header}>
-        <ThemedText type="h2">{t.home.greeting}</ThemedText>
+        <View style={styles.headerText}>
+          <ThemedText mono secondary style={styles.dateEyebrow}>
+            {now
+              .toLocaleDateString(language === "pt-BR" ? "pt-BR" : "en-US", {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+              .toUpperCase()}
+          </ThemedText>
+          <ThemedText type="h2">{t.home.greeting}</ThemedText>
+        </View>
         <Pressable
           onPress={toggleLanguage}
           style={({ pressed }) => [
@@ -206,7 +218,16 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+  },
+  headerText: {
+    flex: 1,
+  },
+  dateEyebrow: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1.4,
+    marginBottom: 6,
   },
   languageButton: {
     paddingHorizontal: Spacing.md,

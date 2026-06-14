@@ -151,6 +151,7 @@ export const translations = {
     },
     inspections: {
       title: "Inspeções",
+      records: "registros",
       search: "Buscar inspeções...",
       filter: "Filtrar",
       new: "Nova Inspeção",
@@ -2943,6 +2944,7 @@ export const translations = {
     },
     inspections: {
       title: "Inspections",
+      records: "records",
       search: "Search inspections...",
       filter: "Filter",
       new: "New Inspection",

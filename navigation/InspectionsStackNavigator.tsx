@@ -33,7 +33,7 @@ export default function InspectionsStackNavigator() {
         name="InspectionsList"
         component={InspectionsListScreen}
         options={{
-          headerTitle: t.inspections.title,
+          headerShown: false,
         }}
       />
       <Stack.Screen
