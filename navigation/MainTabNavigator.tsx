@@ -12,7 +12,8 @@ import Animated, {
 
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import InspectionsStackNavigator from "@/navigation/InspectionsStackNavigator";
-import ITMStackNavigator from "@/navigation/ITMStackNavigator";
+// import ITMStackNavigator from "@/navigation/ITMStackNavigator";
+function ITMStackNavigator() { return <View style={{flex:1}} />; }
 import PropertiesStackNavigator from "@/navigation/PropertiesStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
