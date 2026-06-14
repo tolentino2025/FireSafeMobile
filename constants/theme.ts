@@ -21,10 +21,30 @@ export interface Theme {
     tabIconDefault: string;
     tabIconSelected: string;
     link: string;
+    // ── Instrument v1.0 tokens ──
+    primaryDeep: string;
+    primarySoft: string;
+    successSoft: string;
+    warningSoft: string;
+    errorSoft: string;
+    borderStrong: string;
+    ink: string;
+    inkSoft: string;
+    inkFaint: string;
+    surface: string;
+    surfaceAlt: string;
+    // Placa de aço (constante nos dois temas)
+    steelBg: string;
+    steelBg1: string;
+    steelBg2: string;
+    steelInk: string;
+    steelLabel: string;
+    steelLine: string;
   };
   gradients: {
     header: string[];
     card: string[];
+    steel: string[];
   };
   shadows: {
     small: {
@@ -53,102 +73,138 @@ export interface Theme {
 
 export const lightTheme: Theme = {
   colors: {
-    primary: "#DC2626",
-    primaryDark: "#A81E1E",
-    primaryLight: "#F87171",
-    background: "#F5F5F5",
-    backgroundSecondary: "#EBEBEB",
-    backgroundTertiary: "#E0E0E0",
-    cardBackground: "#FFFFFF",
-    textPrimary: "#111111",
-    textSecondary: "#444444",
-    border: "#E5E7EB",
-    success: "#22C55E",
-    warning: "#FACC15",
-    error: "#DC2626",
-    inputBackground: "#FFFFFF",
-    placeholder: "#9CA3AF",
+    primary: "#CE3A26",
+    primaryDark: "#A52A1A",
+    primaryLight: "#E8634F",
+    background: "#E9E4DC",
+    backgroundSecondary: "#F1ECE4",
+    backgroundTertiary: "#E2DCD2",
+    cardBackground: "#FBFAF6",
+    textPrimary: "#181410",
+    textSecondary: "#6B6258",
+    border: "rgba(24,20,16,0.09)",
+    success: "#2C7A57",
+    warning: "#B7791B",
+    error: "#CE3A26",
+    inputBackground: "#F1ECE4",
+    placeholder: "#A39A8E",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#6B7280",
-    tabIconSelected: "#DC2626",
-    link: "#DC2626",
+    tabIconDefault: "#A39A8E",
+    tabIconSelected: "#CE3A26",
+    link: "#CE3A26",
+    primaryDeep: "#A52A1A",
+    primarySoft: "rgba(206,58,38,0.10)",
+    successSoft: "rgba(44,122,87,0.12)",
+    warningSoft: "rgba(183,121,27,0.12)",
+    errorSoft: "rgba(206,58,38,0.10)",
+    borderStrong: "rgba(24,20,16,0.14)",
+    ink: "#181410",
+    inkSoft: "#6B6258",
+    inkFaint: "#A39A8E",
+    surface: "#FBFAF6",
+    surfaceAlt: "#F1ECE4",
+    steelBg: "#1c2a33",
+    steelBg1: "#22323d",
+    steelBg2: "#16222a",
+    steelInk: "#eef4f8",
+    steelLabel: "#7f94a3",
+    steelLine: "rgba(255,255,255,0.04)",
   },
   gradients: {
-    header: ["#FEE2E2", "#F5F5F5"],
-    card: ["#FFFFFF", "#FAFAFA"],
+    header: ["#F1ECE4", "#E9E4DC"],
+    card: ["#FBFAF6", "#F1ECE4"],
+    steel: ["#22323d", "#16222a"],
   },
   shadows: {
     small: {
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.08,
-      shadowRadius: 2,
-      elevation: 1,
-    },
-    medium: {
-      shadowColor: "#000000",
+      shadowColor: "#281A12",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
-      shadowRadius: 4,
+      shadowRadius: 8,
       elevation: 2,
     },
+    medium: {
+      shadowColor: "#281A12",
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.18,
+      shadowRadius: 22,
+      elevation: 6,
+    },
     large: {
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      elevation: 4,
+      shadowColor: "#281A12",
+      shadowOffset: { width: 0, height: 18 },
+      shadowOpacity: 0.28,
+      shadowRadius: 40,
+      elevation: 12,
     },
   },
 };
 
 export const darkTheme: Theme = {
   colors: {
-    primary: "#EF4444",
-    primaryDark: "#B91C1C",
-    primaryLight: "#FCA5A5",
-    background: "#0B0B0D",
-    backgroundSecondary: "#18181B",
-    backgroundTertiary: "#27272A",
-    cardBackground: "#151518",
-    textPrimary: "#FFFFFF",
-    textSecondary: "#A1A1AA",
-    border: "#27272A",
-    success: "#22C55E",
-    warning: "#FACC15",
-    error: "#EF4444",
-    inputBackground: "#151518",
-    placeholder: "#71717A",
+    primary: "#F2553C",
+    primaryDark: "#C5381F",
+    primaryLight: "#F87A66",
+    background: "#100E0C",
+    backgroundSecondary: "#231E1A",
+    backgroundTertiary: "#15110F",
+    cardBackground: "#1B1714",
+    textPrimary: "#F3EEE7",
+    textSecondary: "#9C9286",
+    border: "rgba(255,255,255,0.09)",
+    success: "#4FBE8E",
+    warning: "#E6A23D",
+    error: "#F2553C",
+    inputBackground: "#231E1A",
+    placeholder: "#6E655B",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#71717A",
-    tabIconSelected: "#EF4444",
-    link: "#EF4444",
+    tabIconDefault: "#6E655B",
+    tabIconSelected: "#F2553C",
+    link: "#F2553C",
+    primaryDeep: "#C5381F",
+    primarySoft: "rgba(242,85,60,0.15)",
+    successSoft: "rgba(79,190,142,0.16)",
+    warningSoft: "rgba(230,162,61,0.16)",
+    errorSoft: "rgba(242,85,60,0.15)",
+    borderStrong: "rgba(255,255,255,0.16)",
+    ink: "#F3EEE7",
+    inkSoft: "#9C9286",
+    inkFaint: "#6E655B",
+    surface: "#1B1714",
+    surfaceAlt: "#231E1A",
+    steelBg: "#1c2a33",
+    steelBg1: "#22323d",
+    steelBg2: "#16222a",
+    steelInk: "#eef4f8",
+    steelLabel: "#7f94a3",
+    steelLine: "rgba(255,255,255,0.04)",
   },
   gradients: {
-    header: ["#1E1E22", "#0B0B0D"],
-    card: ["#1A1A1E", "#151518"],
+    header: ["#15110F", "#100E0C"],
+    card: ["#231E1A", "#1B1714"],
+    steel: ["#22323d", "#16222a"],
   },
   shadows: {
     small: {
       shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.3,
-      shadowRadius: 2,
-      elevation: 1,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 2,
     },
     medium: {
       shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.35,
-      shadowRadius: 4,
-      elevation: 2,
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.55,
+      shadowRadius: 24,
+      elevation: 6,
     },
     large: {
       shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.45,
-      shadowRadius: 8,
-      elevation: 4,
+      shadowOffset: { width: 0, height: 24 },
+      shadowOpacity: 0.7,
+      shadowRadius: 50,
+      elevation: 12,
     },
   },
 };
@@ -207,12 +263,12 @@ export const Colors = {
 };
 
 export const AppColors = {
-  primary: "#DC2626",
-  primaryDark: "#A81E1E",
-  primaryLight: "#F87171",
-  success: "#22C55E",
-  warning: "#FACC15",
-  error: "#DC2626",
+  primary: "#CE3A26",
+  primaryDark: "#A52A1A",
+  primaryLight: "#E8634F",
+  success: "#2C7A57",
+  warning: "#B7791B",
+  error: "#CE3A26",
 };
 
 export const Spacing = {
@@ -240,56 +296,70 @@ export const BorderRadius = {
   full: 9999,
 };
 
+// Padrao Instrument: Archivo (editorial) para titulos/texto, IBM Plex Mono (tecnico)
+// para dados/codigos. Pesos seguem o design system.
 export const Typography = {
   h1: {
-    fontSize: 28,
-    fontWeight: "700" as const,
+    fontSize: 22,
+    fontWeight: "800" as const,
+    letterSpacing: -0.4,
   },
   h2: {
-    fontSize: 22,
-    fontWeight: "600" as const,
+    fontSize: 19,
+    fontWeight: "800" as const,
+    letterSpacing: -0.2,
   },
   h3: {
-    fontSize: 18,
-    fontWeight: "600" as const,
+    fontSize: 16,
+    fontWeight: "700" as const,
   },
   h4: {
-    fontSize: 16,
-    fontWeight: "600" as const,
+    fontSize: 14,
+    fontWeight: "700" as const,
   },
   body: {
-    fontSize: 16,
-    fontWeight: "400" as const,
-  },
-  small: {
     fontSize: 14,
     fontWeight: "400" as const,
   },
-  link: {
-    fontSize: 16,
+  small: {
+    fontSize: 12,
     fontWeight: "400" as const,
+  },
+  link: {
+    fontSize: 14,
+    fontWeight: "600" as const,
   },
 };
 
+// Familias de fonte do padrao Instrument.
+// 'Archivo' e 'IBM Plex Mono' sao injetadas no web via Google Fonts (ver utils/fonts).
+const ARCHIVO = "Archivo, system-ui, -apple-system, sans-serif";
+const PLEX_MONO = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+
 export const Fonts = Platform.select({
   ios: {
-    sans: "system-ui",
+    sans: "Archivo",
     serif: "ui-serif",
-    rounded: "ui-rounded",
-    mono: "ui-monospace",
+    rounded: "Archivo",
+    mono: "IBM Plex Mono",
+  },
+  android: {
+    sans: "Archivo",
+    serif: "serif",
+    rounded: "Archivo",
+    mono: "IBM Plex Mono",
   },
   default: {
-    sans: "normal",
+    sans: ARCHIVO,
     serif: "serif",
-    rounded: "normal",
-    mono: "monospace",
+    rounded: ARCHIVO,
+    mono: PLEX_MONO,
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: ARCHIVO,
     serif: "Georgia, 'Times New Roman', serif",
-    rounded:
-      "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    rounded: ARCHIVO,
+    mono: PLEX_MONO,
   },
 });
 

@@ -23,6 +23,10 @@ import { InspectionProvider } from "@/contexts/InspectionContext";
 import { ITMProvider } from "@/contexts/ITMContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ensureInstrumentFonts } from "@/utils/fonts";
+
+// Injeta as fontes do padrao Instrument no web (Archivo + IBM Plex Mono).
+ensureInstrumentFonts();
 
 function AppContent() {
   const { isDark, fullTheme } = useThemeContext();
