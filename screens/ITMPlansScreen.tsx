@@ -18,6 +18,7 @@ import { useITM, ItmPlan } from "@/contexts/ITMContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { parseLocalYMD } from "@/utils/dateUtils";
 import { statusGeral, type StatusGeral } from "@/utils/itm/agenda";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ITMStackParamList } from "@/navigation/ITMStackNavigator";
 
 const TAB_BAR_HEIGHT = 90;
@@ -67,11 +68,15 @@ export default function ITMPlansScreen({ navigation }: Props) {
 
   return (
     <ThemedView style={styles.container}>
+      <ScreenHeader
+        title={t.itm.plans.title}
+        subtitle={`${plans.length} ${t.itm.plans.plansCount} · NFPA 25`}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + 60,
+            paddingTop: Spacing.xl,
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT + Spacing["3xl"],
           },
         ]}

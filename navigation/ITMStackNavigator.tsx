@@ -32,7 +32,7 @@ export default function ITMStackNavigator() {
         name="ITMPlans"
         component={ITMPlansScreen}
         options={{
-          headerTitle: t.itm.plans.title,
+          headerShown: false,
         }}
       />
       <Stack.Screen

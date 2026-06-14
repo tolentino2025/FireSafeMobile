@@ -6,6 +6,8 @@ import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
 
 import { ScreenScrollView } from "@/components/ScreenScrollView";
+import { ThemedView } from "@/components/ThemedView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { ThemedText } from "@/components/ThemedText";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
@@ -270,7 +272,9 @@ export default function ProfileScreen() {
   const version = Constants.expoConfig?.version || "1.0.0";
 
   return (
-    <ScreenScrollView>
+    <ThemedView style={styles.screen}>
+      <ScreenHeader title={t.profile.title} subtitle={t.profile.eyebrow} />
+      <ScreenScrollView>
       <View style={styles.profileHeader}>
         <View style={[styles.avatar, { backgroundColor: fullTheme.colors.primary }]}>
           <Feather name="user" size={40} color="#FFFFFF" />
@@ -647,7 +651,8 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </ScreenScrollView>
+      </ScreenScrollView>
+    </ThemedView>
   );
 }
 
@@ -775,6 +780,9 @@ function HelpOption({ icon, label, onPress, isLast }: HelpOptionProps) {
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   profileHeader: {
     alignItems: "center",
     paddingTop: Spacing.xl,

@@ -6,6 +6,8 @@ import * as Haptics from "expo-haptics";
 
 import { ScreenFlatList } from "@/components/ScreenFlatList";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { PropertyCard } from "@/components/PropertyCard";
 import { CompanyCard } from "@/components/CompanyCard";
 import Spacer from "@/components/Spacer";
@@ -515,7 +517,8 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
   };
 
   return (
-    <>
+    <ThemedView style={styles.screen}>
+      <ScreenHeader title={t.properties.title} subtitle={t.properties.eyebrow} />
       {activeTab === "companies" ? (
         <ScreenFlatList
           data={filteredCompanies}
@@ -594,11 +597,14 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
       >
         <Feather name="plus" size={24} color="#FFFFFF" />
       </Pressable>
-    </>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
