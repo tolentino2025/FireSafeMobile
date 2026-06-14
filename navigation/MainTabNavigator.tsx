@@ -81,6 +81,7 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
 export default function MainTabNavigator() {
   const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
+  console.log("[NAV-v2] 5 abas: Home Inspecoes Agenda Cadastros Perfil");
 
   return (
     <Tab.Navigator
