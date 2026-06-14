@@ -1225,7 +1225,8 @@ const styles = StyleSheet.create({
   },
   section: {
     marginHorizontal: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    // Instrument v1.0: card de seção = radius 18
+    borderRadius: 18,
     borderWidth: 1,
     overflow: "hidden",
   },
