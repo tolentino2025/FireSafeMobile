@@ -23,10 +23,30 @@ const SYSTEM_LABELS: Record<string, { pt: string; en: string }> = {
   },
 };
 
+// Rotulos de frequencia normativa (chave usada nos templates -> texto legivel).
+const FREQUENCY_LABELS: Record<string, { pt: string; en: string }> = {
+  weekly: { pt: "Semanal", en: "Weekly" },
+  monthly: { pt: "Mensal", en: "Monthly" },
+  quarterly: { pt: "Trimestral", en: "Quarterly" },
+  semiannual: { pt: "Semestral", en: "Semiannual" },
+  annual: { pt: "Anual", en: "Annual" },
+  "5year": { pt: "Quinquenal (5 anos)", en: "Every 5 years" },
+  "3year": { pt: "Trienal (3 anos)", en: "Every 3 years" },
+  "10year": { pt: "Decenal (10 anos)", en: "Every 10 years" },
+  daily: { pt: "Diária", en: "Daily" },
+};
+
 // Rotulo de um sistema no idioma escolhido (fallback = a propria key).
 export function rotuloSistema(systemKey: string, idioma: Idioma): string {
   const l = SYSTEM_LABELS[systemKey];
   if (!l) return systemKey;
+  return idioma === "pt-BR" ? l.pt : l.en;
+}
+
+// Rotulo de uma frequencia no idioma escolhido (fallback = a propria key).
+export function rotuloFrequencia(frequency: string, idioma: Idioma): string {
+  const l = FREQUENCY_LABELS[frequency];
+  if (!l) return frequency;
   return idioma === "pt-BR" ? l.pt : l.en;
 }
 

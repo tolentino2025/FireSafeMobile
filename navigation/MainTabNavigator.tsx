@@ -81,7 +81,6 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
 export default function MainTabNavigator() {
   const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
-
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
