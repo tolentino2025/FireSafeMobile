@@ -143,6 +143,11 @@ export const translations = {
       incomplete: "Incompletas",
       quickActions: "Ações Rápidas",
       firePumpTest: "Teste de Performance Bomba",
+      compliant: "CONFORME",
+      complianceTitle: "Conformidade · Carteira",
+      complianceSummary: "{done} de {total} inspeções concluídas",
+      needsAttention: "{n} requer atenção",
+      allCompliant: "Tudo em conformidade",
     },
     inspections: {
       title: "Inspeções",
@@ -2930,6 +2935,11 @@ export const translations = {
       incomplete: "Incomplete",
       quickActions: "Quick Actions",
       firePumpTest: "Fire Pump Performance Test",
+      compliant: "COMPLIANT",
+      complianceTitle: "Compliance · Portfolio",
+      complianceSummary: "{done} of {total} inspections completed",
+      needsAttention: "{n} need attention",
+      allCompliant: "All compliant",
     },
     inspections: {
       title: "Inspections",
