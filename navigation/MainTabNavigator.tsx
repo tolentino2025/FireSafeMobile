@@ -12,8 +12,7 @@ import Animated, {
 
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import InspectionsStackNavigator from "@/navigation/InspectionsStackNavigator";
-// import ITMStackNavigator from "@/navigation/ITMStackNavigator";
-function ITMStackNavigator() { return <View style={{flex:1}} />; }
+import ITMStackNavigator from "@/navigation/ITMStackNavigator";
 import PropertiesStackNavigator from "@/navigation/PropertiesStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
@@ -82,8 +81,6 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
 export default function MainTabNavigator() {
   const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
-  console.log("[NAV-v2] 5 abas: Home Inspecoes Agenda Cadastros Perfil");
-
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
