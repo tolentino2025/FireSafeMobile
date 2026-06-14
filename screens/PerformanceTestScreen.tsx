@@ -1616,7 +1616,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   section: {
-    borderRadius: BorderRadius.lg,
+    // Instrument v1.0: card de seção = radius 18
+    borderRadius: 18,
     borderWidth: 1,
     overflow: "hidden",
   },
@@ -1696,7 +1697,8 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   readingCard: {
-    borderRadius: BorderRadius.lg,
+    // Instrument v1.0: card = radius 18
+    borderRadius: 18,
     borderWidth: 1,
     marginBottom: Spacing.lg,
     overflow: "hidden",
