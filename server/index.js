@@ -24,6 +24,45 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+// Cria as tabelas ITM se nao existirem (idempotente). Enums como TEXT simples
+// para simplicidade no IF NOT EXISTS. Espelha server/scheduler/schema.ts.
+async function ensureItmTables() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS itm_plans (
+        id TEXT PRIMARY KEY,
+        asset_id TEXT NOT NULL,
+        property_name TEXT,
+        start_date TEXT NOT NULL,
+        normative_profile TEXT NOT NULL DEFAULT 'nfpa25',
+        system_keys JSONB NOT NULL DEFAULT '[]',
+        created_at TEXT,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS itm_occurrences (
+        id TEXT PRIMARY KEY,
+        plan_id TEXT NOT NULL,
+        template_key TEXT NOT NULL,
+        system TEXT,
+        activity TEXT,
+        frequency TEXT,
+        description TEXT,
+        due_date TEXT NOT NULL,
+        scheduled_date TEXT NOT NULL,
+        window_start TEXT NOT NULL,
+        window_end TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'scheduled',
+        completed_at TEXT,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+  } catch (error) {
+    console.error('Error ensuring ITM tables:', error.message);
+  }
+}
+
 const SECRET_KEY = 'FIRESAFE_ITM_LICENSE_SECRET_2025_NFPA25';
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -373,10 +412,124 @@ app.get('/api/photos/inspection/:inspection_id', async (req, res) => {
   }
 });
 
+// Upsert de um plano ITM (idempotente por id).
+async function upsertItmPlan(plan) {
+  await pool.query(
+    `INSERT INTO itm_plans (id, asset_id, property_name, start_date, normative_profile, system_keys, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (id) DO UPDATE SET
+       asset_id = EXCLUDED.asset_id, property_name = EXCLUDED.property_name,
+       start_date = EXCLUDED.start_date, normative_profile = EXCLUDED.normative_profile,
+       system_keys = EXCLUDED.system_keys, created_at = EXCLUDED.created_at, updated_at = NOW()`,
+    [
+      plan.id,
+      plan.assetId,
+      plan.propertyName,
+      plan.startDate,
+      plan.normativeProfile || 'nfpa25',
+      JSON.stringify(plan.systemKeys || []),
+      plan.createdAt,
+    ]
+  );
+}
+
+// Upsert de uma ocorrencia ITM (idempotente por id).
+async function upsertItmOccurrence(occ) {
+  await pool.query(
+    `INSERT INTO itm_occurrences (
+       id, plan_id, template_key, system, activity, frequency, description,
+       due_date, scheduled_date, window_start, window_end, status, completed_at
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+     ON CONFLICT (id) DO UPDATE SET
+       plan_id = EXCLUDED.plan_id, template_key = EXCLUDED.template_key,
+       system = EXCLUDED.system, activity = EXCLUDED.activity,
+       frequency = EXCLUDED.frequency, description = EXCLUDED.description,
+       due_date = EXCLUDED.due_date, scheduled_date = EXCLUDED.scheduled_date,
+       window_start = EXCLUDED.window_start, window_end = EXCLUDED.window_end,
+       status = EXCLUDED.status, completed_at = EXCLUDED.completed_at, updated_at = NOW()`,
+    [
+      occ.id,
+      occ.planId,
+      occ.templateKey,
+      occ.system,
+      occ.activity,
+      occ.frequency,
+      occ.description,
+      occ.dueDate,
+      occ.scheduledDate,
+      occ.windowStart,
+      occ.windowEnd,
+      occ.status || 'scheduled',
+      occ.completedAt || null,
+    ]
+  );
+}
+
+app.get('/api/itm/plans', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM itm_plans ORDER BY created_at');
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/itm/plans', async (req, res) => {
+  try {
+    const { plan, occurrences } = req.body;
+    if (plan) {
+      await upsertItmPlan(plan);
+    }
+    let count = 0;
+    if (Array.isArray(occurrences)) {
+      for (const occ of occurrences) {
+        await upsertItmOccurrence(occ);
+        count++;
+      }
+    }
+    res.json({ success: true, plan: plan ? plan.id : null, occurrences: count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/itm/plans/:id/occurrences', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM itm_occurrences WHERE plan_id = $1 ORDER BY due_date',
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.patch('/api/itm/occurrences/:id', async (req, res) => {
+  try {
+    const { status, completedAt } = req.body;
+    const result = await pool.query(
+      `UPDATE itm_occurrences
+       SET status = COALESCE($2, status),
+           completed_at = COALESCE($3, completed_at),
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [req.params.id, status || null, completedAt || null]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Occurrence not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/sync', async (req, res) => {
   try {
-    const { companies, inspectors, properties, inspections, schedules, lastSyncAt } = req.body;
-    const results = { companies: 0, inspectors: 0, properties: 0, inspections: 0, schedules: 0 };
+    const { companies, inspectors, properties, inspections, schedules, itm_plans, itm_occurrences, lastSyncAt } = req.body;
+    const results = { companies: 0, inspectors: 0, properties: 0, inspections: 0, schedules: 0, itm_plans: 0, itm_occurrences: 0 };
     
     if (companies?.length) {
       for (const company of companies) {
@@ -475,9 +628,23 @@ app.post('/api/sync', async (req, res) => {
         results.schedules++;
       }
     }
-    
-    res.json({ 
-      success: true, 
+
+    if (itm_plans?.length) {
+      for (const plan of itm_plans) {
+        await upsertItmPlan(plan);
+        results.itm_plans++;
+      }
+    }
+
+    if (itm_occurrences?.length) {
+      for (const occ of itm_occurrences) {
+        await upsertItmOccurrence(occ);
+        results.itm_occurrences++;
+      }
+    }
+
+    res.json({
+      success: true,
       syncedAt: new Date().toISOString(),
       counts: results
     });
@@ -490,20 +657,50 @@ app.get('/api/sync/pull', async (req, res) => {
   try {
     const lastSyncAt = req.query.lastSyncAt || '1970-01-01';
     
-    const [companies, inspectors, properties, inspections, schedules] = await Promise.all([
+    const [companies, inspectors, properties, inspections, schedules, itmPlans, itmOccurrences] = await Promise.all([
       pool.query('SELECT * FROM companies WHERE updated_at > $1', [lastSyncAt]),
       pool.query('SELECT * FROM inspectors WHERE updated_at > $1', [lastSyncAt]),
       pool.query('SELECT * FROM properties WHERE updated_at > $1', [lastSyncAt]),
       pool.query('SELECT * FROM inspections WHERE updated_at > $1', [lastSyncAt]),
       pool.query('SELECT * FROM inspection_schedules WHERE updated_at > $1', [lastSyncAt]),
+      pool.query('SELECT * FROM itm_plans WHERE updated_at > $1', [lastSyncAt]),
+      pool.query('SELECT * FROM itm_occurrences WHERE updated_at > $1', [lastSyncAt]),
     ]);
-    
+
+    // Mapeia colunas snake_case -> camelCase para casar com os tipos do app.
+    const mappedPlans = itmPlans.rows.map((r) => ({
+      id: r.id,
+      assetId: r.asset_id,
+      propertyName: r.property_name,
+      startDate: r.start_date,
+      normativeProfile: r.normative_profile,
+      systemKeys: r.system_keys || [],
+      createdAt: r.created_at,
+    }));
+    const mappedOccurrences = itmOccurrences.rows.map((r) => ({
+      id: r.id,
+      planId: r.plan_id,
+      templateKey: r.template_key,
+      system: r.system,
+      activity: r.activity,
+      frequency: r.frequency,
+      description: r.description,
+      dueDate: r.due_date,
+      scheduledDate: r.scheduled_date,
+      windowStart: r.window_start,
+      windowEnd: r.window_end,
+      status: r.status,
+      completedAt: r.completed_at || undefined,
+    }));
+
     res.json({
       companies: companies.rows,
       inspectors: inspectors.rows,
       properties: properties.rows,
       inspections: inspections.rows,
       schedules: schedules.rows,
+      itm_plans: mappedPlans,
+      itm_occurrences: mappedOccurrences,
       syncedAt: new Date().toISOString(),
     });
   } catch (error) {
@@ -514,4 +711,6 @@ app.get('/api/sync/pull', async (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`FireSafe ITM API running on port ${PORT}`);
+  // Garante as tabelas ITM (idempotente) na inicializacao.
+  ensureItmTables();
 });

@@ -12,6 +12,7 @@ import Animated, {
 
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import InspectionsStackNavigator from "@/navigation/InspectionsStackNavigator";
+import ITMStackNavigator from "@/navigation/ITMStackNavigator";
 import PropertiesStackNavigator from "@/navigation/PropertiesStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
@@ -21,6 +22,7 @@ import { Spacing } from "@/constants/theme";
 export type MainTabParamList = {
   HomeTab: undefined;
   InspectionsTab: undefined;
+  ScheduleTab: undefined;
   PropertiesTab: undefined;
   ProfileTab: undefined;
 };
@@ -123,6 +125,16 @@ export default function MainTabNavigator() {
           title: t.tabs.inspections,
           tabBarIcon: ({ color, size }) => (
             <Feather name="clipboard" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ScheduleTab"
+        component={ITMStackNavigator}
+        options={{
+          title: t.tabs.schedule,
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="calendar" size={size} color={color} />
           ),
         }}
       />

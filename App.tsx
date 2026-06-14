@@ -19,6 +19,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider, useThemeContext } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { InspectionProvider } from "@/contexts/InspectionContext";
+import { ITMProvider } from "@/contexts/ITMContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 function AppContent() {
@@ -45,7 +46,9 @@ export default function App() {
               <LanguageProvider>
                 <SubscriptionProvider>
                   <InspectionProvider>
-                    <AppContent />
+                    <ITMProvider>
+                      <AppContent />
+                    </ITMProvider>
                   </InspectionProvider>
                 </SubscriptionProvider>
               </LanguageProvider>
