@@ -28,7 +28,7 @@ export interface PlanoParaAgenda {
 }
 
 export interface GerarAgendaOpcoes {
-  // Data limite do horizonte (YYYY-MM-DD). Padrao: hoje + 18 meses.
+  // Data limite do horizonte (YYYY-MM-DD). Padrao: hoje + 12 meses.
   horizonEnd?: string;
   // Dias de tolerancia para a janela. Padrao: 0.
   toleranceDays?: number;
@@ -45,10 +45,19 @@ function toISODate(d: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-// Horizonte padrao = hoje + 18 meses.
+// Horizonte padrao = hoje + 12 meses.
+// Atividades com periodo maior que o horizonte (ex.: quinquenal) NAO somem:
+// garantimos sempre a PRIMEIRA ocorrencia futura de cada template (ver abaixo).
 function horizontePadrao(): string {
   const d = new Date();
-  d.setMonth(d.getMonth() + 18);
+  d.setMonth(d.getMonth() + 12);
+  return toISODate(d);
+}
+
+// Horizonte "longo" para capturar a primeira ocorrencia de atividades longas.
+function horizonteLongo(startDate: string): string {
+  const d = new Date(startDate);
+  d.setFullYear(d.getFullYear() + 100);
   return toISODate(d);
 }
 
@@ -63,6 +72,13 @@ export function gerarIdOcorrencia(
 
 // Gera a agenda achatada de um plano: para cada template SELECIONADO (pelo system do plano),
 // chama o motor com a startDate do plano e o intervalo do template.
+//
+// Regra de datas (corrigida):
+//  - firstDueIsStart = FALSE -> a primeira ocorrencia eh startDate + 1 intervalo.
+//    Ex.: inicio 15/06/2026 => mensal 15/07/2026, anual 15/06/2027, quinquenal 15/06/2031.
+//    (Antes era TRUE, o que jogava TODAS as atividades para a mesma data de inicio.)
+//  - Atividades cujo periodo ultrapassa o horizonte (ex.: quinquenal) ainda assim
+//    registram a PRIMEIRA ocorrencia futura, para nao desaparecerem da agenda.
 export function gerarAgendaDoPlano(
   plano: PlanoParaAgenda,
   templates: ItmTemplate[],
@@ -81,16 +97,30 @@ export function gerarAgendaDoPlano(
       continue;
     }
 
-    const ocorrencias = gerarOcorrencias({
+    let ocorrencias = gerarOcorrencias({
       startDate: plano.startDate,
       unit: template.intervalUnit,
       count: template.intervalCount,
       toleranceDays,
       horizonEnd,
       holidays,
-      // A primeira ocorrencia eh a propria data de inicio do plano.
-      firstDueIsStart: true,
+      // A primeira ocorrencia eh startDate + 1 intervalo (nao a propria data de inicio).
+      firstDueIsStart: false,
     });
+
+    // Garante a primeira ocorrencia futura de atividades longas (ex.: quinquenal)
+    // que ficariam fora do horizonte padrao.
+    if (ocorrencias.length === 0) {
+      ocorrencias = gerarOcorrencias({
+        startDate: plano.startDate,
+        unit: template.intervalUnit,
+        count: template.intervalCount,
+        toleranceDays,
+        horizonEnd: horizonteLongo(plano.startDate),
+        holidays,
+        firstDueIsStart: false,
+      }).slice(0, 1);
+    }
 
     const description =
       language === "pt-BR" ? template.descriptionPt : template.descriptionEn;

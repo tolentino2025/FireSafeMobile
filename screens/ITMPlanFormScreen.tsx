@@ -34,7 +34,7 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
   const { properties } = useInspections();
-  const { criarPlano } = useITM();
+  const { criarPlano, planoAtivoDaPropriedade } = useITM();
   const insets = useSafeAreaInsets();
 
   const [propertyId, setPropertyId] = useState<string | null>(null);
@@ -70,15 +70,34 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
       return;
     }
 
+    // Evita plano duplicado para a mesma propriedade (a menos que confirme).
+    const existente = planoAtivoDaPropriedade(property.id);
+    if (existente) {
+      Alert.alert(t.itm.form.duplicateTitle, t.itm.form.duplicateMessage, [
+        { text: t.common.cancel, style: "cancel" },
+        {
+          text: t.itm.form.duplicateConfirm,
+          style: "destructive",
+          onPress: () => criarENavegar(property.id, property.name),
+        },
+      ]);
+      return;
+    }
+
+    criarENavegar(property.id, property.name);
+  };
+
+  const criarENavegar = async (assetId: string, propertyName: string) => {
     try {
       setSaving(true);
       const plano = await criarPlano({
-        assetId: property.id,
-        propertyName: property.name,
+        assetId,
+        propertyName,
         startDate,
         systemKeys: selectedSystems,
       });
-      navigation.replace("ITMSchedule", { planId: plano.id });
+      Alert.alert(t.itm.form.successTitle, t.itm.form.successMessage);
+      navigation.replace("ITMPlanSystems", { planId: plano.id });
     } catch (error) {
       console.error("Error creating ITM plan:", error);
       Alert.alert(t.common.error);

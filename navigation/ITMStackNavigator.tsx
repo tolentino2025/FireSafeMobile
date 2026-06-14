@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import ITMPlansScreen from "@/screens/ITMPlansScreen";
 import ITMPlanFormScreen from "@/screens/ITMPlanFormScreen";
+import ITMPlanSystemsScreen from "@/screens/ITMPlanSystemsScreen";
 import ITMScheduleScreen from "@/screens/ITMScheduleScreen";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -11,7 +12,8 @@ import { getCommonScreenOptions } from "@/navigation/screenOptions";
 export type ITMStackParamList = {
   ITMPlans: undefined;
   ITMPlanForm: undefined;
-  ITMSchedule: { planId: string };
+  ITMPlanSystems: { planId: string };
+  ITMSchedule: { planId: string; systemKey: string };
 };
 
 const Stack = createNativeStackNavigator<ITMStackParamList>();
@@ -39,6 +41,14 @@ export default function ITMStackNavigator() {
         options={{
           ...getCommonScreenOptions({ theme, isDark, transparent: false }),
           headerTitle: t.itm.form.title,
+        }}
+      />
+      <Stack.Screen
+        name="ITMPlanSystems"
+        component={ITMPlanSystemsScreen}
+        options={{
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+          headerTitle: t.itm.systems.title,
         }}
       />
       <Stack.Screen

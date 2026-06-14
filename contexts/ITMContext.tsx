@@ -13,6 +13,12 @@ import {
   type ItmOccurrenceStatus,
 } from "@/utils/itm/scheduler";
 import {
+  resumir,
+  resumirPorSistema,
+  type ResumoAgenda,
+  type ResumoSistema,
+} from "@/utils/itm/agenda";
+import {
   addItmPlanToPendingSync,
   addItmOccurrenceToPendingSync,
   syncPendingData,
@@ -29,9 +35,25 @@ export interface ItmPlan {
   createdAt: string;
 }
 
-// Ocorrencia agendada (Parte 2) + completedAt.
+// Resultado da execucao de uma tarefa de ITM.
+export type ItmResult = "approved" | "nonconforming" | "pending";
+
+// Ocorrencia agendada (Parte 2) + dados de conclusao.
 export interface ItmOccurrence extends ItmOccurrenceFlat {
   completedAt?: string;
+  result?: ItmResult;
+  note?: string;
+  completedBy?: string;
+  inspectionId?: string;
+}
+
+// Dados informados ao concluir uma tarefa.
+export interface ConcluirInput {
+  completedAt: string;
+  result?: ItmResult;
+  note?: string;
+  completedBy?: string;
+  inspectionId?: string;
 }
 
 export interface CriarPlanoInput {
@@ -48,10 +70,15 @@ interface ITMContextType {
   isLoading: boolean;
   criarPlano: (input: CriarPlanoInput) => Promise<ItmPlan>;
   removerPlano: (id: string) => Promise<void>;
-  concluirOcorrencia: (id: string, dataConclusao: string) => Promise<void>;
+  concluirOcorrencia: (id: string, dados: ConcluirInput) => Promise<void>;
+  reabrirOcorrencia: (id: string) => Promise<void>;
   regenerarAgenda: (planId: string) => Promise<void>;
   getOcorrenciasDoPlano: (planId: string) => ItmOccurrence[];
+  getOcorrenciasDoSistema: (planId: string, systemKey: string) => ItmOccurrence[];
+  getResumoDoPlano: (planId: string) => ResumoAgenda;
+  getSistemasDoPlano: (planId: string) => ResumoSistema[];
   getPlanoById: (id: string) => ItmPlan | undefined;
+  planoAtivoDaPropriedade: (assetId: string) => ItmPlan | undefined;
   proximasOcorrencias: (limite: number) => ItmOccurrence[];
 }
 
@@ -59,6 +86,9 @@ const ITMContext = createContext<ITMContextType | undefined>(undefined);
 
 const ITM_PLANS_KEY = "@firesafe_itm_plans";
 const ITM_OCCURRENCES_KEY = "@firesafe_itm_occurrences";
+const ITM_VERSION_KEY = "@firesafe_itm_version";
+// v2: corrige geracao (firstDueIsStart=false, horizonte 12m). Regera agendas antigas.
+const ITM_CURRENT_VERSION = "2";
 
 function gerarId(prefixo: string): string {
   return `${prefixo}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -98,16 +128,57 @@ export function ITMProvider({ children }: ITMProviderProps) {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [storedPlans, storedOccurrences] = await Promise.all([
+      const [storedPlans, storedOccurrences, version] = await Promise.all([
         AsyncStorage.getItem(ITM_PLANS_KEY),
         AsyncStorage.getItem(ITM_OCCURRENCES_KEY),
+        AsyncStorage.getItem(ITM_VERSION_KEY),
       ]);
-      if (storedPlans) {
-        setPlans(JSON.parse(storedPlans));
+
+      const loadedPlans: ItmPlan[] = storedPlans ? JSON.parse(storedPlans) : [];
+      let loadedOccurrences: ItmOccurrence[] = storedOccurrences
+        ? JSON.parse(storedOccurrences)
+        : [];
+
+      // Migracao v2: regenera agendas de planos criados com a logica antiga
+      // (que jogava todas as atividades para a data de inicio). Preserva
+      // conclusoes cujo id deterministico ainda exista na nova agenda.
+      if (version !== ITM_CURRENT_VERSION && loadedPlans.length > 0) {
+        const concluidas = new Map<string, ItmOccurrence>();
+        for (const occ of loadedOccurrences) {
+          if (occ.completedAt) concluidas.set(occ.id, occ);
+        }
+        const regeneradas: ItmOccurrence[] = [];
+        for (const plano of loadedPlans) {
+          const novas = gerarAgendaDoPlano(plano, ITM_TEMPLATES);
+          for (const o of novas) {
+            const anterior = concluidas.get(o.id);
+            regeneradas.push(
+              anterior
+                ? {
+                    ...o,
+                    status: "completed",
+                    completedAt: anterior.completedAt,
+                    result: anterior.result,
+                    note: anterior.note,
+                    completedBy: anterior.completedBy,
+                    inspectionId: anterior.inspectionId,
+                  }
+                : (o as ItmOccurrence),
+            );
+          }
+        }
+        loadedOccurrences = regeneradas;
+        await AsyncStorage.setItem(
+          ITM_OCCURRENCES_KEY,
+          JSON.stringify(regeneradas),
+        );
+        await AsyncStorage.setItem(ITM_VERSION_KEY, ITM_CURRENT_VERSION);
+      } else if (version !== ITM_CURRENT_VERSION) {
+        await AsyncStorage.setItem(ITM_VERSION_KEY, ITM_CURRENT_VERSION);
       }
-      if (storedOccurrences) {
-        setOccurrences(JSON.parse(storedOccurrences));
-      }
+
+      setPlans(loadedPlans);
+      setOccurrences(loadedOccurrences);
     } catch (error) {
       console.error("Error loading ITM data:", error);
     } finally {
@@ -186,15 +257,38 @@ export function ITMProvider({ children }: ITMProviderProps) {
     await saveOccurrences(newOccurrences);
   };
 
-  const concluirOcorrencia = async (id: string, dataConclusao: string) => {
+  const concluirOcorrencia = async (id: string, dados: ConcluirInput) => {
     let alvo: ItmOccurrence | undefined;
     const newOccurrences = occurrences.map((o) => {
       if (o.id === id) {
         alvo = {
           ...o,
           status: "completed",
-          completedAt: dataConclusao,
+          completedAt: dados.completedAt,
+          result: dados.result,
+          note: dados.note,
+          completedBy: dados.completedBy,
+          inspectionId: dados.inspectionId,
         };
+        return alvo;
+      }
+      return o;
+    });
+    await saveOccurrences(newOccurrences);
+    if (alvo) {
+      await addItmOccurrenceToPendingSync(alvo);
+      syncPendingData().catch(console.error);
+    }
+  };
+
+  // Reabre uma ocorrencia concluida (volta para agendada).
+  const reabrirOcorrencia = async (id: string) => {
+    let alvo: ItmOccurrence | undefined;
+    const newOccurrences = occurrences.map((o) => {
+      if (o.id === id) {
+        const { completedAt, result, note, completedBy, inspectionId, ...resto } =
+          o;
+        alvo = { ...resto, status: "scheduled" } as ItmOccurrence;
         return alvo;
       }
       return o;
@@ -228,7 +322,34 @@ export function ITMProvider({ children }: ITMProviderProps) {
       .sort((a, b) => (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0));
   };
 
+  // Ocorrencias de UM sistema dentro de um plano (nivel 3 da navegacao).
+  const getOcorrenciasDoSistema = (
+    planId: string,
+    systemKey: string,
+  ): ItmOccurrence[] => {
+    return occurrences
+      .filter((o) => o.planId === planId && o.system === systemKey)
+      .map(comStatusCalculado)
+      .sort((a, b) => (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0));
+  };
+
+  // Resumo (contadores) de um plano inteiro.
+  const getResumoDoPlano = (planId: string): ResumoAgenda => {
+    const occs = occurrences.filter((o) => o.planId === planId);
+    return resumir(occs);
+  };
+
+  // Resumo por sistema (nivel 2 da navegacao).
+  const getSistemasDoPlano = (planId: string): ResumoSistema[] => {
+    const occs = occurrences.filter((o) => o.planId === planId);
+    return resumirPorSistema(occs);
+  };
+
   const getPlanoById = (id: string) => plans.find((p) => p.id === id);
+
+  // Plano ativo existente para uma propriedade (para evitar duplicidade).
+  const planoAtivoDaPropriedade = (assetId: string): ItmPlan | undefined =>
+    plans.find((p) => p.assetId === assetId);
 
   // Seletor: proximas ocorrencias pendentes (nao concluidas), ordenadas por dueDate.
   const proximasOcorrencias = (limite: number): ItmOccurrence[] => {
@@ -248,9 +369,14 @@ export function ITMProvider({ children }: ITMProviderProps) {
         criarPlano,
         removerPlano,
         concluirOcorrencia,
+        reabrirOcorrencia,
         regenerarAgenda,
         getOcorrenciasDoPlano,
+        getOcorrenciasDoSistema,
+        getResumoDoPlano,
+        getSistemasDoPlano,
         getPlanoById,
+        planoAtivoDaPropriedade,
         proximasOcorrencias,
       }}
     >
