@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Pressable, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,6 +36,8 @@ interface FloatingActionButtonProps {
   onPress: () => void;
 }
 
+// FAB de Nova Inspecao (padrao Instrument): 54x54, radius 18, borda 4px na cor
+// do fundo da tela, ember, flutuando acima do centro da barra (top -22px).
 function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
   const { fullTheme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -42,15 +45,12 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
   const rotation = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { rotate: `${rotation.value}deg` },
-    ],
+    transform: [{ scale: scale.value }, { rotate: `${rotation.value}deg` }],
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(1.1, { damping: 15, stiffness: 150 });
-    rotation.value = withSpring(45, { damping: 15, stiffness: 150 });
+    scale.value = withSpring(1.08, { damping: 15, stiffness: 150 });
+    rotation.value = withSpring(90, { damping: 15, stiffness: 150 });
   };
 
   const handlePressOut = () => {
@@ -58,22 +58,27 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
     rotation.value = withSpring(0, { damping: 15, stiffness: 150 });
   };
 
+  // Barra = 78px de altura + safe area. FAB flutua a -22px acima do topo da barra.
+  const bottom = insets.bottom + 78 - 22;
+
   return (
     <AnimatedPressable
+      accessibilityLabel="Nova inspeção"
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[
         styles.fab,
         {
-          bottom: insets.bottom + 70,
+          bottom,
           backgroundColor: fullTheme.colors.primary,
+          borderColor: fullTheme.colors.background,
           ...fullTheme.shadows.large,
         },
         animatedStyle,
       ]}
     >
-      <Feather name="plus" size={28} color="#FFFFFF" />
+      <Feather name="plus" size={26} color="#FFFFFF" />
     </AnimatedPressable>
   );
 }
@@ -81,7 +86,10 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
 export default function MainTabNavigator() {
   const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
+  const navigation = useNavigation<any>();
+
   return (
+    <View style={styles.root}>
     <Tab.Navigator
       initialRouteName="HomeTab"
       screenOptions={{
@@ -170,16 +178,26 @@ export default function MainTabNavigator() {
         }}
       />
     </Tab.Navigator>
+    <FloatingActionButton
+      onPress={() =>
+        navigation.navigate("HomeTab", { screen: "NewInspection" })
+      }
+    />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   fab: {
     position: "absolute",
     alignSelf: "center",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    borderWidth: 4,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
