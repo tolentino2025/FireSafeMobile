@@ -16,6 +16,7 @@ export const translations = {
       plans: {
         title: "Agenda ITM",
         newPlan: "Novo Plano",
+        plansCount: "planos",
         emptyTitle: "Nenhum plano de ITM",
         emptySubtitle:
           "Crie um plano para gerar a agenda de inspeção, teste e manutenção (ITM) conforme a NFPA 25.",
@@ -1899,6 +1900,7 @@ export const translations = {
     },
     properties: {
       title: "Cadastros",
+      eyebrow: "Empresas · Imóveis · Equipamentos",
       companies: "Empresas",
       properties: "Propriedades",
       search: "Buscar...",
@@ -2524,6 +2526,7 @@ export const translations = {
     },
     profile: {
       title: "Perfil",
+      eyebrow: "Conta · Preferências · NFPA 25",
       inspector: "Inspetor",
       certifications: "Certificações",
       language: "Idioma",
@@ -2810,6 +2813,7 @@ export const translations = {
       plans: {
         title: "ITM Schedule",
         newPlan: "New Plan",
+        plansCount: "plans",
         emptyTitle: "No ITM plans",
         emptySubtitle:
           "Create a plan to generate the inspection, testing and maintenance (ITM) schedule per NFPA 25.",
@@ -4692,6 +4696,7 @@ export const translations = {
     },
     properties: {
       title: "Registry",
+      eyebrow: "Companies · Sites · Equipment",
       companies: "Companies",
       properties: "Properties",
       search: "Search...",
@@ -5317,6 +5322,7 @@ export const translations = {
     },
     profile: {
       title: "Profile",
+      eyebrow: "Account · Preferences · NFPA 25",
       inspector: "Inspector",
       certifications: "Certifications",
       language: "Language",

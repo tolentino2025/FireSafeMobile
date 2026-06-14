@@ -52,7 +52,7 @@ export default function PropertiesStackNavigator() {
         name="PropertiesList"
         component={PropertiesScreen}
         options={{
-          headerTitle: t.properties.title,
+          headerShown: false,
         }}
       />
       <Stack.Screen
