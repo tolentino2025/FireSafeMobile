@@ -8,6 +8,7 @@ import { Image as ExpoImage } from "expo-image";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ActionBar } from "@/components/ActionBar";
+import { SteelPlate, type SteelField } from "@/components/SteelPlate";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -355,36 +356,37 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
             <Spacer height={Spacing["2xl"]} />
             <ThemedText type="h2">{t.firePumps.pumpInfo}</ThemedText>
             <Spacer height={Spacing.lg} />
-            <View style={[styles.infoCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
-              <InfoRow icon="tag" label={t.firePumps.tag} value={inspection.firePumpData.tag} />
-              <InfoRow 
-                icon="settings" 
-                label={t.firePumps.type} 
-                value={
-                  inspection.firePumpData.type === "electric_main" ? t.firePumps.electricMain :
-                  inspection.firePumpData.type === "diesel_main" ? t.firePumps.dieselMain :
-                  t.firePumps.jockey
-                } 
-              />
-              {inspection.firePumpData.manufacturer ? (
-                <InfoRow icon="box" label={t.firePumps.manufacturer} value={inspection.firePumpData.manufacturer} />
-              ) : null}
-              {inspection.firePumpData.model ? (
-                <InfoRow icon="info" label={t.firePumps.model} value={inspection.firePumpData.model} />
-              ) : null}
-              {inspection.firePumpData.ratedFlowGpm ? (
-                <InfoRow icon="droplet" label={t.firePumps.ratedFlowGpm} value={`${inspection.firePumpData.ratedFlowGpm} GPM`} />
-              ) : null}
-              {inspection.firePumpData.ratedPressurePsi ? (
-                <InfoRow icon="activity" label={t.firePumps.ratedPressurePsi} value={`${inspection.firePumpData.ratedPressurePsi} PSI`} />
-              ) : null}
-              {inspection.firePumpData.powerHP ? (
-                <InfoRow icon="zap" label={t.firePumps.powerHP} value={`${inspection.firePumpData.powerHP} HP`} isLast={!inspection.firePumpData.serialNumber} />
-              ) : null}
-              {inspection.firePumpData.serialNumber ? (
-                <InfoRow icon="hash" label={t.firePumps.serialNumber} value={inspection.firePumpData.serialNumber} isLast />
-              ) : null}
-            </View>
+            <SteelPlate
+              icon="activity"
+              title={t.firePumps.pumpInfo}
+              fields={(() => {
+                const d = inspection.firePumpData;
+                const f: SteelField[] = [
+                  { label: t.firePumps.tag, value: d.tag || "-" },
+                  {
+                    label: t.firePumps.type,
+                    value:
+                      d.type === "electric_main"
+                        ? t.firePumps.electricMain
+                        : d.type === "diesel_main"
+                          ? t.firePumps.dieselMain
+                          : t.firePumps.jockey,
+                  },
+                ];
+                if (d.manufacturer)
+                  f.push({ label: t.firePumps.manufacturer, value: d.manufacturer });
+                if (d.model) f.push({ label: t.firePumps.model, value: d.model });
+                if (d.ratedFlowGpm)
+                  f.push({ label: t.firePumps.ratedFlowGpm, value: `${d.ratedFlowGpm} GPM` });
+                if (d.ratedPressurePsi)
+                  f.push({ label: t.firePumps.ratedPressurePsi, value: `${d.ratedPressurePsi} PSI` });
+                if (d.powerHP)
+                  f.push({ label: t.firePumps.powerHP, value: `${d.powerHP} HP` });
+                if (d.serialNumber)
+                  f.push({ label: t.firePumps.serialNumber, value: d.serialNumber });
+                return f;
+              })()}
+            />
           </>
         ) : null}
 
