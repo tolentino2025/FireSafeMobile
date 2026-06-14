@@ -8,10 +8,11 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
+import { StatusChip, type StatusChipVariant } from "@/components/StatusChip";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Inspection } from "@/contexts/InspectionContext";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 interface InspectionCardProps {
@@ -58,17 +59,16 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
     scale.value = withSpring(1, { damping: 15, stiffness: 150 });
   };
 
-  const getStatusColor = () => {
+  const getStatusVariant = (): StatusChipVariant => {
     switch (inspection.status) {
       case "completed":
-        return fullTheme.colors.success;
+        return "pass";
       case "in_progress":
-        return fullTheme.colors.warning;
+        return "pending";
       case "draft":
-        return fullTheme.colors.textSecondary;
       case "pending":
       default:
-        return fullTheme.colors.textSecondary;
+        return "neutral";
     }
   };
 
@@ -135,8 +135,13 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
         animatedStyle,
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${fullTheme.colors.primary}15` }]}>
-        <Feather name={icon} size={24} color={fullTheme.colors.primary} />
+      <View
+        style={[
+          styles.iconContainer,
+          { backgroundColor: fullTheme.colors.surfaceAlt },
+        ]}
+      >
+        <Feather name={icon} size={20} color={fullTheme.colors.textPrimary} />
       </View>
       <View style={styles.content}>
         <ThemedText type="h4" numberOfLines={1}>
@@ -149,11 +154,7 @@ export function InspectionCard({ inspection, onPress }: InspectionCardProps) {
           <ThemedText type="small" secondary>
             {formatDate(inspection.date)}
           </ThemedText>
-          <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor()}20` }]}>
-            <ThemedText type="small" style={[styles.statusText, { color: getStatusColor() }]}>
-              {getStatusLabel()}
-            </ThemedText>
-          </View>
+          <StatusChip variant={getStatusVariant()} label={getStatusLabel()} />
         </View>
       </View>
       <Feather name="chevron-right" size={20} color={fullTheme.colors.textSecondary} />
@@ -165,14 +166,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    padding: 13,
+    // Instrument v1.0: item de lista = radius 16
+    borderRadius: 16,
     borderWidth: 1,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -186,15 +188,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: Spacing.xs,
     gap: Spacing.sm,
-  },
-  statusBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-    textTransform: "uppercase",
   },
 });
