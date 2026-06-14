@@ -5,6 +5,8 @@ import { Feather } from "@expo/vector-icons";
 
 import { ScreenFlatList } from "@/components/ScreenFlatList";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { InspectionCard } from "@/components/InspectionCard";
 import { FilterChip } from "@/components/FilterChip";
 import Spacer from "@/components/Spacer";
@@ -132,18 +134,27 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
   );
 
   return (
-    <ScreenFlatList
-      data={filteredInspections}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-      ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderEmpty}
-      contentContainerStyle={styles.listContent}
-    />
+    <ThemedView style={styles.screen}>
+      <ScreenHeader
+        title={t.inspections.title}
+        subtitle={`${filteredInspections.length} ${t.inspections.records} · NFPA 25`}
+      />
+      <ScreenFlatList
+        data={filteredInspections}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmpty}
+        contentContainerStyle={styles.listContent}
+      />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
