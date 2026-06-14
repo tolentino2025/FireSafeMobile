@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Network from 'expo-network';
 import { compressImageForUpload } from './imageCompressor';
 import type { Company, AppUser, Property, Inspection, InspectionSchedule } from '../types/inspection';
+import type { ItmPlan, ItmOccurrence } from '../contexts/ITMContext';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || '';
 const SYNC_KEY = '@firesafe_last_sync';
@@ -13,6 +14,8 @@ interface SyncData {
   properties: Property[];
   inspections: Inspection[];
   schedules: InspectionSchedule[];
+  itm_plans: ItmPlan[];
+  itm_occurrences: ItmOccurrence[];
 }
 
 interface PendingSync {
@@ -21,6 +24,8 @@ interface PendingSync {
   properties: Property[];
   inspections: Inspection[];
   schedules: InspectionSchedule[];
+  itm_plans: ItmPlan[];
+  itm_occurrences: ItmOccurrence[];
   photos: {
     inspectionId: string;
     checklistItemId?: string;
@@ -49,7 +54,18 @@ export const setLastSyncTime = async (time: string): Promise<void> => {
 export const getPendingSync = async (): Promise<PendingSync> => {
   const data = await AsyncStorage.getItem(PENDING_SYNC_KEY);
   if (data) {
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    // Backfill de chaves novas para dados persistidos por versoes antigas.
+    return {
+      companies: parsed.companies ?? [],
+      inspectors: parsed.inspectors ?? [],
+      properties: parsed.properties ?? [],
+      inspections: parsed.inspections ?? [],
+      schedules: parsed.schedules ?? [],
+      itm_plans: parsed.itm_plans ?? [],
+      itm_occurrences: parsed.itm_occurrences ?? [],
+      photos: parsed.photos ?? [],
+    };
   }
   return {
     companies: [],
@@ -57,6 +73,8 @@ export const getPendingSync = async (): Promise<PendingSync> => {
     properties: [],
     inspections: [],
     schedules: [],
+    itm_plans: [],
+    itm_occurrences: [],
     photos: [],
   };
 };
@@ -89,6 +107,14 @@ export const addPhotoToPendingSync = async (photo: PendingSync['photos'][number]
   const pending = await getPendingSync();
   pending.photos.push(photo);
   await setPendingSync(pending);
+};
+
+export const addItmPlanToPendingSync = async (plan: ItmPlan): Promise<void> => {
+  await addToPendingSync('itm_plans', plan);
+};
+
+export const addItmOccurrenceToPendingSync = async (occurrence: ItmOccurrence): Promise<void> => {
+  await addToPendingSync('itm_occurrences', occurrence);
 };
 
 export const syncPush = async (data: Partial<SyncData>): Promise<{ success: boolean; error?: string }> => {
@@ -158,6 +184,8 @@ export const syncPull = async (): Promise<{ success: boolean; data?: SyncData; e
         properties: result.properties || [],
         inspections: result.inspections || [],
         schedules: result.schedules || [],
+        itm_plans: result.itm_plans || [],
+        itm_occurrences: result.itm_occurrences || [],
       },
     };
   } catch (error) {
@@ -219,6 +247,8 @@ export const syncPendingData = async (): Promise<{ success: boolean; syncedCount
     properties: 0,
     inspections: 0,
     schedules: 0,
+    itm_plans: 0,
+    itm_occurrences: 0,
     photos: 0,
   };
 
@@ -227,6 +257,8 @@ export const syncPendingData = async (): Promise<{ success: boolean; syncedCount
     pending.properties.length > 0 ||
     pending.inspections.length > 0 ||
     pending.schedules.length > 0 ||
+    pending.itm_plans.length > 0 ||
+    pending.itm_occurrences.length > 0 ||
     pending.photos.length > 0;
 
   if (!hasData) {
@@ -239,14 +271,17 @@ export const syncPendingData = async (): Promise<{ success: boolean; syncedCount
   }
 
   try {
-    if (pending.companies.length || pending.inspectors.length || pending.properties.length || 
-        pending.inspections.length || pending.schedules.length) {
+    if (pending.companies.length || pending.inspectors.length || pending.properties.length ||
+        pending.inspections.length || pending.schedules.length ||
+        pending.itm_plans.length || pending.itm_occurrences.length) {
       const result = await syncPush({
         companies: pending.companies,
         inspectors: pending.inspectors,
         properties: pending.properties,
         inspections: pending.inspections,
         schedules: pending.schedules,
+        itm_plans: pending.itm_plans,
+        itm_occurrences: pending.itm_occurrences,
       });
 
       if (result.success) {
@@ -255,12 +290,16 @@ export const syncPendingData = async (): Promise<{ success: boolean; syncedCount
         counts.properties = pending.properties.length;
         counts.inspections = pending.inspections.length;
         counts.schedules = pending.schedules.length;
-        
+        counts.itm_plans = pending.itm_plans.length;
+        counts.itm_occurrences = pending.itm_occurrences.length;
+
         pending.companies = [];
         pending.inspectors = [];
         pending.properties = [];
         pending.inspections = [];
         pending.schedules = [];
+        pending.itm_plans = [];
+        pending.itm_occurrences = [];
       }
     }
 
@@ -300,12 +339,14 @@ export const getSyncStatus = async (): Promise<{
     isOnline(),
   ]);
 
-  const pendingCount = 
+  const pendingCount =
     pending.companies.length +
     pending.inspectors.length +
     pending.properties.length +
     pending.inspections.length +
     pending.schedules.length +
+    pending.itm_plans.length +
+    pending.itm_occurrences.length +
     pending.photos.length;
 
   return { lastSync, pendingCount, isOnline: online };
