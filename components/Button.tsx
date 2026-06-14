@@ -138,11 +138,12 @@ export function Button({
 const styles = StyleSheet.create({
   button: {
     height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.md,
+    // Instrument v1.0: botao = radius 13
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
   },
   buttonText: {
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

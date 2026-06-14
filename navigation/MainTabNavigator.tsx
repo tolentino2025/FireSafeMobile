@@ -17,7 +17,7 @@ import PropertiesStackNavigator from "@/navigation/PropertiesStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Spacing } from "@/constants/theme";
+import { Spacing, Fonts } from "@/constants/theme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
@@ -89,19 +89,31 @@ export default function MainTabNavigator() {
         tabBarInactiveTintColor: fullTheme.colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
+          height: 78,
+          paddingTop: 8,
           backgroundColor: Platform.select({
             ios: "transparent",
-            android: fullTheme.colors.background,
+            android: fullTheme.colors.surface,
+            default: fullTheme.colors.surface,
           }),
-          borderTopWidth: 0,
+          borderTopWidth: 1,
+          borderTopColor: fullTheme.colors.border,
           elevation: 0,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          fontFamily: Fonts?.sans,
+        },
+        tabBarItemStyle: {
+          paddingTop: 6,
         },
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
               tint={isDark ? "dark" : "light"}
-              style={StyleSheet.absoluteFill}
+              style={[StyleSheet.absoluteFill, { backgroundColor: fullTheme.colors.surface + "F2" }]}
             />
           ) : null,
         headerShown: false,
@@ -113,7 +125,7 @@ export default function MainTabNavigator() {
         options={{
           title: t.tabs.home,
           tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+            <Feather name="home" size={23} color={color} />
           ),
         }}
       />
@@ -123,7 +135,7 @@ export default function MainTabNavigator() {
         options={{
           title: t.tabs.inspections,
           tabBarIcon: ({ color, size }) => (
-            <Feather name="clipboard" size={size} color={color} />
+            <Feather name="clipboard" size={23} color={color} />
           ),
         }}
       />
@@ -133,7 +145,7 @@ export default function MainTabNavigator() {
         options={{
           title: t.tabs.schedule,
           tabBarIcon: ({ color, size }) => (
-            <Feather name="calendar" size={size} color={color} />
+            <Feather name="calendar" size={23} color={color} />
           ),
         }}
       />
@@ -143,7 +155,7 @@ export default function MainTabNavigator() {
         options={{
           title: t.tabs.properties,
           tabBarIcon: ({ color, size }) => (
-            <Feather name="map-pin" size={size} color={color} />
+            <Feather name="map-pin" size={23} color={color} />
           ),
         }}
       />
@@ -153,7 +165,7 @@ export default function MainTabNavigator() {
         options={{
           title: t.tabs.profile,
           tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
+            <Feather name="user" size={23} color={color} />
           ),
         }}
       />

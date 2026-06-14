@@ -81,7 +81,8 @@ export function Card({ children, onPress, style, elevated = false }: CardProps) 
 const styles = StyleSheet.create({
   card: {
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    // Instrument v1.0: card padrao = 18
+    borderRadius: 18,
     borderWidth: 1,
   },
 });

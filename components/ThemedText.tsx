@@ -1,13 +1,15 @@
 import { Text, type TextProps } from "react-native";
 
 import { useTheme } from "@/hooks/useTheme";
-import { Typography } from "@/constants/theme";
+import { Typography, Fonts } from "@/constants/theme";
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?: "h1" | "h2" | "h3" | "h4" | "body" | "small" | "link";
   secondary?: boolean;
+  /** Usa IBM Plex Mono (dados tecnicos: TAG, RPM, PSI, datas, codigos NFPA). */
+  mono?: boolean;
 };
 
 export function ThemedText({
@@ -16,6 +18,7 @@ export function ThemedText({
   darkColor,
   type = "body",
   secondary = false,
+  mono = false,
   ...rest
 }: ThemedTextProps) {
   const { isDark, fullTheme } = useTheme();
@@ -56,7 +59,17 @@ export function ThemedText({
     }
   };
 
+  const fontFamily = mono ? Fonts?.mono : Fonts?.sans;
+
   return (
-    <Text style={[{ color: getColor() }, getTypeStyle(), style]} {...rest} />
+    <Text
+      style={[
+        { color: getColor() },
+        getTypeStyle(),
+        fontFamily ? { fontFamily } : null,
+        style,
+      ]}
+      {...rest}
+    />
   );
 }
