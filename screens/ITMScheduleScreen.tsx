@@ -25,13 +25,24 @@ import {
 } from "@/contexts/ITMContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { parseLocalYMD } from "@/utils/dateUtils";
-import { rotuloSistema, rotuloFrequencia } from "@/utils/itm/labels";
-import { classificar, hojeISO, type AgendaStatus } from "@/utils/itm/agenda";
+import {
+  rotuloSistema,
+  rotuloFrequencia,
+  ordemFrequencia,
+} from "@/utils/itm/labels";
+import {
+  classificar,
+  resumir,
+  hojeISO,
+  type AgendaStatus,
+} from "@/utils/itm/agenda";
 import { ITMStackParamList } from "@/navigation/ITMStackNavigator";
 
 type Props = NativeStackScreenProps<ITMStackParamList, "ITMSchedule">;
 
 type FiltroKey = "all" | "overdue" | "due_soon" | "future" | "completed";
+// "all" = todas as periodicidades; senao a chave de frequencia (daily, monthly, ...).
+type FreqKey = string;
 
 const ORDEM_GRUPOS: AgendaStatus[] = [
   "overdue",
@@ -49,6 +60,7 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
 
   const [filtro, setFiltro] = useState<FiltroKey>("all");
+  const [freq, setFreq] = useState<FreqKey>("all");
 
   // Estado do modal de conclusao.
   const [alvo, setAlvo] = useState<ItmOccurrence | null>(null);
@@ -81,17 +93,44 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
     { key: "completed", label: t.itm.filters.completed },
   ];
 
-  // Agrupa por status de exibicao, respeitando o filtro selecionado.
+  // Resumo do SISTEMA inteiro (todas as periodicidades), para o cabecalho.
+  const resumoSistema = useMemo(() => resumir(ocorrencias, today), [
+    ocorrencias,
+    today,
+  ]);
+
+  // Periodicidades presentes neste sistema (dinamico), com contagem que
+  // respeita o filtro de STATUS atual. Periodicidades vazias nao aparecem.
+  const frequenciasDisponiveis = useMemo(() => {
+    const contagem = new Map<string, number>();
+    for (const occ of ocorrencias) {
+      const status = classificar(occ, today);
+      if (filtro !== "all" && status !== filtro) continue;
+      contagem.set(occ.frequency, (contagem.get(occ.frequency) ?? 0) + 1);
+    }
+    return Array.from(contagem.entries())
+      .map(([key, count]) => ({ key, count }))
+      .sort((a, b) => ordemFrequencia(a.key) - ordemFrequencia(b.key));
+  }, [ocorrencias, filtro, today]);
+
+  // Total de itens da periodicidade selecionada (respeitando status), para o chip "Todas".
+  const totalTodasFreq = frequenciasDisponiveis.reduce(
+    (acc, f) => acc + f.count,
+    0,
+  );
+
+  // Agrupa por status, respeitando filtro de STATUS + filtro de PERIODICIDADE.
   const grupos = useMemo(() => {
     const map = new Map<AgendaStatus, ItmOccurrence[]>();
     for (const occ of ocorrencias) {
+      if (freq !== "all" && occ.frequency !== freq) continue;
       const status = classificar(occ, today);
       if (filtro !== "all" && status !== filtro) continue;
       if (!map.has(status)) map.set(status, []);
       map.get(status)!.push(occ);
     }
     return map;
-  }, [ocorrencias, filtro, today]);
+  }, [ocorrencias, filtro, freq, today]);
 
   const totalFiltrado = Array.from(grupos.values()).reduce(
     (acc, arr) => acc + arr.length,
@@ -162,8 +201,115 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
 
   return (
     <ThemedView style={styles.container}>
-      {/* Filtros */}
-      <View style={[styles.filterBar, { paddingTop: insets.top + 56 }]}>
+      <View style={[styles.topArea, { paddingTop: insets.top + 56 }]}>
+        {/* Resumo do sistema */}
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryItem}>
+            <ThemedText type="h4">{resumoSistema.total}</ThemedText>
+            <ThemedText type="small" secondary>
+              {t.itm.summary.total}
+            </ThemedText>
+          </View>
+          <View style={styles.summaryItem}>
+            <ThemedText
+              type="h4"
+              style={{
+                color:
+                  resumoSistema.vencidas > 0
+                    ? fullTheme.colors.error
+                    : fullTheme.colors.textPrimary,
+              }}
+            >
+              {resumoSistema.vencidas}
+            </ThemedText>
+            <ThemedText type="small" secondary>
+              {t.itm.summary.overdue}
+            </ThemedText>
+          </View>
+          <View style={styles.summaryItem}>
+            <ThemedText type="h4">{resumoSistema.proximas}</ThemedText>
+            <ThemedText type="small" secondary>
+              {t.itm.summary.soon}
+            </ThemedText>
+          </View>
+          <View style={styles.summaryItem}>
+            <ThemedText type="h4">{resumoSistema.concluidas}</ThemedText>
+            <ThemedText type="small" secondary>
+              {t.itm.summary.completed}
+            </ThemedText>
+          </View>
+        </View>
+        {resumoSistema.proximoVencimento ? (
+          <ThemedText type="small" secondary style={styles.nextDue}>
+            {t.itm.summary.nextDue}: {formatDate(resumoSistema.proximoVencimento)}
+          </ThemedText>
+        ) : null}
+
+        {/* Linha 1 — Periodicidade (dinamica) */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContent}
+        >
+          <Pressable
+            onPress={() => setFreq("all")}
+            style={[
+              styles.chip,
+              {
+                backgroundColor:
+                  freq === "all"
+                    ? fullTheme.colors.primary
+                    : fullTheme.colors.cardBackground,
+                borderColor:
+                  freq === "all"
+                    ? fullTheme.colors.primary
+                    : fullTheme.colors.border,
+              },
+            ]}
+          >
+            <ThemedText
+              type="small"
+              style={{
+                color: freq === "all" ? "#FFFFFF" : fullTheme.colors.textPrimary,
+                fontWeight: "600",
+              }}
+            >
+              {t.itm.freq.all} ({totalTodasFreq})
+            </ThemedText>
+          </Pressable>
+          {frequenciasDisponiveis.map((f) => {
+            const ativo = freq === f.key;
+            return (
+              <Pressable
+                key={f.key}
+                onPress={() => setFreq(f.key)}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: ativo
+                      ? fullTheme.colors.primary
+                      : fullTheme.colors.cardBackground,
+                    borderColor: ativo
+                      ? fullTheme.colors.primary
+                      : fullTheme.colors.border,
+                  },
+                ]}
+              >
+                <ThemedText
+                  type="small"
+                  style={{
+                    color: ativo ? "#FFFFFF" : fullTheme.colors.textPrimary,
+                    fontWeight: "600",
+                  }}
+                >
+                  {rotuloFrequencia(f.key, language)} ({f.count})
+                </ThemedText>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        {/* Linha 2 — Status */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -323,6 +469,12 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
                           </ThemedText>
                         </Pressable>
                       </View>
+                    ) : status === "future" ? (
+                      // Tarefa futura: sem acao de concluir (evita conclusao inconsistente).
+                      <ThemedText type="small" secondary>
+                        {t.itm.schedule.scheduledDate}:{" "}
+                        {formatDate(occ.scheduledDate)}
+                      </ThemedText>
                     ) : (
                       <Pressable
                         onPress={() => abrirModal(occ)}
@@ -482,7 +634,14 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  filterBar: { paddingBottom: Spacing.sm },
+  topArea: { paddingBottom: Spacing.sm, gap: Spacing.sm },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+  },
+  summaryItem: { alignItems: "center", flex: 1, gap: 2 },
+  nextDue: { paddingHorizontal: Spacing.lg },
   filterContent: {
     paddingHorizontal: Spacing.lg,
     gap: Spacing.sm,

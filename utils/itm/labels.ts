@@ -50,6 +50,27 @@ export function rotuloFrequencia(frequency: string, idioma: Idioma): string {
   return idioma === "pt-BR" ? l.pt : l.en;
 }
 
+// Ordem canonica das periodicidades (do mais curto ao mais longo).
+const FREQUENCY_ORDER: string[] = [
+  "daily",
+  "weekly",
+  "biweekly",
+  "monthly",
+  "bimonthly",
+  "quarterly",
+  "semiannual",
+  "annual",
+  "3year",
+  "5year",
+  "10year",
+];
+
+// Peso para ordenacao (frequencias desconhecidas vao para o fim).
+export function ordemFrequencia(frequency: string): number {
+  const i = FREQUENCY_ORDER.indexOf(frequency);
+  return i === -1 ? FREQUENCY_ORDER.length : i;
+}
+
 // Lista de sistemas distintos presentes nos templates, com rotulo.
 export function sistemasDisponiveis(
   idioma: Idioma,

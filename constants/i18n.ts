@@ -71,7 +71,8 @@ export const translations = {
         title: "Agendamentos",
         emptyTitle: "Nenhuma ocorrência",
         emptySubtitle: "Nenhuma ocorrência gerada para este sistema.",
-        emptyFiltered: "Nenhuma ocorrência neste filtro.",
+        emptyFiltered:
+          "Nenhum agendamento encontrado para esta periodicidade e status.",
         dueDate: "Vencimento",
         scheduledDate: "Agendada",
         frequency: "Periodicidade",
@@ -92,6 +93,16 @@ export const translations = {
         due_soon: "Próximos",
         future: "Futuros",
         completed: "Concluídos",
+      },
+      freq: {
+        all: "Todas",
+      },
+      summary: {
+        total: "Total",
+        overdue: "Vencidas",
+        soon: "Próximas 30d",
+        completed: "Concluídas",
+        nextDue: "Próximo vencimento",
       },
       complete: {
         title: "Concluir tarefa",
@@ -2848,7 +2859,7 @@ export const translations = {
         title: "Tasks",
         emptyTitle: "No occurrences",
         emptySubtitle: "No occurrences generated for this system.",
-        emptyFiltered: "No occurrences in this filter.",
+        emptyFiltered: "No schedule found for this frequency and status.",
         dueDate: "Due",
         scheduledDate: "Scheduled",
         frequency: "Frequency",
@@ -2869,6 +2880,16 @@ export const translations = {
         due_soon: "Upcoming",
         future: "Future",
         completed: "Completed",
+      },
+      freq: {
+        all: "All",
+      },
+      summary: {
+        total: "Total",
+        overdue: "Overdue",
+        soon: "Next 30d",
+        completed: "Completed",
+        nextDue: "Next due",
       },
       complete: {
         title: "Complete task",
