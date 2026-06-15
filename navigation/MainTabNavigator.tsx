@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Pressable, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,6 +31,26 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// Telas RAIZ de cada aba — o FAB de Nova Inspeção só aparece nelas.
+// Em telas internas (detalhe, formulário, etc.) o FAB fica oculto para
+// nao cobrir os botoes de acao do rodape (PDF, enviar, salvar).
+const ROOT_ROUTES = new Set([
+  "Home",
+  "InspectionsList",
+  "ITMPlans",
+  "PropertiesList",
+  "Profile",
+]);
+
+// Caminha pelo state da navegacao ate a rota-folha ativa.
+function getActiveLeafRouteName(state: any): string | undefined {
+  if (!state || typeof state.index !== "number") return undefined;
+  const route = state.routes?.[state.index];
+  if (!route) return undefined;
+  if (route.state) return getActiveLeafRouteName(route.state);
+  return route.name;
+}
 
 interface FloatingActionButtonProps {
   onPress: () => void;
@@ -87,6 +107,12 @@ export default function MainTabNavigator() {
   const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
   const navigation = useNavigation<any>();
+
+  // So mostra o FAB nas telas raiz das abas (nao no detalhe/formulario).
+  const leafRoute = useNavigationState((state) =>
+    getActiveLeafRouteName(state),
+  );
+  const showFab = leafRoute ? ROOT_ROUTES.has(leafRoute) : true;
 
   return (
     <View style={styles.root}>
@@ -178,11 +204,13 @@ export default function MainTabNavigator() {
         }}
       />
     </Tab.Navigator>
-    <FloatingActionButton
-      onPress={() =>
-        navigation.navigate("HomeTab", { screen: "NewInspection" })
-      }
-    />
+    {showFab ? (
+      <FloatingActionButton
+        onPress={() =>
+          navigation.navigate("HomeTab", { screen: "NewInspection" })
+        }
+      />
+    ) : null}
     </View>
   );
 }
