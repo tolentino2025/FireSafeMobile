@@ -15,6 +15,7 @@ import {
   wrapDocument 
 } from "@/utils/pdf/pdfLayout";
 import { getLogoDataUri } from "@/utils/pdf/pdfAssets";
+import { printHtml, shareOrPrintHtml } from "@/utils/pdf/pdfPrint";
 
 const INSPECTION_TYPE_NAMES: Record<InspectionType, { en: string; pt: string }> = {
   wet_pipe: { en: "Wet Pipe Sprinkler System", pt: "Sistema de Sprinkler Tubo Molhado" },
@@ -704,12 +705,11 @@ const generateInspectionPdfHtmlWithPhotos = (
   });
 };
 
-export const generateAndPrintPdf = async (options: GeneratePdfOptions): Promise<void> => {
-  const uri = await generatePdfUri(options);
-  await Print.printAsync({ uri });
-};
-
-export const generatePdfUri = async (options: GeneratePdfOptions): Promise<string> => {
+// Monta o HTML COMPLETO do relatório padrão (com fotos em base64 + logo).
+// É a mesma fonte usada para imprimir, compartilhar e gerar URI.
+const buildInspectionPdfHtml = async (
+  options: GeneratePdfOptions,
+): Promise<string> => {
   const [photosWithBase64, logoDataUri] = await Promise.all([
     ensureAllPhotosBase64(options.inspection.photos || []),
     getLogoDataUri(),
@@ -733,24 +733,34 @@ export const generatePdfUri = async (options: GeneratePdfOptions): Promise<strin
     inspection: inspectionWithProcessedPhotos,
   };
 
-  const html = generateInspectionPdfHtmlWithPhotos(optionsWithProcessedPhotos, photosWithBase64, logoDataUri);
+  return generateInspectionPdfHtmlWithPhotos(
+    optionsWithProcessedPhotos,
+    photosWithBase64,
+    logoDataUri,
+  );
+};
+
+// Imprime o relatório completo. Web: abre o HTML formatado em nova aba e imprime.
+// Native: gera arquivo PDF e abre o diálogo de impressão.
+export const generateAndPrintPdf = async (options: GeneratePdfOptions): Promise<void> => {
+  const html = await buildInspectionPdfHtml(options);
+  await printHtml(html);
+};
+
+// Gera um URI de PDF (native). Usado, p.ex., para anexar em e-mail.
+export const generatePdfUri = async (options: GeneratePdfOptions): Promise<string> => {
+  const html = await buildInspectionPdfHtml(options);
   const { uri } = await Print.printToFileAsync({ html });
   return uri;
 };
 
+// Compartilha o relatório completo. Web: nova aba + impressão. Native: share sheet.
 export const generateAndSharePdf = async (options: GeneratePdfOptions): Promise<void> => {
-  const uri = await generatePdfUri(options);
-  
-  const isAvailable = await Sharing.isAvailableAsync();
-  if (isAvailable) {
-    await Sharing.shareAsync(uri, {
-      mimeType: "application/pdf",
-      dialogTitle: `${options.inspection.propertyName || "Inspection"} Report`,
-      UTI: "com.adobe.pdf",
-    });
-  } else {
-    throw new Error("Sharing is not available on this device");
-  }
+  const html = await buildInspectionPdfHtml(options);
+  await shareOrPrintHtml(
+    html,
+    `${options.inspection.propertyName || "Inspection"} Report`,
+  );
 };
 
 export const generateInspectionPdfHtml = generateInspectionPdfHtmlWithPhotos;

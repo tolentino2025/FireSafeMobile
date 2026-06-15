@@ -2,6 +2,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { FM85ACertificate } from "@/types/fm85a";
 import { getLogoDataUri } from "@/utils/pdf/pdfAssets";
+import { printHtml, shareOrPrintHtml } from "@/utils/pdf/pdfPrint";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -1089,29 +1090,23 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
   `;
 };
 
-export const generateFM85APdfUri = async (options: FM85APdfOptions): Promise<string> => {
+const buildFM85AHtml = async (options: FM85APdfOptions): Promise<string> => {
   const logoDataUri = await getLogoDataUri();
-  const html = generateFM85APdfHtml(options, logoDataUri);
+  return generateFM85APdfHtml(options, logoDataUri);
+};
+
+export const generateFM85APdfUri = async (options: FM85APdfOptions): Promise<string> => {
+  const html = await buildFM85AHtml(options);
   const { uri } = await Print.printToFileAsync({ html });
   return uri;
 };
 
 export const generateAndPrintFM85APdf = async (options: FM85APdfOptions): Promise<void> => {
-  const uri = await generateFM85APdfUri(options);
-  await Print.printAsync({ uri });
+  const html = await buildFM85AHtml(options);
+  await printHtml(html);
 };
 
 export const generateAndShareFM85APdf = async (options: FM85APdfOptions): Promise<void> => {
-  const uri = await generateFM85APdfUri(options);
-  
-  const isAvailable = await Sharing.isAvailableAsync();
-  if (isAvailable) {
-    await Sharing.shareAsync(uri, {
-      mimeType: "application/pdf",
-      dialogTitle: "FM Global Certificate FM85A",
-      UTI: "com.adobe.pdf",
-    });
-  } else {
-    await Print.printAsync({ uri });
-  }
+  const html = await buildFM85AHtml(options);
+  await shareOrPrintHtml(html, "FM Global Certificate FM85A");
 };
