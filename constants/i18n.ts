@@ -80,6 +80,7 @@ export const translations = {
         complete: "Concluir",
         reopen: "Reabrir",
         regenerate: "Regerar agenda",
+        addToCalendar: "Adicionar ao calendário (.ics)",
         completedOn: "Concluída em",
         groups: {
           overdue: "Vencidos",
@@ -2878,6 +2879,7 @@ export const translations = {
         complete: "Complete",
         reopen: "Reopen",
         regenerate: "Regenerate schedule",
+        addToCalendar: "Add to calendar (.ics)",
         completedOn: "Completed on",
         groups: {
           overdue: "Overdue",

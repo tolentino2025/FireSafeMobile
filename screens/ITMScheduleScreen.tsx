@@ -37,6 +37,8 @@ import {
   hojeISO,
   type AgendaStatus,
 } from "@/utils/itm/agenda";
+import { buildItmIcs, downloadOrShareIcs } from "@/utils/itm/ics";
+import { showAlert } from "@/utils/appAlert";
 import { ITMStackParamList } from "@/navigation/ITMStackNavigator";
 
 type Props = NativeStackScreenProps<ITMStackParamList, "ITMSchedule">;
@@ -56,7 +58,7 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
   const { planId, systemKey } = route.params;
   const { fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { getOcorrenciasDoSistema, concluirOcorrencia, reabrirOcorrencia } =
+  const { getOcorrenciasDoSistema, concluirOcorrencia, reabrirOcorrencia, getPlanoById } =
     useITM();
   const insets = useSafeAreaInsets();
 
@@ -200,6 +202,29 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
 
   const resultados: ItmResult[] = ["approved", "nonconforming", "pending"];
 
+  // Gera e baixa/compartilha o .ics deste sistema (próximos 90 dias).
+  const handleAddToCalendar = async () => {
+    const plano = getPlanoById(planId);
+    const ics = buildItmIcs(ocorrencias, {
+      propertyName: plano?.propertyName ?? "",
+      language,
+      horizonDays: 90,
+    });
+    const safeName = (plano?.propertyName || "agenda")
+      .replace(/[^a-z0-9]+/gi, "-")
+      .toLowerCase();
+    try {
+      await downloadOrShareIcs(`itm-${safeName}-${systemKey}.ics`, ics);
+    } catch {
+      showAlert(
+        t.common.error,
+        language === "pt-BR"
+          ? "Erro ao gerar o calendário"
+          : "Error generating calendar",
+      );
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <View style={[styles.topArea, { paddingTop: insets.top + 56 }]}>
@@ -245,6 +270,20 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
             {t.itm.summary.nextDue}: {formatDate(resumoSistema.proximoVencimento)}
           </ThemedText>
         ) : null}
+
+        {/* Adicionar ao calendário (.ics, próximos 90 dias) */}
+        <Pressable
+          onPress={handleAddToCalendar}
+          style={[styles.calendarButton, { borderColor: fullTheme.colors.primary }]}
+        >
+          <Feather name="calendar" size={16} color={fullTheme.colors.primary} />
+          <ThemedText
+            type="small"
+            style={{ color: fullTheme.colors.primary, fontWeight: "600" }}
+          >
+            {t.itm.schedule.addToCalendar}
+          </ThemedText>
+        </Pressable>
 
         {/* Linha 1 — Periodicidade (dinamica) */}
         <ScrollView
@@ -578,6 +617,17 @@ const styles = StyleSheet.create({
   },
   summaryItem: { alignItems: "center", flex: 1, gap: 2 },
   nextDue: { paddingHorizontal: Spacing.lg },
+  calendarButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    marginHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: 11,
+    borderWidth: 1,
+  },
   filterContent: {
     paddingHorizontal: Spacing.lg,
     gap: Spacing.sm,
