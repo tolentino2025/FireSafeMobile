@@ -645,6 +645,14 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         checklist: [],
         observations: finalTest.observationsDeficiencies?.generalObservations || "",
         signature: finalTest.signatures?.conductedBy?.signatureData || null,
+        accompanyingName:
+          finalTest.signatures?.ownerRepresentative?.name ||
+          finalTest.signatures?.witnessedBy?.name ||
+          "",
+        accompanyingSignature:
+          finalTest.signatures?.ownerRepresentative?.signatureData ||
+          finalTest.signatures?.witnessedBy?.signatureData ||
+          null,
         photos: [],
         geoLocation: null,
         performanceTestId: finalTest.id,
