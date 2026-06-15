@@ -390,7 +390,10 @@ const generateInspectionPdfHtmlWithPhotos = (
   `
       : "";
 
-  const signatureHtml = inspection.signature
+  const hasSignatureImage =
+    typeof inspection.signature === "string" &&
+    inspection.signature.startsWith("data:");
+  const signatureHtml = hasSignatureImage
     ? `
     <div style="margin-top: 30px; page-break-inside: avoid;">
       <h2 style="color: #1A365D; border-bottom: 2px solid #FF6B00; padding-bottom: 8px; font-size: 16px;">${t.signature}</h2>
