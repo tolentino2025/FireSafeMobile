@@ -40,8 +40,11 @@ function AppContent() {
     );
   }
 
-  // If Supabase is configured and no user is logged in, show auth gate
-  const showAuthGate = isConfigured && !user;
+  // Login só é OBRIGATÓRIO quando EXPO_PUBLIC_AUTH_REQUIRED="1".
+  // Por padrão (testes), mesmo com Supabase configurado, o login é opcional
+  // (disponível no Perfil) e não bloqueia o uso do app.
+  const authRequired = process.env.EXPO_PUBLIC_AUTH_REQUIRED === "1";
+  const showAuthGate = authRequired && isConfigured && !user;
 
   return (
     <>

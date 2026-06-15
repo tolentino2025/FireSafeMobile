@@ -1,5 +1,5 @@
 {
-  "buildCommand": "EXPO_OFFLINE=1 EXPO_PUBLIC_NO_IAP=1 npx expo export --platform web --output-dir dist --clear",
+  "buildCommand": "EXPO_OFFLINE=1 EXPO_PUBLIC_NO_IAP=1 EXPO_PUBLIC_SUPABASE_URL=https://tbbnysvkfnoydjqxdnlc.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_GC_Hwk0Jj9mwPSehlO4DiQ_0XmpqKy1 npx expo export --platform web --output-dir dist --clear",
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [
