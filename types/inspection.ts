@@ -355,6 +355,9 @@ export interface Inspection {
   systemInfo?: SystemInfo;
   observations: string;
   signature: string | null;
+  // Assinatura do responsavel/acompanhante da empresa/propriedade.
+  accompanyingName?: string;
+  accompanyingSignature?: string | null;
   photos: InspectionPhoto[];
   scheduledDate?: string;
   notificationId?: string;
