@@ -24,6 +24,11 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
   const viewShotRef = useRef<ViewShot>(null);
   const currentPathRef = useRef<string>("");
   const pathsRef = useRef<string[]>([]);
+  // Dimensoes reais do canvas (para o viewBox do SVG da assinatura).
+  const layoutRef = useRef<{ width: number; height: number }>({
+    width: 300,
+    height: 150,
+  });
 
   useEffect(() => {
     currentPathRef.current = currentPath;
@@ -39,18 +44,28 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
       return;
     }
 
+    // Constroi um SVG data-URI deterministico a partir dos tracos desenhados.
+    // Funciona em web E nativo (o PDF renderiza o <img> via webview),
+    // ao contrario do captureRef (react-native-view-shot), que falha no web.
     try {
-      if (viewShotRef.current) {
-        const uri = await captureRef(viewShotRef, {
-          format: "png",
-          quality: 1,
-          result: "data-uri",
-        });
-        onSignatureChange(uri);
-      }
+      const { width, height } = layoutRef.current;
+      const pathEls = pathsRef.current
+        .map(
+          (d) =>
+            `<path d="${d}" stroke="#1A365D" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+        )
+        .join("");
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" ` +
+        `viewBox="0 0 ${width} ${height}">` +
+        `<rect width="100%" height="100%" fill="#FFFFFF"/>${pathEls}</svg>`;
+      const encoded = encodeURIComponent(svg)
+        .replace(/'/g, "%27")
+        .replace(/"/g, "%22");
+      onSignatureChange(`data:image/svg+xml,${encoded}`);
     } catch (error) {
-      console.log("Error capturing signature:", error);
-      onSignatureChange("signature_captured");
+      console.log("Error building signature SVG:", error);
+      onSignatureChange(null);
     }
   }, [onSignatureChange]);
 
@@ -106,11 +121,15 @@ export function SignatureCapture({ signature, onSignatureChange }: SignatureCapt
     <View style={styles.container}>
       <GestureDetector gesture={panGesture}>
         <Animated.View
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            if (width && height) layoutRef.current = { width, height };
+          }}
           style={[
             styles.canvasContainer,
-            { 
-              backgroundColor: fullTheme.colors.cardBackground, 
-              borderColor: fullTheme.colors.border 
+            {
+              backgroundColor: fullTheme.colors.cardBackground,
+              borderColor: fullTheme.colors.border
             },
           ]}
         >
