@@ -1,6 +1,7 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as MailComposer from "expo-mail-composer";
+import { printHtml, shareOrPrintHtml } from "@/utils/pdf/pdfPrint";
 import { HydrostaticTest } from "@/types/hydrostaticTest";
 import { Inspection, InspectionPhoto } from "@/contexts/InspectionContext";
 import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
@@ -786,18 +787,15 @@ export async function generateHydrostaticTestPdf(options: HydrostaticPdfOptions)
 
 export async function generateAndPrintHydrostaticTestPdf(options: HydrostaticPdfOptions): Promise<void> {
   const html = await generateHtml(options);
-  await Print.printAsync({ html });
+  await printHtml(html);
 }
 
 export async function generateAndShareHydrostaticTestPdf(options: HydrostaticPdfOptions): Promise<void> {
-  const uri = await generateHydrostaticTestPdf(options);
-  if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(uri, {
-      mimeType: "application/pdf",
-      dialogTitle: options.language === "pt-BR" ? "Compartilhar Relatorio" : "Share Report",
-      UTI: "com.adobe.pdf",
-    });
-  }
+  const html = await generateHtml(options);
+  await shareOrPrintHtml(
+    html,
+    options.language === "pt-BR" ? "Compartilhar Relatorio" : "Share Report",
+  );
 }
 
 export async function generateAndEmailHydrostaticTestPdf(options: HydrostaticPdfOptions & { recipientEmail?: string }): Promise<void> {
