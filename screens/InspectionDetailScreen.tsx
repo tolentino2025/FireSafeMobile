@@ -534,33 +534,6 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           </>
         ) : null}
 
-        {inspection.fm85aCertificate ? (
-          <>
-            <Spacer height={Spacing["2xl"]} />
-            <ThemedText type="h2">FM Global Certificate FM85A</ThemedText>
-            <Spacer height={Spacing.md} />
-            <View style={[styles.infoCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
-              <View style={[styles.infoRow, { borderBottomColor: fullTheme.colors.border }]}>
-                <View style={styles.infoRowLeft}>
-                  <Feather name="file-text" size={18} color={fullTheme.colors.textSecondary} />
-                  <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm }}>
-                    {language === "pt-BR" ? "Certificado disponível" : "Certificate available"}
-                  </ThemedText>
-                </View>
-                <View style={{ flexDirection: "row", gap: Spacing.sm }}>
-                  <Pressable
-                    style={[styles.fm85aBtn, { backgroundColor: fullTheme.colors.primary }]}
-                    onPress={showFM85AOptions}
-                  >
-                    <Feather name="printer" size={16} color="#FFF" />
-                    <ThemedText type="small" style={{ color: "#FFF", marginLeft: 4 }}>PDF</ThemedText>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          </>
-        ) : null}
-
         {inspection.signature ? (
           <>
             <Spacer height={Spacing["2xl"]} />
