@@ -30,11 +30,57 @@ Isso cria: `user_notification_preferences`, `notification_logs`, `user_push_toke
 As env do cliente já estão embutidas no `buildCommand` do `vercel.json` (publishable é pública).
 Nada a fazer — o próximo deploy já conecta. (Opcional: mover para o painel de Env do Vercel.)
 
-## 4. Para o worker de e-mail (Fase 5) — quando formos ativar
-Você precisará fornecer (NÃO vão para o cliente):
-- **`SUPABASE_SERVICE_ROLE_KEY`** (Supabase → Project Settings → API → service_role) — só no servidor.
-- Chave do provedor de e-mail (recomendado **Resend**: `RESEND_API_KEY`).
-- Decidir onde roda o cron (Vercel Cron, Supabase Edge + pg_cron, ou o servidor Express).
+## 4. Worker de e-mail 48h (Fase 5) — Supabase Edge + pg_cron a cada 60 min
+
+Arquitetura escolhida: **Supabase Edge Function + pg_cron** (decisão sua), rodando **a cada 60 minutos**.
+
+> **Como o worker enxerga as ocorrências?** As ocorrências oficiais vivem no app
+> (AsyncStorage). Resolvemos o gap espelhando as ocorrências futuras (não concluídas,
+> dentro do horizonte) em `public.itm_occurrences` via `utils/itm/occurrenceSync.ts`,
+> com `notify_at` (48h antes) e e-mail já calculados. **Requer login** — sem conta o
+> app não tem `user_id`/e-mail para mirar (e-mail 48h só vale com `EXPO_PUBLIC_AUTH_REQUIRED=1`
+> ou usuário logado no Perfil).
+
+### 4.1 Rodar as migrations novas (na sua máquina)
+```bash
+cd <pasta-do-projeto>
+git pull origin claude/fix-apple-review-feedback-tto9g   # pega 0002 e 0003
+supabase db push      # aplica 0002_itm_occurrences_sync.sql e 0003_cron_notify_48h.sql
+```
+
+### 4.2 Definir os segredos do worker (NÃO vão para o cliente)
+No Supabase → Project Settings → API, copie a **service_role key**. Depois:
+```bash
+supabase secrets set RESEND_API_KEY=re_xxx
+supabase secrets set NOTIFY_FROM_EMAIL="FireSafe ITM <itm@seu-dominio.com>"
+# SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já existem no runtime das Edge Functions.
+```
+
+### 4.3 Publicar a Edge Function
+```bash
+supabase functions deploy notify-48h
+# teste manual:
+supabase functions invoke notify-48h
+```
+
+### 4.4 Habilitar o cron (uma vez, no SQL Editor do Supabase)
+A migration `0003` agenda o pg_cron, mas precisa dos segredos no **Vault** (não vão ao repo):
+```sql
+select vault.create_secret('COLE_A_SERVICE_ROLE_KEY', 'notify_48h_service_key');
+select vault.create_secret('https://tbbnysvkfnoydjqxdnlc.supabase.co', 'project_url');
+```
+Depois reaplique a migration `0003` (ou rode o `cron.schedule` dela) e confira:
+```sql
+select jobname, schedule from cron.job where jobname = 'itm-notify-48h';
+```
+
+### 4.5 Provedor de e-mail
+Recomendado **Resend** (`RESEND_API_KEY`). Para produção, verifique seu domínio no Resend
+e ajuste `NOTIFY_FROM_EMAIL`. Sem domínio verificado, use `onboarding@resend.dev` (apenas testes).
+
+### O que ainda falta de você
+1. **`SUPABASE_SERVICE_ROLE_KEY`** — usado em 4.2 (secret) e 4.4 (Vault). **Não cole no repo.**
+2. **`RESEND_API_KEY`** + remetente (`NOTIFY_FROM_EMAIL`).
 
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
@@ -44,5 +90,7 @@ Você precisará fornecer (NÃO vão para o cliente):
 ## 6. Status atual
 - Cliente conecta ao Supabase ✅
 - Login opcional (não bloqueia testes) ✅
-- Tabelas de notificação: **prontas para `db push`** (rodar passo 2) ⏳
-- E-mail 48h / push remoto / Google / Outlook: próximas fases (precisam service_role + worker) ⏳
+- Tabelas de notificação (0001): **aplicadas** (`db push`) ✅
+- Espelho de ocorrências + cron (0002/0003) e Edge Function `notify-48h`: **código pronto** ⏳
+  (falta `db push`, `secrets set`, `functions deploy` e os segredos do passo 4 — service_role + Resend)
+- Push remoto / Google / Outlook: próximas fases ⏳

@@ -24,6 +24,10 @@ import {
   syncPendingData,
 } from "@/utils/syncService";
 import { syncItmLocalReminders } from "@/utils/itm/localReminders";
+import {
+  syncItmOccurrencesToSupabase,
+  markItmOccurrenceCompletedInSupabase,
+} from "@/utils/itm/occurrenceSync";
 
 // Plano de ITM associado a uma propriedade (asset).
 export interface ItmPlan {
@@ -131,6 +135,14 @@ export function ITMProvider({ children }: ITMProviderProps) {
   useEffect(() => {
     if (!isLoading) {
       syncItmLocalReminders(occurrences).catch(() => {});
+    }
+  }, [occurrences, isLoading]);
+
+  // FASE 5 — espelha as ocorrências futuras no Supabase para o worker de e-mail
+  // 48h (Edge Function notify-48h). No-op se Supabase não configurado ou sem login.
+  useEffect(() => {
+    if (!isLoading) {
+      syncItmOccurrencesToSupabase(occurrences).catch(() => {});
     }
   }, [occurrences, isLoading]);
 
@@ -287,6 +299,8 @@ export function ITMProvider({ children }: ITMProviderProps) {
     if (alvo) {
       await addItmOccurrenceToPendingSync(alvo);
       syncPendingData().catch(console.error);
+      // FASE 5 — cancela o e-mail 48h pendente no Supabase (marca como concluída).
+      markItmOccurrenceCompletedInSupabase(id, dados.completedAt).catch(() => {});
     }
   };
 
