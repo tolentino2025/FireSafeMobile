@@ -30,6 +30,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { generateDieselPumpPdf } from "@/utils/performanceTestPdfGenerator";
+import { showAlert } from "@/utils/appAlert";
 
 type DieselPerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "DieselPerformanceTest">;
 
@@ -503,13 +504,13 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      Alert.alert(
+      showAlert(
         "Success",
         t.performanceTest?.draftSaved || "Draft saved successfully"
       );
     } catch (error) {
       console.error("Error in handleSaveDraft:", error);
-      Alert.alert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving draft");
+      showAlert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving draft");
     } finally {
       setIsSaving(false);
     }
@@ -520,7 +521,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     if (isSaving) return;
     
     if (!test.contractorInfo?.companyName?.trim()) {
-      Alert.alert(
+      showAlert(
         language === "pt-BR" ? "Prestadora obrigatória" : "Contractor required",
         language === "pt-BR"
           ? "Selecione a Prestadora (Contratante) no topo do formulário para salvar. Se não houver nenhuma cadastrada, cadastre em Cadastros → Prestadoras."
@@ -529,7 +530,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       return;
     }
     if (!test.jobInfo?.jobName?.trim()) {
-      Alert.alert(
+      showAlert(
         language === "pt-BR" ? "Obra/Local obrigatório" : "Job/Site required",
         language === "pt-BR"
           ? "Selecione a Obra/Local (Job Site) no formulário para salvar. Se não houver nenhuma cadastrada, cadastre em Cadastros → Obras."
@@ -614,14 +615,14 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       
-      Alert.alert(
+      showAlert(
         "Success",
         t.performanceTest?.testSaved || "Performance test saved successfully",
-        [{ text: "OK", onPress: () => navigation.goBack() }]
       );
+      navigation.goBack();
     } catch (error) {
       console.error("Error saving performance test:", error);
-      Alert.alert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving test");
+      showAlert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving test");
     } finally {
       setIsSaving(false);
     }
@@ -637,14 +638,14 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       const result = await generateDieselPumpPdf(pdfSource, language);
       
       if (!result.success) {
-        Alert.alert(
+        showAlert(
           t.common?.error || "Error",
           result.message || t.performanceTest?.pdfError || "Error generating PDF"
         );
       }
     } catch (error) {
       console.error("Error exporting PDF:", error);
-      Alert.alert(
+      showAlert(
         t.common?.error || "Error",
         t.performanceTest?.pdfError || "Error generating PDF"
       );
@@ -807,7 +808,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       });
     
     if (validReadings.length < 2) {
-      Alert.alert(
+      showAlert(
         dt?.pumpCurve?.insufficientData || "Insufficient Data",
         dt?.pumpCurve?.needMoreReadings || "Please enter at least 2 complete readings (Flow GPM, Suction PSI, Discharge PSI) to generate the pump curve."
       );
