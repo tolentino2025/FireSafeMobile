@@ -589,6 +589,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
           </View>
         ) : (
           <ActionBar
+            onPrint={handlePrintPdf}
             onShare={showShareOptions}
             onEdit={handleEdit}
             onDelete={handleDelete}
