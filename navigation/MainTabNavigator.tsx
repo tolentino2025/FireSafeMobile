@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Pressable, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useNavigation, useNavigationState } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -109,10 +109,22 @@ export default function MainTabNavigator() {
   const navigation = useNavigation<any>();
 
   // So mostra o FAB nas telas raiz das abas (nao no detalhe/formulario).
-  const leafRoute = useNavigationState((state) =>
-    getActiveLeafRouteName(state),
-  );
-  const showFab = leafRoute ? ROOT_ROUTES.has(leafRoute) : true;
+  // Usa getState()+listener (nao useNavigationState) para nao lançar no nivel
+  // do wrapper do navegador.
+  const [showFab, setShowFab] = useState(true);
+  useEffect(() => {
+    const update = () => {
+      try {
+        const leaf = getActiveLeafRouteName(navigation.getState?.());
+        setShowFab(leaf ? ROOT_ROUTES.has(leaf) : true);
+      } catch {
+        setShowFab(true);
+      }
+    };
+    update();
+    const unsub = navigation.addListener?.("state", update);
+    return unsub;
+  }, [navigation]);
 
   return (
     <View style={styles.root}>
