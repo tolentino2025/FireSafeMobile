@@ -12,6 +12,7 @@ interface ActionBarProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onSend?: () => void;
+  onPrint?: () => void;
   showSend?: boolean;
 }
 
@@ -20,6 +21,7 @@ export function ActionBar({
   onEdit,
   onDelete,
   onSend,
+  onPrint,
   showSend = false,
 }: ActionBarProps) {
   const { fullTheme } = useTheme();
@@ -32,6 +34,15 @@ export function ActionBar({
         { borderColor: fullTheme.colors.border },
       ]}
     >
+      {onPrint ? (
+        <Pressable style={styles.action} onPress={onPrint}>
+          <Feather name="file-text" size={18} color={fullTheme.colors.primary} />
+          <ThemedText style={[styles.label, { color: fullTheme.colors.primary }]}>
+            {t.report.generate}
+          </ThemedText>
+        </Pressable>
+      ) : null}
+
       {onShare ? (
         <Pressable style={styles.action} onPress={onShare}>
           <Feather name="share-2" size={18} color={fullTheme.colors.primary} />
