@@ -23,6 +23,7 @@ import {
   addItmOccurrenceToPendingSync,
   syncPendingData,
 } from "@/utils/syncService";
+import { syncItmLocalReminders } from "@/utils/itm/localReminders";
 
 // Plano de ITM associado a uma propriedade (asset).
 export interface ItmPlan {
@@ -124,6 +125,14 @@ export function ITMProvider({ children }: ITMProviderProps) {
   useEffect(() => {
     loadData();
   }, []);
+
+  // FASE 2 — mantém os lembretes locais (48h) sincronizados com as ocorrências.
+  // Mobile-only e só se o usuário habilitar push nas preferências (no-op no web).
+  useEffect(() => {
+    if (!isLoading) {
+      syncItmLocalReminders(occurrences).catch(() => {});
+    }
+  }, [occurrences, isLoading]);
 
   const loadData = async () => {
     try {

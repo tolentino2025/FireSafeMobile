@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Pressable, Switch, Alert, Linking, Platform, Modal, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "@/contexts/AuthContext";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
@@ -31,6 +32,7 @@ const ADMIN_EMAIL = "suporte@firesafeitm.com";
 type HelpType = "question" | "comment" | "suggestion" | "bugReport" | "other";
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<any>();
   const { fullTheme, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const { inspections, refreshData } = useInspections();
@@ -359,6 +361,11 @@ export default function ProfileScreen() {
               thumbColor={notificationsEnabled ? "#FFFFFF" : "#F4F4F4"}
             />
           }
+        />
+        <SettingsRow
+          icon="calendar"
+          label={language === "pt-BR" ? "Notificações e Calendário" : "Notifications & Calendar"}
+          onPress={() => navigation.navigate("NotificationSettings")}
         />
         <SettingsRow
           icon="book-open"
