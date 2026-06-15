@@ -84,6 +84,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   );
   const [observations, setObservations] = useState(existingInspection?.observations || "");
   const [signature, setSignature] = useState<string | null>(existingInspection?.signature || null);
+  const [accompanyingName, setAccompanyingName] = useState<string>(existingInspection?.accompanyingName || "");
+  const [accompanyingSignature, setAccompanyingSignature] = useState<string | null>(existingInspection?.accompanyingSignature || null);
   const [photos, setPhotos] = useState<InspectionPhoto[]>(existingInspection?.photos || []);
   const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(existingInspection?.geoLocation || null);
   const [autoSaved, setAutoSaved] = useState(false);
@@ -356,6 +358,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       checklist,
       observations,
       signature,
+      accompanyingName,
+      accompanyingSignature,
       photos,
       companyId: selectedCompanyId,
       companyData: selectedCompany,
@@ -413,6 +417,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         checklist,
         observations,
         signature,
+      accompanyingName,
+      accompanyingSignature,
         photos,
         companyId: selectedCompanyId,
         companyData: selectedCompany,
@@ -475,6 +481,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       checklist,
       observations,
       signature,
+      accompanyingName,
+      accompanyingSignature,
       photos,
       companyId: selectedCompanyId,
       companyData: selectedCompany,
@@ -544,6 +552,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       checklist,
       observations,
       signature,
+      accompanyingName,
+      accompanyingSignature,
       photos,
       companyId: selectedCompanyId,
       companyData: selectedCompany,
@@ -592,6 +602,8 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       checklist,
       observations,
       signature,
+      accompanyingName,
+      accompanyingSignature,
       photos,
       companyId: selectedCompanyId,
       companyData: selectedCompany,
@@ -1062,6 +1074,24 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       <SignatureCapture
         signature={signature}
         onSignatureChange={setSignature}
+      />
+
+      <Spacer height={Spacing["2xl"]} />
+
+      <ThemedText type="h3">{t.form.accompanyingSignature}</ThemedText>
+      <Spacer height={Spacing.sm} />
+      <TextInput
+        style={inputStyle}
+        value={accompanyingName}
+        onChangeText={(text) => setAccompanyingName(toUpperIfNotEmail(text, "accompanyingName"))}
+        placeholder={t.form.accompanyingName}
+        placeholderTextColor={theme.placeholder}
+        autoCapitalize="characters"
+      />
+      <Spacer height={Spacing.sm} />
+      <SignatureCapture
+        signature={accompanyingSignature}
+        onSignatureChange={setAccompanyingSignature}
       />
 
       <Spacer height={100 + Spacing["4xl"]} />

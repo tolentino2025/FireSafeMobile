@@ -175,6 +175,7 @@ const translations = {
     staticPsi: "Static Pressure",
     observations: "Observations",
     signature: "Inspector Signature",
+    accompanyingSignature: "Accompanying Person Signature",
     photos: "Inspection Photos",
     generatedOn: "Report generated on",
     page: "Page",
@@ -243,6 +244,7 @@ const translations = {
     staticPsi: "Pressão Estática",
     observations: "Observações",
     signature: "Assinatura do Inspetor",
+    accompanyingSignature: "Assinatura do Acompanhante",
     photos: "Fotos da Inspeção",
     generatedOn: "Relatório gerado em",
     page: "Página",
@@ -393,14 +395,49 @@ const generateInspectionPdfHtmlWithPhotos = (
   const hasSignatureImage =
     typeof inspection.signature === "string" &&
     inspection.signature.startsWith("data:");
-  const signatureHtml = hasSignatureImage
+  const hasAccompanyingSignature =
+    typeof inspection.accompanyingSignature === "string" &&
+    inspection.accompanyingSignature.startsWith("data:");
+
+  const signatureCard = (
+    label: string,
+    img: string,
+    name: string,
+    role?: string,
+  ) => `
+      <div style="flex: 1; min-width: 220px; padding: 15px; background: #F9FAFB; border-radius: 8px;">
+        <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em;">${label}</p>
+        <img src="${img}" style="max-height: 80px;" />
+        <p style="margin: 10px 0 0 0; font-size: 12px; color: #6B7280;">${sanitizeHtml(name) || "-"}</p>
+        ${role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #9CA3AF;">${sanitizeHtml(role)}</p>` : ""}
+      </div>`;
+
+  const signatureCards = [
+    hasSignatureImage
+      ? signatureCard(
+          t.signature,
+          inspection.signature as string,
+          inspection.inspectorName,
+          inspectorData?.role,
+        )
+      : "",
+    hasAccompanyingSignature
+      ? signatureCard(
+          t.accompanyingSignature,
+          inspection.accompanyingSignature as string,
+          inspection.accompanyingName || "",
+        )
+      : "",
+  ]
+    .filter(Boolean)
+    .join("");
+
+  const signatureHtml = signatureCards
     ? `
     <div style="margin-top: 30px; page-break-inside: avoid;">
       <h2 style="color: #1A365D; border-bottom: 2px solid #FF6B00; padding-bottom: 8px; font-size: 16px;">${t.signature}</h2>
-      <div style="margin-top: 15px; padding: 15px; background: #F9FAFB; border-radius: 8px; display: inline-block;">
-        <img src="${inspection.signature}" style="max-height: 80px;" />
-        <p style="margin: 10px 0 0 0; font-size: 12px; color: #6B7280;">${sanitizeHtml(inspection.inspectorName) || "-"}</p>
-        ${inspectorData?.role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #9CA3AF;">${sanitizeHtml(inspectorData.role)}</p>` : ""}
+      <div style="margin-top: 15px; display: flex; gap: 16px; flex-wrap: wrap;">
+        ${signatureCards}
       </div>
     </div>
   `
