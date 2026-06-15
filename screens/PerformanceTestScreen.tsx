@@ -594,11 +594,21 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
 
   const handleSubmit = async () => {
     if (!test.contractorInfo?.companyName?.trim()) {
-      Alert.alert(t.common.error, t.performanceTest?.contractorRequired || "Contractor information is required");
+      Alert.alert(
+        language === "pt-BR" ? "Prestadora obrigatória" : "Contractor required",
+        language === "pt-BR"
+          ? "Informe a Prestadora (Contratante) para salvar. Selecione uma cadastrada ou preencha o nome da empresa no formulário."
+          : "Provide the Contractor to save. Select a registered one or fill in the company name in the form.",
+      );
       return;
     }
     if (!test.jobInfo?.jobName?.trim()) {
-      Alert.alert(t.common.error, t.performanceTest?.jobRequired || "Job/Site information is required");
+      Alert.alert(
+        language === "pt-BR" ? "Obra/Local obrigatório" : "Job/Site required",
+        language === "pt-BR"
+          ? "Informe a Obra/Local (Job Site) para salvar. Selecione uma cadastrada ou preencha o nome da obra no formulário."
+          : "Provide the Job/Site to save. Select a registered one or fill in the job name in the form.",
+      );
       return;
     }
 
