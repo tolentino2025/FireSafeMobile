@@ -520,11 +520,21 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
     if (isSaving) return;
     
     if (!test.contractorInfo?.companyName?.trim()) {
-      Alert.alert(t.common?.error || "Error", t.performanceTest?.contractorRequired || "Contractor information is required");
+      Alert.alert(
+        language === "pt-BR" ? "Prestadora obrigatória" : "Contractor required",
+        language === "pt-BR"
+          ? "Selecione a Prestadora (Contratante) no topo do formulário para salvar. Se não houver nenhuma cadastrada, cadastre em Cadastros → Prestadoras."
+          : "Select the Contractor at the top of the form to save. If there is none, register one in Registry → Contractors.",
+      );
       return;
     }
     if (!test.jobInfo?.jobName?.trim()) {
-      Alert.alert(t.common?.error || "Error", t.performanceTest?.jobRequired || "Job/Site information is required");
+      Alert.alert(
+        language === "pt-BR" ? "Obra/Local obrigatório" : "Job/Site required",
+        language === "pt-BR"
+          ? "Selecione a Obra/Local (Job Site) no formulário para salvar. Se não houver nenhuma cadastrada, cadastre em Cadastros → Obras."
+          : "Select the Job/Site in the form to save. If there is none, register one in Registry → Job Sites.",
+      );
       return;
     }
 
