@@ -1,0 +1,3 @@
+# Supabase CLI — config mínima.
+# Use: supabase link --project-ref tbbnysvkfnoydjqxdnlc  &&  supabase db push
+project_id = "tbbnysvkfnoydjqxdnlc"
