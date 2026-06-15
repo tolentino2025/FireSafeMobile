@@ -36,6 +36,7 @@ import { Spacing, BorderRadius, AppColors, Fonts } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert } from "@/utils/appAlert";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 import { generateAndPrintHydrostaticTestPdf, generateAndShareHydrostaticTestPdf, generateAndEmailHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
@@ -321,21 +322,50 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     );
   }, []);
 
+  // Lista os campos obrigatórios ainda não preenchidos (não-hidrostático).
+  // Usado para avisar o usuário ao Enviar ou Gerar PDF.
+  const getMissingFields = (): string[] => {
+    const missing: string[] = [];
+    const hasInspector = !!(inspectorName.trim() || selectedInspectorId);
+    if (!propertyName.trim()) {
+      missing.push(language === "pt-BR" ? "Nome da propriedade" : "Property name");
+    }
+    if (!hasInspector) {
+      missing.push(language === "pt-BR" ? "Inspetor" : "Inspector");
+    }
+    if (!date) {
+      missing.push(language === "pt-BR" ? "Data" : "Date");
+    }
+    return missing;
+  };
+
+  const avisarCamposFaltando = (missing: string[]) => {
+    const title = language === "pt-BR" ? "Campos obrigatórios" : "Required fields";
+    const subtitle =
+      language === "pt-BR"
+        ? "Preencha os seguintes campos:"
+        : "Please fill in the following fields:";
+    showAlert(title, `${subtitle}\n\n${missing.map((m) => `• ${m}`).join("\n")}`);
+  };
+
   const handleSubmit = async () => {
     if (isHydrostatic) {
       const validationErrors = validateHydrostaticTest(hydrostaticTest, language as "en" | "pt-BR");
       if (validationErrors.length > 0) {
         const errorMessages = validationErrors.map(e => `- ${e.message}`).join('\n');
         const title = language === "pt-BR" ? "Campos Obrigatórios" : "Required Fields";
-        const subtitle = language === "pt-BR" 
-          ? "Por favor, preencha os seguintes campos:" 
+        const subtitle = language === "pt-BR"
+          ? "Por favor, preencha os seguintes campos:"
           : "Please fill in the following fields:";
-        Alert.alert(title, `${subtitle}\n\n${errorMessages}`);
+        showAlert(title, `${subtitle}\n\n${errorMessages}`);
         return;
       }
-    } else if (!propertyName.trim()) {
-      Alert.alert(t.common.error, t.form.required);
-      return;
+    } else {
+      const missing = getMissingFields();
+      if (missing.length > 0) {
+        avisarCamposFaltando(missing);
+        return;
+      }
     }
 
     const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
@@ -390,7 +420,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       navigation.goBack();
     } catch (error) {
       console.error("Error saving inspection:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
@@ -444,19 +474,27 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      Alert.alert(
+      showAlert(
         t.common.success,
         language === "pt-BR" ? "Rascunho salvo com sucesso" : "Draft saved successfully"
       );
     } catch (error) {
       console.error("Error saving draft:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleExportPdf = async () => {
+    // Avisa campos obrigatórios faltando antes de gerar o PDF (não-hidrostático).
+    if (!isHydrostatic) {
+      const missing = getMissingFields();
+      if (missing.length > 0) {
+        avisarCamposFaltando(missing);
+        return;
+      }
+    }
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -512,7 +550,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       }
     } catch (error) {
       console.error("Error generating PDF:", error);
-      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
+      showAlert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
     }
   };
 
@@ -525,7 +563,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       await generateAndShareFM85APdf({ certificate: fm85aCertificate, language: language as "en" | "pt-BR" });
     } catch (error) {
       console.error("Error generating FM85A PDF:", error);
-      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
+      showAlert(t.common.error, language === "pt-BR" ? "Erro ao gerar PDF" : "Error generating PDF");
     }
   };
 
@@ -575,7 +613,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       });
     } catch (error) {
       console.error("Error sharing hydrostatic PDF:", error);
-      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao compartilhar PDF" : "Error sharing PDF");
+      showAlert(t.common.error, language === "pt-BR" ? "Erro ao compartilhar PDF" : "Error sharing PDF");
     }
   };
 
@@ -626,7 +664,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       });
     } catch (error) {
       console.error("Error emailing hydrostatic PDF:", error);
-      Alert.alert(t.common.error, language === "pt-BR" ? "Erro ao enviar email" : "Error sending email");
+      showAlert(t.common.error, language === "pt-BR" ? "Erro ao enviar email" : "Error sending email");
     }
   };
 

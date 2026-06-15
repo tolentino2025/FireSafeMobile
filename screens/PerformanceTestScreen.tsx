@@ -38,6 +38,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
+import { showAlert } from "@/utils/appAlert";
 
 type PerformanceTestScreenProps = NativeStackScreenProps<HomeStackParamList, "PerformanceTest">;
 
@@ -581,12 +582,12 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      Alert.alert(
+      showAlert(
         t.common.success || "Success",
         t.performanceTest?.draftSaved || "Draft saved successfully"
       );
     } catch (error) {
-      Alert.alert(t.common.error, t.performanceTest?.saveError || "Error saving draft");
+      showAlert(t.common.error, t.performanceTest?.saveError || "Error saving draft");
     } finally {
       setIsSaving(false);
     }
@@ -594,7 +595,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
 
   const handleSubmit = async () => {
     if (!test.contractorInfo?.companyName?.trim()) {
-      Alert.alert(
+      showAlert(
         language === "pt-BR" ? "Prestadora obrigatória" : "Contractor required",
         language === "pt-BR"
           ? "Informe a Prestadora (Contratante) para salvar. Selecione uma cadastrada ou preencha o nome da empresa no formulário."
@@ -603,7 +604,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       return;
     }
     if (!test.jobInfo?.jobName?.trim()) {
-      Alert.alert(
+      showAlert(
         language === "pt-BR" ? "Obra/Local obrigatório" : "Job/Site required",
         language === "pt-BR"
           ? "Informe a Obra/Local (Job Site) para salvar. Selecione uma cadastrada ou preencha o nome da obra no formulário."
@@ -682,14 +683,14 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       
-      Alert.alert(
+      showAlert(
         t.common.success || "Success",
         t.performanceTest?.testSaved || "Performance test saved successfully",
-        [{ text: "OK", onPress: () => navigation.goBack() }]
       );
+      navigation.goBack();
     } catch (error) {
       console.error("Error saving performance test:", error);
-      Alert.alert(t.common.error, t.performanceTest?.saveError || "Error saving test");
+      showAlert(t.common.error, t.performanceTest?.saveError || "Error saving test");
     } finally {
       setIsSaving(false);
     }
@@ -705,14 +706,14 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       const result = await generateElectricPumpPdf(pdfSource, language);
       
       if (!result.success) {
-        Alert.alert(
+        showAlert(
           t.common?.error || "Error",
           result.message || t.performanceTest?.pdfError || "Error generating PDF"
         );
       }
     } catch (error) {
       console.error("Error exporting PDF:", error);
-      Alert.alert(
+      showAlert(
         t.common?.error || "Error",
         t.performanceTest?.pdfError || "Error generating PDF"
       );
