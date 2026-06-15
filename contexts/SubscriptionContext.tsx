@@ -57,7 +57,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isPremium = subscriptionData.plan !== "free";
+  // No build de teste/web (sem IAP), libera tudo como premium para testes.
+  // No build real (iOS com IAP), mantém a regra normal de assinatura.
+  const IAP_DISABLED = process.env.EXPO_PUBLIC_NO_IAP === "1";
+  const isPremium = IAP_DISABLED || subscriptionData.plan !== "free";
   const activePlan = subscriptionData.plan;
 
   const canCreateInspection = (currentCount: number): boolean => {
