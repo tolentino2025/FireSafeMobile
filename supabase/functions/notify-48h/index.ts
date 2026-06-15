@@ -4,23 +4,24 @@
 //   1. Varre public.itm_occurrences com notify_at já vencido (<= agora), não concluídas.
 //   2. Respeita user_notification_preferences.email_48h_enabled (default: ligado).
 //   3. Pula o que já foi enviado (notification_logs — idempotência).
-//   4. Envia e-mail via Resend e grava o log.
+//   4. Envia e-mail via Brevo (Sendinblue) e grava o log.
 //
 // COMO RODAR:
 //   - Disparado a cada 60 min pelo pg_cron (ver migration 0003_cron_notify_48h.sql).
 //   - Também pode ser chamado manualmente: supabase functions invoke notify-48h
 //
 // SEGREDOS (NÃO vão para o cliente) — definir com:
-//   supabase secrets set RESEND_API_KEY=...  NOTIFY_FROM_EMAIL="FireSafe ITM <itm@seu-dominio>"
+//   supabase secrets set BREVO_API_KEY=xkeysib-...
+//   supabase secrets set NOTIFY_FROM_EMAIL="itm@seu-dominio" NOTIFY_FROM_NAME="FireSafe ITM"
 //   (SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já existem no runtime das Edge Functions.)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
-const FROM_EMAIL =
-  Deno.env.get("NOTIFY_FROM_EMAIL") ?? "FireSafe ITM <onboarding@resend.dev>";
+const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
+const FROM_EMAIL = Deno.env.get("NOTIFY_FROM_EMAIL") ?? "no-reply@firesafe-itm.app";
+const FROM_NAME = Deno.env.get("NOTIFY_FROM_NAME") ?? "FireSafe ITM";
 const CHANNEL = "email";
 const OFFSET_MINUTES = 2880; // 48h
 
@@ -65,23 +66,25 @@ function emailHtml(o: OccRow): string {
 }
 
 async function sendEmail(to: string, o: OccRow): Promise<void> {
-  if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY ausente");
-  const res = await fetch("https://api.resend.com/emails", {
+  if (!BREVO_API_KEY) throw new Error("BREVO_API_KEY ausente");
+  // Brevo (Sendinblue) — API transacional: POST https://api.brevo.com/v3/smtp/email
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "api-key": BREVO_API_KEY,
       "Content-Type": "application/json",
+      accept: "application/json",
     },
     body: JSON.stringify({
-      from: FROM_EMAIL,
-      to,
+      sender: { name: FROM_NAME, email: FROM_EMAIL },
+      to: [{ email: to }],
       subject: `ITM vence em 48h: ${o.activity || o.description || "atividade"}`,
-      html: emailHtml(o),
+      htmlContent: emailHtml(o),
     }),
   });
   if (!res.ok) {
     const txt = await res.text();
-    throw new Error(`Resend ${res.status}: ${txt}`);
+    throw new Error(`Brevo ${res.status}: ${txt}`);
   }
 }
 

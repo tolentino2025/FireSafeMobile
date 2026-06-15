@@ -49,12 +49,14 @@ supabase db push      # aplica 0002_itm_occurrences_sync.sql e 0003_cron_notify_
 ```
 
 ### 4.2 Definir os segredos do worker (NÃO vão para o cliente)
-No Supabase → Project Settings → API, copie a **service_role key**. Depois:
+Provedor de e-mail: **Brevo** (ex-Sendinblue). Pegue a API key em Brevo → SMTP & API → API Keys.
 ```bash
-supabase secrets set RESEND_API_KEY=re_xxx
-supabase secrets set NOTIFY_FROM_EMAIL="FireSafe ITM <itm@seu-dominio.com>"
+supabase secrets set BREVO_API_KEY=xkeysib-xxx
+supabase secrets set NOTIFY_FROM_EMAIL="itm@seu-dominio.com" NOTIFY_FROM_NAME="FireSafe ITM"
 # SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY já existem no runtime das Edge Functions.
 ```
+> O remetente (`NOTIFY_FROM_EMAIL`) precisa ser um **sender verificado** no Brevo
+> (Senders, Domains & Dedicated IPs). Sem verificação, o envio é recusado.
 
 ### 4.3 Publicar a Edge Function
 ```bash
@@ -74,13 +76,15 @@ Depois reaplique a migration `0003` (ou rode o `cron.schedule` dela) e confira:
 select jobname, schedule from cron.job where jobname = 'itm-notify-48h';
 ```
 
-### 4.5 Provedor de e-mail
-Recomendado **Resend** (`RESEND_API_KEY`). Para produção, verifique seu domínio no Resend
-e ajuste `NOTIFY_FROM_EMAIL`. Sem domínio verificado, use `onboarding@resend.dev` (apenas testes).
+### 4.5 Provedor de e-mail — Brevo
+A Edge Function usa a API transacional do Brevo (`POST https://api.brevo.com/v3/smtp/email`,
+header `api-key`). Verifique o remetente/domínio no painel do Brevo antes de produção.
+Plano gratuito do Brevo cobre o volume de lembretes ITM com folga.
 
 ### O que ainda falta de você
-1. **`SUPABASE_SERVICE_ROLE_KEY`** — usado em 4.2 (secret) e 4.4 (Vault). **Não cole no repo.**
-2. **`RESEND_API_KEY`** + remetente (`NOTIFY_FROM_EMAIL`).
+1. **`SUPABASE_SERVICE_ROLE_KEY`** — usado no Vault (4.4). Já está disponível no runtime da
+   Edge Function automaticamente, então **não precisa** do `secrets set` para ela. **Não cole no repo.**
+2. **`BREVO_API_KEY`** + remetente verificado (`NOTIFY_FROM_EMAIL`).
 
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
@@ -91,6 +95,6 @@ e ajuste `NOTIFY_FROM_EMAIL`. Sem domínio verificado, use `onboarding@resend.de
 - Cliente conecta ao Supabase ✅
 - Login opcional (não bloqueia testes) ✅
 - Tabelas de notificação (0001): **aplicadas** (`db push`) ✅
-- Espelho de ocorrências + cron (0002/0003) e Edge Function `notify-48h`: **código pronto** ⏳
-  (falta `db push`, `secrets set`, `functions deploy` e os segredos do passo 4 — service_role + Resend)
+- Espelho de ocorrências + cron (0002/0003) e Edge Function `notify-48h` (Brevo): **código pronto** ⏳
+  (falta `db push`, `secrets set`, `functions deploy` e os segredos do passo 4 — service_role no Vault + Brevo)
 - Push remoto / Google / Outlook: próximas fases ⏳
