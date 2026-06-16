@@ -139,6 +139,19 @@ Para habilitar o push remoto:
 
 > O envio usa a Expo Push API (`https://exp.host/--/api/v2/push/send`), sem chave obrigatória.
 
+## 4-quinquies. Fase 2A — Fundação multiempresa (companies + members + invites + RLS)
+
+Migration `0005_multitenant_foundation.sql` cria:
+- `companies`, `company_members` (owner/admin/supervisor/inspector/viewer), `company_invites`
+- RLS: "só vejo dados de empresas onde sou membro ativo" (via função `user_company_ids()`, SECURITY DEFINER, sem recursão)
+- RPCs: `create_company_with_owner(name, cnpj)` e `accept_company_invite(token)`
+
+Aplicar (SQL Editor do Dashboard — como o `db push` é morto no seu Mac, cole o conteúdo
+de `supabase/migrations/0005_multitenant_foundation.sql`). É idempotente.
+
+> Fase 2B (próxima): onboarding (criar/aceitar empresa) + tela de membros + convite por
+> e-mail (Brevo). Fase 2C: migrar entidades operacionais para o Supabase com `company_id`.
+
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
 2. Definir `EXPO_PUBLIC_AUTH_REQUIRED=1` no `vercel.json`/env.
