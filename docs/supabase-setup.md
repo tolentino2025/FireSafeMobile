@@ -167,6 +167,17 @@ Migration `0006_company_data.sql`: tabela `company_data` (JSONB por empresa+cole
 > (last-write-wins), não por registro. Para multiusuário simultâneo intenso, uma
 > fase futura pode trocar para tabelas relacionais por entidade + merge por registro.
 
+## 4-septies. Fase 2D — Arquivos por empresa (Storage privado) — FUNDAÇÃO
+
+Migration `0007_company_storage.sql`: bucket privado `company-files` + RLS no
+`storage.objects` (path `<companyId>/...`; só membros acessam). Util `utils/companyStorage.ts`:
+`uploadCompanyBase64()`, `getCompanyFileUrl()` (URL assinada), `removeCompanyFile()`.
+
+> **Pendente (integração guiada)**: religar o pipeline de fotos para subir ao bucket e
+> guardar só o path (em vez de base64 embutido na inspeção). Isso enxuga o `company_data`
+> e dá controle de acesso real aos binários. Tocar em captura/preview/PDF exige testes
+> com o app rodando — fazer como próximo passo guiado.
+
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
 2. Definir `EXPO_PUBLIC_AUTH_REQUIRED=1` no `vercel.json`/env.
