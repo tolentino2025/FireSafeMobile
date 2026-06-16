@@ -33,6 +33,7 @@ import {
 } from "@/utils/itm/calendarFeed";
 import { showAlert, showConfirm } from "@/utils/appAlert";
 import { syncItmPreferencesToSupabase } from "@/utils/itm/preferencesSync";
+import { registerForItmPush, deactivateItmPush } from "@/utils/itm/pushTokens";
 
 export default function NotificationSettingsScreen() {
   const { fullTheme } = useTheme();
@@ -116,9 +117,23 @@ export default function NotificationSettingsScreen() {
     const next = { ...prefs, ...patch };
     setPrefs(next);
     await saveItmNotificationPreferences(next);
-    // Se mexeu no push, reagenda os lembretes locais.
+    // Se mexeu no push: lembrete local + registro de push remoto (mobile/login).
     if ("push48hEnabled" in patch) {
       syncItmLocalReminders(occurrences).catch(() => {});
+      if (next.push48hEnabled) {
+        registerForItmPush().then((reason) => {
+          if (reason === "projectId") {
+            showAlert(
+              pt ? "Push remoto" : "Remote push",
+              pt
+                ? "O lembrete local foi ativado. O push remoto (servidor) requer um build do app (EAS) — será ativado automaticamente quando o app for publicado."
+                : "Local reminder enabled. Remote push (server) requires an app build (EAS) — it will activate automatically once the app is published.",
+            );
+          }
+        });
+      } else {
+        deactivateItmPush().catch(() => {});
+      }
     }
     // Espelha as preferências no Supabase (servidor lê para e-mail/resumo diário).
     syncItmPreferencesToSupabase(next).catch(() => {});
@@ -179,7 +194,11 @@ export default function NotificationSettingsScreen() {
         />
         <Toggle
           label={pt ? "Receber push no celular" : "Push on phone"}
-          desc={pt ? "Lembrete local 48h antes (mobile)" : "Local 48h reminder (mobile)"}
+          desc={
+            pt
+              ? "Lembrete local + push remoto 48h antes (mobile)"
+              : "Local + remote push 48h before (mobile)"
+          }
           value={prefs.push48hEnabled}
           onChange={(v) => update({ push48hEnabled: v })}
         />

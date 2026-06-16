@@ -23,6 +23,7 @@ const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
 const FROM_EMAIL = Deno.env.get("NOTIFY_FROM_EMAIL") ?? "no-reply@firesafe-itm.app";
 const FROM_NAME = Deno.env.get("NOTIFY_FROM_NAME") ?? "FireSafe ITM";
 const CHANNEL = "email";
+const PUSH_CHANNEL = "push";
 const OFFSET_MINUTES = 2880; // 48h
 const MAX_RETRIES = 3; // após 3 falhas, desiste (fica registrado no notification_logs)
 
@@ -66,6 +67,23 @@ function emailHtml(o: OccRow): string {
     </div>`;
 }
 
+async function sendPush(tokens: string[], o: OccRow): Promise<void> {
+  // Expo Push API (sem chave obrigatória). Aceita lote de mensagens.
+  const messages = tokens.map((to) => ({
+    to,
+    title: "FireSafe ITM",
+    body: `Vence em 48h: ${o.activity || o.description || "atividade ITM"}`,
+    sound: "default",
+    data: { occurrenceId: o.occurrence_id, type: "itm-48h" },
+  }));
+  const res = await fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(messages),
+  });
+  if (!res.ok) throw new Error(`Expo push ${res.status}: ${await res.text()}`);
+}
+
 async function sendEmail(to: string, o: OccRow): Promise<void> {
   if (!BREVO_API_KEY) throw new Error("BREVO_API_KEY ausente");
   // Brevo (Sendinblue) — API transacional: POST https://api.brevo.com/v3/smtp/email
@@ -89,13 +107,94 @@ async function sendEmail(to: string, o: OccRow): Promise<void> {
   }
 }
 
+// deno-lint-ignore no-explicit-any
+type Supa = any;
+interface Summary {
+  pushSent: number;
+  pushFailed: number;
+}
+
+// Envia o push 48h (Expo) se ainda não enviado e houver token ativo. Idempotente.
+async function maybeSendPush(
+  supabase: Supa,
+  occ: OccRow,
+  summary: Summary,
+): Promise<void> {
+  const { data: existing } = await supabase
+    .from("notification_logs")
+    .select("status,retry_count")
+    .eq("user_id", occ.user_id)
+    .eq("occurrence_id", occ.occurrence_id)
+    .eq("channel", PUSH_CHANNEL)
+    .eq("offset_minutes", OFFSET_MINUTES)
+    .maybeSingle();
+  if (existing && existing.status === "sent") return;
+  const priorRetries = existing?.retry_count ?? 0;
+  if (existing && existing.status === "failed" && priorRetries >= MAX_RETRIES) {
+    return;
+  }
+
+  const { data: toks } = await supabase
+    .from("user_push_tokens")
+    .select("push_token")
+    .eq("user_id", occ.user_id)
+    .eq("is_active", true);
+  const tokens = (toks ?? [])
+    .map((t: { push_token: string }) => t.push_token)
+    .filter(Boolean);
+  if (tokens.length === 0) return; // sem token: nada a fazer (push opcional)
+
+  const nowAttempt = new Date().toISOString();
+  try {
+    await sendPush(tokens, occ);
+    summary.pushSent++;
+    await supabase.from("notification_logs").upsert(
+      {
+        user_id: occ.user_id,
+        company_id: occ.company_id,
+        occurrence_id: occ.occurrence_id,
+        channel: PUSH_CHANNEL,
+        offset_minutes: OFFSET_MINUTES,
+        status: "sent",
+        sent_at: nowAttempt,
+        last_attempt_at: nowAttempt,
+        retry_count: priorRetries,
+      },
+      { onConflict: "user_id,occurrence_id,channel,offset_minutes" },
+    );
+  } catch (e) {
+    summary.pushFailed++;
+    await supabase.from("notification_logs").upsert(
+      {
+        user_id: occ.user_id,
+        company_id: occ.company_id,
+        occurrence_id: occ.occurrence_id,
+        channel: PUSH_CHANNEL,
+        offset_minutes: OFFSET_MINUTES,
+        status: "failed",
+        error_message: String(e),
+        last_attempt_at: nowAttempt,
+        retry_count: priorRetries + 1,
+      },
+      { onConflict: "user_id,occurrence_id,channel,offset_minutes" },
+    );
+  }
+}
+
 Deno.serve(async () => {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
 
   const nowIso = new Date().toISOString();
-  const summary = { scanned: 0, sent: 0, skipped: 0, failed: 0 };
+  const summary = {
+    scanned: 0,
+    sent: 0,
+    skipped: 0,
+    failed: 0,
+    pushSent: 0,
+    pushFailed: 0,
+  };
 
   // 1) Ocorrências cuja janela de 48h já chegou e ainda não foram concluídas.
   const { data: occs, error } = await supabase
@@ -121,10 +220,18 @@ Deno.serve(async () => {
     // 2) Preferência do usuário (default: e-mail ligado se não houver linha).
     const { data: pref } = await supabase
       .from("user_notification_preferences")
-      .select("email_48h_enabled")
+      .select("email_48h_enabled,push_48h_enabled")
       .eq("user_id", occ.user_id)
       .maybeSingle();
-    if (pref && pref.email_48h_enabled === false) {
+    const emailEnabled = !pref || pref.email_48h_enabled !== false;
+    const pushEnabled = pref?.push_48h_enabled === true;
+
+    // 2b) Push remoto (Expo) — só se o usuário ativou e tem token registrado.
+    if (pushEnabled) {
+      await maybeSendPush(supabase, occ, summary);
+    }
+
+    if (!emailEnabled) {
       summary.skipped++;
       continue;
     }

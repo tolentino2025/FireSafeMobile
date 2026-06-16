@@ -124,6 +124,21 @@ supabase functions deploy notify-48h    # redeploy com retry cap
 O cron diário (`itm-daily-summary`, `0 9 * * *`) reaproveita os segredos do Vault já criados.
 Confira: `select jobname, schedule from cron.job;`
 
+## 4-quater. Fase 6 — Push remoto (Expo)
+
+- O app registra o token de push em `user_push_tokens` quando o usuário liga "push" nas
+  preferências (mobile + login). O `notify-48h` envia o push 48h junto com o e-mail.
+- **Pré-requisito**: um **build EAS com `projectId`**. Sem ele o app só agenda o lembrete
+  LOCAL (o push remoto ativa sozinho quando houver build). No web, push remoto não existe.
+
+Para habilitar o push remoto:
+1. `eas init` (ou defina `expo.extra.eas.projectId` no `app.json`).
+2. Configure credenciais de push (Android FCM / iOS APNs) via EAS.
+3. Gere um build (`eas build`) — daí o `getExpoPushTokenAsync` passa a retornar token.
+4. Redeploy do worker: `supabase functions deploy notify-48h` (já tem o envio de push).
+
+> O envio usa a Expo Push API (`https://exp.host/--/api/v2/push/send`), sem chave obrigatória.
+
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
 2. Definir `EXPO_PUBLIC_AUTH_REQUIRED=1` no `vercel.json`/env.
@@ -138,4 +153,5 @@ Confira: `select jobname, schedule from cron.job;`
   e `calendar-feed --no-verify-jwt` ⏳
 - Fase 9 (resumo diário + retries + auditoria): código pronto — falta `db push` (0004) +
   `functions deploy daily-summary` e redeploy do `notify-48h` ⏳
-- Push remoto / Google / Outlook: próximas fases ⏳
+- Fase 6 (push remoto Expo): código pronto — ativa quando houver build EAS com projectId ⏳
+- Google / Outlook (Fase 8): próxima fase ⏳
