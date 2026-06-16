@@ -1,0 +1,45 @@
+name: Deploy Supabase
+
+# Aplica migrations e publica as Edge Functions automaticamente a cada push
+# que toque em supabase/** na main. Também pode ser disparado manualmente.
+# Roda num runner do GitHub (tem rede liberada para o Supabase) — não depende
+# do CLI local nem de colar SQL no dashboard.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/functions/**"
+      - "supabase/config.toml"
+      - ".github/workflows/supabase-deploy.yml"
+  workflow_dispatch: {}
+
+env:
+  PROJECT_REF: tbbnysvkfnoydjqxdnlc
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Push migrations
+        run: supabase db push
+
+      - name: Deploy Edge Functions
+        run: |
+          supabase functions deploy notify-48h --project-ref "$PROJECT_REF"
+          supabase functions deploy daily-summary --project-ref "$PROJECT_REF"
+          supabase functions deploy manage-calendar-feed --project-ref "$PROJECT_REF"
+          supabase functions deploy calendar-feed --no-verify-jwt --project-ref "$PROJECT_REF"
