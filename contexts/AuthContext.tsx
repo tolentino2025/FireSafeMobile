@@ -82,11 +82,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
+      const appUrl =
+        process.env.EXPO_PUBLIC_APP_URL ?? "https://fire-safe-mobile.vercel.app";
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: name },
+          emailRedirectTo: appUrl,
         },
       });
       if (error) {
