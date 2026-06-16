@@ -24,6 +24,7 @@ const FROM_EMAIL = Deno.env.get("NOTIFY_FROM_EMAIL") ?? "no-reply@firesafe-itm.a
 const FROM_NAME = Deno.env.get("NOTIFY_FROM_NAME") ?? "FireSafe ITM";
 const CHANNEL = "email";
 const OFFSET_MINUTES = 2880; // 48h
+const MAX_RETRIES = 3; // após 3 falhas, desiste (fica registrado no notification_logs)
 
 interface OccRow {
   id: string;
@@ -128,10 +129,10 @@ Deno.serve(async () => {
       continue;
     }
 
-    // 3) Idempotência: já enviado para (user, occ, email, 48h)?
+    // 3) Idempotência + retries: já enviado, ou falhou demais? (auditoria via log)
     const { data: existing } = await supabase
       .from("notification_logs")
-      .select("id,status")
+      .select("id,status,retry_count")
       .eq("user_id", occ.user_id)
       .eq("occurrence_id", occ.occurrence_id)
       .eq("channel", CHANNEL)
@@ -141,6 +142,11 @@ Deno.serve(async () => {
       summary.skipped++;
       continue;
     }
+    const priorRetries = existing?.retry_count ?? 0;
+    if (existing && existing.status === "failed" && priorRetries >= MAX_RETRIES) {
+      summary.skipped++; // desistiu após MAX_RETRIES tentativas (registrado no log)
+      continue;
+    }
 
     const to = occ.email;
     if (!to) {
@@ -148,7 +154,8 @@ Deno.serve(async () => {
       continue;
     }
 
-    // 4) Enviar + logar.
+    // 4) Enviar + logar (com auditoria de tentativa/retry).
+    const nowAttempt = new Date().toISOString();
     try {
       await sendEmail(to, occ);
       summary.sent++;
@@ -160,7 +167,9 @@ Deno.serve(async () => {
           channel: CHANNEL,
           offset_minutes: OFFSET_MINUTES,
           status: "sent",
-          sent_at: new Date().toISOString(),
+          sent_at: nowAttempt,
+          last_attempt_at: nowAttempt,
+          retry_count: priorRetries,
         },
         { onConflict: "user_id,occurrence_id,channel,offset_minutes" },
       );
@@ -175,6 +184,8 @@ Deno.serve(async () => {
           offset_minutes: OFFSET_MINUTES,
           status: "failed",
           error_message: String(e),
+          last_attempt_at: nowAttempt,
+          retry_count: priorRetries + 1,
         },
         { onConflict: "user_id,occurrence_id,channel,offset_minutes" },
       );

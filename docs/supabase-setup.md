@@ -105,6 +105,25 @@ Uso no app: **Perfil → Notificações e Calendário → Calendário assinável
 (requer login). Copie o link e "assine" no Google Calendar (Outros calendários → Por URL),
 Apple (Arquivo → Nova assinatura de calendário) ou Outlook (Adicionar → Da internet).
 
+## 4-ter. Fase 9 — Resumo diário + retries + auditoria
+
+- **Resumo diário**: Edge Function `daily-summary` agrupa vencidas + a vencer por
+  propriedade/sistema e manda 1 e-mail/dia (só para quem ativou em Preferências).
+- **Retries**: o `notify-48h` reenvia falhas a cada hora até `MAX_RETRIES=3` e então desiste
+  (tudo registrado em `notification_logs.retry_count` / `last_attempt_at`).
+- **Auditoria**: `notification_logs` guarda status, erro, tentativas e horário de cada envio.
+- **Preferências no servidor**: o app agora espelha `user_notification_preferences`
+  (necessário para o resumo diário saber quem quer receber).
+
+Deploy:
+```bash
+supabase db push      # aplica 0004 (colunas de retry + cron diário 09:00 UTC)
+supabase functions deploy daily-summary
+supabase functions deploy notify-48h    # redeploy com retry cap
+```
+O cron diário (`itm-daily-summary`, `0 9 * * *`) reaproveita os segredos do Vault já criados.
+Confira: `select jobname, schedule from cron.job;`
+
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
 2. Definir `EXPO_PUBLIC_AUTH_REQUIRED=1` no `vercel.json`/env.
@@ -117,4 +136,6 @@ Apple (Arquivo → Nova assinatura de calendário) ou Outlook (Adicionar → Da 
 - Espelho de ocorrências + cron (0002/0003) e Edge Function `notify-48h` (Brevo): **ativos** ✅
 - Fase 7 (feed .ics assinável): código pronto — falta `functions deploy` de `manage-calendar-feed`
   e `calendar-feed --no-verify-jwt` ⏳
+- Fase 9 (resumo diário + retries + auditoria): código pronto — falta `db push` (0004) +
+  `functions deploy daily-summary` e redeploy do `notify-48h` ⏳
 - Push remoto / Google / Outlook: próximas fases ⏳

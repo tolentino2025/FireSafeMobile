@@ -32,6 +32,7 @@ import {
   isLoggedIn,
 } from "@/utils/itm/calendarFeed";
 import { showAlert, showConfirm } from "@/utils/appAlert";
+import { syncItmPreferencesToSupabase } from "@/utils/itm/preferencesSync";
 
 export default function NotificationSettingsScreen() {
   const { fullTheme } = useTheme();
@@ -47,7 +48,11 @@ export default function NotificationSettingsScreen() {
   const [feedBusy, setFeedBusy] = useState(false);
 
   useEffect(() => {
-    getItmNotificationPreferences().then(setPrefs);
+    getItmNotificationPreferences().then((p) => {
+      setPrefs(p);
+      // Garante que o servidor tenha as preferências atuais (e-mail/resumo diário).
+      syncItmPreferencesToSupabase(p).catch(() => {});
+    });
     isLoggedIn().then(setLoggedIn);
     getSavedCalendarFeedUrl().then(setFeedUrl);
   }, []);
@@ -115,6 +120,8 @@ export default function NotificationSettingsScreen() {
     if ("push48hEnabled" in patch) {
       syncItmLocalReminders(occurrences).catch(() => {});
     }
+    // Espelha as preferências no Supabase (servidor lê para e-mail/resumo diário).
+    syncItmPreferencesToSupabase(next).catch(() => {});
   };
 
   const Toggle = ({
@@ -183,7 +190,11 @@ export default function NotificationSettingsScreen() {
         />
         <Toggle
           label={pt ? "Resumo diário" : "Daily summary"}
-          desc={pt ? "Requer servidor (em breve)" : "Requires server (coming soon)"}
+          desc={
+            pt
+              ? "E-mail diário com vencidas e a vencer (requer login)"
+              : "Daily email with overdue and upcoming (requires login)"
+          }
           value={prefs.dailySummaryEnabled}
           onChange={(v) => update({ dailySummaryEnabled: v })}
         />
