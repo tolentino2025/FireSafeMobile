@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProfileScreen from "@/screens/ProfileScreen";
 import NotificationSettingsScreen from "@/screens/NotificationSettingsScreen";
 import LoginScreen from "@/screens/LoginScreen";
+import CompanyScreen from "@/screens/CompanyScreen";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
@@ -12,6 +13,7 @@ export type ProfileStackParamList = {
   Profile: undefined;
   NotificationSettings: undefined;
   Login: undefined;
+  Company: undefined;
 };
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
@@ -46,6 +48,13 @@ export default function ProfileStackNavigator() {
         options={{
           headerShown: true,
           title: "",
+        }}
+      />
+      <Stack.Screen
+        name="Company"
+        component={CompanyScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

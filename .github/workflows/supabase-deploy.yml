@@ -43,3 +43,4 @@ jobs:
           supabase functions deploy daily-summary --project-ref "$PROJECT_REF"
           supabase functions deploy manage-calendar-feed --project-ref "$PROJECT_REF"
           supabase functions deploy calendar-feed --no-verify-jwt --project-ref "$PROJECT_REF"
+          supabase functions deploy invite-member --project-ref "$PROJECT_REF"

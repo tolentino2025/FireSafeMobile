@@ -23,6 +23,7 @@ import { InspectionProvider } from "@/contexts/InspectionContext";
 import { ITMProvider } from "@/contexts/ITMContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { CompanyProvider } from "@/contexts/CompanyContext";
 import { ensureInstrumentFonts } from "@/utils/fonts";
 
 // Injeta as fontes do padrao Instrument no web (Archivo + IBM Plex Mono).
@@ -67,11 +68,13 @@ export default function App() {
               <LanguageProvider>
                 <AuthProvider>
                   <SubscriptionProvider>
-                    <InspectionProvider>
-                      <ITMProvider>
-                        <AppContent />
-                      </ITMProvider>
-                    </InspectionProvider>
+                    <CompanyProvider>
+                      <InspectionProvider>
+                        <ITMProvider>
+                          <AppContent />
+                        </ITMProvider>
+                      </InspectionProvider>
+                    </CompanyProvider>
                   </SubscriptionProvider>
                 </AuthProvider>
               </LanguageProvider>

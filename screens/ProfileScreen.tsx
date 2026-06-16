@@ -363,6 +363,11 @@ export default function ProfileScreen() {
           }
         />
         <SettingsRow
+          icon="briefcase"
+          label={language === "pt-BR" ? "Empresa / Equipe" : "Company / Team"}
+          onPress={() => navigation.navigate("Company")}
+        />
+        <SettingsRow
           icon="calendar"
           label={language === "pt-BR" ? "Notificações e Calendário" : "Notifications & Calendar"}
           onPress={() => navigation.navigate("NotificationSettings")}
