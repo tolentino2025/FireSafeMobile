@@ -10,9 +10,22 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { scopedStorage } from "@/utils/scopedStorage";
+import { setCompanyScope } from "@/utils/scopedStorage";
+import {
+  registerCompanyWriteHook,
+  setSyncContext,
+  pullCompanyData,
+  seedCompanyFromUserScope,
+} from "@/utils/itm/companyDataSync";
+
+// Chave (por usuário) que guarda qual empresa está ativa — metadado, não escopado por empresa.
+const activeCompanyStorageKey = (uid: string) => `@firesafe_active_company::u:${uid}`;
+
+// Registra o hook de push uma única vez no carregamento do módulo.
+registerCompanyWriteHook();
 
 export type CompanyRole = "owner" | "admin" | "supervisor" | "inspector" | "viewer";
 
@@ -62,7 +75,6 @@ interface CompanyContextType {
 }
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
-const ACTIVE_COMPANY_KEY = "@firesafe_active_company";
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();
@@ -104,6 +116,8 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!isSupabaseConfigured || !user?.id) {
+      setCompanyScope(null);
+      setSyncContext(null, null);
       setMemberships([]);
       setActiveCompanyId(null);
       setMembers([]);
@@ -125,10 +139,17 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       })) as Membership[];
       setMemberships(list);
 
-      // Resolve empresa ativa: salva localmente (por usuário) ou a primeira.
-      const saved = await scopedStorage.getItem(ACTIVE_COMPANY_KEY, user.id);
+      // Resolve empresa ativa: salva (por usuário) ou a primeira.
+      const saved = await AsyncStorage.getItem(activeCompanyStorageKey(user.id));
       const valid = list.find((m) => m.company_id === saved)?.company_id;
       const next = valid ?? list[0]?.company_id ?? null;
+
+      // Define o escopo de storage = empresa e HIDRATA o local antes de expor o id
+      // (os contextos recarregam quando activeCompanyId muda).
+      setCompanyScope(next);
+      setSyncContext(next, user.id);
+      if (next) await pullCompanyData(next);
+
       setActiveCompanyId(next);
       await loadMembersAndInvites(next);
     } catch (e) {
@@ -145,8 +166,12 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   }, [user?.id, authLoading, refresh]);
 
   const setActiveCompany = async (companyId: string) => {
+    // Troca o escopo e hidrata ANTES de expor o novo id (contextos recarregam).
+    setCompanyScope(companyId);
+    setSyncContext(companyId, user?.id ?? null);
+    await pullCompanyData(companyId);
+    if (user?.id) await AsyncStorage.setItem(activeCompanyStorageKey(user.id), companyId);
     setActiveCompanyId(companyId);
-    if (user?.id) await scopedStorage.setItem(ACTIVE_COMPANY_KEY, companyId, user.id);
     await loadMembersAndInvites(companyId);
   };
 
@@ -156,9 +181,14 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       p_cnpj: cnpj ?? null,
     });
     if (error) throw error;
+    const companyId = data as string;
+    // Leva os dados locais do usuário para a empresa recém-criada (vazia).
+    if (user?.id && companyId) {
+      await seedCompanyFromUserScope(user.id, companyId);
+    }
     await refresh();
-    if (data) await setActiveCompany(data as string);
-    return data as string;
+    if (companyId) await setActiveCompany(companyId);
+    return companyId;
   };
 
   const acceptInvite = async (token: string): Promise<string> => {

@@ -1,42 +1,95 @@
-// Isolamento de dados locais por usuário.
-// PROBLEMA: as chaves do AsyncStorage eram globais (@firesafe_*), então no mesmo
-// navegador/dispositivo um usuário via os dados de quem usou antes.
-// SOLUÇÃO: todo dado OPERACIONAL é escopado pelo id do usuário ativo:
-//   @firesafe_inspections  ->  @firesafe_inspections::u:<userId>  (ou ::u:guest)
+// Isolamento de dados locais por usuário/empresa + ponte para o sync.
 //
-// Dados de DISPOSITIVO (tema, idioma, assinatura) continuam globais — são
-// preferências do aparelho, não dados de cliente. Use AsyncStorage direto para eles.
+// PROBLEMA original: chaves globais (@firesafe_*) vazavam dados entre logins.
+// SOLUÇÃO: todo dado OPERACIONAL é escopado:
+//   - com empresa ativa  -> @chave::c:<companyId>   (membros compartilham)
+//   - logado sem empresa -> @chave::u:<userId>
+//   - sem login          -> @chave::u:guest
+//
+// Fase 2C: ao escrever uma coleção operacional sob escopo de EMPRESA, disparamos
+// um "write hook" que espelha no Supabase (company_data). O pull usa setItemRaw
+// (sem hook) para hidratar o local sem reempurrar.
+//
+// Dados de DISPOSITIVO (tema, idioma, assinatura) continuam globais (AsyncStorage direto).
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const GUEST = "guest";
 let activeUserId: string | null = null;
+let activeCompanyId: string | null = null;
 
-// Define o usuário ativo (chamado pelo AuthContext quando o login muda).
+type WriteHook = (baseKey: string, value: string) => void;
+let onWrite: WriteHook | null = null;
+
+// Coleções operacionais que pertencem à empresa (sincronizam no servidor).
+export const OPERATIONAL_KEYS = [
+  "@firesafe_inspections",
+  "@firesafe_properties",
+  "@firesafe_companies",
+  "@firesafe_app_users",
+  "@firesafe_technical_responsibles",
+  "@firesafe_fire_pumps",
+  "@firesafe_fire_pump_panels",
+  "@firesafe_schedules",
+  "@firesafe_contractors",
+  "@firesafe_job_sites",
+  "@firesafe_diesel_performance_tests",
+  "@firesafe_electric_performance_tests",
+  "@firesafe_itm_plans",
+  "@firesafe_itm_occurrences",
+];
+const OPERATIONAL = new Set(OPERATIONAL_KEYS);
+
 export function setStorageScope(userId: string | null): void {
   activeUserId = userId && userId.length > 0 ? userId : null;
 }
 
-export function getStorageScope(): string {
-  return activeUserId ?? GUEST;
+// Define a empresa ativa (precede o usuário no escopo). null = volta ao usuário.
+export function setCompanyScope(companyId: string | null): void {
+  activeCompanyId = companyId && companyId.length > 0 ? companyId : null;
 }
 
-// Constrói a chave escopada. Aceita um userId explícito (evita corrida em efeitos).
-export function scopedKey(baseKey: string, userId?: string | null): string {
-  const scope = userId !== undefined ? userId || GUEST : getStorageScope();
-  return `${baseKey}::u:${scope}`;
+// Registra o hook de escrita (o companyDataSync usa para empurrar ao servidor).
+export function setWriteHook(hook: WriteHook | null): void {
+  onWrite = hook;
+}
+
+export function getActiveCompanyId(): string | null {
+  return activeCompanyId;
+}
+
+function scopeSuffix(): string {
+  if (activeCompanyId) return `::c:${activeCompanyId}`;
+  return `::u:${activeUserId ?? GUEST}`;
+}
+
+export function scopedKey(baseKey: string): string {
+  return `${baseKey}${scopeSuffix()}`;
 }
 
 export const scopedStorage = {
-  getItem(baseKey: string, userId?: string | null) {
-    return AsyncStorage.getItem(scopedKey(baseKey, userId));
+  getItem(baseKey: string) {
+    return AsyncStorage.getItem(scopedKey(baseKey));
   },
-  setItem(baseKey: string, value: string, userId?: string | null) {
-    return AsyncStorage.setItem(scopedKey(baseKey, userId), value);
+  setItem(baseKey: string, value: string) {
+    const p = AsyncStorage.setItem(scopedKey(baseKey), value);
+    // Espelha no servidor apenas coleções operacionais sob escopo de empresa.
+    if (activeCompanyId && OPERATIONAL.has(baseKey) && onWrite) {
+      try {
+        onWrite(baseKey, value);
+      } catch {
+        /* noop */
+      }
+    }
+    return p;
   },
-  removeItem(baseKey: string, userId?: string | null) {
-    return AsyncStorage.removeItem(scopedKey(baseKey, userId));
+  // Escrita "crua": não dispara o hook (usada pelo pull para hidratar o local).
+  setItemRaw(baseKey: string, value: string) {
+    return AsyncStorage.setItem(scopedKey(baseKey), value);
   },
-  multiGet(baseKeys: string[], userId?: string | null) {
-    return AsyncStorage.multiGet(baseKeys.map((k) => scopedKey(k, userId)));
+  removeItem(baseKey: string) {
+    return AsyncStorage.removeItem(scopedKey(baseKey));
+  },
+  multiGet(baseKeys: string[]) {
+    return AsyncStorage.multiGet(baseKeys.map((k) => scopedKey(k)));
   },
 };

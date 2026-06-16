@@ -152,6 +152,21 @@ de `supabase/migrations/0005_multitenant_foundation.sql`). É idempotente.
 > Fase 2B (próxima): onboarding (criar/aceitar empresa) + tela de membros + convite por
 > e-mail (Brevo). Fase 2C: migrar entidades operacionais para o Supabase com `company_id`.
 
+## 4-sexies. Fase 2C — Dados operacionais por empresa (sync local-first)
+
+Migration `0006_company_data.sql`: tabela `company_data` (JSONB por empresa+coleção) + RLS.
+- **PUSH**: `scopedStorage` dispara um write hook ao salvar uma coleção sob escopo de
+  empresa → espelha em `company_data` (debounce 800ms).
+- **PULL**: ao ativar/trocar empresa, baixa `company_data` e hidrata o local.
+- **Escopo**: com empresa ativa, o storage local usa `::c:<companyId>` (membros
+  compartilham); sem empresa, `::u:<userId>`; deslogado, `::u:guest`.
+- **Seed**: ao criar empresa, os dados locais do dono são levados para a empresa nova.
+- Aplicada automaticamente pela GitHub Action (nada manual).
+
+> **Limitação conhecida (follow-up)**: a resolução de conflito é por COLEÇÃO
+> (last-write-wins), não por registro. Para multiusuário simultâneo intenso, uma
+> fase futura pode trocar para tabelas relacionais por entidade + merge por registro.
+
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
 2. Definir `EXPO_PUBLIC_AUTH_REQUIRED=1` no `vercel.json`/env.

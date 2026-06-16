@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { scopedStorage } from "@/utils/scopedStorage";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCompany } from "@/contexts/CompanyContext";
 import { cancelInspectionReminder, scheduleNotificationForSchedule, cancelScheduleNotification } from "@/utils/notifications";
 import { addInterval, generateScheduleId, getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
 import { parseLocalYMD } from "@/utils/dateUtils";
@@ -492,15 +493,16 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user, isLoading: authLoading } = useAuth();
+  const { isReady: companyReady, activeCompanyId } = useCompany();
 
-  // Recarrega os dados sempre que o usuário ativo mudar (login/logout).
-  // Aguarda o AuthContext resolver para garantir que o escopo de storage já
-  // está definido (evita carregar dados de "guest" antes da sessão restaurar).
+  // Recarrega quando o usuário OU a empresa ativa mudar. Aguarda Auth e Company
+  // resolverem para garantir que o escopo de storage (empresa/usuário) e o pull
+  // do servidor já aconteceram (evita ler escopo errado ou dados vazios).
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || !companyReady) return;
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, authLoading]);
+  }, [user?.id, activeCompanyId, authLoading, companyReady]);
 
   // Zera o estado em memória (usado ao trocar de usuário para não vazar dados).
   const resetState = () => {

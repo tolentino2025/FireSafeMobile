@@ -29,6 +29,7 @@ import {
   markItmOccurrenceCompletedInSupabase,
 } from "@/utils/itm/occurrenceSync";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCompany } from "@/contexts/CompanyContext";
 
 // Plano de ITM associado a uma propriedade (asset).
 export interface ItmPlan {
@@ -127,14 +128,15 @@ export function ITMProvider({ children }: ITMProviderProps) {
   const [occurrences, setOccurrences] = useState<ItmOccurrence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user, isLoading: authLoading } = useAuth();
+  const { isReady: companyReady, activeCompanyId } = useCompany();
 
-  // Recarrega ao trocar de usuário (login/logout); aguarda o AuthContext resolver
-  // para garantir que o escopo de storage já está correto.
+  // Recarrega ao trocar de usuário OU de empresa; aguarda Auth e Company
+  // resolverem (escopo de storage e pull do servidor já aplicados).
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || !companyReady) return;
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, authLoading]);
+  }, [user?.id, activeCompanyId, authLoading, companyReady]);
 
   // FASE 2 — mantém os lembretes locais (48h) sincronizados com as ocorrências.
   // Mobile-only e só se o usuário habilitar push nas preferências (no-op no web).
