@@ -3,7 +3,7 @@ import { View, StyleSheet, TextInput, Pressable, Alert, Switch, Platform } from 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -196,7 +196,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const loadDraft = async () => {
     try {
       const key = getDraftStorageKey(testId || 'new');
-      const data = await AsyncStorage.getItem(key);
+      const data = await scopedStorage.getItem(key);
       if (data) {
         const parsedDraft = JSON.parse(data);
         activeDraftKeyRef.current = key;
@@ -213,7 +213,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const saveDraft = async () => {
     try {
       const key = getDraftStorageKey(test.id || testId || 'new');
-      await AsyncStorage.setItem(key, JSON.stringify(test));
+      await scopedStorage.setItem(key, JSON.stringify(test));
       activeDraftKeyRef.current = key;
     } catch (error) {
       console.error("Error saving draft:", error);
@@ -223,7 +223,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
   const clearDraft = async () => {
     try {
       if (activeDraftKeyRef.current) {
-        await AsyncStorage.removeItem(activeDraftKeyRef.current);
+        await scopedStorage.removeItem(activeDraftKeyRef.current);
       }
     } catch (error) {
       console.error("Error clearing draft:", error);

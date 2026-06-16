@@ -1,7 +1,7 @@
 import { Paths, File } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
 import { Platform } from "react-native";
 
 const STORAGE_KEYS = [
@@ -39,7 +39,7 @@ export async function exportAllData(): Promise<{ success: boolean; filePath?: st
 
     for (const key of STORAGE_KEYS) {
       try {
-        const value = await AsyncStorage.getItem(key);
+        const value = await scopedStorage.getItem(key);
         if (value) {
           backupData.data[key] = JSON.parse(value);
         }
@@ -115,7 +115,7 @@ export async function importAllData(): Promise<{
 
     for (const key of STORAGE_KEYS) {
       try {
-        await AsyncStorage.removeItem(key);
+        await scopedStorage.removeItem(key);
       } catch (e) {
         console.log(`Could not clear key ${key}:`, e);
       }
@@ -123,7 +123,7 @@ export async function importAllData(): Promise<{
 
     for (const [key, value] of Object.entries(backupData.data)) {
       if (STORAGE_KEYS.includes(key)) {
-        await AsyncStorage.setItem(key, JSON.stringify(value));
+        await scopedStorage.setItem(key, JSON.stringify(value));
         
         if (key === "@firesafe_inspections" && Array.isArray(value)) {
           counts.inspections = value.length;
@@ -162,19 +162,19 @@ export async function getDataSummary(): Promise<{
   };
 
   try {
-    const inspections = await AsyncStorage.getItem("@firesafe_inspections");
+    const inspections = await scopedStorage.getItem("@firesafe_inspections");
     if (inspections) counts.inspections = JSON.parse(inspections).length;
 
-    const companies = await AsyncStorage.getItem("@firesafe_companies");
+    const companies = await scopedStorage.getItem("@firesafe_companies");
     if (companies) counts.companies = JSON.parse(companies).length;
 
-    const appUsers = await AsyncStorage.getItem("@firesafe_app_users");
+    const appUsers = await scopedStorage.getItem("@firesafe_app_users");
     if (appUsers) counts.appUsers = JSON.parse(appUsers).length;
 
-    const properties = await AsyncStorage.getItem("@firesafe_properties");
+    const properties = await scopedStorage.getItem("@firesafe_properties");
     if (properties) counts.properties = JSON.parse(properties).length;
 
-    const firePumps = await AsyncStorage.getItem("@firesafe_fire_pumps");
+    const firePumps = await scopedStorage.getItem("@firesafe_fire_pumps");
     if (firePumps) counts.firePumps = JSON.parse(firePumps).length;
   } catch (e) {
     console.error("Error getting data summary:", e);

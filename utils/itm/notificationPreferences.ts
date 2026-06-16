@@ -1,7 +1,7 @@
 // FASE 3 — Preferências de notificação/calendário do usuário (persistência local).
 // Quando o Supabase/Auth entrar, estas preferências sincronizam com a tabela
 // user_notification_preferences. Por ora, ficam em AsyncStorage (offline-first).
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
 
 export type HorizonDays = 30 | 60 | 90;
 
@@ -33,7 +33,7 @@ const PREFS_KEY = "@firesafe_itm_notification_prefs";
 
 export async function getItmNotificationPreferences(): Promise<ItmNotificationPreferences> {
   try {
-    const raw = await AsyncStorage.getItem(PREFS_KEY);
+    const raw = await scopedStorage.getItem(PREFS_KEY);
     if (!raw) return { ...DEFAULT_ITM_NOTIFICATION_PREFERENCES };
     const parsed = JSON.parse(raw);
     return { ...DEFAULT_ITM_NOTIFICATION_PREFERENCES, ...parsed };
@@ -45,5 +45,5 @@ export async function getItmNotificationPreferences(): Promise<ItmNotificationPr
 export async function saveItmNotificationPreferences(
   prefs: ItmNotificationPreferences,
 ): Promise<void> {
-  await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  await scopedStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
 }

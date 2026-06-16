@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
+import { useAuth } from "@/contexts/AuthContext";
 import { cancelInspectionReminder, scheduleNotificationForSchedule, cancelScheduleNotification } from "@/utils/notifications";
 import { addInterval, generateScheduleId, getFrequencyLabel, getInspectionTypeLabel } from "@/utils/scheduleUtils";
 import { parseLocalYMD } from "@/utils/dateUtils";
@@ -170,6 +171,10 @@ const ELECTRIC_TESTS_KEY = "@firesafe_electric_performance_tests";
 const DATA_VERSION_KEY = "@firesafe_data_version";
 const CURRENT_DATA_VERSION = 3;
 const SAMPLE_DATA_LOADED_KEY = "@firesafe_sample_data_loaded";
+
+// Dados de demonstração (Petrobras, Hospital, etc.) SÓ aparecem em modo demo
+// explícito. Em produção e para usuários reais, DEMO_MODE é falso → ambiente limpo.
+const DEMO_MODE = process.env.EXPO_PUBLIC_DEMO_MODE === "1";
 
 const now = new Date().toISOString();
 const sampleCompanies: Company[] = [
@@ -486,31 +491,56 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
   const [electricPerformanceTests, setElectricPerformanceTests] = useState<PerformanceTest[]>([]);
   const [currentInspection, setCurrentInspection] = useState<Partial<Inspection> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: authLoading } = useAuth();
 
+  // Recarrega os dados sempre que o usuário ativo mudar (login/logout).
+  // Aguarda o AuthContext resolver para garantir que o escopo de storage já
+  // está definido (evita carregar dados de "guest" antes da sessão restaurar).
   useEffect(() => {
+    if (authLoading) return;
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, authLoading]);
+
+  // Zera o estado em memória (usado ao trocar de usuário para não vazar dados).
+  const resetState = () => {
+    setInspections([]);
+    setProperties([]);
+    setCompanies([]);
+    setAppUsers([]);
+    setTechnicalResponsibles([]);
+    setFirePumps([]);
+    setFirePumpPanels([]);
+    setSchedules([]);
+    setContractors([]);
+    setJobSites([]);
+    setDieselPerformanceTests([]);
+    setElectricPerformanceTests([]);
+    setCurrentInspection(null);
+  };
 
   const loadData = async () => {
     try {
       setIsLoading(true);
+      // Limpa o estado do usuário anterior antes de carregar o escopo atual.
+      resetState();
       
-      const storedVersion = await AsyncStorage.getItem(DATA_VERSION_KEY);
+      const storedVersion = await scopedStorage.getItem(DATA_VERSION_KEY);
       const version = storedVersion ? parseInt(storedVersion, 10) : 1;
       
       const [storedInspections, storedProperties, storedCompanies, storedAppUsers, storedTechnicalResponsibles, storedFirePumps, storedFirePumpPanels, storedSchedules, storedContractors, storedJobSites, storedDieselTests, storedElectricTests] = await Promise.all([
-        AsyncStorage.getItem(INSPECTIONS_KEY),
-        AsyncStorage.getItem(PROPERTIES_KEY),
-        AsyncStorage.getItem(COMPANIES_KEY),
-        AsyncStorage.getItem(APP_USERS_KEY),
-        AsyncStorage.getItem(TECHNICAL_RESPONSIBLES_KEY),
-        AsyncStorage.getItem(FIRE_PUMPS_KEY),
-        AsyncStorage.getItem(FIRE_PUMP_PANELS_KEY),
-        AsyncStorage.getItem(SCHEDULES_KEY),
-        AsyncStorage.getItem(CONTRACTORS_KEY),
-        AsyncStorage.getItem(JOB_SITES_KEY),
-        AsyncStorage.getItem(DIESEL_TESTS_KEY),
-        AsyncStorage.getItem(ELECTRIC_TESTS_KEY),
+        scopedStorage.getItem(INSPECTIONS_KEY),
+        scopedStorage.getItem(PROPERTIES_KEY),
+        scopedStorage.getItem(COMPANIES_KEY),
+        scopedStorage.getItem(APP_USERS_KEY),
+        scopedStorage.getItem(TECHNICAL_RESPONSIBLES_KEY),
+        scopedStorage.getItem(FIRE_PUMPS_KEY),
+        scopedStorage.getItem(FIRE_PUMP_PANELS_KEY),
+        scopedStorage.getItem(SCHEDULES_KEY),
+        scopedStorage.getItem(CONTRACTORS_KEY),
+        scopedStorage.getItem(JOB_SITES_KEY),
+        scopedStorage.getItem(DIESEL_TESTS_KEY),
+        scopedStorage.getItem(ELECTRIC_TESTS_KEY),
       ]);
 
       if (storedInspections) {
@@ -518,8 +548,8 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         
         if (version < CURRENT_DATA_VERSION) {
           parsedInspections = migrateInspections(parsedInspections);
-          await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(parsedInspections));
-          await AsyncStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
+          await scopedStorage.setItem(INSPECTIONS_KEY, JSON.stringify(parsedInspections));
+          await scopedStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
         }
         
         const seenIds = new Set<string>();
@@ -534,30 +564,33 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
         
         if (deduplicatedInspections.length !== parsedInspections.length) {
           console.log(`Removed ${parsedInspections.length - deduplicatedInspections.length} duplicate inspections`);
-          await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(deduplicatedInspections));
+          await scopedStorage.setItem(INSPECTIONS_KEY, JSON.stringify(deduplicatedInspections));
         }
         
         setInspections(deduplicatedInspections);
       }
-      const sampleDataLoaded = await AsyncStorage.getItem(SAMPLE_DATA_LOADED_KEY);
-      const shouldLoadSampleData = !sampleDataLoaded && !storedCompanies && !storedAppUsers && !storedProperties;
+      const sampleDataLoaded = await scopedStorage.getItem(SAMPLE_DATA_LOADED_KEY);
+      // ISOLAMENTO: dados de demonstração SÓ entram em modo demo explícito
+      // (EXPO_PUBLIC_DEMO_MODE="1"). Usuário real/produção começa SEMPRE vazio.
+      const shouldLoadSampleData =
+        DEMO_MODE && !sampleDataLoaded && !storedCompanies && !storedAppUsers && !storedProperties;
 
       if (storedProperties) {
         setProperties(JSON.parse(storedProperties));
       } else if (shouldLoadSampleData) {
-        await AsyncStorage.setItem(PROPERTIES_KEY, JSON.stringify(sampleProperties));
+        await scopedStorage.setItem(PROPERTIES_KEY, JSON.stringify(sampleProperties));
         setProperties(sampleProperties);
       }
       if (storedCompanies) {
         setCompanies(JSON.parse(storedCompanies));
       } else if (shouldLoadSampleData) {
-        await AsyncStorage.setItem(COMPANIES_KEY, JSON.stringify(sampleCompanies));
+        await scopedStorage.setItem(COMPANIES_KEY, JSON.stringify(sampleCompanies));
         setCompanies(sampleCompanies);
       }
       if (storedAppUsers) {
         setAppUsers(JSON.parse(storedAppUsers));
       } else if (shouldLoadSampleData) {
-        await AsyncStorage.setItem(APP_USERS_KEY, JSON.stringify(sampleAppUsers));
+        await scopedStorage.setItem(APP_USERS_KEY, JSON.stringify(sampleAppUsers));
         setAppUsers(sampleAppUsers);
       }
       if (storedTechnicalResponsibles) {
@@ -575,18 +608,18 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
           return pump;
         });
         if (needsMigration) {
-          await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(parsedFirePumps));
+          await scopedStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(parsedFirePumps));
           console.log("Migrated fire pumps: added missing type field");
         }
         setFirePumps(parsedFirePumps);
-      } else {
-        await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(sampleFirePumps));
+      } else if (shouldLoadSampleData) {
+        await scopedStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(sampleFirePumps));
         setFirePumps(sampleFirePumps);
       }
       if (storedFirePumpPanels) {
         setFirePumpPanels(JSON.parse(storedFirePumpPanels));
-      } else {
-        await AsyncStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(sampleFirePumpPanels));
+      } else if (shouldLoadSampleData) {
+        await scopedStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(sampleFirePumpPanels));
         setFirePumpPanels(sampleFirePumpPanels);
       }
       if (storedSchedules) {
@@ -594,14 +627,14 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
       if (storedContractors) {
         setContractors(JSON.parse(storedContractors));
-      } else {
-        await AsyncStorage.setItem(CONTRACTORS_KEY, JSON.stringify(sampleContractors));
+      } else if (shouldLoadSampleData) {
+        await scopedStorage.setItem(CONTRACTORS_KEY, JSON.stringify(sampleContractors));
         setContractors(sampleContractors);
       }
       if (storedJobSites) {
         setJobSites(JSON.parse(storedJobSites));
-      } else {
-        await AsyncStorage.setItem(JOB_SITES_KEY, JSON.stringify(sampleJobSites));
+      } else if (shouldLoadSampleData) {
+        await scopedStorage.setItem(JOB_SITES_KEY, JSON.stringify(sampleJobSites));
         setJobSites(sampleJobSites);
       }
       if (storedDieselTests) {
@@ -612,7 +645,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
       }
 
       if (shouldLoadSampleData) {
-        await AsyncStorage.setItem(SAMPLE_DATA_LOADED_KEY, "true");
+        await scopedStorage.setItem(SAMPLE_DATA_LOADED_KEY, "true");
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -627,7 +660,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveInspections = async (newInspections: Inspection[]) => {
     try {
-      await AsyncStorage.setItem(INSPECTIONS_KEY, JSON.stringify(newInspections));
+      await scopedStorage.setItem(INSPECTIONS_KEY, JSON.stringify(newInspections));
       setInspections(newInspections);
     } catch (error) {
       console.error("Error saving inspections:", error);
@@ -670,7 +703,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveProperties = async (newProperties: Property[]) => {
     try {
-      await AsyncStorage.setItem(PROPERTIES_KEY, JSON.stringify(newProperties));
+      await scopedStorage.setItem(PROPERTIES_KEY, JSON.stringify(newProperties));
       setProperties(newProperties);
     } catch (error) {
       console.error("Error saving properties:", error);
@@ -708,7 +741,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveCompanies = async (newCompanies: Company[]) => {
     try {
-      await AsyncStorage.setItem(COMPANIES_KEY, JSON.stringify(newCompanies));
+      await scopedStorage.setItem(COMPANIES_KEY, JSON.stringify(newCompanies));
       setCompanies(newCompanies);
     } catch (error) {
       console.error("Error saving companies:", error);
@@ -746,7 +779,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveAppUsers = async (newAppUsers: AppUser[]) => {
     try {
-      await AsyncStorage.setItem(APP_USERS_KEY, JSON.stringify(newAppUsers));
+      await scopedStorage.setItem(APP_USERS_KEY, JSON.stringify(newAppUsers));
       setAppUsers(newAppUsers);
     } catch (error) {
       console.error("Error saving app users:", error);
@@ -755,7 +788,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveTechnicalResponsibles = async (newTechResps: TechnicalResponsible[]) => {
     try {
-      await AsyncStorage.setItem(TECHNICAL_RESPONSIBLES_KEY, JSON.stringify(newTechResps));
+      await scopedStorage.setItem(TECHNICAL_RESPONSIBLES_KEY, JSON.stringify(newTechResps));
       setTechnicalResponsibles(newTechResps);
     } catch (error) {
       console.error("Error saving technical responsibles:", error);
@@ -814,7 +847,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveFirePumps = async (newFirePumps: FirePump[]) => {
     try {
-      await AsyncStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(newFirePumps));
+      await scopedStorage.setItem(FIRE_PUMPS_KEY, JSON.stringify(newFirePumps));
       setFirePumps(newFirePumps);
     } catch (error) {
       console.error("Error saving fire pumps:", error);
@@ -852,7 +885,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveFirePumpPanels = async (newPanels: FirePumpControlPanel[]) => {
     try {
-      await AsyncStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(newPanels));
+      await scopedStorage.setItem(FIRE_PUMP_PANELS_KEY, JSON.stringify(newPanels));
       setFirePumpPanels(newPanels);
     } catch (error) {
       console.error("Error saving fire pump panels:", error);
@@ -887,7 +920,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveContractors = async (newContractors: Contractor[]) => {
     try {
-      await AsyncStorage.setItem(CONTRACTORS_KEY, JSON.stringify(newContractors));
+      await scopedStorage.setItem(CONTRACTORS_KEY, JSON.stringify(newContractors));
       setContractors(newContractors);
     } catch (error) {
       console.error("Error saving contractors:", error);
@@ -921,7 +954,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveJobSites = async (newJobSites: JobSite[]) => {
     try {
-      await AsyncStorage.setItem(JOB_SITES_KEY, JSON.stringify(newJobSites));
+      await scopedStorage.setItem(JOB_SITES_KEY, JSON.stringify(newJobSites));
       setJobSites(newJobSites);
     } catch (error) {
       console.error("Error saving job sites:", error);
@@ -956,7 +989,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveDieselPerformanceTests = async (newTests: DieselPerformanceTest[]) => {
     try {
-      await AsyncStorage.setItem(DIESEL_TESTS_KEY, JSON.stringify(newTests));
+      await scopedStorage.setItem(DIESEL_TESTS_KEY, JSON.stringify(newTests));
       setDieselPerformanceTests(newTests);
     } catch (error) {
       console.error("Error saving diesel performance tests:", error);
@@ -987,7 +1020,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveElectricPerformanceTests = async (newTests: PerformanceTest[]) => {
     try {
-      await AsyncStorage.setItem(ELECTRIC_TESTS_KEY, JSON.stringify(newTests));
+      await scopedStorage.setItem(ELECTRIC_TESTS_KEY, JSON.stringify(newTests));
       setElectricPerformanceTests(newTests);
     } catch (error) {
       console.error("Error saving electric performance tests:", error);
@@ -1018,7 +1051,7 @@ export function InspectionProvider({ children }: InspectionProviderProps) {
 
   const saveSchedules = async (newSchedules: InspectionSchedule[]) => {
     try {
-      await AsyncStorage.setItem(SCHEDULES_KEY, JSON.stringify(newSchedules));
+      await scopedStorage.setItem(SCHEDULES_KEY, JSON.stringify(newSchedules));
       setSchedules(newSchedules);
     } catch (error) {
       console.error("Error saving schedules:", error);

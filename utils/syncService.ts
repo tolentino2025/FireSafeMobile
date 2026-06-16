@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { scopedStorage } from '@/utils/scopedStorage';
 import * as Network from 'expo-network';
 import { compressImageForUpload } from './imageCompressor';
 import type { Company, AppUser, Property, Inspection, InspectionSchedule } from '../types/inspection';
@@ -44,15 +44,15 @@ export const isOnline = async (): Promise<boolean> => {
 };
 
 export const getLastSyncTime = async (): Promise<string | null> => {
-  return AsyncStorage.getItem(SYNC_KEY);
+  return scopedStorage.getItem(SYNC_KEY);
 };
 
 export const setLastSyncTime = async (time: string): Promise<void> => {
-  await AsyncStorage.setItem(SYNC_KEY, time);
+  await scopedStorage.setItem(SYNC_KEY, time);
 };
 
 export const getPendingSync = async (): Promise<PendingSync> => {
-  const data = await AsyncStorage.getItem(PENDING_SYNC_KEY);
+  const data = await scopedStorage.getItem(PENDING_SYNC_KEY);
   if (data) {
     const parsed = JSON.parse(data);
     // Backfill de chaves novas para dados persistidos por versoes antigas.
@@ -80,11 +80,11 @@ export const getPendingSync = async (): Promise<PendingSync> => {
 };
 
 export const setPendingSync = async (data: PendingSync): Promise<void> => {
-  await AsyncStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(data));
+  await scopedStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(data));
 };
 
 export const clearPendingSync = async (): Promise<void> => {
-  await AsyncStorage.removeItem(PENDING_SYNC_KEY);
+  await scopedStorage.removeItem(PENDING_SYNC_KEY);
 };
 
 export const addToPendingSync = async <T extends keyof Omit<PendingSync, 'photos'>>(

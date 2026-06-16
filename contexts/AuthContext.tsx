@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabase";
+import { setStorageScope } from "@/utils/scopedStorage";
 
 const SUPABASE_CONFIGURED = Boolean(process.env.EXPO_PUBLIC_SUPABASE_URL);
 
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Restore session on mount
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setStorageScope(currentSession?.user?.id ?? null);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setIsLoading(false);
@@ -40,6 +42,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
+        // Atualiza o escopo de armazenamento ANTES de propagar o novo usuário,
+        // para que os contextos recarreguem já no escopo correto.
+        setStorageScope(newSession?.user?.id ?? null);
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setIsLoading(false);

@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
 import { ITM_TEMPLATES } from "@/constants/itmTemplates";
 import {
   gerarAgendaDoPlano,
@@ -28,6 +28,7 @@ import {
   syncItmOccurrencesToSupabase,
   markItmOccurrenceCompletedInSupabase,
 } from "@/utils/itm/occurrenceSync";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Plano de ITM associado a uma propriedade (asset).
 export interface ItmPlan {
@@ -125,10 +126,15 @@ export function ITMProvider({ children }: ITMProviderProps) {
   const [plans, setPlans] = useState<ItmPlan[]>([]);
   const [occurrences, setOccurrences] = useState<ItmOccurrence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: authLoading } = useAuth();
 
+  // Recarrega ao trocar de usuário (login/logout); aguarda o AuthContext resolver
+  // para garantir que o escopo de storage já está correto.
   useEffect(() => {
+    if (authLoading) return;
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, authLoading]);
 
   // FASE 2 — mantém os lembretes locais (48h) sincronizados com as ocorrências.
   // Mobile-only e só se o usuário habilitar push nas preferências (no-op no web).
@@ -149,10 +155,13 @@ export function ITMProvider({ children }: ITMProviderProps) {
   const loadData = async () => {
     try {
       setIsLoading(true);
+      // Limpa o estado do usuário anterior antes de carregar o escopo atual.
+      setPlans([]);
+      setOccurrences([]);
       const [storedPlans, storedOccurrences, version] = await Promise.all([
-        AsyncStorage.getItem(ITM_PLANS_KEY),
-        AsyncStorage.getItem(ITM_OCCURRENCES_KEY),
-        AsyncStorage.getItem(ITM_VERSION_KEY),
+        scopedStorage.getItem(ITM_PLANS_KEY),
+        scopedStorage.getItem(ITM_OCCURRENCES_KEY),
+        scopedStorage.getItem(ITM_VERSION_KEY),
       ]);
 
       const loadedPlans: ItmPlan[] = storedPlans ? JSON.parse(storedPlans) : [];
@@ -189,13 +198,13 @@ export function ITMProvider({ children }: ITMProviderProps) {
           }
         }
         loadedOccurrences = regeneradas;
-        await AsyncStorage.setItem(
+        await scopedStorage.setItem(
           ITM_OCCURRENCES_KEY,
           JSON.stringify(regeneradas),
         );
-        await AsyncStorage.setItem(ITM_VERSION_KEY, ITM_CURRENT_VERSION);
+        await scopedStorage.setItem(ITM_VERSION_KEY, ITM_CURRENT_VERSION);
       } else if (version !== ITM_CURRENT_VERSION) {
-        await AsyncStorage.setItem(ITM_VERSION_KEY, ITM_CURRENT_VERSION);
+        await scopedStorage.setItem(ITM_VERSION_KEY, ITM_CURRENT_VERSION);
       }
 
       setPlans(loadedPlans);
@@ -208,12 +217,12 @@ export function ITMProvider({ children }: ITMProviderProps) {
   };
 
   const savePlans = async (newPlans: ItmPlan[]) => {
-    await AsyncStorage.setItem(ITM_PLANS_KEY, JSON.stringify(newPlans));
+    await scopedStorage.setItem(ITM_PLANS_KEY, JSON.stringify(newPlans));
     setPlans(newPlans);
   };
 
   const saveOccurrences = async (newOccurrences: ItmOccurrence[]) => {
-    await AsyncStorage.setItem(
+    await scopedStorage.setItem(
       ITM_OCCURRENCES_KEY,
       JSON.stringify(newOccurrences),
     );

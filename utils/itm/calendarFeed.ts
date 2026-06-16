@@ -2,7 +2,7 @@
 // Chama as Edge Functions manage-calendar-feed (gerar/revogar). O token só é
 // retornado UMA vez (guardamos só o hash no servidor), então a URL é persistida
 // localmente para reexibir. Requer Supabase configurado + usuário logado.
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
 
 const FEED_URL_KEY = "@firesafe_itm_calendar_feed_url";
@@ -15,7 +15,7 @@ export interface CalendarFeedResult {
 // URL do feed salva localmente (após gerar). null se nunca gerou ou foi revogado.
 export async function getSavedCalendarFeedUrl(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(FEED_URL_KEY);
+    return await scopedStorage.getItem(FEED_URL_KEY);
   } catch {
     return null;
   }
@@ -35,7 +35,7 @@ export async function createCalendarFeed(): Promise<CalendarFeedResult> {
   if (error) throw error;
   if (!data?.feedUrl) throw new Error("Resposta inválida do servidor");
 
-  await AsyncStorage.setItem(FEED_URL_KEY, data.feedUrl);
+  await scopedStorage.setItem(FEED_URL_KEY, data.feedUrl);
   return { feedUrl: data.feedUrl, horizonDays: data.horizonDays };
 }
 
@@ -51,7 +51,7 @@ export async function revokeCalendarFeed(): Promise<void> {
     body: { action: "revoke" },
   });
   if (error) throw error;
-  await AsyncStorage.removeItem(FEED_URL_KEY);
+  await scopedStorage.removeItem(FEED_URL_KEY);
 }
 
 // Indica se há sessão logada (para mostrar/ocultar a seção do feed).

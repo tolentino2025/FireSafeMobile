@@ -3,7 +3,7 @@ import { View, StyleSheet, TextInput, Pressable, Alert, Switch, Platform, Scroll
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { scopedStorage } from "@/utils/scopedStorage";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -225,12 +225,12 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
     try {
       if (testId) {
         const key = getDraftStorageKey(testId);
-        const data = await AsyncStorage.getItem(key);
+        const data = await scopedStorage.getItem(key);
         if (data) return { key, data };
       }
       
       const newKey = getDraftStorageKey('new');
-      const newData = await AsyncStorage.getItem(newKey);
+      const newData = await scopedStorage.getItem(newKey);
       if (newData) return { key: newKey, data: newData };
       
       return null;
@@ -271,10 +271,10 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
         const newKey = resolveDraftKey(test);
         const oldKey = activeDraftKeyRef.current;
         
-        await AsyncStorage.setItem(newKey, JSON.stringify(test));
+        await scopedStorage.setItem(newKey, JSON.stringify(test));
         
         if (oldKey && oldKey !== newKey) {
-          await AsyncStorage.removeItem(oldKey);
+          await scopedStorage.removeItem(oldKey);
         }
         
         activeDraftKeyRef.current = newKey;
@@ -291,7 +291,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
   const clearDraft = async () => {
     try {
       if (activeDraftKeyRef.current) {
-        await AsyncStorage.removeItem(activeDraftKeyRef.current);
+        await scopedStorage.removeItem(activeDraftKeyRef.current);
       }
       activeDraftKeyRef.current = null;
     } catch (error) {
