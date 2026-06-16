@@ -86,6 +86,25 @@ Plano gratuito do Brevo cobre o volume de lembretes ITM com folga.
    Edge Function automaticamente, então **não precisa** do `secrets set` para ela. **Não cole no repo.**
 2. **`BREVO_API_KEY`** + remetente verificado (`NOTIFY_FROM_EMAIL`).
 
+## 4-bis. Fase 7 — Feed .ics assinável (calendário que atualiza sozinho)
+
+Duas Edge Functions:
+- `manage-calendar-feed` (autenticada): o app gera/revoga o link do usuário.
+- `calendar-feed` (**pública**, sem JWT): o Google/Apple/Outlook acessam a URL; a segurança
+  é o token secreto na URL (guardamos só o hash em `calendar_feed_tokens`).
+
+Deploy (na sua máquina, após `git pull`):
+```bash
+supabase functions deploy manage-calendar-feed
+supabase functions deploy calendar-feed --no-verify-jwt
+```
+> O `--no-verify-jwt` (ou `[functions.calendar-feed] verify_jwt=false` no `config.toml`,
+> já incluído) é obrigatório: apps de calendário não enviam JWT do Supabase.
+
+Uso no app: **Perfil → Notificações e Calendário → Calendário assinável → Gerar link**
+(requer login). Copie o link e "assine" no Google Calendar (Outros calendários → Por URL),
+Apple (Arquivo → Nova assinatura de calendário) ou Outlook (Adicionar → Da internet).
+
 ## 5. Habilitar login obrigatório (multiempresa) — quando quiser
 1. Criar usuários (Auth) e a tabela `profiles` ligando `auth.uid()` → empresa/tenant.
 2. Definir `EXPO_PUBLIC_AUTH_REQUIRED=1` no `vercel.json`/env.
@@ -95,6 +114,7 @@ Plano gratuito do Brevo cobre o volume de lembretes ITM com folga.
 - Cliente conecta ao Supabase ✅
 - Login opcional (não bloqueia testes) ✅
 - Tabelas de notificação (0001): **aplicadas** (`db push`) ✅
-- Espelho de ocorrências + cron (0002/0003) e Edge Function `notify-48h` (Brevo): **código pronto** ⏳
-  (falta `db push`, `secrets set`, `functions deploy` e os segredos do passo 4 — service_role no Vault + Brevo)
+- Espelho de ocorrências + cron (0002/0003) e Edge Function `notify-48h` (Brevo): **ativos** ✅
+- Fase 7 (feed .ics assinável): código pronto — falta `functions deploy` de `manage-calendar-feed`
+  e `calendar-feed --no-verify-jwt` ⏳
 - Push remoto / Google / Outlook: próximas fases ⏳

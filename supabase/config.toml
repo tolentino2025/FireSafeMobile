@@ -1,3 +1,8 @@
 # Supabase CLI — config mínima.
 # Use: supabase link --project-ref tbbnysvkfnoydjqxdnlc  &&  supabase db push
 project_id = "tbbnysvkfnoydjqxdnlc"
+
+# Feed .ics assinável é PÚBLICO (calendários externos acessam sem JWT).
+# A segurança vem do token secreto na URL (hash conferido no banco).
+[functions.calendar-feed]
+verify_jwt = false

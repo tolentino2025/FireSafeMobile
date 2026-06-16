@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Switch, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Switch,
+  Pressable,
+  ScrollView,
+  Share,
+  Platform,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedView } from "@/components/ThemedView";
@@ -17,6 +25,13 @@ import {
   type HorizonDays,
 } from "@/utils/itm/notificationPreferences";
 import { syncItmLocalReminders } from "@/utils/itm/localReminders";
+import {
+  getSavedCalendarFeedUrl,
+  createCalendarFeed,
+  revokeCalendarFeed,
+  isLoggedIn,
+} from "@/utils/itm/calendarFeed";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 export default function NotificationSettingsScreen() {
   const { fullTheme } = useTheme();
@@ -27,10 +42,70 @@ export default function NotificationSettingsScreen() {
   const [prefs, setPrefs] = useState<ItmNotificationPreferences>(
     DEFAULT_ITM_NOTIFICATION_PREFERENCES,
   );
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [feedUrl, setFeedUrl] = useState<string | null>(null);
+  const [feedBusy, setFeedBusy] = useState(false);
 
   useEffect(() => {
     getItmNotificationPreferences().then(setPrefs);
+    isLoggedIn().then(setLoggedIn);
+    getSavedCalendarFeedUrl().then(setFeedUrl);
   }, []);
+
+  const handleCreateFeed = async () => {
+    setFeedBusy(true);
+    try {
+      const { feedUrl: url } = await createCalendarFeed();
+      setFeedUrl(url);
+      showAlert(
+        pt ? "Link gerado" : "Link created",
+        pt
+          ? "Copie o link e adicione/assine como um calendário no Google, Apple ou Outlook. Ele atualiza sozinho."
+          : "Copy the link and subscribe to it as a calendar in Google, Apple or Outlook. It updates automatically.",
+      );
+    } catch (e: unknown) {
+      showAlert(
+        pt ? "Erro" : "Error",
+        e instanceof Error ? e.message : String(e),
+      );
+    } finally {
+      setFeedBusy(false);
+    }
+  };
+
+  const handleCopyFeed = async () => {
+    if (!feedUrl) return;
+    if (Platform.OS === "web" && typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(feedUrl);
+      showAlert(pt ? "Copiado" : "Copied", feedUrl);
+    } else {
+      await Share.share({ message: feedUrl });
+    }
+  };
+
+  const handleRevokeFeed = () => {
+    showConfirm(
+      pt ? "Revogar link?" : "Revoke link?",
+      pt
+        ? "Os calendários que usam este link param de atualizar. Você pode gerar um novo depois."
+        : "Calendars using this link will stop updating. You can generate a new one later.",
+      async () => {
+        setFeedBusy(true);
+        try {
+          await revokeCalendarFeed();
+          setFeedUrl(null);
+        } catch (e: unknown) {
+          showAlert(
+            pt ? "Erro" : "Error",
+            e instanceof Error ? e.message : String(e),
+          );
+        } finally {
+          setFeedBusy(false);
+        }
+      },
+      { destructive: true },
+    );
+  };
 
   const update = async (patch: Partial<ItmNotificationPreferences>) => {
     const next = { ...prefs, ...patch };
@@ -91,7 +166,7 @@ export default function NotificationSettingsScreen() {
 
         <Toggle
           label={pt ? "Receber e-mail 48h antes" : "Email 48h before"}
-          desc={pt ? "Requer servidor (em breve)" : "Requires server (coming soon)"}
+          desc={pt ? "Requer login (envio pelo servidor)" : "Requires login (sent by server)"}
           value={prefs.email48hEnabled}
           onChange={(v) => update({ email48hEnabled: v })}
         />
@@ -122,6 +197,72 @@ export default function NotificationSettingsScreen() {
           value={prefs.calendarSyncEnabled}
           onChange={(v) => update({ calendarSyncEnabled: v })}
         />
+
+        {loggedIn ? (
+          <>
+            <ThemedText type="h4" style={styles.sectionTitle}>
+              {pt ? "Calendário assinável (link)" : "Subscribable calendar (link)"}
+            </ThemedText>
+            <ThemedText type="small" secondary style={{ marginBottom: Spacing.sm }}>
+              {pt
+                ? "Gere um link e assine-o no Google/Apple/Outlook. O calendário atualiza sozinho conforme sua agenda ITM muda."
+                : "Generate a link and subscribe to it in Google/Apple/Outlook. The calendar updates automatically as your ITM schedule changes."}
+            </ThemedText>
+
+            {feedUrl ? (
+              <>
+                <View
+                  style={[
+                    styles.urlBox,
+                    { backgroundColor: fullTheme.colors.surfaceAlt, borderColor: fullTheme.colors.border },
+                  ]}
+                >
+                  <ThemedText type="small" mono style={{ fontSize: 12 }} numberOfLines={2}>
+                    {feedUrl}
+                  </ThemedText>
+                </View>
+                <View style={styles.feedActions}>
+                  <Pressable
+                    onPress={handleCopyFeed}
+                    style={[styles.feedBtn, { backgroundColor: fullTheme.colors.primary }]}
+                  >
+                    <Feather name="copy" size={15} color="#FFFFFF" />
+                    <ThemedText type="small" style={styles.feedBtnLabel}>
+                      {pt ? "Copiar / Compartilhar" : "Copy / Share"}
+                    </ThemedText>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleRevokeFeed}
+                    disabled={feedBusy}
+                    style={[styles.feedBtn, { backgroundColor: fullTheme.colors.surface, borderColor: fullTheme.colors.border, borderWidth: 1 }]}
+                  >
+                    <Feather name="x-circle" size={15} color={fullTheme.colors.textPrimary} />
+                    <ThemedText type="small" style={{ marginLeft: 6, fontWeight: "600" }}>
+                      {pt ? "Revogar" : "Revoke"}
+                    </ThemedText>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <Pressable
+                onPress={handleCreateFeed}
+                disabled={feedBusy}
+                style={[styles.feedBtn, { backgroundColor: fullTheme.colors.primary, opacity: feedBusy ? 0.6 : 1 }]}
+              >
+                <Feather name="link" size={15} color="#FFFFFF" />
+                <ThemedText type="small" style={styles.feedBtnLabel}>
+                  {feedBusy
+                    ? pt
+                      ? "Gerando..."
+                      : "Generating..."
+                    : pt
+                      ? "Gerar link de calendário"
+                      : "Generate calendar link"}
+                </ThemedText>
+              </Pressable>
+            )}
+          </>
+        ) : null}
 
         <ThemedText type="h4" style={styles.sectionTitle}>
           {pt ? "Horizonte de sincronização" : "Sync horizon"}
@@ -199,4 +340,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: Spacing.xl,
   },
+  urlBox: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginBottom: Spacing.sm,
+  },
+  feedActions: { flexDirection: "row", gap: Spacing.sm },
+  feedBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    flex: 1,
+  },
+  feedBtnLabel: { color: "#FFFFFF", fontWeight: "600", marginLeft: 6 },
 });
