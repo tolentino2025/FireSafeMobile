@@ -55,6 +55,31 @@ export async function getCompanyFileUrl(
   }
 }
 
+// Baixa um arquivo do bucket e devolve como data URI base64 (para hidratar o
+// dispositivo após o pull, mantendo display/PDF locais inalterados).
+export async function downloadCompanyFileAsBase64(
+  path: string,
+  contentType = "image/jpeg",
+): Promise<string | null> {
+  const url = await getCompanyFileUrl(path, 600);
+  if (!url) return null;
+  try {
+    const res = await fetch(url);
+    const buf = await res.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const b64 =
+      typeof btoa === "function"
+        ? btoa(binary)
+        : Buffer.from(binary, "binary").toString("base64");
+    return `data:${contentType};base64,${b64}`;
+  } catch (e) {
+    console.warn("[storage] download falhou:", e);
+    return null;
+  }
+}
+
 export async function removeCompanyFile(path: string): Promise<void> {
   if (!isSupabaseConfigured || !path) return;
   try {

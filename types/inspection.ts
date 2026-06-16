@@ -236,6 +236,9 @@ export interface InspectionPhoto {
   id: string;
   uri: string;
   base64?: string;
+  // Fase 2D: caminho no bucket company-files (fonte para outros dispositivos).
+  // O base64/uri continuam locais para exibição/PDF; o sync usa storagePath.
+  storagePath?: string;
   caption: string;
   timestamp: string;
 }

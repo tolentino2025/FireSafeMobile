@@ -183,7 +183,10 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
     const companyId = data as string;
     // Leva os dados locais do usuário para a empresa recém-criada (vazia).
+    // Define escopo/sync antes para o upload de fotos mirar a empresa certa.
     if (user?.id && companyId) {
+      setCompanyScope(companyId);
+      setSyncContext(companyId, user.id);
       await seedCompanyFromUserScope(user.id, companyId);
     }
     await refresh();
