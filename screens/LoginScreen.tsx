@@ -10,6 +10,7 @@ import {
   Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -21,6 +22,7 @@ import { BorderRadius, Spacing } from "@/constants/theme";
 export default function LoginScreen() {
   const { fullTheme } = useTheme();
   const { signIn, signUp, isConfigured } = useAuth();
+  const navigation = useNavigation<{ canGoBack: () => boolean; goBack: () => void }>();
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -60,9 +62,17 @@ export default function LoginScreen() {
 
       if (result.error) {
         setErrorMessage(result.error);
+      } else if (mode === "register") {
+        // Cadastro pode exigir confirmação de e-mail (sem sessão imediata).
+        setErrorMessage(null);
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
+      } else if (navigation.canGoBack()) {
+        // Login a partir do Perfil (modo opcional): volta para o app.
+        // No modo obrigatório (root), a troca de tela é automática pelo AppContent.
+        navigation.goBack();
       }
-      // On success, AuthContext state change triggers AppContent re-render
-      // which swaps AuthNavigator out for MainTabNavigator automatically.
     } finally {
       setIsSubmitting(false);
     }

@@ -490,6 +490,32 @@ export default function ProfileScreen() {
           </ThemedText>
           <Spacer height={Spacing["3xl"]} />
         </>
+      ) : isConfigured ? (
+        <>
+          <Pressable
+            onPress={() => navigation.navigate("Login")}
+            style={({ pressed }) => [
+              styles.signOutButton,
+              {
+                backgroundColor: fullTheme.colors.primary,
+                borderColor: fullTheme.colors.primary,
+                opacity: pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Feather name="log-in" size={18} color="#FFFFFF" />
+            <ThemedText type="body" style={[styles.signOutText, { color: "#FFFFFF" }]}>
+              {language === "pt-BR" ? "Entrar / Criar conta" : "Sign in / Create account"}
+            </ThemedText>
+          </Pressable>
+          <Spacer height={Spacing.md} />
+          <ThemedText type="small" secondary style={styles.accountEmail}>
+            {language === "pt-BR"
+              ? "Entre para receber e-mails 48h, resumo diário e sincronizar o calendário."
+              : "Sign in to get 48h emails, daily summary and calendar sync."}
+          </ThemedText>
+          <Spacer height={Spacing["3xl"]} />
+        </>
       ) : null}
 
       <View style={styles.versionContainer}>
