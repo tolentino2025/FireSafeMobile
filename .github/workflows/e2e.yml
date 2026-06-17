@@ -10,7 +10,15 @@ on:
       # Branches de trabalho do Claude — permite validar o E2E no CI sem abrir PR.
       - "claude/**"
     paths:
+      # Inclui o código do app: a suíte E2E exercita telas/navegação/contextos,
+      # então mudanças nessas pastas devem re-rodar os testes no push (sem PR).
       - "e2e/**"
+      - "screens/**"
+      - "contexts/**"
+      - "components/**"
+      - "navigation/**"
+      - "utils/**"
+      - "App.tsx"
       - "playwright.config.ts"
       - "package.json"
       - "package-lock.json"
