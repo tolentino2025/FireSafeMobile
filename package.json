@@ -13,6 +13,8 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "scheduler:golden": "tsx scripts/generate-golden.ts",
     "scheduler:report": "tsx scripts/report.ts",
     "scheduler:app-templates": "tsx scripts/generate-app-templates.ts"
@@ -73,6 +75,7 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@types/js-yaml": "^4.0.9",
     "@types/react": "~19.1.0",
     "babel-plugin-module-resolver": "^5.0.2",

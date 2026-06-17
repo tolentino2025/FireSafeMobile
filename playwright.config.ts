@@ -1,0 +1,80 @@
+import { defineConfig, devices } from "@playwright/test";
+
+// Config de E2E web do FireSafe ITM.
+// O app web sobe via Expo (`npm run web`) na porta 8081 (Metro/web).
+// O Playwright sobe o servidor automaticamente e espera ficar disponível.
+const PORT = Number(process.env.E2E_PORT ?? 8081);
+const BASE_URL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
+
+export default defineConfig({
+  testDir: "./e2e",
+  // Exclui os helpers — não são specs
+  testIgnore: ["**/helpers/**"],
+  // Bundle Expo web pode demorar no primeiro acesso (cold start).
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
+  // Paralelo: cada worker tem localStorage isolado (contexto de browser próprio)
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  // Em CI: reporter GitHub + HTML (publicado como artifact)
+  // Local: lista + HTML interativo
+  reporter: process.env.CI
+    ? [["github"], ["html", { open: "never" }]]
+    : [["list"], ["html", { open: "on-failure" }]],
+  use: {
+    baseURL: BASE_URL,
+    // O app detecta o idioma pelo locale do navegador (expo-localization →
+    // navigator.language). Sem isto, o CI headless usa en-US e a UI sobe em
+    // inglês (Home/Profile/...), quebrando os seletores PT (Perfil/Cadastros).
+    // Forçamos pt-BR para uma UI determinística em português.
+    locale: "pt-BR",
+    timezoneId: "America/Sao_Paulo",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+    // React Native Web: garante que eventos de toque/click funcionem
+    actionTimeout: 15_000,
+  },
+  projects: [
+    // Desktop Chromium — suite principal completa
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    // Mobile — apenas smoke + navigation + responsive
+    {
+      name: "mobile-chrome",
+      use: { ...devices["Pixel 7"] },
+      testMatch: ["**/smoke.spec.ts", "**/navigation.spec.ts", "**/responsive.spec.ts"],
+    },
+    // iPhone para validação de viewports iOS
+    {
+      name: "mobile-safari",
+      use: { ...devices["iPhone 14"] },
+      testMatch: ["**/smoke.spec.ts", "**/responsive.spec.ts"],
+    },
+  ],
+  // Reaproveita um servidor já rodando em dev; na CI sobe um novo.
+  // --non-interactive: evita prompts do Expo CLI no ambiente de CI.
+  webServer: {
+    command: process.env.CI
+      ? "npx expo start --web --non-interactive"
+      : "npm run web",
+    url: BASE_URL,
+    reuseExistingServer: !process.env.CI,
+    // O primeiro bundle do Expo web pode levar bastante; damos folga generosa.
+    timeout: 180_000,
+    stdout: "pipe",
+    stderr: "pipe",
+    env: {
+      // Passa as variáveis de ambiente do processo atual para o servidor web
+      ...(process.env.EXPO_PUBLIC_SUPABASE_URL
+        ? { EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL }
+        : {}),
+      ...(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+        ? { EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY }
+        : {}),
+    },
+  },
+});

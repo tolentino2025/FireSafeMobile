@@ -31,17 +31,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
-    // Restore session on mount
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setStorageScope(currentSession?.user?.id ?? null);
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setIsLoading(false);
-    });
+    let active = true;
+    const finishLoading = () => {
+      if (active) {
+        setIsLoading(false);
+      }
+    };
+
+    // Restore session on mount.
+    // IMPORTANTE: nunca deixar o app preso na splash. Se getSession() travar
+    // ou rejeitar (rede instável, sessão corrompida, locks do navegador no
+    // ambiente web/headless), o isLoading precisa ser resolvido mesmo assim.
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: currentSession } }) => {
+        if (!active) return;
+        setStorageScope(currentSession?.user?.id ?? null);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+      })
+      .catch((err) => {
+        console.warn("[Auth] getSession falhou:", err);
+      })
+      .finally(finishLoading);
+
+    // Fallback de segurança: garante que o app saia da splash em no máximo 8s,
+    // mesmo que getSession() nunca resolva.
+    const splashTimeout = setTimeout(finishLoading, 8_000);
 
     // Listen to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
+        if (!active) return;
         // Atualiza o escopo de armazenamento ANTES de propagar o novo usuário,
         // para que os contextos recarreguem já no escopo correto.
         setStorageScope(newSession?.user?.id ?? null);
@@ -52,6 +73,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
 
     return () => {
+      active = false;
+      clearTimeout(splashTimeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -82,11 +105,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
+      const appUrl =
+        process.env.EXPO_PUBLIC_APP_URL ?? "https://fire-safe-mobile.vercel.app";
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: name },
+          emailRedirectTo: appUrl,
         },
       });
       if (error) {

@@ -46,3 +46,9 @@ app-example
 # Claude Code local config
 .claude/
 dist/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

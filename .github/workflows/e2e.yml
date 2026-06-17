@@ -1,0 +1,103 @@
+name: E2E (Playwright)
+
+# Roda os testes E2E do app web (Expo web) no Chromium, mobile-chrome e mobile-safari.
+# O runner do GitHub tem rede liberada — baixa os navegadores do Playwright sem bloqueio.
+
+on:
+  push:
+    branches:
+      - main
+      # Branches de trabalho do Claude — permite validar o E2E no CI sem abrir PR.
+      - "claude/**"
+    paths:
+      # Inclui o código do app: a suíte E2E exercita telas/navegação/contextos,
+      # então mudanças nessas pastas devem re-rodar os testes no push (sem PR).
+      - "e2e/**"
+      - "screens/**"
+      - "contexts/**"
+      - "components/**"
+      - "navigation/**"
+      - "utils/**"
+      - "App.tsx"
+      - "playwright.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/e2e.yml"
+  pull_request:
+    paths:
+      - "e2e/**"
+      - "playwright.config.ts"
+      - "screens/**"
+      - "contexts/**"
+      - "components/**"
+      - "navigation/**"
+      - "utils/**"
+      - "App.tsx"
+      - "package.json"
+      - ".github/workflows/e2e.yml"
+  workflow_dispatch: {}
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Variáveis públicas do cliente (anon/publishable — seguras por design).
+      # Cadastradas como Actions *Variables* (não Secrets), portanto lidas via `vars`.
+      # Sem elas o app sobe em modo local e os testes que requerem Supabase são pulados.
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+      # Usuários de teste para os testes de isolamento (Nível 3).
+      # Crie esses usuários no Supabase e adicione como secrets no repositório.
+      # Sem eles, os testes de Nível 3 são automaticamente pulados (não falham).
+      PW_USER_A_EMAIL: ${{ secrets.PW_USER_A_EMAIL }}
+      PW_USER_A_PASSWORD: ${{ secrets.PW_USER_A_PASSWORD }}
+      PW_USER_B_EMAIL: ${{ secrets.PW_USER_B_EMAIL }}
+      PW_USER_B_PASSWORD: ${{ secrets.PW_USER_B_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Confirma configuração do ambiente (sem vazar valores)
+        run: |
+          echo "SUPABASE_URL set:      $([ -n \"$EXPO_PUBLIC_SUPABASE_URL\" ] && echo yes || echo NO)"
+          echo "SUPABASE_ANON_KEY set: $([ -n \"$EXPO_PUBLIC_SUPABASE_ANON_KEY\" ] && echo yes || echo NO)"
+          echo "PW_USER_A_EMAIL set:   $([ -n \"$PW_USER_A_EMAIL\" ] && echo yes || echo NO)"
+          echo "PW_USER_A_PASSWORD set:$([ -n \"$PW_USER_A_PASSWORD\" ] && echo yes || echo NO)"
+          echo "PW_USER_B_EMAIL set:   $([ -n \"$PW_USER_B_EMAIL\" ] && echo yes || echo NO)"
+          echo "PW_USER_B_PASSWORD set:$([ -n \"$PW_USER_B_PASSWORD\" ] && echo yes || echo NO)"
+
+      # Gate rápido: se o app não carregar (splash infinita, bundle quebrado),
+      # o smoke falha em poucos minutos e o job para antes da suíte completa.
+      - name: Smoke gate (app carrega?)
+        run: npx playwright test smoke.spec.ts --project=chromium --retries=0
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (traces/screenshots on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7

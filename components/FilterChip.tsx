@@ -9,15 +9,17 @@ interface FilterChipProps {
   active: boolean;
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
 // Chip de filtro horizontal — padrao Instrument (spec): padding 8v/14h,
 // radius 11, border 1, 12/600. Ativo = ember; inativo = superficie + tinta.
-export function FilterChip({ label, active, onPress, style }: FilterChipProps) {
+export function FilterChip({ label, active, onPress, style, testID }: FilterChipProps) {
   const { fullTheme } = useTheme();
 
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       style={[
         styles.chip,

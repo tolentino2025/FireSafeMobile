@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
+import { Platform } from "react-native";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -19,7 +20,9 @@ export const supabase = createClient(
       storage: AsyncStorage,
       autoRefreshToken: isSupabaseConfigured,
       persistSession: isSupabaseConfigured,
-      detectSessionInUrl: false,
+      // Web: detecta tokens no hash da URL (links de confirmação de e-mail).
+      // Native: desativado — a URL não é acessível da mesma forma.
+      detectSessionInUrl: Platform.OS === "web",
     },
   },
 );
