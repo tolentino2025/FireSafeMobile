@@ -7,6 +7,16 @@ import { Page } from "@playwright/test";
 const FS_PREFIX = "@firesafe_";
 const SB_PREFIX = "sb-"; // chaves do Supabase Auth
 
+// Preferências de DISPOSITIVO que são globais POR DESIGN (não escopadas):
+// tema, idioma e assinatura. Ver utils/scopedStorage.ts:
+// "Dados de DISPOSITIVO (tema, idioma, assinatura) continuam globais".
+// Essas chaves não carregam dados de usuário, então não violam o isolamento.
+const GLOBAL_DEVICE_KEYS = new Set<string>([
+  "@firesafe_language",
+  "@firesafe_theme_preference",
+  "@firesafe_subscription",
+]);
+
 /** Remove todas as chaves do FireSafe ITM e do Supabase do localStorage. */
 export async function clearAppStorage(page: Page): Promise<void> {
   await page.evaluate(
@@ -73,8 +83,12 @@ export async function storageContains(page: Page, text: string): Promise<boolean
  */
 export async function assertScopedKeys(page: Page): Promise<{ ok: boolean; badKeys: string[] }> {
   const keys = await getAppStorageKeys(page);
+  const globalKeys = Array.from(GLOBAL_DEVICE_KEYS);
   const badKeys = keys
     .map((k) => k.key)
+    // Ignora preferências globais de dispositivo (idioma, tema, assinatura).
+    .filter((k) => !globalKeys.includes(k))
+    // O que sobra DEVE ter sufixo de escopo ::u: ou ::c:.
     .filter((k) => !k.match(/::(u:|c:)/));
   return { ok: badKeys.length === 0, badKeys };
 }
