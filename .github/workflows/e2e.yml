@@ -70,6 +70,11 @@ jobs:
           echo "PW_USER_B_EMAIL set:   $([ -n \"$PW_USER_B_EMAIL\" ] && echo yes || echo NO)"
           echo "PW_USER_B_PASSWORD set:$([ -n \"$PW_USER_B_PASSWORD\" ] && echo yes || echo NO)"
 
+      # Gate rápido: se o app não carregar (splash infinita, bundle quebrado),
+      # o smoke falha em poucos minutos e o job para antes da suíte completa.
+      - name: Smoke gate (app carrega?)
+        run: npx playwright test smoke.spec.ts --project=chromium --retries=0
+
       - name: Run E2E tests
         run: npm run test:e2e
 
