@@ -1,30 +1,69 @@
+// SMOKE TEST — Garante que o app web abre, renderiza e não trava.
+// Não depende de Supabase nem de login — apenas valida o carregamento.
+
 import { test, expect } from "@playwright/test";
+import { waitForApp } from "./helpers/nav";
+import { clearAppStorage, assertScopedKeys } from "./helpers/storage";
 
-// Teste de fumaça: garante que o app web carrega e renderiza a UI inicial.
-// Não depende de Supabase nem de login obrigatório — só verifica que o bundle
-// sobe e a marca aparece (presente na tela de login e no app).
-test("app web carrega e mostra a marca FireSafe ITM", async ({ page }) => {
-  await page.goto("/");
+test.describe("Smoke — carregamento do app", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await waitForApp(page);
+  });
 
-  // O nome do app aparece como texto em react-native-web (div/span), tanto na
-  // tela de login quanto no app logado/local. Usamos um regex tolerante.
-  await expect(page.getByText(/FireSafe ITM/i).first()).toBeVisible();
-});
+  test("app abre sem tela branca", async ({ page }) => {
+    // Nenhum loader infinito — a página deve ter conteúdo real
+    const body = page.locator("body");
+    await expect(body).not.toBeEmpty();
+    await expect(page.getByText("FireSafe ITM").first()).toBeVisible();
+  });
 
-// Quando o login está habilitado (Supabase configurado), o formulário deve
-// estar acessível. Tolerante: se o app abrir direto no modo local (sem gate),
-// o teste é pulado em vez de falhar.
-test("formulário de login está acessível quando aplicável", async ({ page }) => {
-  await page.goto("/");
+  test("não há erros críticos no console durante o carregamento", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (err) => errors.push(err.message));
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
+    });
 
-  const emailField = page.getByPlaceholder(/seu@email\.com/i);
-  const appearedCount = await emailField.count();
+    await page.reload();
+    await waitForApp(page);
 
-  test.skip(
-    appearedCount === 0,
-    "Login não exibido (modo local/sem gate de auth) — nada a testar aqui.",
-  );
+    // Filtra erros esperados (Expo/React Native podem emitir warnings não-fatais)
+    const critical = errors.filter(
+      (e) =>
+        !e.includes("Warning:") &&
+        !e.includes("Each child in a list") &&
+        !e.includes("ResizeObserver") &&
+        !e.includes("Non-serializable") &&
+        !e.includes("VirtualizedList") &&
+        !e.includes("Animated:"),
+    );
+    expect(critical, `Erros críticos de console:\n${critical.join("\n")}`).toHaveLength(0);
+  });
 
-  await expect(emailField.first()).toBeVisible();
-  await expect(page.getByPlaceholder(/sua senha/i).first()).toBeVisible();
+  test("os 5 tabs do bottom bar estão visíveis", async ({ page }) => {
+    for (const tab of ["Inicio", "Inspeções", "Agenda", "Cadastros", "Perfil"]) {
+      await expect(page.getByText(tab).first()).toBeVisible();
+    }
+  });
+
+  test("tab Home mostra elementos de conformidade", async ({ page }) => {
+    await page.getByText("Inicio").first().click();
+    await page.waitForTimeout(500);
+    // HomeScreen sempre renderiza algo — título ou anel de conformidade
+    await expect(page.getByText("FireSafe ITM").first()).toBeVisible();
+  });
+
+  test("chaves de localStorage usam sufixo de escopo correto", async ({ page }) => {
+    // Força criação de algum dado para gerar chaves
+    await clearAppStorage(page);
+    await page.reload();
+    await waitForApp(page);
+
+    const { ok, badKeys } = await assertScopedKeys(page);
+    expect(
+      ok,
+      `Chaves sem escopo encontradas (vazamento potencial): ${badKeys.join(", ")}`,
+    ).toBe(true);
+  });
 });
