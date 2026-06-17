@@ -21,15 +21,16 @@ import { BorderRadius, Spacing } from "@/constants/theme";
 
 export default function LoginScreen() {
   const { fullTheme } = useTheme();
-  const { signIn, signUp, isConfigured } = useAuth();
+  const { signIn, signUp, resetPassword, isConfigured } = useAuth();
   const navigation = useNavigation<{ canGoBack: () => boolean; goBack: () => void }>();
 
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   // If Supabase is not configured, show unconfigured state with local mode button
@@ -39,6 +40,26 @@ export default function LoginScreen() {
 
   const handleSubmit = async () => {
     setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (mode === "forgot") {
+      if (!email.trim()) {
+        setErrorMessage("Informe o e-mail para redefinir a senha.");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const result = await resetPassword(email.trim());
+        if (result.error) {
+          setErrorMessage(result.error);
+        } else {
+          setSuccessMessage("E-mail de redefinição enviado. Verifique sua caixa de entrada.");
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
 
     if (!email.trim()) {
       setErrorMessage("Informe o e-mail.");
@@ -63,14 +84,12 @@ export default function LoginScreen() {
       if (result.error) {
         setErrorMessage(result.error);
       } else if (mode === "register") {
-        // Cadastro pode exigir confirmação de e-mail (sem sessão imediata).
+        setSuccessMessage("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
         setErrorMessage(null);
         if (navigation.canGoBack()) {
           navigation.goBack();
         }
       } else if (navigation.canGoBack()) {
-        // Login a partir do Perfil (modo opcional): volta para o app.
-        // No modo obrigatório (root), a troca de tela é automática pelo AppContent.
         navigation.goBack();
       }
     } finally {
@@ -78,10 +97,10 @@ export default function LoginScreen() {
     }
   };
 
-  const toggleMode = () => {
-    setMode((prev) => (prev === "login" ? "register" : "login"));
+  const switchMode = (next: "login" | "register" | "forgot") => {
+    setMode(next);
     setErrorMessage(null);
-    setEmail("");
+    setSuccessMessage(null);
     setPassword("");
     setName("");
   };
@@ -124,7 +143,11 @@ export default function LoginScreen() {
               FireSafe ITM
             </ThemedText>
             <ThemedText type="body" secondary style={styles.tagline}>
-              {mode === "login" ? "Entrar na sua conta" : "Criar nova conta"}
+              {mode === "login"
+                ? "Entrar na sua conta"
+                : mode === "register"
+                  ? "Criar nova conta"
+                  : "Redefinir senha"}
             </ThemedText>
           </View>
 
@@ -207,51 +230,83 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Password field */}
-            <View style={styles.fieldGroup}>
-              <ThemedText type="small" secondary style={styles.fieldLabel}>
-                Senha
-              </ThemedText>
+            {/* Password field — login and register only */}
+            {mode !== "forgot" ? (
+              <View style={styles.fieldGroup}>
+                <View style={styles.passwordLabelRow}>
+                  <ThemedText type="small" secondary style={styles.fieldLabel}>
+                    Senha
+                  </ThemedText>
+                  {mode === "login" ? (
+                    <Pressable onPress={() => switchMode("forgot")} hitSlop={8}>
+                      <ThemedText type="small" style={{ color: fullTheme.colors.primary }}>
+                        Esqueci minha senha
+                      </ThemedText>
+                    </Pressable>
+                  ) : null}
+                </View>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    {
+                      backgroundColor: fullTheme.colors.inputBackground,
+                      borderColor: fullTheme.colors.border,
+                    },
+                  ]}
+                >
+                  <Feather
+                    name="lock"
+                    size={18}
+                    color={fullTheme.colors.placeholder}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={[styles.input, { color: fullTheme.colors.textPrimary }]}
+                    placeholder={mode === "register" ? "Mínimo 6 caracteres" : "Sua senha"}
+                    placeholderTextColor={fullTheme.colors.placeholder}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    onSubmitEditing={handleSubmit}
+                  />
+                  <Pressable
+                    onPress={() => setShowPassword((prev) => !prev)}
+                    hitSlop={8}
+                    style={styles.eyeButton}
+                  >
+                    <Feather
+                      name={showPassword ? "eye-off" : "eye"}
+                      size={18}
+                      color={fullTheme.colors.placeholder}
+                    />
+                  </Pressable>
+                </View>
+              </View>
+            ) : null}
+
+            {/* Success message */}
+            {successMessage ? (
               <View
                 style={[
-                  styles.inputWrapper,
+                  styles.successBox,
                   {
-                    backgroundColor: fullTheme.colors.inputBackground,
-                    borderColor: fullTheme.colors.border,
+                    backgroundColor: `${fullTheme.colors.success}15`,
+                    borderColor: fullTheme.colors.success,
                   },
                 ]}
               >
-                <Feather
-                  name="lock"
-                  size={18}
-                  color={fullTheme.colors.placeholder}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={[styles.input, { color: fullTheme.colors.textPrimary }]}
-                  placeholder={mode === "register" ? "Mínimo 6 caracteres" : "Sua senha"}
-                  placeholderTextColor={fullTheme.colors.placeholder}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="done"
-                  onSubmitEditing={handleSubmit}
-                />
-                <Pressable
-                  onPress={() => setShowPassword((prev) => !prev)}
-                  hitSlop={8}
-                  style={styles.eyeButton}
+                <Feather name="check-circle" size={16} color={fullTheme.colors.success} />
+                <ThemedText
+                  type="small"
+                  style={[styles.errorText, { color: fullTheme.colors.success }]}
                 >
-                  <Feather
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={18}
-                    color={fullTheme.colors.placeholder}
-                  />
-                </Pressable>
+                  {successMessage}
+                </ThemedText>
               </View>
-            </View>
+            ) : null}
 
             {/* Error message */}
             {errorMessage ? (
@@ -284,23 +339,33 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : mode === "login" ? (
                 "Entrar"
-              ) : (
+              ) : mode === "register" ? (
                 "Criar conta"
+              ) : (
+                "Enviar e-mail de redefinição"
               )}
             </Button>
           </View>
 
-          {/* Toggle mode */}
-          <View style={styles.toggleRow}>
-            <ThemedText type="small" secondary>
-              {mode === "login" ? "Não tem conta? " : "Já tem conta? "}
-            </ThemedText>
-            <Pressable onPress={toggleMode} hitSlop={8}>
-              <ThemedText type="small" style={{ color: fullTheme.colors.primary, fontWeight: "600" }}>
-                {mode === "login" ? "Criar conta" : "Entrar"}
-              </ThemedText>
-            </Pressable>
-          </View>
+          {/* Links de navegação entre modos */}
+          {mode === "login" ? (
+            <View style={styles.toggleRow}>
+              <ThemedText type="small" secondary>Não tem conta? </ThemedText>
+              <Pressable onPress={() => switchMode("register")} hitSlop={8}>
+                <ThemedText type="small" style={{ color: fullTheme.colors.primary, fontWeight: "600" }}>
+                  Criar conta
+                </ThemedText>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.toggleRow}>
+              <Pressable onPress={() => switchMode("login")} hitSlop={8}>
+                <ThemedText type="small" style={{ color: fullTheme.colors.primary, fontWeight: "600" }}>
+                  ← Voltar para o login
+                </ThemedText>
+              </Pressable>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
@@ -368,6 +433,19 @@ const styles = StyleSheet.create({
   },
   eyeButton: {
     padding: Spacing.xs,
+  },
+  passwordLabelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  successBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
   },
   errorBox: {
     flexDirection: "row",

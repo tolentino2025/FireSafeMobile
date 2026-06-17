@@ -13,6 +13,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,6 +137,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const resetPassword = async (email: string): Promise<{ error: string | null }> => {
+    if (!SUPABASE_CONFIGURED) return { error: "Supabase não configurado" };
+    try {
+      const appUrl = process.env.EXPO_PUBLIC_APP_URL ?? "https://fire-safe-mobile.vercel.app";
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: appUrl,
+      });
+      if (error) return { error: error.message };
+      return { error: null };
+    } catch {
+      return { error: "Ocorreu um erro. Tente novamente." };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     session,
@@ -144,6 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signUp,
     signOut,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
