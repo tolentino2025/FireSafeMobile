@@ -39,6 +39,16 @@ const ROOT_ROUTES = new Set([
   "ITMPlans",
   "PropertiesList",
   "Profile",
+  // Ao trocar de aba, o estado do stack aninhado pode ainda não ter sido
+  // inicializado — nesse caso getActiveLeafRouteName retorna o NOME DA ABA.
+  // Isso também significa "tela raiz" (a aba mostra sua rota inicial), então
+  // o FAB deve aparecer. Sem isto, o FAB sumia em todas as abas exceto a Home
+  // inicial (bug de UX real + quebrava os testes E2E do FAB).
+  "HomeTab",
+  "InspectionsTab",
+  "ScheduleTab",
+  "PropertiesTab",
+  "ProfileTab",
 ]);
 
 // Caminha pelo state da navegacao ate a rota-folha ativa.
