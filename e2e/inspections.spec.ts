@@ -7,7 +7,6 @@ import { clearAppStorage, storageContains, readCollection } from "./helpers/stor
 import { P } from "./constants";
 
 const TEST_PROPERTY_NAME = `${P}Propriedade Teste`;
-const TEST_INSPECTOR_NAME = `${P}Inspetor Teste`;
 
 test.describe("Inspeções — fluxo completo", () => {
   test.beforeEach(async ({ page }) => {
@@ -60,25 +59,23 @@ test.describe("Inspeções — fluxo completo", () => {
       await page.waitForTimeout(600);
     }
 
-    // Preenche nome da propriedade
+    // Preenche nome da propriedade. NÃO preenchemos o "inspetor" via
+    // getByPlaceholder(/nome/i): esse regex casaria justamente com o campo
+    // "Nome da Propriedade" (primeiro match) e sobrescreveria o valor — fazendo
+    // a inspeção ser salva sem TEST_PROPERTY_NAME. Para salvar rascunho basta
+    // o nome da propriedade (handleSaveDraft não exige inspetor).
     const propName = page.getByPlaceholder(/nome da propriedade/i).first();
     if (await propName.isVisible({ timeout: 8_000 }).catch(() => false)) {
       await propName.fill(TEST_PROPERTY_NAME);
 
-      // Preenche nome do inspetor
-      const inspName = page.getByPlaceholder(/inspetor|nome/i).first();
-      if (await inspName.isVisible({ timeout: 3_000 }).catch(() => false)) {
-        await inspName.fill(TEST_INSPECTOR_NAME);
-      }
-
-      // Salva rascunho
-      const saveBtn = page.getByText(/salvar|rascunho/i).first();
+      // Botão "Salvar" (handleSaveDraft) — texto exato p/ não casar com outros.
+      const saveBtn = page.getByText(/^salvar$/i).first();
       if (await saveBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await saveBtn.click();
         await page.waitForTimeout(1_500);
       }
 
-      // Verifica no localStorage
+      // Verifica no localStorage (case-insensitive: o form aplica MAIÚSCULAS).
       expect(
         await storageContains(page, TEST_PROPERTY_NAME),
         "Inspeção não foi salva no localStorage",
