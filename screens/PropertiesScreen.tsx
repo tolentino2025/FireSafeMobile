@@ -585,11 +585,12 @@ export default function PropertiesScreen({ navigation }: PropertiesScreenProps) 
       )}
 
       <Pressable
+        testID="fab-add"
         onPress={handleAddPress}
         style={({ pressed }) => [
           styles.addButton,
-          { 
-            backgroundColor: fullTheme.colors.primary, 
+          {
+            backgroundColor: fullTheme.colors.primary,
             opacity: pressed ? 0.9 : 1,
             ...fullTheme.shadows.large,
           },

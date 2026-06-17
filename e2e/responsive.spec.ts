@@ -85,9 +85,8 @@ test.describe("Responsividade — múltiplos viewports", () => {
     await page.getByText("Empresas").first().click();
     await page.waitForTimeout(400);
 
-    // FAB deve estar visível e clicável
-    const buttons = page.getByRole("button");
-    const count = await buttons.count();
-    expect(count, "Esperava ao menos 1 botão (FAB) em tela de Empresas").toBeGreaterThan(0);
+    // FAB de adicionar empresa (PropertiesScreen, testID="fab-add" → data-testid no web)
+    const fab = page.locator('[data-testid="fab-add"]');
+    await expect(fab, "Esperava o FAB de adicionar em tela de Empresas").toBeVisible({ timeout: 5_000 });
   });
 });

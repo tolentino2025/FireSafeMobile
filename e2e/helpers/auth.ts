@@ -29,13 +29,17 @@ async function gotoLoginScreen(page: Page): Promise<void> {
   if (await profileTab.count() > 0) {
     await profileTab.click();
     await page.waitForTimeout(400);
+  } else {
+    await page.getByText("Perfil").last().click();
+    await page.waitForTimeout(400);
   }
-  // Clica em "Entrar / Criar conta" (visível quando não está logado)
-  const loginBtn = page.getByText(/entrar/i).first();
-  const visible = await loginBtn.isVisible({ timeout: 3_000 }).catch(() => false);
+  // Clica em "Entrar / Criar conta" (visível quando não está logado e Supabase configurado)
+  // Usa regex que casa com o texto exato do botão no ProfileScreen
+  const loginBtn = page.getByText(/entrar.*criar conta/i).first();
+  const visible = await loginBtn.isVisible({ timeout: 4_000 }).catch(() => false);
   if (visible) {
     await loginBtn.click();
-    await page.waitForTimeout(600);
+    await page.waitForTimeout(800);
   }
 }
 
@@ -56,9 +60,8 @@ export async function login(page: Page, email: string, password: string): Promis
   // outros textos "Entrar" na tela (ex.: link de alternância de modo).
   await page.getByText(/^entrar$/i).first().click();
 
-  // Aguarda o login completar — o botão "Sair" deve aparecer no Perfil.
-  // Esperar pela rede do Supabase pode levar alguns segundos.
-  await page.waitForTimeout(4_000);
+  // Aguarda o login completar — a rede do Supabase no CI pode levar vários segundos.
+  await page.waitForTimeout(8_000);
 }
 
 /** Faz logout a partir da aba Perfil. */
@@ -69,20 +72,25 @@ export async function logout(page: Page): Promise<void> {
     await page.waitForTimeout(400);
   }
 
-  const sairBtn = page.getByText(/sair/i).first();
+  const sairBtn = page.getByText(/^sair$/i).first();
   await sairBtn.waitFor({ state: "visible", timeout: 5_000 });
+
+  // No RN Web, Alert.alert com 2 botões usa window.confirm() → diálogo nativo do browser.
+  // Playwright auto-rejeita diálogos por padrão (dismiss = Cancel = logout não executado).
+  // Registramos um handler único para aceitar o diálogo antes de clicar.
+  page.once("dialog", (dialog) => dialog.accept());
   await sairBtn.click();
 
-  // Confirma dialog de logout se aparecer
+  // Fallback para implementações que usam modal customizado em vez de window.confirm()
   for (const text of ["OK", "Sair", "Confirmar", "Sim"]) {
     const btn = page.getByText(text).first();
-    if (await btn.isVisible({ timeout: 1_500 }).catch(() => false)) {
+    if (await btn.isVisible({ timeout: 1_000 }).catch(() => false)) {
       await btn.click();
       break;
     }
   }
 
-  await page.waitForTimeout(1_500);
+  await page.waitForTimeout(2_000);
 }
 
 /**
@@ -93,7 +101,8 @@ export async function isLoggedIn(page: Page): Promise<boolean> {
   const profileTab = page.getByRole("tab", { name: /perfil/i });
   if (await profileTab.count() > 0) {
     await profileTab.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
   }
-  return page.getByText(/^sair$/i).isVisible({ timeout: 3_000 }).catch(() => false);
+  // Timeout generoso: auth do Supabase no CI pode levar vários segundos.
+  return page.getByText(/^sair$/i).isVisible({ timeout: 8_000 }).catch(() => false);
 }

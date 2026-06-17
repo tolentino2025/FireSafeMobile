@@ -245,30 +245,9 @@ test.describe("Nível 2 — Isolamento por escopo de chave localStorage", () => 
     await page.reload();
     await waitForApp(page);
 
-    expect(
-      await storageContains(
-        page,
-        // Verifica apenas no escopo ativo (guest), não em toda a storage
-        // Lê somente a chave do escopo guest
-        DATA_FOREIGN,
-      ),
-    ).toBe(
-      // É aceitável que storageContains retorne true porque a CHAVE existe
-      // no localStorage (ela tem sufixo diferente). O que importa é que
-      // a UI não exiba esses dados.
-      // Por isso fazemos verificação visual abaixo.
-      await page.evaluate(() => {
-        const guestKey = "@firesafe_inspections::u:guest";
-        const data = JSON.parse(localStorage.getItem(guestKey) ?? "[]");
-        return data.some((i: { propertyName: string }) => i.propertyName.includes("ISOLATION_OUTRO"));
-      })
-        ? true  // se guest scope tem o dado, o teste falhará na verificação visual
-        : false,
-    );
-
-    // Verificação visual: a inspeção da empresa não deve aparecer na lista guest
-    await page.goto("/");
-    await waitForApp(page);
+    // Verificação: a inspeção injetada em ::c:company-xyz-789 NÃO deve aparecer
+    // no escopo guest (::u:guest). storageContains busca em TODOS os escopos,
+    // então é normal retornar true — o que importa é que o escopo guest não tenha o dado.
     const hasInGuestScope = await page.evaluate(() => {
       const guestKey = "@firesafe_inspections::u:guest";
       const data = JSON.parse(localStorage.getItem(guestKey) ?? "[]");

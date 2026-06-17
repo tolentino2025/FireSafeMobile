@@ -20,9 +20,8 @@ test.describe("Inspeções — fluxo completo", () => {
   test("abre modal de Nova Inspeção com categorias", async ({ page }) => {
     await goInspections(page);
 
-    // Clica no FAB de nova inspeção
-    const fabBtn = page.getByRole("button").last();
-    await fabBtn.click();
+    // FAB global (MainTabNavigator) — aria-label no DOM web
+    await page.locator('[aria-label="Nova inspeção"]').click();
 
     // Deve mostrar as categorias de tipo de inspeção
     await expect(
@@ -33,8 +32,8 @@ test.describe("Inspeções — fluxo completo", () => {
   test("seleciona tipo Tubo Molhado e abre formulário", async ({ page }) => {
     await goInspections(page);
 
-    // Abre nova inspeção
-    await page.getByRole("button").last().click();
+    // FAB global (MainTabNavigator)
+    await page.locator('[aria-label="Nova inspeção"]').click();
     await page.waitForTimeout(600);
 
     // Seleciona "Tubo Molhado" (wet_pipe)
@@ -51,7 +50,7 @@ test.describe("Inspeções — fluxo completo", () => {
 
   test("preenche formulário básico e salva rascunho", async ({ page }) => {
     await goInspections(page);
-    await page.getByRole("button").last().click();
+    await page.locator('[aria-label="Nova inspeção"]').click();
     await page.waitForTimeout(600);
 
     // Seleciona tipo

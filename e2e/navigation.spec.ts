@@ -60,14 +60,9 @@ test.describe("Navegação — tabs e sub-telas", () => {
   test("Nova Inspeção modal abre ao clicar no botão +", async ({ page }) => {
     await goInspections(page);
 
-    // O botão Nova Inspeção pode aparecer como FAB ou no header
-    const newBtn = page.getByText(/nova inspeção/i).first();
-    if (await newBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await newBtn.click();
-    } else {
-      // FAB no app — clica no botão flutuante
-      await page.getByRole("button").last().click();
-    }
+    // FAB global do MainTabNavigator — aria-label no DOM web
+    // Visível nas telas raiz (InspectionsList, Home, etc.)
+    await page.locator('[aria-label="Nova inspeção"]').click();
 
     await page.waitForTimeout(600);
     // Modal de nova inspeção deve mostrar categorias de tipo

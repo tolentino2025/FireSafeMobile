@@ -70,29 +70,42 @@ export async function clickRegistrationTile(page: Page, label: string): Promise<
 
 /**
  * Clica no botão de adicionar/novo da tela atual.
+ *
  * No React Native Web os botões são Pressable e NÃO expõem role="button".
- * O botão de adicionar tem TEXTO visível:
- *   - Cadastros: "Adicionar Empresa", "Adicionar Prestadora", "Adicionar Bomba"...
- *   - Inspeções: "Nova Inspeção"
- *   - Agenda ITM: "Novo Plano"
+ * Há dois tipos de FAB nesta aplicação:
+ *   1. FAB de tela (PropertiesScreen): testID="fab-add" → data-testid no web
+ *   2. FAB global (MainTabNavigator): accessibilityLabel="Nova inspeção" → aria-label no web
+ *   3. Botões com texto: ITM "Novo Plano", Agenda "Nova Inspeção"
+ *
+ * IMPORTANTE: [tabindex="0"].last() NÃO é o FAB de tela — é o FAB global que
+ * aparece por último no DOM. Por isso usamos seletores específicos em vez de .last().
  */
 export async function clickFab(page: Page): Promise<void> {
+  // 1. Botões com texto visível (ITMPlansScreen "Novo Plano" etc.)
   const addByText = page
     .getByText(/^(adicionar|nova inspeção|nova vistoria|novo plano)\b/i)
     .first();
-  if (await addByText.isVisible({ timeout: 8_000 }).catch(() => false)) {
+  if (await addByText.isVisible({ timeout: 2_000 }).catch(() => false)) {
     await addByText.click();
     await page.waitForTimeout(500);
     return;
   }
-  // Fallback: ícone "+" via role=button (caso alguma tela use header icon).
-  const buttons = page.getByRole("button");
-  const count = await buttons.count();
-  if (count > 0) {
-    await buttons.nth(count - 1).click();
-  } else {
-    await page.locator('[tabindex="0"]').last().click();
+  // 2. FAB de tela via testID (PropertiesScreen "+" para CRUD de cadastros)
+  const screenFab = page.locator('[data-testid="fab-add"]');
+  if (await screenFab.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await screenFab.click();
+    await page.waitForTimeout(500);
+    return;
   }
+  // 3. FAB global via aria-label (MainTabNavigator, visível nas abas raiz)
+  const globalFab = page.locator('[aria-label="Nova inspeção"]');
+  if (await globalFab.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await globalFab.click();
+    await page.waitForTimeout(500);
+    return;
+  }
+  // 4. Último recurso
+  await page.locator('[tabindex="0"]').last().click();
   await page.waitForTimeout(500);
 }
 
