@@ -24,6 +24,12 @@ export default defineConfig({
     : [["list"], ["html", { open: "on-failure" }]],
   use: {
     baseURL: BASE_URL,
+    // O app detecta o idioma pelo locale do navegador (expo-localization →
+    // navigator.language). Sem isto, o CI headless usa en-US e a UI sobe em
+    // inglês (Home/Profile/...), quebrando os seletores PT (Perfil/Cadastros).
+    // Forçamos pt-BR para uma UI determinística em português.
+    locale: "pt-BR",
+    timezoneId: "America/Sao_Paulo",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

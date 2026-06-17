@@ -79,13 +79,10 @@ jobs:
 
       # Gate rápido: se o app não carregar (splash infinita, bundle quebrado),
       # o smoke falha em poucos minutos e o job para antes da suíte completa.
-      # TEMPORARIAMENTE desabilitado enquanto depuramos o carregamento do app.
       - name: Smoke gate (app carrega?)
-        if: ${{ false }}
         run: npx playwright test smoke.spec.ts --project=chromium --retries=0
 
       - name: Run E2E tests
-        if: ${{ false }}
         run: npm run test:e2e
 
       - name: Upload Playwright report
