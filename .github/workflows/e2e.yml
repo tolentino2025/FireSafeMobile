@@ -5,7 +5,10 @@ name: E2E (Playwright)
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      # Branches de trabalho do Claude — permite validar o E2E no CI sem abrir PR.
+      - "claude/**"
     paths:
       - "e2e/**"
       - "playwright.config.ts"
