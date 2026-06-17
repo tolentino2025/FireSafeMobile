@@ -74,14 +74,17 @@ test.describe("Agenda ITM", () => {
     // Injeta plano diretamente no localStorage
     await page.evaluate((propName) => {
       const planKey = "@firesafe_itm_plans::u:guest";
+      // Estrutura DEVE casar com a interface ItmPlan (assetId, systemKeys,
+      // normativeProfile) — caso contrário ITMPlansScreen quebra ao renderizar
+      // (getResumoDoPlano/statusGeral) e o header "Agenda ITM" nem aparece.
       const plan = [{
         id: "pw-plan-001",
-        propertyId: "pw-prop-001",
+        assetId: "pw-prop-001",
         propertyName: propName,
-        systems: ["wet_pipe"],
         startDate: "2025-01-01",
+        normativeProfile: "nfpa25",
+        systemKeys: ["wet_pipe"],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       }];
       localStorage.setItem(planKey, JSON.stringify(plan));
 
@@ -109,12 +112,12 @@ test.describe("Agenda ITM", () => {
     await page.evaluate((propName) => {
       localStorage.setItem("@firesafe_itm_plans::u:guest", JSON.stringify([{
         id: "pw-plan-002",
-        propertyId: "pw-prop-002",
+        assetId: "pw-prop-002",
         propertyName: propName,
-        systems: ["wet_pipe"],
         startDate: "2025-01-01",
+        normativeProfile: "nfpa25",
+        systemKeys: ["wet_pipe"],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       }]));
       localStorage.setItem("@firesafe_properties::u:guest", JSON.stringify([{
         id: "pw-prop-002",

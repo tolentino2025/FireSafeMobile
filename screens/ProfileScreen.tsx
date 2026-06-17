@@ -26,6 +26,7 @@ import {
 } from "@/utils/notifications";
 import { shareUserManualPdf } from "@/utils/manualPdfGenerator";
 import { exportAllData, importAllData } from "@/utils/backupUtils";
+import { showConfirm } from "@/utils/appAlert";
 
 const ADMIN_EMAIL = "suporte@firesafeitm.com";
 
@@ -255,19 +256,16 @@ export default function ProfileScreen() {
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
     }
-    Alert.alert(
+    // Usa o shim cross-platform: no web o Alert.alert do react-native-web é um
+    // no-op silencioso (o logout nunca era executado). showConfirm usa
+    // window.confirm no web e Alert.alert no nativo.
+    showConfirm(
       "Sair da conta",
       "Tem certeza que deseja sair?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sair",
-          style: "destructive",
-          onPress: async () => {
-            await signOut();
-          },
-        },
-      ]
+      async () => {
+        await signOut();
+      },
+      { confirmText: "Sair", cancelText: "Cancelar", destructive: true },
     );
   };
 

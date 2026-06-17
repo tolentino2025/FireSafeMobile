@@ -39,7 +39,7 @@ test.describe("Autenticação", () => {
     await page.getByPlaceholder(/seu@email\.com/i).waitFor({ timeout: 8_000 });
     await page.getByPlaceholder(/seu@email\.com/i).fill("invalido@teste.com");
     await page.getByPlaceholder(/sua senha/i).fill("senhaerrada123");
-    await page.getByText(/^entrar$/i).click();
+    await page.getByText(/^entrar$/i).first().click();
 
     // Deve aparecer mensagem de erro
     await expect(
@@ -58,10 +58,13 @@ test.describe("Autenticação", () => {
     await page.getByPlaceholder(/seu@email\.com/i).waitFor({ timeout: 8_000 });
     // Não preenche email, só a senha
     await page.getByPlaceholder(/sua senha/i).fill("qualquer123");
-    await page.getByText(/^entrar$/i).click();
+    await page.getByText(/^entrar$/i).first().click();
 
+    // Mensagem de validação exata do LoginScreen: "Informe o e-mail."
+    // (regex genérico /e-mail/ casava com textos OCULTOS do Perfil por baixo,
+    // e .first() pegava um elemento hidden → falso negativo).
     await expect(
-      page.getByText(/informe o e-mail|e-mail|email/i).first(),
+      page.getByText(/informe o e-mail/i).first(),
     ).toBeVisible({ timeout: 5_000 });
   });
 
@@ -76,7 +79,7 @@ test.describe("Autenticação", () => {
     await page.getByPlaceholder(/seu@email\.com/i).waitFor({ timeout: 8_000 });
     await page.getByPlaceholder(/seu@email\.com/i).fill("teste@teste.com");
     await page.getByPlaceholder(/sua senha/i).fill("123"); // menos de 6 chars
-    await page.getByText(/^entrar$/i).click();
+    await page.getByText(/^entrar$/i).first().click();
 
     await expect(
       page.getByText(/senha.*6|6.*caract|senha/i).first(),

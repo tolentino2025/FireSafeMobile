@@ -68,11 +68,17 @@ export async function readCollection(page: Page, baseKey: string): Promise<unkno
 /**
  * Retorna true se algum valor no localStorage contiver o texto fornecido.
  * Útil para verificar se dados de outro usuário vazaram.
+ *
+ * A comparação é case-insensitive: os formulários do app aplicam
+ * `toUpperIfNotEmail` (campos não-email viram MAIÚSCULAS). Sem isso,
+ * `storageContains("Empresa SA")` falharia porque o dado é gravado como
+ * "EMPRESA SA". Para detecção de vazamento, case-insensitive é mais seguro.
  */
 export async function storageContains(page: Page, text: string): Promise<boolean> {
   return page.evaluate((t) => {
+    const needle = t.toLowerCase();
     return Object.values(localStorage).some(
-      (v) => typeof v === "string" && v.includes(t),
+      (v) => typeof v === "string" && v.toLowerCase().includes(needle),
     );
   }, text);
 }

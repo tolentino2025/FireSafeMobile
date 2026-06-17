@@ -209,14 +209,26 @@ test.describe("Cadastros — CRUD", () => {
   // -----------------------------------------------------------------------
 
   test("criar local de trabalho salva na lista", async ({ page }) => {
+    // O formulário de Local de Trabalho EXIGE uma prestadora (contractorId).
+    // Sem selecionar uma, handleSubmit aborta — então criamos uma primeiro.
+    await clickRegistrationTile(page, "Prestadoras de Serviço");
+    await clickFab(page);
+    await fillAndSave(page, { "Nome da Prestadora": TEST_CONTRACTOR.name });
+
+    // Agora cria o local de trabalho, selecionando a prestadora no SelectPicker.
     await clickRegistrationTile(page, "Locais de Trabalho");
     await clickFab(page);
 
-    await fillAndSave(page, {
-      "Nome do Local": TEST_JOB_SITE.jobName,
-      "Número do Trabalho": TEST_JOB_SITE.jobNumber,
-      "Local do Teste": TEST_JOB_SITE.testLocation,
-    });
+    await page.getByPlaceholder("Nome do Local").first().fill(TEST_JOB_SITE.jobName);
+
+    // Abre o seletor de prestadora e escolhe a criada (label vem em MAIÚSCULAS).
+    await page.getByText(/selecione (o contratante|a prestadora)/i).first().click();
+    await page.waitForTimeout(400);
+    await page.getByText(new RegExp(TEST_CONTRACTOR.name, "i")).first().click();
+    await page.waitForTimeout(300);
+
+    await page.getByText(UI.form.save).first().click();
+    await page.waitForTimeout(800);
 
     await expect(page.getByText(TEST_JOB_SITE.jobName).first()).toBeVisible({ timeout: 8_000 });
     expect(await storageContains(page, TEST_JOB_SITE.jobName)).toBe(true);

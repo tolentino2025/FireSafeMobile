@@ -104,6 +104,7 @@ export default function InspectionsListScreen({ navigation }: InspectionsListScr
         {(["completed", "in_progress", "pending", "draft"] as const).map((status) => (
           <FilterChip
             key={status}
+            testID={`filter-${status}`}
             active={statusFilter === status}
             onPress={() => setStatusFilter(statusFilter === status ? null : status)}
             label={

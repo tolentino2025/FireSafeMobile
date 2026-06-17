@@ -62,7 +62,7 @@ test.describe("Navegação — tabs e sub-telas", () => {
 
     // FAB global do MainTabNavigator — aria-label no DOM web
     // Visível nas telas raiz (InspectionsList, Home, etc.)
-    await page.locator('[aria-label="Nova inspeção"]').click();
+    await page.locator('[data-testid="fab-new-inspection"]').click();
 
     await page.waitForTimeout(600);
     // Modal de nova inspeção deve mostrar categorias de tipo

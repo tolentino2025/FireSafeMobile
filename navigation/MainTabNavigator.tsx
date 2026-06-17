@@ -84,6 +84,7 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
   return (
     <AnimatedPressable
       accessibilityLabel="Nova inspeção"
+      testID="fab-new-inspection"
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}

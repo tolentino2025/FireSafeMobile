@@ -74,11 +74,12 @@ export async function clickRegistrationTile(page: Page, label: string): Promise<
  * No React Native Web os botões são Pressable e NÃO expõem role="button".
  * Há dois tipos de FAB nesta aplicação:
  *   1. FAB de tela (PropertiesScreen): testID="fab-add" → data-testid no web
- *   2. FAB global (MainTabNavigator): accessibilityLabel="Nova inspeção" → aria-label no web
+ *   2. FAB global (MainTabNavigator): testID="fab-new-inspection" → data-testid no web
  *   3. Botões com texto: ITM "Novo Plano", Agenda "Nova Inspeção"
  *
- * IMPORTANTE: [tabindex="0"].last() NÃO é o FAB de tela — é o FAB global que
- * aparece por último no DOM. Por isso usamos seletores específicos em vez de .last().
+ * NOTA: accessibilityLabel NÃO vira aria-label no AnimatedPressable (Reanimated)
+ * do FAB global — por isso usamos testID, que o react-native-web mapeia para
+ * data-testid de forma confiável.
  */
 export async function clickFab(page: Page): Promise<void> {
   // 1. Botões com texto visível (ITMPlansScreen "Novo Plano" etc.)
@@ -97,8 +98,8 @@ export async function clickFab(page: Page): Promise<void> {
     await page.waitForTimeout(500);
     return;
   }
-  // 3. FAB global via aria-label (MainTabNavigator, visível nas abas raiz)
-  const globalFab = page.locator('[aria-label="Nova inspeção"]');
+  // 3. FAB global via testID (MainTabNavigator, visível nas abas raiz)
+  const globalFab = page.locator('[data-testid="fab-new-inspection"]');
   if (await globalFab.isVisible({ timeout: 2_000 }).catch(() => false)) {
     await globalFab.click();
     await page.waitForTimeout(500);

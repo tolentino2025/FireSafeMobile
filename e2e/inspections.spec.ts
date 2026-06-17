@@ -21,7 +21,7 @@ test.describe("Inspeções — fluxo completo", () => {
     await goInspections(page);
 
     // FAB global (MainTabNavigator) — aria-label no DOM web
-    await page.locator('[aria-label="Nova inspeção"]').click();
+    await page.locator('[data-testid="fab-new-inspection"]').click();
 
     // Deve mostrar as categorias de tipo de inspeção
     await expect(
@@ -33,7 +33,7 @@ test.describe("Inspeções — fluxo completo", () => {
     await goInspections(page);
 
     // FAB global (MainTabNavigator)
-    await page.locator('[aria-label="Nova inspeção"]').click();
+    await page.locator('[data-testid="fab-new-inspection"]').click();
     await page.waitForTimeout(600);
 
     // Seleciona "Tubo Molhado" (wet_pipe)
@@ -50,7 +50,7 @@ test.describe("Inspeções — fluxo completo", () => {
 
   test("preenche formulário básico e salva rascunho", async ({ page }) => {
     await goInspections(page);
-    await page.locator('[aria-label="Nova inspeção"]').click();
+    await page.locator('[data-testid="fab-new-inspection"]').click();
     await page.waitForTimeout(600);
 
     // Seleciona tipo
@@ -152,8 +152,10 @@ test.describe("Inspeções — fluxo completo", () => {
     await waitForApp(page);
     await goInspections(page);
 
-    // Clica no chip de filtro "Rascunho"
-    const rascunhoChip = page.getByText("Rascunho").first();
+    // Clica no chip de filtro "Rascunho" via testID — o texto "Rascunho"
+    // também aparece no StatusChip do card, então getByText seria ambíguo
+    // (e o badge do card fica coberto pela tab bar/FAB, causando timeout no click).
+    const rascunhoChip = page.locator('[data-testid="filter-draft"]');
     if (await rascunhoChip.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await rascunhoChip.click();
       await page.waitForTimeout(400);
