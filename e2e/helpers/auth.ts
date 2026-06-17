@@ -51,11 +51,14 @@ export async function login(page: Page, email: string, password: string): Promis
   await emailInput.fill(email);
   await page.getByPlaceholder(/sua senha/i).fill(password);
 
-  // Clica em "Entrar" (botão de submit no modo login)
-  await page.getByText(/^entrar$/i).click();
+  // Clica em "Entrar" (botão de submit no modo login). No RN Web é um
+  // Pressable com texto — usamos .first() para evitar strict-mode se houver
+  // outros textos "Entrar" na tela (ex.: link de alternância de modo).
+  await page.getByText(/^entrar$/i).first().click();
 
-  // Aguarda o login completar — o botão "Sair" deve aparecer no Perfil
-  await page.waitForTimeout(3_000);
+  // Aguarda o login completar — o botão "Sair" deve aparecer no Perfil.
+  // Esperar pela rede do Supabase pode levar alguns segundos.
+  await page.waitForTimeout(4_000);
 }
 
 /** Faz logout a partir da aba Perfil. */

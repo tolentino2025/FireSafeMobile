@@ -69,17 +69,28 @@ export async function clickRegistrationTile(page: Page, label: string): Promise<
 }
 
 /**
- * Clica no botão FAB (flutuante "+") da tela de Cadastros.
- * O FAB é a última Pressable na hierarquia DOM da tela.
+ * Clica no botão de adicionar/novo da tela atual.
+ * No React Native Web os botões são Pressable e NÃO expõem role="button".
+ * O botão de adicionar tem TEXTO visível:
+ *   - Cadastros: "Adicionar Empresa", "Adicionar Prestadora", "Adicionar Bomba"...
+ *   - Inspeções: "Nova Inspeção"
+ *   - Agenda ITM: "Novo Plano"
  */
 export async function clickFab(page: Page): Promise<void> {
-  // O FAB não tem texto nem aria-label — é identificado como último role=button
+  const addByText = page
+    .getByText(/^(adicionar|nova inspeção|nova vistoria|novo plano)\b/i)
+    .first();
+  if (await addByText.isVisible({ timeout: 8_000 }).catch(() => false)) {
+    await addByText.click();
+    await page.waitForTimeout(500);
+    return;
+  }
+  // Fallback: ícone "+" via role=button (caso alguma tela use header icon).
   const buttons = page.getByRole("button");
   const count = await buttons.count();
   if (count > 0) {
     await buttons.nth(count - 1).click();
   } else {
-    // Fallback menos robusto: último elemento clicável
     await page.locator('[tabindex="0"]').last().click();
   }
   await page.waitForTimeout(500);
