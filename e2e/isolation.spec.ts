@@ -439,10 +439,15 @@ test.describe("Nível 3 — Isolamento entre usuários autenticados (Supabase)",
 
       await login(page, AUTH_USER_A.email, AUTH_USER_A.password);
 
-      // Injeta dado no escopo de A
+      // Injeta dado num escopo de A NÃO-guest. Importante: NÃO usar fallback
+      // para "::u:guest" — logado como A sem dados ainda, não existe chave
+      // @firesafe_companies; escrever no guest poluiria o próprio escopo que
+      // o teste valida. Usamos uma chave de escopo de usuário explícita.
       await page.evaluate((name) => {
-        const keys = Object.keys(localStorage).filter(k => k.startsWith("@firesafe_companies"));
-        const key = keys[0] ?? "@firesafe_companies::u:guest";
+        const existing = Object.keys(localStorage)
+          .filter((k) => k.startsWith("@firesafe_companies::u:"))
+          .find((k) => !k.endsWith("::u:guest"));
+        const key = existing ?? "@firesafe_companies::u:isolation-userA";
         const data = JSON.parse(localStorage.getItem(key) ?? "[]");
         data.push({
           id: "pw-session-a-001",

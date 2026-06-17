@@ -30,8 +30,6 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 // Telas RAIZ de cada aba — o FAB de Nova Inspeção só aparece nelas.
 // Em telas internas (detalhe, formulário, etc.) o FAB fica oculto para
 // nao cobrir os botoes de acao do rodape (PDF, enviar, salvar).
@@ -81,13 +79,11 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
   // Barra = 78px de altura + safe area. FAB flutua a -22px acima do topo da barra.
   const bottom = insets.bottom + 78 - 22;
 
+  // O Pressable interno é um componente puro do react-native-web, então o
+  // testID é mapeado para data-testid de forma confiável (o AnimatedPressable
+  // do Reanimated NÃO encaminha testID/accessibilityLabel para o DOM).
   return (
-    <AnimatedPressable
-      accessibilityLabel="Nova inspeção"
-      testID="fab-new-inspection"
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+    <Animated.View
       style={[
         styles.fab,
         {
@@ -99,8 +95,17 @@ function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
         animatedStyle,
       ]}
     >
-      <Feather name="plus" size={26} color="#FFFFFF" />
-    </AnimatedPressable>
+      <Pressable
+        accessibilityLabel="Nova inspeção"
+        testID="fab-new-inspection"
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={styles.fabPressable}
+      >
+        <Feather name="plus" size={26} color="#FFFFFF" />
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -242,5 +247,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
+  },
+  fabPressable: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 14,
   },
 });
