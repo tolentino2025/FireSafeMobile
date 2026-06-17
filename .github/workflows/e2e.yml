@@ -35,9 +35,10 @@ jobs:
     timeout-minutes: 30
     env:
       # Variáveis públicas do cliente (anon/publishable — seguras por design).
+      # Cadastradas como Actions *Variables* (não Secrets), portanto lidas via `vars`.
       # Sem elas o app sobe em modo local e os testes que requerem Supabase são pulados.
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
       # Usuários de teste para os testes de isolamento (Nível 3).
       # Crie esses usuários no Supabase e adicione como secrets no repositório.
       # Sem eles, os testes de Nível 3 são automaticamente pulados (não falham).
@@ -59,6 +60,15 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
+
+      - name: Confirma configuração do ambiente (sem vazar valores)
+        run: |
+          echo "SUPABASE_URL set:      $([ -n \"$EXPO_PUBLIC_SUPABASE_URL\" ] && echo yes || echo NO)"
+          echo "SUPABASE_ANON_KEY set: $([ -n \"$EXPO_PUBLIC_SUPABASE_ANON_KEY\" ] && echo yes || echo NO)"
+          echo "PW_USER_A_EMAIL set:   $([ -n \"$PW_USER_A_EMAIL\" ] && echo yes || echo NO)"
+          echo "PW_USER_A_PASSWORD set:$([ -n \"$PW_USER_A_PASSWORD\" ] && echo yes || echo NO)"
+          echo "PW_USER_B_EMAIL set:   $([ -n \"$PW_USER_B_EMAIL\" ] && echo yes || echo NO)"
+          echo "PW_USER_B_PASSWORD set:$([ -n \"$PW_USER_B_PASSWORD\" ] && echo yes || echo NO)"
 
       - name: Run E2E tests
         run: npm run test:e2e
