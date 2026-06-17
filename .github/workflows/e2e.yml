@@ -47,6 +47,8 @@ jobs:
       # Sem elas o app sobe em modo local e os testes que requerem Supabase são pulados.
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+      # Desabilita o portão de auth para os testes E2E rodarem em guest mode.
+      EXPO_PUBLIC_AUTH_REQUIRED: "0"
       # Usuários de teste para os testes de isolamento (Nível 3).
       # Crie esses usuários no Supabase e adicione como secrets no repositório.
       # Sem eles, os testes de Nível 3 são automaticamente pulados (não falham).

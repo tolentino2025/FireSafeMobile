@@ -41,11 +41,10 @@ function AppContent() {
     );
   }
 
-  // Login só é OBRIGATÓRIO quando EXPO_PUBLIC_AUTH_REQUIRED="1".
-  // Por padrão (testes), mesmo com Supabase configurado, o login é opcional
-  // (disponível no Perfil) e não bloqueia o uso do app.
-  const authRequired = process.env.EXPO_PUBLIC_AUTH_REQUIRED === "1";
-  const showAuthGate = authRequired && isConfigured && !user;
+  // Auth gate: obrigatória por padrão quando Supabase está configurado.
+  // Desative com EXPO_PUBLIC_AUTH_REQUIRED="0" (ex: testes E2E em guest mode).
+  const authDisabled = process.env.EXPO_PUBLIC_AUTH_REQUIRED === "0";
+  const showAuthGate = !authDisabled && isConfigured && !user;
 
   return (
     <>
