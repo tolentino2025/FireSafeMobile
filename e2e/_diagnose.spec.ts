@@ -1,45 +1,75 @@
-// Teste de DIAGNÓSTICO (não faz parte da suíte normal).
-// Só roda quando E2E_DIAGNOSE=1. Navega até o app, espera, e imprime no
-// stdout (visível no log do CI) o que foi renderizado e quaisquer erros de
-// console/página — para descobrir por que waitForApp("Perfil") não encontra
-// a tab bar no CI.
+// Teste de DIAGNÓSTICO INTERATIVO (gated por E2E_DIAGNOSE=1).
+// Executa o fluxo Cadastros → Empresas → Adicionar e despeja o estado da tela
+// em cada passo, para descobrir os seletores reais do React Native Web.
 
 import { test } from "@playwright/test";
 
-test("diagnóstico: o que o app renderiza no CI", async ({ page }) => {
+async function dumpInteractives(page: import("@playwright/test").Page, tag: string) {
+  const info = await page.evaluate(() => {
+    const out: Array<{ tag: string; role: string | null; tabindex: string | null; text: string }> = [];
+    const all = Array.from(document.querySelectorAll("*")) as HTMLElement[];
+    for (const el of all) {
+      const role = el.getAttribute("role");
+      const tabindex = el.getAttribute("tabindex");
+      const clickable =
+        role === "button" ||
+        tabindex === "0" ||
+        el.tagName === "BUTTON" ||
+        (typeof el.onclick === "function");
+      if (!clickable) continue;
+      const text = (el.innerText || el.textContent || "").trim().slice(0, 40);
+      if (!text && role !== "button") continue;
+      out.push({ tag: el.tagName, role, tabindex, text });
+    }
+    // dedup por texto
+    const seen = new Set<string>();
+    return out.filter((o) => {
+      const k = o.tag + o.role + o.text;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    }).slice(0, 40);
+  });
+  const inputs = await page.locator("input, textarea").count();
+  console.log(`===STEP[${tag}] inputs=${inputs} interactives=${info.length}`);
+  for (const i of info) {
+    console.log(`   <${i.tag}> role=${i.role} tabindex=${i.tabindex} text="${i.text}"`);
+  }
+}
+
+test("diag interativo: Cadastros → Empresas → Adicionar", async ({ page }) => {
   test.skip(!process.env.E2E_DIAGNOSE, "diagnóstico só roda sob demanda (E2E_DIAGNOSE=1)");
 
-  const logs: string[] = [];
-  page.on("console", (m) => logs.push(`[console.${m.type()}] ${m.text()}`));
-  page.on("pageerror", (e) => logs.push(`[pageerror] ${e.message}\n${e.stack ?? ""}`));
-  page.on("requestfailed", (r) =>
-    logs.push(`[requestfailed] ${r.url()} :: ${r.failure()?.errorText ?? "?"}`),
-  );
+  page.on("pageerror", (e) => console.log(`[pageerror] ${e.message}`));
 
   await page.goto("/", { waitUntil: "load" });
-  // Tempo generoso para o bundle/app montarem e o AuthContext resolver.
-  await page.waitForTimeout(15_000);
+  await page.getByText("Perfil").first().waitFor({ timeout: 90_000 });
+  console.log("===APP READY (Perfil visível)===");
 
-  const title = await page.title().catch(() => "<no title>");
-  const bodyText = (await page.locator("body").innerText().catch(() => "<no body>")).slice(0, 1500);
-  const tabCount = await page.getByRole("tab").count().catch(() => -1);
-  const perfilCount = await page.getByText("Perfil").count().catch(() => -1);
-  // Conta elementos do shell para distinguir splash vs ErrorBoundary vs tabs.
-  const spinnerCount = await page.locator('[role="progressbar"], .css-view [aria-busy="true"]').count().catch(() => -1);
-  const rootText = await page.locator("#root, #main, body > div").first().innerText().catch(() => "<no root>");
+  // 1) Cadastros
+  await page.getByText("Cadastros").last().click();
+  await page.waitForTimeout(1200);
+  await dumpInteractives(page, "apos-click-Cadastros");
 
-  // Ordem: dados pequenos e os LOGS por ÚLTIMO (ficam no tail do CI).
-  console.log("===DIAG_TITLE===", JSON.stringify(title));
-  console.log("===DIAG_TABCOUNT===", tabCount);
-  console.log("===DIAG_PERFILCOUNT===", perfilCount);
-  console.log("===DIAG_SPINNERCOUNT===", spinnerCount);
-  console.log("===DIAG_BODYTEXT_START===");
-  console.log(bodyText);
-  console.log("===DIAG_BODYTEXT_END===");
-  console.log("===DIAG_ROOTTEXT_START===");
-  console.log(String(rootText).slice(0, 800));
-  console.log("===DIAG_ROOTTEXT_END===");
-  console.log("===DIAG_PAGELOGS_START===");
-  console.log(logs.length ? logs.join("\n") : "(nenhum log/erro capturado)");
-  console.log("===DIAG_PAGELOGS_END===");
+  // 2) Empresas (tile)
+  await page.getByText("Empresas").first().click();
+  await page.waitForTimeout(1500);
+  await dumpInteractives(page, "apos-click-Empresas");
+
+  // 3) Tentar achar e clicar o botão Adicionar
+  const add = page.getByText(/adicionar/i).first();
+  const addVisible = await add.isVisible({ timeout: 4000 }).catch(() => false);
+  console.log(`===ADICIONAR visivel? ${addVisible}===`);
+  if (addVisible) {
+    await add.click();
+    await page.waitForTimeout(1500);
+    await dumpInteractives(page, "apos-click-Adicionar");
+    // placeholders disponíveis no form
+    const phs = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("input, textarea"))
+        .map((e) => (e as HTMLInputElement).placeholder)
+        .filter(Boolean),
+    );
+    console.log("===FORM placeholders===", JSON.stringify(phs));
+  }
 });
