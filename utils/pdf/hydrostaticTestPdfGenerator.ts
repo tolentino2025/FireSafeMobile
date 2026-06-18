@@ -249,6 +249,10 @@ const translations = {
   },
 };
 
+export const generateHydrostaticTestHtml = async (options: HydrostaticPdfOptions): Promise<string> => {
+  return generateHtml(options);
+};
+
 const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => {
   const { inspection, hydrostaticTest, photos, language } = options;
   

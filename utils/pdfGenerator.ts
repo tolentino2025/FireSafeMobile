@@ -747,7 +747,7 @@ const generateInspectionPdfHtmlWithPhotos = (
 
 // Monta o HTML COMPLETO do relatório padrão (com fotos em base64 + logo).
 // É a mesma fonte usada para imprimir, compartilhar e gerar URI.
-const buildInspectionPdfHtml = async (
+export const buildInspectionPdfHtml = async (
   options: GeneratePdfOptions,
 ): Promise<string> => {
   const [photosWithBase64, logoDataUri] = await Promise.all([
