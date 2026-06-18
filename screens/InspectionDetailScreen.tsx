@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -33,6 +33,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   const { inspections, deleteInspection, getDieselPerformanceTestById, getElectricPerformanceTestById } = useInspections();
   const insets = useSafeAreaInsets();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const isGeneratingPdfRef = useRef(false);
 
   const inspection = inspections.find((i) => i.id === inspectionId);
 
@@ -140,7 +141,8 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   };
 
   const handlePrintPdf = async () => {
-    if (isGeneratingPdf) return;
+    if (isGeneratingPdfRef.current) return;
+    isGeneratingPdfRef.current = true;
     setIsGeneratingPdf(true);
     try {
       if (inspection.performanceTestId) {
@@ -178,6 +180,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       console.error("Error generating PDF:", error);
       Alert.alert(t.common.error, t.report.shareError);
     } finally {
+      isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
     }
   };
@@ -218,7 +221,8 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
 
   // Compartilhar → WhatsApp com o PDF anexado (nativo: share sheet; web: Web Share API).
   const handleWhatsApp = async () => {
-    if (isGeneratingPdf) return;
+    if (isGeneratingPdfRef.current) return;
+    isGeneratingPdfRef.current = true;
     const message = `${t.report.title} - ${inspection.propertyName}\n${getTypeLabel()} • ${formatDate(inspection.date)}`;
     setIsGeneratingPdf(true);
     try {
@@ -227,13 +231,15 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       console.error("Error sharing via WhatsApp:", error);
       Alert.alert(t.common.error, t.report.shareError);
     } finally {
+      isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
     }
   };
 
   // Enviar → E-mail com o PDF anexado (nativo: mail composer; web: Web Share API).
   const handleEmail = async () => {
-    if (isGeneratingPdf) return;
+    if (isGeneratingPdfRef.current) return;
+    isGeneratingPdfRef.current = true;
     const subject = `${t.report.title} - ${inspection.propertyName}`;
     const body = `${t.report.inspectionDetails}\n\n${getTypeLabel()}\n${formatDate(inspection.date)}`;
     setIsGeneratingPdf(true);
@@ -243,6 +249,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       console.error("Error sending email:", error);
       Alert.alert(t.common.error, t.report.shareError);
     } finally {
+      isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
     }
   };
@@ -252,7 +259,8 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       console.log("[FM85A Detail] No fm85aCertificate found in inspection");
       return;
     }
-    if (isGeneratingPdf) return;
+    if (isGeneratingPdfRef.current) return;
+    isGeneratingPdfRef.current = true;
     setIsGeneratingPdf(true);
     console.log("[FM85A Detail] Generating PDF with certificate:", JSON.stringify({
       contractorInfo: inspection.fm85aCertificate.contractorInfo,
@@ -272,6 +280,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       console.error("Error generating FM85A PDF:", error);
       Alert.alert(t.common.error, t.report.shareError);
     } finally {
+      isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
     }
   };
