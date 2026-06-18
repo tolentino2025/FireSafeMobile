@@ -39,7 +39,8 @@ import { toUpperIfNotEmail } from "@/utils/textTransform";
 import { showAlert } from "@/utils/appAlert";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
-import { generateAndPrintHydrostaticTestPdf, generateAndShareHydrostaticTestPdf, generateAndEmailHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
 
@@ -638,11 +639,16 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     };
 
     try {
-      await generateAndShareHydrostaticTestPdf({
-        inspection: inspectionData,
-        hydrostaticTest,
-        photos,
-        language: language as "en" | "pt-BR",
+      const message = `${t.report.title} - ${inspectionData.propertyName}\n${inspectionData.date}`;
+      await shareViaWhatsApp({
+        message,
+        getPdfUri: () =>
+          generateHydrostaticTestPdf({
+            inspection: inspectionData,
+            hydrostaticTest,
+            photos,
+            language: language as "en" | "pt-BR",
+          }),
       });
     } catch (error) {
       console.error("Error sharing hydrostatic PDF:", error);
@@ -688,12 +694,19 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     };
 
     try {
-      await generateAndEmailHydrostaticTestPdf({
-        inspection: inspectionData,
-        hydrostaticTest,
-        photos,
-        language: language as "en" | "pt-BR",
-        recipientEmail: hydrostaticTest.owner.contact.includes("@") ? hydrostaticTest.owner.contact : undefined,
+      const subject = `${t.report.title} - ${inspectionData.propertyName}`;
+      const body = `${t.report.inspectionDetails}\n\n${inspectionData.date}`;
+      await sendViaEmail({
+        subject,
+        body,
+        recipient: hydrostaticTest.owner.contact.includes("@") ? hydrostaticTest.owner.contact : undefined,
+        getPdfUri: () =>
+          generateHydrostaticTestPdf({
+            inspection: inspectionData,
+            hydrostaticTest,
+            photos,
+            language: language as "en" | "pt-BR",
+          }),
       });
     } catch (error) {
       console.error("Error emailing hydrostatic PDF:", error);
