@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import * as MailComposer from "expo-mail-composer";
 import { Image as ExpoImage } from "expo-image";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -16,10 +15,11 @@ import { useInspections, InspectionFrequency } from "@/contexts/InspectionContex
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateAndPrintPdf, generateAndSharePdf, generatePdfUri } from "@/utils/pdfGenerator";
+import { generateAndPrintPdf, generatePdfUri } from "@/utils/pdfGenerator";
 import { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
-import { generateAndPrintHydrostaticTestPdf, generateAndShareHydrostaticTestPdf, generateHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -182,82 +182,47 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     }
   };
 
-  const handleSharePdf = async () => {
-    if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
-    try {
-      if (inspection.performanceTestId) {
-        if (inspection.type === "diesel_pump") {
-          const saved = getDieselPerformanceTestById(inspection.performanceTestId);
-          const result = await generateDieselPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
-          if (!result.success) {
-            Alert.alert(t.common.error, result.message || t.report.shareError);
-          }
-          return;
-        }
-        if (inspection.type === "electric_pump") {
-          const saved = getElectricPerformanceTestById(inspection.performanceTestId);
-          const result = await generateElectricPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
-          if (!result.success) {
-            Alert.alert(t.common.error, result.message || t.report.shareError);
-          }
-          return;
-        }
-      }
-      if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
-        await generateAndShareHydrostaticTestPdf({
-          inspection,
-          hydrostaticTest: inspection.hydrostaticTest,
-          photos: inspection.photos || [],
-          language: language as "en" | "pt-BR",
-        });
-        return;
-      }
-      await generateAndSharePdf({
+  // Gera o URI do PDF do relatório de acordo com o tipo de inspeção.
+  const getPdfUri = async (): Promise<string> => {
+    if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
+      return generateHydrostaticTestPdf({
         inspection,
+        hydrostaticTest: inspection.hydrostaticTest,
+        photos: inspection.photos || [],
         language: language as "en" | "pt-BR",
       });
+    }
+    return generatePdfUri({
+      inspection,
+      language: language as "en" | "pt-BR",
+    });
+  };
+
+  // Compartilhar → WhatsApp (web: wa.me; nativo: folha de compartilhamento c/ PDF).
+  const handleWhatsApp = async () => {
+    if (isGeneratingPdf) return;
+    const message = `${t.report.title} - ${inspection.propertyName}\n${getTypeLabel()} • ${formatDate(inspection.date)}`;
+    setIsGeneratingPdf(true);
+    try {
+      await shareViaWhatsApp({ message, getPdfUri });
     } catch (error) {
-      console.error("Error sharing PDF:", error);
+      console.error("Error sharing via WhatsApp:", error);
       Alert.alert(t.common.error, t.report.shareError);
     } finally {
       setIsGeneratingPdf(false);
     }
   };
 
-  const handleEmailPdf = async () => {
+  // Enviar → E-mail (web: mailto; nativo: compositor de e-mail c/ PDF anexado).
+  const handleEmail = async () => {
     if (isGeneratingPdf) return;
+    const subject = `${t.report.title} - ${inspection.propertyName}`;
+    const body = `${t.report.inspectionDetails}\n\n${getTypeLabel()}\n${formatDate(inspection.date)}`;
     setIsGeneratingPdf(true);
     try {
-      const isAvailable = await MailComposer.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert(t.common.error, t.common.emailNotAvailable);
-        setIsGeneratingPdf(false);
-        return;
-      }
-
-      let pdfUri: string;
-      if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
-        pdfUri = await generateHydrostaticTestPdf({
-          inspection,
-          hydrostaticTest: inspection.hydrostaticTest,
-          photos: inspection.photos || [],
-          language: language as "en" | "pt-BR",
-        });
-      } else {
-        pdfUri = await generatePdfUri({
-          inspection,
-          language: language as "en" | "pt-BR",
-        });
-      }
-
-      await MailComposer.composeAsync({
-        subject: `${t.report.title} - ${inspection.propertyName}`,
-        body: `${t.report.inspectionDetails}\n\n${getTypeLabel()}\n${formatDate(inspection.date)}`,
-        attachments: [pdfUri],
-      });
+      await sendViaEmail({ subject, body, getPdfUri });
     } catch (error) {
-      console.error("Error emailing PDF:", error);
+      console.error("Error sending email:", error);
       Alert.alert(t.common.error, t.report.shareError);
     } finally {
       setIsGeneratingPdf(false);
@@ -550,10 +515,10 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         ) : (
           <ActionBar
             onPrint={handlePrintPdf}
-            onShare={handleSharePdf}
+            onShare={handleWhatsApp}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onSend={handleEmailPdf}
+            onSend={handleEmail}
             showSend={true}
           />
         )}
