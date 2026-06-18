@@ -14,7 +14,6 @@ import { useNavigation } from "@react-navigation/native";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -430,23 +429,28 @@ export default function LoginScreen() {
             ) : null}
 
             {/* Submit button */}
-            <Button
-              onPress={handleSubmit}
+            <Pressable
+              onPress={isSubmitting ? undefined : handleSubmit}
               disabled={isSubmitting}
-              style={styles.submitButton}
+              style={[
+                styles.submitButton,
+                { backgroundColor: isSubmitting ? "#9CA3AF" : fullTheme.colors.primary },
+              ]}
             >
               {isSubmitting ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : mode === "login" ? (
-                "Entrar"
-              ) : mode === "register" ? (
-                "Criar conta"
-              ) : mode === "reset" ? (
-                "Salvar nova senha"
               ) : (
-                "Enviar e-mail de redefinição"
+                <ThemedText style={styles.submitButtonText}>
+                  {mode === "login"
+                    ? "Entrar"
+                    : mode === "register"
+                      ? "Criar conta"
+                      : mode === "reset"
+                        ? "Salvar nova senha"
+                        : "Enviar e-mail de redefinição"}
+                </ThemedText>
               )}
-            </Button>
+            </Pressable>
           </View>
 
           {/* Links de navegação entre modos */}
@@ -562,6 +566,15 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: Spacing.xs,
+    height: 52,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
   },
   toggleRow: {
     flexDirection: "row",
