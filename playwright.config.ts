@@ -68,6 +68,10 @@ export default defineConfig({
     stdout: "pipe",
     stderr: "pipe",
     env: {
+      // Desabilita o portão de auth: a suíte E2E roda em guest mode. Sem isto,
+      // como a auth passou a ser obrigatória por padrão, o app subiria na tela
+      // de login e todos os testes de fluxo (guest) quebrariam.
+      EXPO_PUBLIC_AUTH_REQUIRED: "0",
       // Passa as variáveis de ambiente do processo atual para o servidor web
       ...(process.env.EXPO_PUBLIC_SUPABASE_URL
         ? { EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL }

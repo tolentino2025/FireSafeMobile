@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert, Switch } from "react-native";
+import { View, StyleSheet, TextInput, Alert, Switch, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
 import { SelectPicker } from "@/components/SelectPicker";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
@@ -431,16 +431,22 @@ export default function FirePumpPanelFormScreen({ navigation, route }: FirePumpP
 
       <Spacer height={Spacing["3xl"]} />
 
-      <Button onPress={handleSubmit}>{t.form.save}</Button>
-
-      {existingPanel ? (
-        <>
-          <Spacer height={Spacing.lg} />
-          <Button variant="outline" onPress={handleDeletePanel}>
-            {t.common.delete}
-          </Button>
-        </>
-      ) : null}
+      <View style={styles.buttonRow}>
+        <Pressable
+          onPress={handleSubmit}
+          style={[styles.saveButton, { backgroundColor: fullTheme.colors.primary }]}
+        >
+          <Feather name="save" size={20} color="#FFFFFF" />
+        </Pressable>
+        {existingPanel ? (
+          <Pressable
+            onPress={handleDeletePanel}
+            style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}
+          >
+            <Feather name="trash-2" size={20} color="#FFFFFF" />
+          </Pressable>
+        ) : null}
+      </View>
 
       <Spacer height={Spacing["4xl"]} />
     </ScreenKeyboardAwareScrollView>
@@ -470,5 +476,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  saveButton: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButton: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
