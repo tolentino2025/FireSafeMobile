@@ -540,7 +540,7 @@ interface GenerateElectricPdfOptions {
   language: "en" | "pt-BR";
 }
 
-const generateElectricPumpPdfHtml = (options: GenerateElectricPdfOptions): string => {
+export const generateElectricPumpPdfHtml = (options: GenerateElectricPdfOptions): string => {
   const { test, language } = options;
   const t = translations[language];
 
@@ -943,7 +943,7 @@ interface GenerateDieselPdfOptions {
   language: "en" | "pt-BR";
 }
 
-const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string => {
+export const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): string => {
   const { test, language } = options;
   const t = translations[language];
 
