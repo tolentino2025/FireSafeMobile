@@ -22,10 +22,12 @@
 //     - EAS Build (production/preview)
 //     - Custom dev client criado com eas build --profile development
 //   NÃO funciona em Expo Go (neste caso usa fallback via expo-sharing).
-import { Platform, Linking, Alert } from "react-native";
+import { Platform, Linking } from "react-native";
 import * as Sharing from "expo-sharing";
 import * as MailComposer from "expo-mail-composer";
-import RNShare, { Social } from "react-native-share";
+// Wrapper resolvido por plataforma: no web usa whatsappShare.ts (stub, sem
+// react-native-share); no nativo usa whatsappShare.native.ts (módulo nativo).
+import { shareToWhatsAppNative } from "@/utils/whatsappShare";
 
 interface ShareOpts {
   message: string;
@@ -89,57 +91,6 @@ async function shareFileOnWeb(
   return false;
 }
 
-// Nativo: tenta abrir o WhatsApp diretamente com o PDF via react-native-share.
-// Retorna:
-//   "ok"          – WhatsApp aberto (ou cancelado pelo usuário, ambos resolvidos)
-//   "no_whatsapp" – WhatsApp não instalado (alerta já exibido)
-//   "unavailable" – react-native-share não linkado (Expo Go); cabe ao chamador
-//                   usar o fallback (expo-sharing)
-async function tryWhatsAppDirect(
-  uri: string,
-  fileName: string,
-  message: string,
-): Promise<"ok" | "no_whatsapp" | "unavailable"> {
-  // Verifica instalação do WhatsApp antes de tentar qualquer coisa.
-  let canOpen = false;
-  try {
-    canOpen = await Linking.canOpenURL("whatsapp://send");
-  } catch {
-    canOpen = false;
-  }
-
-  if (!canOpen) {
-    Alert.alert(
-      "WhatsApp não encontrado",
-      "WhatsApp não está instalado neste dispositivo.",
-    );
-    return "no_whatsapp";
-  }
-
-  try {
-    await RNShare.shareSingle({
-      social: Social.Whatsapp,
-      url: uri,
-      type: "application/pdf",
-      filename: fileName,
-      message,
-    });
-    return "ok";
-  } catch (e: any) {
-    const msg = (e?.error?.message || e?.message || "").toLowerCase();
-    // Usuário cancelou — não é um erro.
-    if (
-      msg.includes("cancel") ||
-      msg.includes("dismiss") ||
-      msg.includes("user did not share")
-    ) {
-      return "ok";
-    }
-    // Módulo nativo não linkado (Expo Go) ou erro inesperado → fallback.
-    return "unavailable";
-  }
-}
-
 export async function shareViaWhatsApp(opts: ShareOpts): Promise<void> {
   const { message, getPdfUri, getPdfHtml } = opts;
   const fileName = safeFileName(opts.fileName);
@@ -163,7 +114,7 @@ export async function shareViaWhatsApp(opts: ShareOpts): Promise<void> {
     try {
       const uri = await getPdfUri();
 
-      const result = await tryWhatsAppDirect(uri, fileName, message);
+      const result = await shareToWhatsAppNative(uri, fileName, message);
 
       if (result === "ok" || result === "no_whatsapp") return;
 
