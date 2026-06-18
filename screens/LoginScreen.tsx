@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -21,17 +21,29 @@ import { BorderRadius, Spacing } from "@/constants/theme";
 
 export default function LoginScreen() {
   const { fullTheme } = useTheme();
-  const { signIn, signUp, resetPassword, isConfigured } = useAuth();
+  const { signIn, signUp, resetPassword, updatePassword, isConfigured, isPasswordRecovery } = useAuth();
   const navigation = useNavigation<{ canGoBack: () => boolean; goBack: () => void }>();
 
-  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  // Quando o SDK detecta o link de recuperação, muda para o modo de redefinição.
+  useEffect(() => {
+    if (isPasswordRecovery) {
+      setMode("reset");
+      setErrorMessage(null);
+      setSuccessMessage(null);
+    }
+  }, [isPasswordRecovery]);
 
   // If Supabase is not configured, show unconfigured state with local mode button
   // The parent (AppContent) will handle navigation once user/session changes,
@@ -54,6 +66,31 @@ export default function LoginScreen() {
           setErrorMessage(result.error);
         } else {
           setSuccessMessage("E-mail de redefinição enviado. Verifique sua caixa de entrada.");
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (mode === "reset") {
+      if (!newPassword || newPassword.length < 6) {
+        setErrorMessage("A nova senha deve ter pelo menos 6 caracteres.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setErrorMessage("As senhas não coincidem.");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const result = await updatePassword(newPassword);
+        if (result.error) {
+          setErrorMessage(result.error);
+        } else {
+          setSuccessMessage("Senha atualizada com sucesso! Você já está conectado.");
+          setNewPassword("");
+          setConfirmPassword("");
         }
       } finally {
         setIsSubmitting(false);
@@ -97,12 +134,14 @@ export default function LoginScreen() {
     }
   };
 
-  const switchMode = (next: "login" | "register" | "forgot") => {
+  const switchMode = (next: "login" | "register" | "forgot" | "reset") => {
     setMode(next);
     setErrorMessage(null);
     setSuccessMessage(null);
     setPassword("");
     setName("");
+    setNewPassword("");
+    setConfirmPassword("");
   };
 
   // Not-configured fallback (should not normally reach here since AppContent
@@ -147,7 +186,9 @@ export default function LoginScreen() {
                 ? "Entrar na sua conta"
                 : mode === "register"
                   ? "Criar nova conta"
-                  : "Redefinir senha"}
+                  : mode === "reset"
+                    ? "Criar nova senha"
+                    : "Redefinir senha"}
             </ThemedText>
           </View>
 
@@ -196,8 +237,8 @@ export default function LoginScreen() {
               </View>
             ) : null}
 
-            {/* Email field */}
-            <View style={styles.fieldGroup}>
+            {/* Email field — hidden in reset mode (user identified via recovery token) */}
+            {mode !== "reset" ? <View style={styles.fieldGroup}>
               <ThemedText type="small" secondary style={styles.fieldLabel}>
                 E-mail
               </ThemedText>
@@ -228,10 +269,68 @@ export default function LoginScreen() {
                   returnKeyType="next"
                 />
               </View>
-            </View>
+            </View> : null}
+
+            {/* New password fields — reset mode only */}
+            {mode === "reset" ? (
+              <>
+                <View style={styles.fieldGroup}>
+                  <ThemedText type="small" secondary style={styles.fieldLabel}>
+                    Nova senha
+                  </ThemedText>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border },
+                    ]}
+                  >
+                    <Feather name="lock" size={18} color={fullTheme.colors.placeholder} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: fullTheme.colors.textPrimary }]}
+                      placeholder="Mínimo 6 caracteres"
+                      placeholderTextColor={fullTheme.colors.placeholder}
+                      value={newPassword}
+                      onChangeText={setNewPassword}
+                      secureTextEntry={!showNewPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      returnKeyType="next"
+                    />
+                    <Pressable onPress={() => setShowNewPassword((p) => !p)} hitSlop={8} style={styles.eyeButton}>
+                      <Feather name={showNewPassword ? "eye-off" : "eye"} size={18} color={fullTheme.colors.placeholder} />
+                    </Pressable>
+                  </View>
+                </View>
+                <View style={styles.fieldGroup}>
+                  <ThemedText type="small" secondary style={styles.fieldLabel}>
+                    Confirmar nova senha
+                  </ThemedText>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      { backgroundColor: fullTheme.colors.inputBackground, borderColor: fullTheme.colors.border },
+                    ]}
+                  >
+                    <Feather name="lock" size={18} color={fullTheme.colors.placeholder} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: fullTheme.colors.textPrimary }]}
+                      placeholder="Repita a nova senha"
+                      placeholderTextColor={fullTheme.colors.placeholder}
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                      secureTextEntry={!showNewPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit}
+                    />
+                  </View>
+                </View>
+              </>
+            ) : null}
 
             {/* Password field — login and register only */}
-            {mode !== "forgot" ? (
+            {mode !== "forgot" && mode !== "reset" ? (
               <View style={styles.fieldGroup}>
                 <View style={styles.passwordLabelRow}>
                   <ThemedText type="small" secondary style={styles.fieldLabel}>
@@ -245,6 +344,7 @@ export default function LoginScreen() {
                     </Pressable>
                   ) : null}
                 </View>
+
                 <View
                   style={[
                     styles.inputWrapper,
@@ -341,6 +441,8 @@ export default function LoginScreen() {
                 "Entrar"
               ) : mode === "register" ? (
                 "Criar conta"
+              ) : mode === "reset" ? (
+                "Salvar nova senha"
               ) : (
                 "Enviar e-mail de redefinição"
               )}
@@ -357,7 +459,7 @@ export default function LoginScreen() {
                 </ThemedText>
               </Pressable>
             </View>
-          ) : (
+          ) : mode === "reset" ? null : (
             <View style={styles.toggleRow}>
               <Pressable onPress={() => switchMode("login")} hitSlop={8}>
                 <ThemedText type="small" style={{ color: fullTheme.colors.primary, fontWeight: "600" }}>

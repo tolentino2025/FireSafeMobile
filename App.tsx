@@ -31,7 +31,7 @@ ensureInstrumentFonts();
 
 function AppContent() {
   const { isDark, fullTheme } = useThemeContext();
-  const { user, isLoading, isConfigured } = useAuth();
+  const { user, isLoading, isConfigured, isPasswordRecovery } = useAuth();
 
   if (isLoading) {
     return (
@@ -44,7 +44,9 @@ function AppContent() {
   // Auth gate: obrigatória por padrão quando Supabase está configurado.
   // Desative com EXPO_PUBLIC_AUTH_REQUIRED="0" (ex: testes E2E em guest mode).
   const authDisabled = process.env.EXPO_PUBLIC_AUTH_REQUIRED === "0";
-  const showAuthGate = !authDisabled && isConfigured && !user;
+  // isPasswordRecovery: usuário chegou via link de recuperação de senha.
+  // Forçamos o auth gate mesmo com sessão ativa para mostrar o form de nova senha.
+  const showAuthGate = (!authDisabled && isConfigured && !user) || isPasswordRecovery;
 
   return (
     <>
