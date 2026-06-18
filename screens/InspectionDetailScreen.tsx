@@ -305,19 +305,6 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     );
   };
 
-  const showShareOptions = () => {
-    Alert.alert(
-      t.report.share,
-      "",
-      [
-        { text: t.report.generate, onPress: handlePrintPdf },
-        { text: t.report.share, onPress: handleSharePdf },
-        { text: t.report.email, onPress: handleEmailPdf },
-        { text: t.common.cancel, style: "cancel" },
-      ]
-    );
-  };
-
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -563,7 +550,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         ) : (
           <ActionBar
             onPrint={handlePrintPdf}
-            onShare={showShareOptions}
+            onShare={handleSharePdf}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onSend={handleEmailPdf}

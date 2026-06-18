@@ -49,7 +49,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const { type, inspectionId } = route.params;
   const { theme, fullTheme } = useTheme();
   const { t, language } = useLanguage();
-  const { inspections, addInspection, updateInspection, companies, appUsers, firePumps, firePumpPanels, getFirePumpsByCompany, getPanelsByPump, createOrUpdateScheduleForInspection } = useInspections();
+  const { inspections, addInspection, updateInspection, deleteInspection, companies, appUsers, firePumps, firePumpPanels, getFirePumpsByCompany, getPanelsByPump, createOrUpdateScheduleForInspection } = useInspections();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -493,6 +493,32 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }
   };
 
+  // Excluir disponível também na edição (somente quando já existe registro salvo).
+  const handleDelete = () => {
+    const targetId = existingInspection?.id || (hasSavedRef.current ? stableId : null);
+    if (!targetId) return;
+    Alert.alert(
+      t.common.delete,
+      t.common.deleteConfirmation,
+      [
+        { text: t.common.cancel, style: "cancel" },
+        {
+          text: t.common.delete,
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteInspection(targetId);
+              navigation.goBack();
+            } catch (error) {
+              console.error("Error deleting inspection:", error);
+              showAlert(t.common.error, t.report.shareError);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleExportPdf = async () => {
     // Avisa campos obrigatórios faltando antes de gerar o PDF (não-hidrostático).
     if (!isHydrostatic) {
@@ -818,6 +844,15 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
             <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
             <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
           </Pressable>
+          {existingInspection ? (
+            <Pressable
+              onPress={handleDelete}
+              style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.error }]}
+            >
+              <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+              <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: fullTheme.colors.error }}>{t.common.delete}</ThemedText>
+            </Pressable>
+          ) : null}
         </View>
       </>
     );
@@ -879,6 +914,14 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           >
             <Feather name="mail" size={18} color={fullTheme.colors.textPrimary} />
           </Pressable>
+          {existingInspection ? (
+            <Pressable
+              onPress={handleDelete}
+              style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.error }]}
+            >
+              <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+            </Pressable>
+          ) : null}
         </View>
       </>
     );
@@ -1165,6 +1208,15 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         <Feather name="file-text" size={18} color={fullTheme.colors.textPrimary} />
         <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>PDF</ThemedText>
       </Pressable>
+      {existingInspection ? (
+        <Pressable
+          onPress={handleDelete}
+          style={[styles.actionButton, { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.error }]}
+        >
+          <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+          <ThemedText type="small" style={{ marginLeft: Spacing.xs, color: fullTheme.colors.error }}>{t.common.delete}</ThemedText>
+        </Pressable>
+      ) : null}
     </View>
     </>
   );
