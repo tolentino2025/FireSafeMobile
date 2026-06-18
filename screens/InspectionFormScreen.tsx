@@ -92,6 +92,11 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [autoSaved, setAutoSaved] = useState(false);
   const [isNewInspection] = useState(!existingInspection);
   const [isSaving, setIsSaving] = useState(false);
+  // ID gerado UMA vez para evitar duplicação: salvar draft + concluir
+  // criava dois registros distintos porque existingInspection ficava null
+  // após o primeiro addInspection (formulário permanece aberto).
+  const [stableId] = useState<string>(() => existingInspection?.id || Date.now().toString());
+  const hasSavedRef = React.useRef(!!existingInspection);
   const [fm85aCertificate, setFm85aCertificate] = useState<FM85ACertificate>(
     existingInspection?.fm85aCertificate || createEmptyFM85ACertificate()
   );
@@ -374,7 +379,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
 
     const inspectionData: Inspection = {
-      id: existingInspection?.id || Date.now().toString(),
+      id: stableId,
       type,
       status: "completed",
       propertyId: "",
@@ -407,16 +412,17 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     };
 
     try {
-      if (existingInspection) {
-        await updateInspection(existingInspection.id, inspectionData);
+      if (hasSavedRef.current) {
+        await updateInspection(stableId, inspectionData);
       } else {
         await addInspection(inspectionData);
+        hasSavedRef.current = true;
       }
-      
+
       if (!isHydrostatic) {
         await createOrUpdateScheduleForInspection(inspectionData, language as "en" | "pt-BR");
       }
-      
+
       navigation.goBack();
     } catch (error) {
       console.error("Error saving inspection:", error);
@@ -433,7 +439,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
 
       const inspectionData: Inspection = {
-        id: existingInspection?.id || Date.now().toString(),
+        id: stableId,
         type,
         status: "draft",
         propertyId: "",
@@ -465,10 +471,11 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         updatedAt: new Date().toISOString(),
       };
 
-      if (existingInspection) {
-        await updateInspection(existingInspection.id, inspectionData);
+      if (hasSavedRef.current) {
+        await updateInspection(stableId, inspectionData);
       } else {
         await addInspection(inspectionData);
+        hasSavedRef.current = true;
       }
 
       if (Platform.OS !== "web") {
@@ -505,7 +512,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
 
     const inspectionData: Inspection = {
-      id: existingInspection?.id || Date.now().toString(),
+      id: stableId,
       type,
       status: existingInspection?.status || "draft",
       propertyId: "",
@@ -576,7 +583,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
 
     const inspectionData: Inspection = {
-      id: existingInspection?.id || Date.now().toString(),
+      id: stableId,
       type,
       status: existingInspection?.status || "draft",
       propertyId: "",
@@ -626,7 +633,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
 
     const inspectionData: Inspection = {
-      id: existingInspection?.id || Date.now().toString(),
+      id: stableId,
       type,
       status: existingInspection?.status || "draft",
       propertyId: "",
