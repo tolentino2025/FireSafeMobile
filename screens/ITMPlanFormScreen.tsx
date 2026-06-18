@@ -9,6 +9,7 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -36,6 +37,7 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
   const { properties } = useInspections();
   const { criarPlano, planoAtivoDaPropriedade } = useITM();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<string>(hojeISO());
@@ -113,7 +115,7 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
           styles.content,
           {
             paddingTop: insets.top + 60,
-            paddingBottom: insets.bottom + Spacing["5xl"],
+            paddingBottom: tabBarHeight + Spacing["2xl"],
           },
         ]}
         showsVerticalScrollIndicator={false}
