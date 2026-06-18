@@ -16,7 +16,8 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateAndPrintPdf, generatePdfUri, buildInspectionPdfHtml } from "@/utils/pdfGenerator";
-import { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
+import { generateDieselPumpPdf, generateElectricPumpPdf, generateDieselPumpPdfHtml, generateElectricPumpPdfHtml } from "@/utils/performanceTestPdfGenerator";
+import * as Print from "expo-print";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf, generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
@@ -195,6 +196,20 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         language: language as "en" | "pt-BR",
       });
     }
+    if (inspection.performanceTestId) {
+      if (inspection.type === "diesel_pump") {
+        const saved = getDieselPerformanceTestById(inspection.performanceTestId);
+        const html = generateDieselPumpPdfHtml({ test: saved ?? ({} as any), language: language as "en" | "pt-BR" });
+        const { uri } = await Print.printToFileAsync({ html });
+        return uri;
+      }
+      if (inspection.type === "electric_pump") {
+        const saved = getElectricPerformanceTestById(inspection.performanceTestId);
+        const html = generateElectricPumpPdfHtml({ test: saved ?? ({} as any), language: language as "en" | "pt-BR" });
+        const { uri } = await Print.printToFileAsync({ html });
+        return uri;
+      }
+    }
     return generatePdfUri({
       inspection,
       language: language as "en" | "pt-BR",
@@ -210,6 +225,16 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
         photos: inspection.photos || [],
         language: language as "en" | "pt-BR",
       });
+    }
+    if (inspection.performanceTestId) {
+      if (inspection.type === "diesel_pump") {
+        const saved = getDieselPerformanceTestById(inspection.performanceTestId);
+        return generateDieselPumpPdfHtml({ test: saved ?? ({} as any), language: language as "en" | "pt-BR" });
+      }
+      if (inspection.type === "electric_pump") {
+        const saved = getElectricPerformanceTestById(inspection.performanceTestId);
+        return generateElectricPumpPdfHtml({ test: saved ?? ({} as any), language: language as "en" | "pt-BR" });
+      }
     }
     return buildInspectionPdfHtml({
       inspection,
