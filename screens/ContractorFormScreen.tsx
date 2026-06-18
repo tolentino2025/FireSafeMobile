@@ -5,7 +5,6 @@ import { Feather } from "@expo/vector-icons";
 
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
 import Spacer from "@/components/Spacer";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -215,14 +214,12 @@ export default function ContractorFormScreen({ navigation, route }: ContractorFo
       <Spacer height={Spacing["3xl"]} />
 
       <View style={styles.buttonRow}>
-        <View style={styles.saveButtonContainer}>
-          <Button onPress={handleSubmit} variant="save">
-            <View style={styles.saveButtonContent}>
-              <Feather name="save" size={18} color="#111827" />
-              <ThemedText type="body" style={[styles.saveButtonText, { color: "#111827" }]}>{t.form.save}</ThemedText>
-            </View>
-          </Button>
-        </View>
+        <Pressable
+          onPress={handleSubmit}
+          style={[styles.saveButton, { backgroundColor: fullTheme.colors.primary }]}
+        >
+          <Feather name="save" size={20} color="#FFFFFF" />
+        </Pressable>
         {existingContractor ? (
           <Pressable
             onPress={() => {
@@ -274,8 +271,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.md,
   },
-  saveButtonContainer: {
-    flex: 1,
+  saveButton: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   deleteButton: {
     width: 52,
@@ -283,13 +284,5 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
-  },
-  saveButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  saveButtonText: {
-    fontWeight: "600",
   },
 });

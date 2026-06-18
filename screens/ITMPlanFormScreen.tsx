@@ -215,22 +215,21 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
           </View>
         )}
 
-        <Pressable
-          onPress={handleSave}
-          disabled={saving}
-          style={[
-            styles.saveButton,
-            {
-              backgroundColor: fullTheme.colors.primary,
-              opacity: saving ? 0.6 : 1,
-              ...fullTheme.shadows.medium,
-            },
-          ]}
-        >
-          <ThemedText type="h4" style={styles.saveButtonText}>
-            {t.itm.form.save}
-          </ThemedText>
-        </Pressable>
+        <View style={styles.buttonRow}>
+          <Pressable
+            onPress={handleSave}
+            disabled={saving}
+            style={[
+              styles.saveButton,
+              {
+                backgroundColor: fullTheme.colors.primary,
+                opacity: saving ? 0.6 : 1,
+              },
+            ]}
+          >
+            <Feather name="save" size={20} color="#FFFFFF" />
+          </Pressable>
+        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -266,14 +265,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: Spacing.md,
   },
-  saveButton: {
+  buttonRow: {
     marginTop: Spacing["2xl"],
-    height: Spacing.buttonHeight,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  saveButton: {
+    width: 52,
+    height: 52,
     borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
-  },
-  saveButtonText: {
-    color: "#FFFFFF",
   },
 });
