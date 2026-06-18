@@ -9,6 +9,8 @@ import {
   Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -40,6 +42,8 @@ export default function NotificationSettingsScreen() {
   const { language } = useLanguage();
   const { occurrences } = useITM();
   const pt = language === "pt-BR";
+  const navigation = useNavigation();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const [prefs, setPrefs] = useState<ItmNotificationPreferences>(
     DEFAULT_ITM_NOTIFICATION_PREFERENCES,
@@ -70,9 +74,14 @@ export default function NotificationSettingsScreen() {
           : "Copy the link and subscribe to it as a calendar in Google, Apple or Outlook. It updates automatically.",
       );
     } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
       showAlert(
         pt ? "Erro" : "Error",
-        e instanceof Error ? e.message : String(e),
+        msg.includes("Failed to send a request") || msg.includes("Edge Function")
+          ? pt
+            ? "Não foi possível conectar ao servidor. O link de calendário requer que as Edge Functions estejam ativas no Supabase."
+            : "Could not connect to the server. The calendar link requires Edge Functions to be active in Supabase."
+          : msg,
       );
     } finally {
       setFeedBusy(false);
@@ -180,8 +189,16 @@ export default function NotificationSettingsScreen() {
       <ScreenHeader
         title={pt ? "Notificações e Calendário" : "Notifications & Calendar"}
         subtitle="ITM · NFPA 25"
+        left={
+          <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
+            <Feather name="chevron-left" size={26} color={fullTheme.colors.textPrimary} />
+          </Pressable>
+        }
       />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + 24 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <ThemedText type="h4" style={styles.sectionTitle}>
           {pt ? "Notificações" : "Notifications"}
         </ThemedText>
@@ -343,7 +360,7 @@ export default function NotificationSettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: Spacing.lg, paddingBottom: Spacing["5xl"] },
+  content: { padding: Spacing.lg },
   sectionTitle: { marginTop: Spacing.lg, marginBottom: Spacing.sm },
   row: {
     flexDirection: "row",
