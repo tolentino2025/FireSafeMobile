@@ -36,7 +36,7 @@ import { Spacing, BorderRadius, AppColors, Fonts } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { getChecklistForType } from "@/utils/checklistTemplates";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
-import { showAlert } from "@/utils/appAlert";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf, generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
@@ -498,25 +498,25 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const handleDelete = () => {
     const targetId = existingInspection?.id || (hasSavedRef.current ? stableId : null);
     if (!targetId) return;
-    Alert.alert(
+    // showConfirm é cross-platform: no web Alert.alert com botões é no-op
+    // (o onPress nunca dispara), então o "Excluir" não funcionava no navegador.
+    showConfirm(
       t.common.delete,
       t.common.deleteConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteInspection(targetId);
-              navigation.goBack();
-            } catch (error) {
-              console.error("Error deleting inspection:", error);
-              showAlert(t.common.error, t.report.shareError);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteInspection(targetId);
+          navigation.goBack();
+        } catch (error) {
+          console.error("Error deleting inspection:", error);
+          showAlert(t.common.error, t.report.shareError);
+        }
+      },
+      {
+        confirmText: t.common.delete,
+        cancelText: t.common.cancel,
+        destructive: true,
+      },
     );
   };
 

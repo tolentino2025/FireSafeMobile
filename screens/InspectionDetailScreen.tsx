@@ -22,6 +22,7 @@ import { printHtml } from "@/utils/pdf/pdfPrint";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 import { generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
+import { showConfirm } from "@/utils/appAlert";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -125,20 +126,20 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   };
 
   const handleDelete = () => {
-    Alert.alert(
+    // showConfirm é cross-platform: no web Alert.alert com botões é no-op
+    // (o onPress nunca dispara), então o "Excluir" não funcionava no navegador.
+    showConfirm(
       t.common.delete,
       t.common.deleteConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            await deleteInspection(inspection.id);
-            navigation.goBack();
-          },
-        },
-      ]
+      async () => {
+        await deleteInspection(inspection.id);
+        navigation.goBack();
+      },
+      {
+        confirmText: t.common.delete,
+        cancelText: t.common.cancel,
+        destructive: true,
+      },
     );
   };
 
