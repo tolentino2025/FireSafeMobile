@@ -33,6 +33,13 @@ export interface Company {
   id: string;
   name: string;
   cnpj: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
 }
 
 export interface Membership {
@@ -67,7 +74,10 @@ interface CompanyContextType {
   members: CompanyMember[];
   invites: CompanyInvite[];
   setActiveCompany: (companyId: string) => Promise<void>;
-  createCompany: (name: string, cnpj?: string) => Promise<string>;
+  createCompany: (name: string, cnpj?: string, extra?: {
+    address?: string; city?: string; state?: string; zipCode?: string;
+    contactName?: string; contactPhone?: string; contactEmail?: string;
+  }) => Promise<string>;
   acceptInvite: (token: string) => Promise<string>;
   inviteMember: (email: string, role: CompanyRole) => Promise<void>;
   revokeInvite: (id: string) => Promise<void>;
@@ -175,10 +185,20 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     await loadMembersAndInvites(companyId);
   };
 
-  const createCompany = async (name: string, cnpj?: string): Promise<string> => {
+  const createCompany = async (name: string, cnpj?: string, extra?: {
+    address?: string; city?: string; state?: string; zipCode?: string;
+    contactName?: string; contactPhone?: string; contactEmail?: string;
+  }): Promise<string> => {
     const { data, error } = await supabase.rpc("create_company_with_owner", {
       p_name: name,
       p_cnpj: cnpj ?? null,
+      p_address: extra?.address ?? null,
+      p_city: extra?.city ?? null,
+      p_state: extra?.state ?? null,
+      p_zip_code: extra?.zipCode ?? null,
+      p_contact_name: extra?.contactName ?? null,
+      p_contact_phone: extra?.contactPhone ?? null,
+      p_contact_email: extra?.contactEmail ?? null,
     });
     if (error) throw error;
     const companyId = data as string;
