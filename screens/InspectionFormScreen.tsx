@@ -39,7 +39,7 @@ import { toUpperIfNotEmail } from "@/utils/textTransform";
 import { showAlert } from "@/utils/appAlert";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
-import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf, generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
 
 type InspectionFormScreenProps = NativeStackScreenProps<HomeStackParamList, "InspectionForm">;
@@ -642,8 +642,16 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       const message = `${t.report.title} - ${inspectionData.propertyName}\n${inspectionData.date}`;
       await shareViaWhatsApp({
         message,
+        fileName: `${(inspectionData.propertyName || "relatorio").trim()}-${inspectionData.date}`,
         getPdfUri: () =>
           generateHydrostaticTestPdf({
+            inspection: inspectionData,
+            hydrostaticTest,
+            photos,
+            language: language as "en" | "pt-BR",
+          }),
+        getPdfHtml: () =>
+          generateHydrostaticTestHtml({
             inspection: inspectionData,
             hydrostaticTest,
             photos,
@@ -700,8 +708,16 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
         subject,
         body,
         recipient: hydrostaticTest.owner.contact.includes("@") ? hydrostaticTest.owner.contact : undefined,
+        fileName: `${(inspectionData.propertyName || "relatorio").trim()}-${inspectionData.date}`,
         getPdfUri: () =>
           generateHydrostaticTestPdf({
+            inspection: inspectionData,
+            hydrostaticTest,
+            photos,
+            language: language as "en" | "pt-BR",
+          }),
+        getPdfHtml: () =>
+          generateHydrostaticTestHtml({
             inspection: inspectionData,
             hydrostaticTest,
             photos,

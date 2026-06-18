@@ -15,10 +15,10 @@ import { useInspections, InspectionFrequency } from "@/contexts/InspectionContex
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateAndPrintPdf, generatePdfUri } from "@/utils/pdfGenerator";
+import { generateAndPrintPdf, generatePdfUri, buildInspectionPdfHtml } from "@/utils/pdfGenerator";
 import { generateDieselPumpPdf, generateElectricPumpPdf } from "@/utils/performanceTestPdfGenerator";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
-import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf, generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
@@ -198,13 +198,31 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     });
   };
 
-  // Compartilhar → WhatsApp (web: wa.me; nativo: folha de compartilhamento c/ PDF).
+  // Gera o HTML do relatório (usado no web p/ produzir o PDF no navegador).
+  const getPdfHtml = async (): Promise<string> => {
+    if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
+      return generateHydrostaticTestHtml({
+        inspection,
+        hydrostaticTest: inspection.hydrostaticTest,
+        photos: inspection.photos || [],
+        language: language as "en" | "pt-BR",
+      });
+    }
+    return buildInspectionPdfHtml({
+      inspection,
+      language: language as "en" | "pt-BR",
+    });
+  };
+
+  const pdfFileName = `${(inspection.propertyName || "relatorio-inspecao").trim()}-${inspection.date}`;
+
+  // Compartilhar → WhatsApp com o PDF anexado (nativo: share sheet; web: Web Share API).
   const handleWhatsApp = async () => {
     if (isGeneratingPdf) return;
     const message = `${t.report.title} - ${inspection.propertyName}\n${getTypeLabel()} • ${formatDate(inspection.date)}`;
     setIsGeneratingPdf(true);
     try {
-      await shareViaWhatsApp({ message, getPdfUri });
+      await shareViaWhatsApp({ message, getPdfUri, getPdfHtml, fileName: pdfFileName });
     } catch (error) {
       console.error("Error sharing via WhatsApp:", error);
       Alert.alert(t.common.error, t.report.shareError);
@@ -213,14 +231,14 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
     }
   };
 
-  // Enviar → E-mail (web: mailto; nativo: compositor de e-mail c/ PDF anexado).
+  // Enviar → E-mail com o PDF anexado (nativo: mail composer; web: Web Share API).
   const handleEmail = async () => {
     if (isGeneratingPdf) return;
     const subject = `${t.report.title} - ${inspection.propertyName}`;
     const body = `${t.report.inspectionDetails}\n\n${getTypeLabel()}\n${formatDate(inspection.date)}`;
     setIsGeneratingPdf(true);
     try {
-      await sendViaEmail({ subject, body, getPdfUri });
+      await sendViaEmail({ subject, body, getPdfUri, getPdfHtml, fileName: pdfFileName });
     } catch (error) {
       console.error("Error sending email:", error);
       Alert.alert(t.common.error, t.report.shareError);
