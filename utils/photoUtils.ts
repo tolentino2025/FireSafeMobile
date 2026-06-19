@@ -1,4 +1,4 @@
-import { readAsStringAsync } from "expo-file-system";
+import { readAsStringAsync } from "expo-file-system/legacy";
 
 export interface InspectionPhoto {
   id: string;

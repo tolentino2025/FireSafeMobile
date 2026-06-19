@@ -428,7 +428,7 @@ export function HydrostaticTestSection({
 
   const pickImage = async (category: string) => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 0.8,
       base64: true,
     });

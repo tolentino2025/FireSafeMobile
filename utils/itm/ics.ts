@@ -154,7 +154,7 @@ export async function downloadOrShareIcs(
   // Nativo: escreve em arquivo (requer expo-file-system) e abre o share sheet.
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const FileSystem = require("expo-file-system");
+    const FileSystem = require("expo-file-system/legacy");
     const uri = `${FileSystem.cacheDirectory}${filename}`;
     await FileSystem.writeAsStringAsync(uri, content, {
       encoding: FileSystem.EncodingType?.UTF8 ?? "utf8",

@@ -1,4 +1,4 @@
-import { readAsStringAsync } from "expo-file-system";
+import { readAsStringAsync } from "expo-file-system/legacy";
 import { Asset } from "expo-asset";
 
 let cachedLogoDataUri: string | null = null;
