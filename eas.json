@@ -31,12 +31,12 @@
   "submit": {
     "production": {
       "android": {
-        "serviceAccountKeyPath": "./google-services.json",
-        "track": "production"
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
       },
       "ios": {
-        "appleId": "your-apple-id@email.com",
-        "ascAppId": "your-app-store-connect-app-id"
+        "appleId": "cleiton@jonelincendio.com.br",
+        "ascAppId": "6758782734"
       }
     }
   }
