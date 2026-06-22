@@ -5,15 +5,25 @@ import { setStorageScope } from "@/utils/scopedStorage";
 
 const SUPABASE_CONFIGURED = Boolean(process.env.EXPO_PUBLIC_SUPABASE_URL);
 
+// URL de produção para redirecionamento pós-autenticação.
+// Deve coincidir exatamente com o "Site URL" e a lista de "Redirect URLs"
+// configurados em Supabase Dashboard → Authentication → URL Configuration.
+// ⚠️  Se esse valor não estiver na lista do Supabase, o redirect_to do e-mail
+//     será ignorado e cairá no "Site URL" cadastrado lá (ex: localhost).
+const APP_URL =
+  process.env.EXPO_PUBLIC_APP_URL ?? "https://fire-safe-mobile.vercel.app";
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   isConfigured: boolean;
+  isPasswordRecovery: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +36,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(SUPABASE_CONFIGURED);
+  // true quando o SDK detecta um link de recuperação de senha (evento PASSWORD_RECOVERY).
+  // Enquanto true, o app mostra o formulário de nova senha em vez do app principal.
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) {
@@ -60,12 +73,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // mesmo que getSession() nunca resolva.
     const splashTimeout = setTimeout(finishLoading, 8_000);
 
-    // Listen to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
+      (event, newSession) => {
         if (!active) return;
-        // Atualiza o escopo de armazenamento ANTES de propagar o novo usuário,
-        // para que os contextos recarreguem já no escopo correto.
+
+        if (event === "PASSWORD_RECOVERY") {
+          // O SDK parseou o token de recuperação da URL.
+          // Mantém o usuário na tela de redefinição de senha.
+          setIsPasswordRecovery(true);
+          setStorageScope(newSession?.user?.id ?? null);
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          setIsLoading(false);
+          return;
+        }
+
+        if (event === "USER_UPDATED") {
+          // Senha foi atualizada com sucesso → sai do modo de recuperação.
+          setIsPasswordRecovery(false);
+        }
+
         setStorageScope(newSession?.user?.id ?? null);
         setSession(newSession);
         setUser(newSession?.user ?? null);
@@ -84,14 +111,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!SUPABASE_CONFIGURED) {
       return { error: "Supabase não configurado" };
     }
-
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        return { error: error.message };
-      }
+      if (error) return { error: error.message };
       return { error: null };
-    } catch (err) {
+    } catch {
       return { error: "Ocorreu um erro ao fazer login. Tente novamente." };
     }
   };
@@ -99,37 +123,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (
     email: string,
     password: string,
-    name: string
+    name: string,
   ): Promise<{ error: string | null }> => {
     if (!SUPABASE_CONFIGURED) {
       return { error: "Supabase não configurado" };
     }
-
     try {
-      const appUrl =
-        process.env.EXPO_PUBLIC_APP_URL ?? "https://fire-safe-mobile.vercel.app";
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: name },
-          emailRedirectTo: appUrl,
+          emailRedirectTo: APP_URL,
         },
       });
-      if (error) {
-        return { error: error.message };
-      }
+      if (error) return { error: error.message };
       return { error: null };
-    } catch (err) {
+    } catch {
       return { error: "Ocorreu um erro ao criar a conta. Tente novamente." };
     }
   };
 
   const signOut = async (): Promise<void> => {
-    if (!SUPABASE_CONFIGURED) {
-      return;
-    }
-
+    if (!SUPABASE_CONFIGURED) return;
     try {
       await supabase.auth.signOut();
     } catch (err) {
@@ -140,9 +156,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const resetPassword = async (email: string): Promise<{ error: string | null }> => {
     if (!SUPABASE_CONFIGURED) return { error: "Supabase não configurado" };
     try {
-      const appUrl = process.env.EXPO_PUBLIC_APP_URL ?? "https://fire-safe-mobile.vercel.app";
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: appUrl,
+        redirectTo: APP_URL,
       });
       if (error) return { error: error.message };
       return { error: null };
@@ -151,15 +166,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Atualiza a senha do usuário após ele chegar via link de recuperação.
+  // Só funciona enquanto há uma sessão de recuperação ativa (isPasswordRecovery === true).
+  const updatePassword = async (newPassword: string): Promise<{ error: string | null }> => {
+    if (!SUPABASE_CONFIGURED) return { error: "Supabase não configurado" };
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { error: error.message };
+      // USER_UPDATED já limpa isPasswordRecovery via onAuthStateChange,
+      // mas zeramos aqui também para garantir responsividade imediata.
+      setIsPasswordRecovery(false);
+      return { error: null };
+    } catch {
+      return { error: "Ocorreu um erro ao atualizar a senha. Tente novamente." };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     session,
     isLoading,
     isConfigured: SUPABASE_CONFIGURED,
+    isPasswordRecovery,
     signIn,
     signUp,
     signOut,
     resetPassword,
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

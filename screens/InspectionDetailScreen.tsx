@@ -15,12 +15,14 @@ import { useInspections, InspectionFrequency } from "@/contexts/InspectionContex
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateAndPrintPdf, generatePdfUri, buildInspectionPdfHtml } from "@/utils/pdfGenerator";
-import { generateDieselPumpPdf, generateElectricPumpPdf, generateDieselPumpPdfHtml, generateElectricPumpPdfHtml } from "@/utils/performanceTestPdfGenerator";
+import { buildInspectionPdfHtml } from "@/utils/pdfGenerator";
+import { generateDieselPumpPdfHtml, generateElectricPumpPdfHtml } from "@/utils/performanceTestPdfGenerator";
 import * as Print from "expo-print";
+import { printHtml } from "@/utils/pdf/pdfPrint";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
-import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf, generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
+import { generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
+import { showConfirm } from "@/utils/appAlert";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -124,99 +126,30 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   };
 
   const handleDelete = () => {
-    Alert.alert(
+    // showConfirm é cross-platform: no web Alert.alert com botões é no-op
+    // (o onPress nunca dispara), então o "Excluir" não funcionava no navegador.
+    showConfirm(
       t.common.delete,
       t.common.deleteConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            await deleteInspection(inspection.id);
-            navigation.goBack();
-          },
-        },
-      ]
+      async () => {
+        await deleteInspection(inspection.id);
+        navigation.goBack();
+      },
+      {
+        confirmText: t.common.delete,
+        cancelText: t.common.cancel,
+        destructive: true,
+      },
     );
   };
 
-  const handlePrintPdf = async () => {
-    if (isGeneratingPdfRef.current) return;
-    isGeneratingPdfRef.current = true;
-    setIsGeneratingPdf(true);
-    try {
-      if (inspection.performanceTestId) {
-        if (inspection.type === "diesel_pump") {
-          const saved = getDieselPerformanceTestById(inspection.performanceTestId);
-          const result = await generateDieselPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
-          if (!result.success) {
-            Alert.alert(t.common.error, result.message || t.report.shareError);
-          }
-          return;
-        }
-        if (inspection.type === "electric_pump") {
-          const saved = getElectricPerformanceTestById(inspection.performanceTestId);
-          const result = await generateElectricPumpPdf(saved ?? ({} as any), language as "en" | "pt-BR");
-          if (!result.success) {
-            Alert.alert(t.common.error, result.message || t.report.shareError);
-          }
-          return;
-        }
-      }
-      if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
-        await generateAndPrintHydrostaticTestPdf({
-          inspection,
-          hydrostaticTest: inspection.hydrostaticTest,
-          photos: inspection.photos || [],
-          language: language as "en" | "pt-BR",
-        });
-        return;
-      }
-      await generateAndPrintPdf({
-        inspection,
-        language: language as "en" | "pt-BR",
-      });
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      Alert.alert(t.common.error, t.report.shareError);
-    } finally {
-      isGeneratingPdfRef.current = false;
-      setIsGeneratingPdf(false);
-    }
-  };
-
-  // Gera o URI do PDF do relatório de acordo com o tipo de inspeção.
-  const getPdfUri = async (): Promise<string> => {
-    if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
-      return generateHydrostaticTestPdf({
-        inspection,
-        hydrostaticTest: inspection.hydrostaticTest,
-        photos: inspection.photos || [],
-        language: language as "en" | "pt-BR",
-      });
-    }
-    if (inspection.performanceTestId) {
-      if (inspection.type === "diesel_pump") {
-        const saved = getDieselPerformanceTestById(inspection.performanceTestId);
-        const html = generateDieselPumpPdfHtml({ test: saved ?? ({} as any), language: language as "en" | "pt-BR" });
-        const { uri } = await Print.printToFileAsync({ html });
-        return uri;
-      }
-      if (inspection.type === "electric_pump") {
-        const saved = getElectricPerformanceTestById(inspection.performanceTestId);
-        const html = generateElectricPumpPdfHtml({ test: saved ?? ({} as any), language: language as "en" | "pt-BR" });
-        const { uri } = await Print.printToFileAsync({ html });
-        return uri;
-      }
-    }
-    return generatePdfUri({
-      inspection,
-      language: language as "en" | "pt-BR",
-    });
-  };
-
-  // Gera o HTML do relatório (usado no web p/ produzir o PDF no navegador).
+  // ── Fonte única do relatório ──────────────────────────────────────────────
+  // getPdfHtml() é a ÚNICA fonte que decide o conteúdo do relatório por tipo de
+  // inspeção. Os três botões usam exatamente este mesmo HTML:
+  //   - "Gerar Relatório" (handlePrintPdf): imprime/abre este HTML.
+  //   - "Compartilhar" (WhatsApp) e "Enviar" (E-mail): anexam o PDF gerado a
+  //     partir deste HTML (getPdfUri no nativo; getPdfHtml no web).
+  // Assim o relatório anexado é sempre idêntico ao gerado pelo "Gerar Relatório".
   const getPdfHtml = async (): Promise<string> => {
     if (inspection.type === "hydrostatic_test" && inspection.hydrostaticTest) {
       return generateHydrostaticTestHtml({
@@ -240,6 +173,30 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       inspection,
       language: language as "en" | "pt-BR",
     });
+  };
+
+  // Gera o URI do PDF (nativo) a partir do MESMO HTML do relatório.
+  const getPdfUri = async (): Promise<string> => {
+    const html = await getPdfHtml();
+    const { uri } = await Print.printToFileAsync({ html });
+    return uri;
+  };
+
+  // "Gerar Relatório": imprime/abre o MESMO HTML usado no compartilhar/enviar.
+  const handlePrintPdf = async () => {
+    if (isGeneratingPdfRef.current) return;
+    isGeneratingPdfRef.current = true;
+    setIsGeneratingPdf(true);
+    try {
+      const html = await getPdfHtml();
+      await printHtml(html);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      Alert.alert(t.common.error, t.report.shareError);
+    } finally {
+      isGeneratingPdfRef.current = false;
+      setIsGeneratingPdf(false);
+    }
   };
 
   const pdfFileName = `${(inspection.propertyName || "relatorio-inspecao").trim()}-${inspection.date}`;

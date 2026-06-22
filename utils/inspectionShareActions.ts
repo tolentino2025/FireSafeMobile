@@ -2,8 +2,13 @@
 // SEMPRE com o PDF completo do relatório em anexo quando tecnicamente possível.
 //
 // Nativo (iOS/Android):
-//   - WhatsApp: gera o PDF e abre a folha de compartilhamento (WhatsApp recebe
-//     o anexo). Sem PDF/compartilhamento, cai no whatsapp:// só com texto.
+//   - WhatsApp (Compartilhar): usa react-native-share → Share.shareSingle() com
+//     social: Social.WHATSAPP. No iOS abre o WhatsApp diretamente via
+//     UIDocumentInteractionController (sem share sheet genérico). No Android usa
+//     intent explícito direcionado ao pacote com.whatsapp.
+//     Se WhatsApp não estiver instalado: exibe alerta claro ao usuário.
+//     Se react-native-share não estiver linkado (Expo Go / dev sem native build):
+//     cai para expo-sharing como fallback (share sheet genérico).
 //   - E-mail: compositor de e-mail com o PDF anexado (fallback: mailto).
 //
 // Web (navegador):
@@ -11,9 +16,18 @@
 //     (navigator.share({ files })) — assim o WhatsApp/e-mail recebem o PDF.
 //     Em navegadores sem suporte a compartilhar arquivos (ex.: desktop), baixa
 //     o PDF e abre o WhatsApp (wa.me) / e-mail (mailto) para anexar manualmente.
+//
+// IMPORTANTE – build nativo obrigatório para compartilhamento direto:
+//   react-native-share requer módulo nativo linkado. Funciona em:
+//     - EAS Build (production/preview)
+//     - Custom dev client criado com eas build --profile development
+//   NÃO funciona em Expo Go (neste caso usa fallback via expo-sharing).
 import { Platform, Linking } from "react-native";
 import * as Sharing from "expo-sharing";
 import * as MailComposer from "expo-mail-composer";
+// Wrapper resolvido por plataforma: no web usa whatsappShare.ts (stub, sem
+// react-native-share); no nativo usa whatsappShare.native.ts (módulo nativo).
+import { shareToWhatsAppNative } from "@/utils/whatsappShare";
 
 interface ShareOpts {
   message: string;
@@ -86,7 +100,7 @@ export async function shareViaWhatsApp(opts: ShareOpts): Promise<void> {
     if (getPdfHtml) {
       try {
         const shared = await shareFileOnWeb(getPdfHtml, fileName, { text: message });
-        if (shared) return; // PDF já foi anexado/compartilhado
+        if (shared) return;
       } catch {
         // falha ao gerar/compartilhar o PDF → segue para o WhatsApp só com texto
       }
@@ -95,10 +109,16 @@ export async function shareViaWhatsApp(opts: ShareOpts): Promise<void> {
     return;
   }
 
-  // Nativo: envia o PDF pela folha de compartilhamento (WhatsApp incluso).
+  // Nativo: gera o PDF e tenta abrir o WhatsApp diretamente.
   if (getPdfUri) {
     try {
       const uri = await getPdfUri();
+
+      const result = await shareToWhatsAppNative(uri, fileName, message);
+
+      if (result === "ok" || result === "no_whatsapp") return;
+
+      // "unavailable" (Expo Go / native module not linked): fallback para share sheet.
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
@@ -108,10 +128,11 @@ export async function shareViaWhatsApp(opts: ShareOpts): Promise<void> {
         return;
       }
     } catch {
-      // cai para abrir o WhatsApp só com o texto
+      // falha ao gerar o PDF → cai para WhatsApp só com texto
     }
   }
 
+  // Último recurso: abre o WhatsApp apenas com o texto.
   const appUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
   const canOpenApp = await Linking.canOpenURL(appUrl);
   await Linking.openURL(canOpenApp ? appUrl : webUrl);
@@ -131,7 +152,7 @@ export async function sendViaEmail(opts: EmailOpts): Promise<void> {
           title: subject,
           text: body,
         });
-        if (shared) return; // PDF anexado via Web Share API (usuário escolhe o e-mail)
+        if (shared) return;
       } catch {
         // falha ao gerar/compartilhar → segue para o mailto (sem anexo)
       }
