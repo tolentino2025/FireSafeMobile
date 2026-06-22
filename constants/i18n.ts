@@ -2556,6 +2556,21 @@ export const translations = {
       helpContact: "Contato",
       logout: "Sair",
       deleteAccount: "Excluir Conta",
+      legalSection: "Privacidade e Termos",
+      privacyPolicy: "Política de Privacidade",
+      termsOfUse: "Termos de Uso",
+      deleting: "Excluindo...",
+      deleteAccountConfirmTitle: "Excluir conta permanentemente?",
+      deleteAccountConfirmMessage:
+        "Esta ação é irreversível. Sua conta e os dados pessoais associados serão excluídos. Inspeções e dados sincronizados da sua empresa podem ser removidos. Deseja continuar?",
+      deleteAccountConfirmButton: "Excluir minha conta",
+      deleteAccountSuccess: "Sua conta foi excluída.",
+      deleteAccountErrorTitle: "Não foi possível excluir automaticamente",
+      deleteAccountErrorMessage:
+        "Não conseguimos concluir a exclusão agora. Solicite a exclusão da sua conta e dados pelo e-mail",
+      disclaimerTitle: "Aviso importante",
+      disclaimer:
+        "O FireSafe ITM é uma ferramenta de apoio à inspeção, teste e manutenção. Não substitui o responsável técnico, ART, AVCB, laudo profissional ou as normas oficiais aplicáveis, nem é um serviço de emergência. Consulte sempre a edição vigente das normas e um profissional habilitado.",
       version: "Versão",
       backup: "Backup de Dados",
       exportData: "Exportar Dados",
@@ -5355,6 +5370,21 @@ export const translations = {
       helpContact: "Contact",
       logout: "Log Out",
       deleteAccount: "Delete Account",
+      legalSection: "Privacy & Terms",
+      privacyPolicy: "Privacy Policy",
+      termsOfUse: "Terms of Use",
+      deleting: "Deleting...",
+      deleteAccountConfirmTitle: "Permanently delete account?",
+      deleteAccountConfirmMessage:
+        "This action is irreversible. Your account and associated personal data will be deleted. Inspections and synced company data may be removed. Do you want to continue?",
+      deleteAccountConfirmButton: "Delete my account",
+      deleteAccountSuccess: "Your account has been deleted.",
+      deleteAccountErrorTitle: "Could not delete automatically",
+      deleteAccountErrorMessage:
+        "We couldn't complete the deletion right now. Request deletion of your account and data by email",
+      disclaimerTitle: "Important notice",
+      disclaimer:
+        "FireSafe ITM is a support tool for inspection, testing and maintenance. It does not replace the responsible engineer, official permits/reports, professional assessment or applicable official standards, and it is not an emergency service. Always consult the current edition of the standards and a qualified professional.",
       version: "Version",
       backup: "Data Backup",
       exportData: "Export Data",

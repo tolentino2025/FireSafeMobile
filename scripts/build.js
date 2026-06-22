@@ -412,6 +412,18 @@ function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
   console.log("Manifests updated");
 }
 
+function copyPublicAssets() {
+  // Copia páginas estáticas (política de privacidade, termos, exclusão de conta)
+  // de public/ para a raiz do deploy estático (static-build/), servidas em
+  // firesafeitm.com/privacidade, /termos, /excluir-conta.
+  const publicDir = "public";
+  if (!fs.existsSync(publicDir)) {
+    return;
+  }
+  fs.cpSync(publicDir, "static-build", { recursive: true });
+  console.log("Copied public/ assets (legal pages) to static-build");
+}
+
 function createLandingPage(baseUrl) {
   const expsUrl = baseUrl.replace("https://", "");
   const template = fs.readFileSync(
@@ -462,6 +474,7 @@ async function main() {
   console.log("Updating manifests and creating landing page...");
   updateManifests(manifests, timestamp, baseUrl, assetsByHash);
   createLandingPage(baseUrl);
+  copyPublicAssets();
 
   console.log("Build complete! Deploy to:", baseUrl);
 

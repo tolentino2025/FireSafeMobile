@@ -26,7 +26,14 @@ import {
 } from "@/utils/notifications";
 import { shareUserManualPdf } from "@/utils/manualPdfGenerator";
 import { exportAllData, importAllData } from "@/utils/backupUtils";
-import { showConfirm } from "@/utils/appAlert";
+import { showAlert, showConfirm } from "@/utils/appAlert";
+import * as WebBrowser from "expo-web-browser";
+import { supabase } from "@/utils/supabase";
+import {
+  PRIVACY_POLICY_URL,
+  TERMS_OF_USE_URL,
+  PRIVACY_CONTACT_EMAIL,
+} from "@/constants/legal";
 
 const ADMIN_EMAIL = "suporte@firesafeitm.com";
 
@@ -46,6 +53,7 @@ export default function ProfileScreen() {
   const [generatingManual, setGeneratingManual] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     loadNotificationSettings();
@@ -269,6 +277,63 @@ export default function ProfileScreen() {
     );
   };
 
+  const openExternal = async (url: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    try {
+      await WebBrowser.openBrowserAsync(url);
+    } catch {
+      try {
+        await Linking.openURL(url);
+      } catch (error) {
+        console.error("Error opening link:", error);
+        showAlert(t.common.error, url);
+      }
+    }
+  };
+
+  const handleOpenPrivacy = () => openExternal(PRIVACY_POLICY_URL);
+  const handleOpenTerms = () => openExternal(TERMS_OF_USE_URL);
+
+  const performAccountDeletion = async () => {
+    setIsDeletingAccount(true);
+    try {
+      // Exclusão server-side: a Edge Function usa a service_role para apagar os
+      // dados pessoais e a conta de auth. A identidade vem do JWT, não do app.
+      const { error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+      await signOut();
+      showAlert(t.common.success, t.profile.deleteAccountSuccess);
+    } catch (error) {
+      console.error("Account deletion failed:", error);
+      // Fallback humano exigido pela política: canal de solicitação de exclusão.
+      showAlert(
+        t.profile.deleteAccountErrorTitle,
+        `${t.profile.deleteAccountErrorMessage} ${PRIVACY_CONTACT_EMAIL}`,
+      );
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    if (isDeletingAccount) return;
+    if (Platform.OS !== "web") {
+      Haptics.selectionAsync();
+    }
+    showConfirm(
+      t.profile.deleteAccountConfirmTitle,
+      t.profile.deleteAccountConfirmMessage,
+      performAccountDeletion,
+      {
+        confirmText: t.profile.deleteAccountConfirmButton,
+        cancelText: t.common.cancel,
+        destructive: true,
+      },
+    );
+  };
+
   const version = Constants.expoConfig?.version || "1.0.0";
 
   return (
@@ -387,6 +452,40 @@ export default function ProfileScreen() {
           onPress={handleHelp}
           isLast
         />
+      </View>
+
+      <Spacer height={Spacing["3xl"]} />
+
+      <ThemedText type="h3" style={styles.sectionTitle}>
+        {t.profile.legalSection}
+      </ThemedText>
+      <Spacer height={Spacing.md} />
+
+      <View style={[styles.settingsCard, { backgroundColor: fullTheme.colors.cardBackground, borderColor: fullTheme.colors.border }]}>
+        <SettingsRow
+          testID="settings-privacy"
+          icon="shield"
+          label={t.profile.privacyPolicy}
+          onPress={handleOpenPrivacy}
+        />
+        <SettingsRow
+          testID="settings-terms"
+          icon="file-text"
+          label={t.profile.termsOfUse}
+          onPress={handleOpenTerms}
+          isLast={!(isConfigured && user)}
+        />
+        {isConfigured && user ? (
+          <SettingsRow
+            testID="settings-delete-account"
+            icon="trash-2"
+            label={t.profile.deleteAccount}
+            value={isDeletingAccount ? t.profile.deleting : undefined}
+            onPress={isDeletingAccount ? undefined : handleDeleteAccount}
+            destructive
+            isLast
+          />
+        ) : null}
       </View>
 
       <Spacer height={Spacing["3xl"]} />
@@ -618,8 +717,8 @@ export default function ProfileScreen() {
               <View style={[styles.aboutSection, { borderTopColor: fullTheme.colors.border }]}>
                 <ThemedText type="body" style={styles.aboutText}>
                   {language === "pt-BR"
-                    ? "O FireSafe ITM é um aplicativo completo para Inspeção, Teste e Manutenção de sistemas de proteção contra incêndio, desenvolvido em conformidade com as normas NFPA 25."
-                    : "FireSafe ITM is a complete application for Inspection, Testing, and Maintenance of fire protection systems, developed in compliance with NFPA 25 standards."
+                    ? "O FireSafe ITM é um aplicativo para Inspeção, Teste e Manutenção de sistemas de proteção contra incêndio, com checklists baseados nas normas NFPA 25."
+                    : "FireSafe ITM is an application for Inspection, Testing, and Maintenance of fire protection systems, with checklists based on NFPA 25 standards."
                   }
                 </ThemedText>
 
@@ -668,9 +767,29 @@ export default function ProfileScreen() {
                 <View style={[styles.complianceBadge, { backgroundColor: `${fullTheme.colors.success}15` }]}>
                   <Feather name="award" size={20} color={fullTheme.colors.success} />
                   <ThemedText type="body" style={{ color: fullTheme.colors.success, marginLeft: Spacing.sm, fontWeight: "600" }}>
-                    {language === "pt-BR" ? "Conforme NFPA 25" : "NFPA 25 Compliant"}
+                    {language === "pt-BR" ? "Baseado na NFPA 25" : "Based on NFPA 25"}
                   </ThemedText>
                 </View>
+
+                <Spacer height={Spacing.lg} />
+
+                <View style={[styles.disclaimerBox, { backgroundColor: `${fullTheme.colors.primary}10`, borderColor: fullTheme.colors.border }]}>
+                  <ThemedText type="small" style={{ fontWeight: "700" }}>
+                    {t.profile.disclaimerTitle}
+                  </ThemedText>
+                  <Spacer height={Spacing.xs} />
+                  <ThemedText type="small" secondary style={{ lineHeight: 18 }}>
+                    {t.profile.disclaimer}
+                  </ThemedText>
+                </View>
+
+                <Spacer height={Spacing.md} />
+
+                <Pressable onPress={handleOpenPrivacy}>
+                  <ThemedText type="small" style={{ color: fullTheme.colors.primary, textAlign: "center", fontWeight: "600" }}>
+                    {t.profile.privacyPolicy}
+                  </ThemedText>
+                </Pressable>
               </View>
 
               <Spacer height={Spacing.lg} />
@@ -716,13 +835,17 @@ interface SettingsRowProps {
   onPress?: () => void;
   isLast?: boolean;
   rightElement?: React.ReactNode;
+  testID?: string;
+  destructive?: boolean;
 }
 
-function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: SettingsRowProps) {
+function SettingsRow({ icon, label, value, onPress, isLast, rightElement, testID, destructive }: SettingsRowProps) {
   const { fullTheme } = useTheme();
+  const tint = destructive ? fullTheme.colors.error : fullTheme.colors.textSecondary;
 
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       style={({ pressed }) => [
         styles.settingsRow,
@@ -731,8 +854,8 @@ function SettingsRow({ icon, label, value, onPress, isLast, rightElement }: Sett
       ]}
     >
       <View style={styles.settingsRowLeft}>
-        <Feather name={icon} size={20} color={fullTheme.colors.textSecondary} />
-        <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
+        <Feather name={icon} size={20} color={tint} />
+        <ThemedText type="body" style={{ marginLeft: Spacing.md, color: destructive ? fullTheme.colors.error : undefined }}>
           {label}
         </ThemedText>
       </View>
@@ -1001,6 +1124,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.lg,
+  },
+  disclaimerBox: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
   },
   aboutCloseButton: {
     paddingVertical: Spacing.md,

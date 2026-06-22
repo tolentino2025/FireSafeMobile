@@ -54,6 +54,28 @@ export default defineConfig({
       use: { ...devices["iPhone 14"] },
       testMatch: ["**/smoke.spec.ts", "**/responsive.spec.ts"],
     },
+    {
+      name: "pixel-5-compliance",
+      use: { ...devices["Pixel 5"] },
+      testMatch: ["**/playstore-compliance.spec.ts", "**/mobile-quality.spec.ts", "**/privacy-permissions.spec.ts"],
+    },
+    {
+      name: "galaxy-s9-compliance",
+      use: {
+        ...devices["Galaxy S9+"],
+        viewport: { width: 360, height: 740 },
+      },
+      testMatch: ["**/mobile-quality.spec.ts"],
+    },
+    {
+      name: "android-tablet-compliance",
+      use: {
+        ...devices["Pixel 5"],
+        viewport: { width: 800, height: 1280 },
+        deviceScaleFactor: 1.5,
+      },
+      testMatch: ["**/mobile-quality.spec.ts"],
+    },
   ],
   // Reaproveita um servidor já rodando em dev; na CI sobe um novo.
   // --non-interactive: evita prompts do Expo CLI no ambiente de CI.

@@ -53,3 +53,6 @@ dist/
 /blob-report/
 /playwright/.cache/
 store-assets.zip
+
+# Google Play service account key (NÃO comitar — credencial sensível)
+google-play-service-account.json
