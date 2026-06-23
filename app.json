@@ -34,7 +34,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.firesafe.itm",
+      "package": "com.firesafeitm",
       "versionCode": 2,
       "permissions": [
         "android.permission.CAMERA",
