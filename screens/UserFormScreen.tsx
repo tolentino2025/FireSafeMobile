@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -12,6 +12,7 @@ import { useInspections, AppUser } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type UserFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "UserForm">;
 
@@ -30,7 +31,7 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert(t.common.error, t.form.required);
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
@@ -53,7 +54,7 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
       navigation.goBack();
     } catch (error) {
       console.error("Error saving user:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
@@ -127,20 +128,14 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
         {existingUser ? (
           <Pressable
             onPress={() => {
-              Alert.alert(
+              showConfirm(
                 t.common.confirm,
                 `${t.common.delete} "${existingUser.name}"?`,
-                [
-                  { text: t.common.cancel, style: "cancel" },
-                  {
-                    text: t.common.delete,
-                    style: "destructive",
-                    onPress: async () => {
-                      await deleteAppUser(existingUser.id);
-                      navigation.goBack();
-                    },
-                  },
-                ]
+                async () => {
+                  await deleteAppUser(existingUser.id);
+                  navigation.goBack();
+                },
+                { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
               );
             }}
             style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}

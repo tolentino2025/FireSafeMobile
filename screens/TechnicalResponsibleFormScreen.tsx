@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -12,6 +12,7 @@ import { useInspections, TechnicalResponsible } from "@/contexts/InspectionConte
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type TechnicalResponsibleFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "TechnicalResponsibleForm">;
 
@@ -31,7 +32,7 @@ export default function TechnicalResponsibleFormScreen({ navigation, route }: Te
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert(t.common.error, t.form.required);
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
@@ -55,7 +56,7 @@ export default function TechnicalResponsibleFormScreen({ navigation, route }: Te
       navigation.goBack();
     } catch (error) {
       console.error("Error saving technical responsible:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
@@ -150,20 +151,14 @@ export default function TechnicalResponsibleFormScreen({ navigation, route }: Te
         {existingTechResp ? (
           <Pressable
             onPress={() => {
-              Alert.alert(
+              showConfirm(
                 t.common.confirm,
                 `${t.common.delete} "${existingTechResp.name}"?`,
-                [
-                  { text: t.common.cancel, style: "cancel" },
-                  {
-                    text: t.common.delete,
-                    style: "destructive",
-                    onPress: async () => {
-                      await deleteTechnicalResponsible(existingTechResp.id);
-                      navigation.goBack();
-                    },
-                  },
-                ]
+                async () => {
+                  await deleteTechnicalResponsible(existingTechResp.id);
+                  navigation.goBack();
+                },
+                { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
               );
             }}
             style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}

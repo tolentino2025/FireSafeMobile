@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  html,body{margin:0;padding:0}
+  .wrap{width:1024px;height:500px;overflow:hidden;position:relative;
+    background:radial-gradient(120% 140% at 0% 0%, #2d3748 0%, #1a202c 55%, #11151c 100%);
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#fff;display:flex;align-items:center}
+  .glow{position:absolute;right:-120px;top:-120px;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(circle, rgba(255,107,0,.35) 0%, rgba(206,58,38,.12) 45%, transparent 70%)}
+  .logo{width:210px;height:210px;margin:0 44px 0 72px;flex:0 0 auto;
+    background:#fff;border-radius:48px;overflow:hidden;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 14px 40px rgba(0,0,0,.5)}
+  .logo img{width:80%;height:80%;object-fit:contain}
+  .txt{position:relative;z-index:2}
+  .title{font-size:78px;font-weight:800;letter-spacing:-1px;line-height:1}
+  .title .fire{color:#FF6B00}
+  .sub{font-size:30px;font-weight:600;margin-top:16px;color:#e8eaed}
+  .pills{margin-top:26px;display:flex;gap:14px}
+  .pill{font-size:20px;font-weight:600;padding:10px 18px;border-radius:999px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16)}
+  .accent{position:absolute;left:0;top:0;bottom:0;width:10px;background:linear-gradient(#FF6B00,#CE3A26)}
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="accent"></div>
+    <div class="glow"></div>
+    <div class="logo"><img src="../assets/branding/firesafeitm-logo.png"></div>
+    <div class="txt">
+      <div class="title"><span class="fire">FireSafe</span> ITM</div>
+      <div class="sub">Inspeção, Teste e Manutenção · NFPA 25</div>
+      <div class="pills">
+        <div class="pill">Relatórios em PDF</div>
+        <div class="pill">Fotos & Assinaturas</div>
+        <div class="pill">Agenda & Lembretes</div>
+      </div>
+    </div>
+  </div>
+</body></html>

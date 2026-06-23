@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert, Switch, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -18,6 +18,7 @@ import {
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type FirePumpPanelFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "FirePumpPanelForm">;
 
@@ -75,7 +76,7 @@ export default function FirePumpPanelFormScreen({ navigation, route }: FirePumpP
 
   const handleSubmit = async () => {
     if (!tag.trim()) {
-      Alert.alert(t.common.error, t.form.required);
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
@@ -116,29 +117,23 @@ export default function FirePumpPanelFormScreen({ navigation, route }: FirePumpP
       navigation.goBack();
     } catch (error) {
       console.error("Error saving panel:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
   const handleDeletePanel = () => {
-    Alert.alert(
+    showConfirm(
       t.common.delete,
       t.firePumps.deletePanelConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteFirePumpPanel(existingPanel!.id);
-              navigation.goBack();
-            } catch (error) {
-              console.error("Error deleting panel:", error);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteFirePumpPanel(existingPanel!.id);
+          navigation.goBack();
+        } catch (error) {
+          console.error("Error deleting panel:", error);
+        }
+      },
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 

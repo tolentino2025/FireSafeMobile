@@ -20,6 +20,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChecklistItemPhoto as PhotoType } from "@/types/inspection";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 interface ChecklistItemPhotoProps {
   photos: PhotoType[];
@@ -66,7 +67,7 @@ export function ChecklistItemPhoto({
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (cameraStatus !== "granted" || libraryStatus !== "granted") {
-      Alert.alert(t.common.error, t.notifications.permissionRequired);
+      showAlert(t.common.error, t.notifications.permissionRequired);
       return false;
     }
     return true;
@@ -74,7 +75,7 @@ export function ChecklistItemPhoto({
 
   const takePhoto = async () => {
     if (!canAddMore) {
-      Alert.alert(
+      showAlert(
         t.common.error,
         `${maxPhotos} ${t.form.photos} max`
       );
@@ -115,13 +116,13 @@ export function ChecklistItemPhoto({
       }
     } catch (error) {
       console.error("Error taking photo:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
   const pickFromGallery = async () => {
     if (!canAddMore) {
-      Alert.alert(
+      showAlert(
         t.common.error,
         `${maxPhotos} ${t.form.photos} max`
       );
@@ -162,7 +163,7 @@ export function ChecklistItemPhoto({
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
@@ -170,19 +171,17 @@ export function ChecklistItemPhoto({
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    Alert.alert(t.common.confirm, t.form.removePhoto + "?", [
-      { text: t.common.cancel, style: "cancel" },
-      {
-        text: t.common.delete,
-        style: "destructive",
-        onPress: () => {
-          onPhotosChange(photos.filter((p) => p.id !== photoId));
-          if (selectedPhoto?.id === photoId) {
-            setSelectedPhoto(null);
-          }
-        },
+    showConfirm(
+      t.common.confirm,
+      t.form.removePhoto + "?",
+      () => {
+        onPhotosChange(photos.filter((p) => p.id !== photoId));
+        if (selectedPhoto?.id === photoId) {
+          setSelectedPhoto(null);
+        }
       },
-    ]);
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
+    );
   };
 
   const updateCaption = (photoId: string, caption: string) => {
@@ -193,9 +192,10 @@ export function ChecklistItemPhoto({
 
   const showPhotoOptions = () => {
     if (Platform.OS === "web") {
-      Alert.alert(t.common.error, t.common.runInExpoGo);
+      showAlert(t.common.error, t.common.runInExpoGo);
       return;
     }
+    // TODO(web-alert): Alert.alert é no-op na web — revisar
     Alert.alert(t.form.addPhoto, "", [
       { text: t.form.takePhoto, onPress: takePhoto },
       { text: t.form.chooseFromGallery, onPress: pickFromGallery },

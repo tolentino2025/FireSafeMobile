@@ -5,7 +5,6 @@ import {
   Modal,
   Pressable,
   ActivityIndicator,
-  Alert,
   Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -17,6 +16,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, FREE_INSPECTION_LIMIT } from "@/contexts/SubscriptionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { showAlert } from "@/utils/appAlert";
 
 type PlanOption = "monthly" | "annual";
 
@@ -115,7 +115,7 @@ export default function PaywallScreen() {
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Subscribe error:", error);
-      Alert.alert(sub.errorTitle, sub.errorMessage);
+      showAlert(sub.errorTitle, sub.errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +124,7 @@ export default function PaywallScreen() {
   const handleRestore = async () => {
     if (Platform.OS !== "web") Haptics.selectionAsync();
     await restorePurchases();
-    Alert.alert(
+    showAlert(
       sub.restoreTitle,
       sub.restoreMessage,
     );

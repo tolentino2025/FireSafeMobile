@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, Platform } from "react-native";
+import { View, StyleSheet, Pressable, Platform } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -14,6 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, JobSite, Contractor } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
+import { showConfirm } from "@/utils/appAlert";
 
 type JobSitesScreenProps = {
   navigation: NativeStackNavigationProp<PropertiesStackParamList, "JobSites">;
@@ -109,17 +110,11 @@ export default function JobSitesScreen({ navigation }: JobSitesScreenProps) {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    Alert.alert(
+    showConfirm(
       t.common.confirm,
       `${t.common.delete} "${jobSite.jobName}"?`,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: () => deleteJobSite(jobSite.id),
-        },
-      ]
+      () => deleteJobSite(jobSite.id),
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 

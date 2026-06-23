@@ -4,7 +4,6 @@ import {
   ScrollView,
   Pressable,
   View,
-  Alert,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -20,6 +19,7 @@ import { useInspections } from "@/contexts/InspectionContext";
 import { useITM } from "@/contexts/ITMContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { sistemasDisponiveis } from "@/utils/itm/labels";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 import { ITMStackParamList } from "@/navigation/ITMStackNavigator";
 
 type Props = NativeStackScreenProps<ITMStackParamList, "ITMPlanForm">;
@@ -54,35 +54,37 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
 
   const handleSave = async () => {
     if (!propertyId) {
-      Alert.alert(t.itm.form.validationProperty);
+      showAlert(t.itm.form.validationProperty);
       return;
     }
     if (!startDate) {
-      Alert.alert(t.itm.form.validationStartDate);
+      showAlert(t.itm.form.validationStartDate);
       return;
     }
     if (selectedSystems.length === 0) {
-      Alert.alert(t.itm.form.validationSystems);
+      showAlert(t.itm.form.validationSystems);
       return;
     }
 
     const property = properties.find((p) => p.id === propertyId);
     if (!property) {
-      Alert.alert(t.itm.form.validationProperty);
+      showAlert(t.itm.form.validationProperty);
       return;
     }
 
     // Evita plano duplicado para a mesma propriedade (a menos que confirme).
     const existente = planoAtivoDaPropriedade(property.id);
     if (existente) {
-      Alert.alert(t.itm.form.duplicateTitle, t.itm.form.duplicateMessage, [
-        { text: t.common.cancel, style: "cancel" },
+      showConfirm(
+        t.itm.form.duplicateTitle,
+        t.itm.form.duplicateMessage,
+        () => criarENavegar(property.id, property.name),
         {
-          text: t.itm.form.duplicateConfirm,
-          style: "destructive",
-          onPress: () => criarENavegar(property.id, property.name),
+          confirmText: t.itm.form.duplicateConfirm,
+          cancelText: t.common.cancel,
+          destructive: true,
         },
-      ]);
+      );
       return;
     }
 
@@ -98,11 +100,11 @@ export default function ITMPlanFormScreen({ navigation }: Props) {
         startDate,
         systemKeys: selectedSystems,
       });
-      Alert.alert(t.itm.form.successTitle, t.itm.form.successMessage);
+      showAlert(t.itm.form.successTitle, t.itm.form.successMessage);
       navigation.replace("ITMPlanSystems", { planId: plano.id });
     } catch (error) {
       console.error("Error creating ITM plan:", error);
-      Alert.alert(t.common.error);
+      showAlert(t.common.error);
     } finally {
       setSaving(false);
     }

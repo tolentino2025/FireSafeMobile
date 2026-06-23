@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Alert, Platform } from "react-native";
+import { View, StyleSheet, Pressable, Platform } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -14,6 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, Contractor } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
+import { showConfirm } from "@/utils/appAlert";
 
 type ContractorsScreenProps = {
   navigation: NativeStackNavigationProp<PropertiesStackParamList, "Contractors">;
@@ -104,17 +105,11 @@ export default function ContractorsScreen({ navigation }: ContractorsScreenProps
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    Alert.alert(
+    showConfirm(
       t.common.confirm,
       `${t.common.delete} "${contractor.name}"?`,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: () => deleteContractor(contractor.id),
-        },
-      ]
+      () => deleteContractor(contractor.id),
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 

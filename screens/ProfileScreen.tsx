@@ -99,7 +99,7 @@ export default function ProfileScreen() {
     try {
       const success = await shareUserManualPdf(language as "pt-BR" | "en");
       if (!success) {
-        Alert.alert(
+        showAlert(
           language === "pt-BR" ? "Erro" : "Error",
           language === "pt-BR" 
             ? "Não foi possível gerar o manual. Tente novamente." 
@@ -108,7 +108,7 @@ export default function ProfileScreen() {
       }
     } catch (error) {
       console.error("Error generating manual:", error);
-      Alert.alert(
+      showAlert(
         language === "pt-BR" ? "Erro" : "Error",
         language === "pt-BR" 
           ? "Ocorreu um erro ao gerar o manual." 
@@ -137,14 +137,14 @@ export default function ProfileScreen() {
       if (canOpen) {
         await Linking.openURL(mailtoUrl);
       } else {
-        Alert.alert(
+        showAlert(
           language === "pt-BR" ? "E-mail não configurado" : "Email not configured",
           `${language === "pt-BR" ? "Entre em contato pelo e-mail:" : "Please contact us at:"} ${ADMIN_EMAIL}`
         );
       }
     } catch (error) {
       console.error("Error opening mail:", error);
-      Alert.alert(
+      showAlert(
         language === "pt-BR" ? "E-mail não configurado" : "Email not configured",
         `${language === "pt-BR" ? "Entre em contato pelo e-mail:" : "Please contact us at:"} ${ADMIN_EMAIL}`
       );
@@ -159,6 +159,7 @@ export default function ProfileScreen() {
     if (value && !hasPermission) {
       const granted = await requestNotificationPermissions();
       if (!granted) {
+        // TODO(web-alert): Alert.alert é no-op na web — revisar
         Alert.alert(
           t.notifications.title,
           t.notifications.permissionRequired,
@@ -203,13 +204,13 @@ export default function ProfileScreen() {
     try {
       const result = await exportAllData();
       if (result.success) {
-        Alert.alert(t.common.success, t.profile.exportSuccess);
+        showAlert(t.common.success, t.profile.exportSuccess);
       } else {
-        Alert.alert(t.common.error, t.profile.exportError);
+        showAlert(t.common.error, t.profile.exportError);
       }
     } catch (error) {
       console.error("Export error:", error);
-      Alert.alert(t.common.error, t.profile.exportError);
+      showAlert(t.common.error, t.profile.exportError);
     } finally {
       setIsExporting(false);
     }
@@ -220,43 +221,41 @@ export default function ProfileScreen() {
       Haptics.selectionAsync();
     }
 
-    Alert.alert(
+    showConfirm(
       t.profile.importConfirmTitle,
       t.profile.importConfirmMessage,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.confirm,
-          style: "destructive",
-          onPress: async () => {
-            setIsImporting(true);
-            try {
-              const result = await importAllData();
-              if (result.success && result.counts) {
-                await refreshData();
-                Alert.alert(
-                  t.common.success,
-                  `${t.profile.dataRestored}:\n` +
-                  `${result.counts.inspections} ${language === "pt-BR" ? "inspeções" : "inspections"}\n` +
-                  `${result.counts.companies} ${language === "pt-BR" ? "empresas" : "companies"}\n` +
-                  `${result.counts.appUsers} ${language === "pt-BR" ? "inspetores" : "inspectors"}`
-                );
-              } else if (result.error === "cancelled") {
-                // User cancelled, do nothing
-              } else if (result.error === "invalid_format") {
-                Alert.alert(t.common.error, t.profile.importInvalidFormat);
-              } else {
-                Alert.alert(t.common.error, t.profile.importError);
-              }
-            } catch (error) {
-              console.error("Import error:", error);
-              Alert.alert(t.common.error, t.profile.importError);
-            } finally {
-              setIsImporting(false);
-            }
-          },
-        },
-      ]
+      async () => {
+        setIsImporting(true);
+        try {
+          const result = await importAllData();
+          if (result.success && result.counts) {
+            await refreshData();
+            showAlert(
+              t.common.success,
+              `${t.profile.dataRestored}:\n` +
+              `${result.counts.inspections} ${language === "pt-BR" ? "inspeções" : "inspections"}\n` +
+              `${result.counts.companies} ${language === "pt-BR" ? "empresas" : "companies"}\n` +
+              `${result.counts.appUsers} ${language === "pt-BR" ? "inspetores" : "inspectors"}`
+            );
+          } else if (result.error === "cancelled") {
+            // User cancelled, do nothing
+          } else if (result.error === "invalid_format") {
+            showAlert(t.common.error, t.profile.importInvalidFormat);
+          } else {
+            showAlert(t.common.error, t.profile.importError);
+          }
+        } catch (error) {
+          console.error("Import error:", error);
+          showAlert(t.common.error, t.profile.importError);
+        } finally {
+          setIsImporting(false);
+        }
+      },
+      {
+        confirmText: t.common.confirm,
+        cancelText: t.common.cancel,
+        destructive: true,
+      },
     );
   };
 

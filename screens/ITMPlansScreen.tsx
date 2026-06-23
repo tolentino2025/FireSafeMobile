@@ -4,7 +4,6 @@ import {
   ScrollView,
   Pressable,
   View,
-  Alert,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -20,6 +19,7 @@ import { parseLocalYMD } from "@/utils/dateUtils";
 import { statusGeral, type StatusGeral } from "@/utils/itm/agenda";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { ITMStackParamList } from "@/navigation/ITMStackNavigator";
+import { showConfirm } from "@/utils/appAlert";
 
 const TAB_BAR_HEIGHT = 90;
 
@@ -56,14 +56,12 @@ export default function ITMPlansScreen({ navigation }: Props) {
   };
 
   const confirmarRemocao = (plan: ItmPlan) => {
-    Alert.alert(t.itm.plans.removeConfirmTitle, t.itm.plans.removeConfirmMessage, [
-      { text: t.common.cancel, style: "cancel" },
-      {
-        text: t.itm.plans.removePlan,
-        style: "destructive",
-        onPress: () => removerPlano(plan.id),
-      },
-    ]);
+    showConfirm(
+      t.itm.plans.removeConfirmTitle,
+      t.itm.plans.removeConfirmMessage,
+      () => removerPlano(plan.id),
+      { confirmText: t.itm.plans.removePlan, cancelText: t.common.cancel, destructive: true }
+    );
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, StyleSheet, TextInput, Pressable, Platform, Alert } from "react-native";
+import { View, StyleSheet, TextInput, Pressable, Platform } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -13,6 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections, FirePump, FirePumpControlPanel, Company } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type FirePumpListScreenProps = NativeStackScreenProps<PropertiesStackParamList, "FirePumpList">;
 
@@ -138,7 +139,7 @@ export default function FirePumpListScreen({ navigation }: FirePumpListScreenPro
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     if (!selectedCompanyId && companies.length > 0) {
-      Alert.alert(t.common.error, t.firePumps.selectCompanyFirst);
+      showAlert(t.common.error, t.firePumps.selectCompanyFirst);
       return;
     }
     navigation.navigate("FirePumpForm", { companyId: selectedCompanyId });
@@ -149,23 +150,17 @@ export default function FirePumpListScreen({ navigation }: FirePumpListScreenPro
   };
 
   const handleDeletePump = (pump: FirePump) => {
-    Alert.alert(
+    showConfirm(
       t.common.delete,
       t.firePumps.deleteConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteFirePump(pump.id);
-            } catch (error) {
-              console.error("Error deleting pump:", error);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteFirePump(pump.id);
+        } catch (error) {
+          console.error("Error deleting pump:", error);
+        }
+      },
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 

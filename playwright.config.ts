@@ -76,6 +76,25 @@ export default defineConfig({
       },
       testMatch: ["**/mobile-quality.spec.ts"],
     },
+    // ── Captura de elementos gráficos da loja (Play Store) ──
+    // Telefone 9:16 -> 360x640 @3x = 1080x1920
+    {
+      name: "shots-phone",
+      use: { ...devices["Pixel 5"], viewport: { width: 360, height: 640 }, deviceScaleFactor: 3 },
+      testMatch: ["**/store-shots.spec.ts"],
+    },
+    // Tablet 10" 9:16 -> 540x960 @2x = 1080x1920 (layout mais largo)
+    {
+      name: "shots-tablet10",
+      use: { ...devices["Pixel 5"], viewport: { width: 540, height: 960 }, deviceScaleFactor: 2, isMobile: false },
+      testMatch: ["**/store-shots.spec.ts"],
+    },
+    // Tablet 7" 9:16 -> 360x640 @2x = 720x1280
+    {
+      name: "shots-tablet7",
+      use: { ...devices["Pixel 5"], viewport: { width: 360, height: 640 }, deviceScaleFactor: 2, isMobile: false },
+      testMatch: ["**/store-shots.spec.ts"],
+    },
   ],
   // Reaproveita um servidor já rodando em dev; na CI sobe um novo.
   // --non-interactive: evita prompts do Expo CLI no ambiente de CI.

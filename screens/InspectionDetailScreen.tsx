@@ -22,7 +22,7 @@ import { printHtml } from "@/utils/pdf/pdfPrint";
 import { generateAndPrintFM85APdf, generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
 import { generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
-import { showConfirm } from "@/utils/appAlert";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 import { parseLocalYMD } from "@/utils/dateUtils";
 
 const TAB_BAR_HEIGHT = 90;
@@ -192,7 +192,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       await printHtml(html);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     } finally {
       isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
@@ -211,7 +211,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       await shareViaWhatsApp({ message, getPdfUri, getPdfHtml, fileName: pdfFileName });
     } catch (error) {
       console.error("Error sharing via WhatsApp:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     } finally {
       isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
@@ -229,7 +229,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       await sendViaEmail({ subject, body, getPdfUri, getPdfHtml, fileName: pdfFileName });
     } catch (error) {
       console.error("Error sending email:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     } finally {
       isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
@@ -260,7 +260,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
       }
     } catch (error) {
       console.error("Error generating FM85A PDF:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     } finally {
       isGeneratingPdfRef.current = false;
       setIsGeneratingPdf(false);
@@ -268,6 +268,7 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   };
 
   const showFM85AOptions = () => {
+    // TODO(web-alert): Alert.alert é no-op na web — revisar
     Alert.alert(
       "FM Global Certificate FM85A",
       "",

@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -12,6 +12,7 @@ import { useInspections, Property, Company } from "@/contexts/InspectionContext"
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type PropertyFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "PropertyForm">;
 
@@ -61,7 +62,7 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert(t.common.error, "Name is required");
+      showAlert(t.common.error, "Name is required");
       return;
     }
 
@@ -105,34 +106,28 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
       }
       navigation.goBack();
     } catch (error) {
-      Alert.alert(t.common.error, "Failed to save");
+      showAlert(t.common.error, "Failed to save");
     }
   };
 
   const handleDelete = () => {
     const itemName = mode === "company" ? existingCompany?.name : existingProperty?.name;
-    Alert.alert(
+    showConfirm(
       t.common.confirm,
       `${t.common.delete} "${itemName}"?`,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              if (mode === "company" && existingCompany) {
-                await deleteCompany(existingCompany.id);
-              } else if (mode === "property" && existingProperty) {
-                await deleteProperty(existingProperty.id);
-              }
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert(t.common.error, "Failed to delete");
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          if (mode === "company" && existingCompany) {
+            await deleteCompany(existingCompany.id);
+          } else if (mode === "property" && existingProperty) {
+            await deleteProperty(existingProperty.id);
+          }
+          navigation.goBack();
+        } catch (error) {
+          showAlert(t.common.error, "Failed to delete");
+        }
+      },
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 

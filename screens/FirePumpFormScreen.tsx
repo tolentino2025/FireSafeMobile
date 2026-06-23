@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable, Platform, Switch } from "react-native";
+import { View, StyleSheet, TextInput, Pressable, Platform, Switch } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -24,6 +24,7 @@ import {
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type FirePumpFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "FirePumpForm">;
 
@@ -176,7 +177,7 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
 
   const handleSubmit = async () => {
     if (!tag.trim()) {
-      Alert.alert(t.common.error, t.form.required);
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
@@ -243,29 +244,23 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
       navigation.goBack();
     } catch (error) {
       console.error("Error saving pump:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
   const handleDeletePump = () => {
-    Alert.alert(
+    showConfirm(
       t.common.delete,
       t.firePumps.deleteConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteFirePump(existingPump!.id);
-              navigation.goBack();
-            } catch (error) {
-              console.error("Error deleting pump:", error);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteFirePump(existingPump!.id);
+          navigation.goBack();
+        } catch (error) {
+          console.error("Error deleting pump:", error);
+        }
+      },
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 
@@ -281,23 +276,17 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
   };
 
   const handleDeletePanel = (panel: FirePumpControlPanel) => {
-    Alert.alert(
+    showConfirm(
       t.common.delete,
       t.firePumps.deletePanelConfirmation,
-      [
-        { text: t.common.cancel, style: "cancel" },
-        {
-          text: t.common.delete,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteFirePumpPanel(panel.id);
-            } catch (error) {
-              console.error("Error deleting panel:", error);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteFirePumpPanel(panel.id);
+        } catch (error) {
+          console.error("Error deleting panel:", error);
+        }
+      },
+      { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
     );
   };
 

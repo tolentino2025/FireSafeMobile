@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -12,6 +12,7 @@ import { useInspections, Company } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type CompanyFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "CompanyForm">;
 
@@ -35,7 +36,7 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert(t.common.error, t.form.required);
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
@@ -63,7 +64,7 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
       navigation.goBack();
     } catch (error) {
       console.error("Error saving company:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
@@ -213,20 +214,14 @@ export default function CompanyFormScreen({ navigation, route }: CompanyFormScre
         {existingCompany ? (
           <Pressable
             onPress={() => {
-              Alert.alert(
+              showConfirm(
                 t.common.confirm,
                 `${t.common.delete} "${existingCompany.name}"?`,
-                [
-                  { text: t.common.cancel, style: "cancel" },
-                  {
-                    text: t.common.delete,
-                    style: "destructive",
-                    onPress: async () => {
-                      await deleteCompany(existingCompany.id);
-                      navigation.goBack();
-                    },
-                  },
-                ]
+                async () => {
+                  await deleteCompany(existingCompany.id);
+                  navigation.goBack();
+                },
+                { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
               );
             }}
             style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}

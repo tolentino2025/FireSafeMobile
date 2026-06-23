@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Alert, Pressable } from "react-native";
+import { View, StyleSheet, TextInput, Pressable } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
@@ -13,6 +13,7 @@ import { useInspections, JobSite } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { PropertiesStackParamList } from "@/navigation/PropertiesStackNavigator";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 
 type JobSiteFormScreenProps = NativeStackScreenProps<PropertiesStackParamList, "JobSiteForm">;
 
@@ -42,12 +43,12 @@ export default function JobSiteFormScreen({ navigation, route }: JobSiteFormScre
 
   const handleSubmit = async () => {
     if (!jobName.trim()) {
-      Alert.alert(t.common.error, t.form.required);
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
     if (!contractorId) {
-      Alert.alert(t.common.error, t.jobSites?.selectContractor || "Selecione um contratante");
+      showAlert(t.common.error, t.jobSites?.selectContractor || "Selecione um contratante");
       return;
     }
 
@@ -86,7 +87,7 @@ export default function JobSiteFormScreen({ navigation, route }: JobSiteFormScre
       navigation.goBack();
     } catch (error) {
       console.error("Error saving job site:", error);
-      Alert.alert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.report.shareError);
     }
   };
 
@@ -242,20 +243,14 @@ export default function JobSiteFormScreen({ navigation, route }: JobSiteFormScre
         {existingJobSite ? (
           <Pressable
             onPress={() => {
-              Alert.alert(
+              showConfirm(
                 t.common.confirm,
                 `${t.common.delete} "${existingJobSite.jobName}"?`,
-                [
-                  { text: t.common.cancel, style: "cancel" },
-                  {
-                    text: t.common.delete,
-                    style: "destructive",
-                    onPress: async () => {
-                      await deleteJobSite(existingJobSite.id);
-                      navigation.goBack();
-                    },
-                  },
-                ]
+                async () => {
+                  await deleteJobSite(existingJobSite.id);
+                  navigation.goBack();
+                },
+                { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }
               );
             }}
             style={[styles.deleteButton, { backgroundColor: fullTheme.colors.error }]}

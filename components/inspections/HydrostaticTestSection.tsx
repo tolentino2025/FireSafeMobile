@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from "react";
-import { View, TextInput, StyleSheet, Pressable, Platform, Alert, Linking } from "react-native";
+import { View, TextInput, StyleSheet, Pressable, Platform, Linking } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ControlledTextInput } from "@/components/ControlledTextInput";
@@ -13,6 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
+import { showConfirm } from "@/utils/appAlert";
 import {
   HydrostaticTest,
   HydrostaticSystemType,
@@ -455,24 +456,22 @@ export function HydrostaticTestSection({
     if (status !== "granted") {
       if (!canAskAgain && Platform.OS !== "web") {
         // Permission denied permanently - show alert to open settings
-        Alert.alert(
+        showConfirm(
           language === "pt-BR" ? "Permissao Necessaria" : "Permission Required",
-          language === "pt-BR" 
+          language === "pt-BR"
             ? "A permissao de camera e necessaria para tirar fotos. Por favor, habilite nas configuracoes."
             : "Camera permission is required to take photos. Please enable it in settings.",
-          [
-            { text: language === "pt-BR" ? "Cancelar" : "Cancel", style: "cancel" },
-            { 
-              text: language === "pt-BR" ? "Abrir Configuracoes" : "Open Settings", 
-              onPress: async () => {
-                try {
-                  await Linking.openSettings();
-                } catch (error) {
-                  // openSettings not supported on this platform
-                }
-              }
+          async () => {
+            try {
+              await Linking.openSettings();
+            } catch (error) {
+              // openSettings not supported on this platform
             }
-          ]
+          },
+          {
+            confirmText: language === "pt-BR" ? "Abrir Configuracoes" : "Open Settings",
+            cancelText: language === "pt-BR" ? "Cancelar" : "Cancel",
+          }
         );
       }
       return;
