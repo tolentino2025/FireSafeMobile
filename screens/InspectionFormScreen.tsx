@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, TextInput, Pressable, Alert, Platform } from "react-native";
+import { View, StyleSheet, TextInput, Pressable, Platform } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -142,45 +142,53 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     }
   }, [frequency, type, isNewInspection]);
 
+  // Propaga uma localização JÁ registrada para os certificados FM-85A/hidrostático
+  // quando o tipo de inspeção muda. NÃO solicita permissão automaticamente.
   useEffect(() => {
-    const captureLocation = async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setGeoLocation(null);
-          return;
-        }
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
-        const geoData = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          accuracy: location.coords.accuracy ?? undefined,
-          timestamp: location.timestamp,
-        };
-        setGeoLocation(geoData);
-        
-        if (isFM85A) {
-          setFm85aCertificate(prev => ({
-            ...prev,
-            geoLocation: geoData,
-          }));
-        }
-        
-        if (isHydrostatic) {
-          setHydrostaticTest(prev => ({
-            ...prev,
-            geoLocation: geoData,
-          }));
-        }
-      } catch (error) {
-        console.log("Error getting location:", error);
-        setGeoLocation(null);
+    if (!geoLocation) return;
+    if (isFM85A) setFm85aCertificate((prev) => ({ ...prev, geoLocation }));
+    if (isHydrostatic) setHydrostaticTest((prev) => ({ ...prev, geoLocation }));
+  }, [isFM85A, isHydrostatic, geoLocation]);
+
+  // A localização é registrada SOMENTE por ação explícita do usuário, após o aviso
+  // de finalidade (disclosure). Foreground apenas — nunca em segundo plano.
+  const captureLocationNow = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        showAlert(t.form.locationDenied);
+        return;
       }
-    };
-    captureLocation();
-  }, [isFM85A, isHydrostatic]);
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      const geoData = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        accuracy: location.coords.accuracy ?? undefined,
+        timestamp: location.timestamp,
+      };
+      setGeoLocation(geoData);
+      if (isFM85A) {
+        setFm85aCertificate((prev) => ({ ...prev, geoLocation: geoData }));
+      }
+      if (isHydrostatic) {
+        setHydrostaticTest((prev) => ({ ...prev, geoLocation: geoData }));
+      }
+    } catch (error) {
+      console.log("Error getting location:", error);
+      showAlert(t.form.locationDenied);
+    }
+  };
+
+  const handleRequestLocation = () => {
+    showConfirm(
+      t.form.locationDisclosureTitle,
+      t.form.locationDisclosureMessage,
+      captureLocationNow,
+      { confirmText: t.form.locationDisclosureConfirm, cancelText: t.form.cancel },
+    );
+  };
 
   const handleCompanySelect = (companyId: string) => {
     setSelectedCompanyId(companyId);
@@ -1170,6 +1178,35 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
 
       <Spacer height={Spacing["2xl"]} />
 
+      <ThemedText type="h3">{t.form.locationSection}</ThemedText>
+      <Spacer height={Spacing.sm} />
+      <Pressable
+        onPress={handleRequestLocation}
+        style={[
+          styles.locationButton,
+          { backgroundColor: fullTheme.colors.backgroundSecondary, borderColor: fullTheme.colors.border },
+        ]}
+      >
+        <Feather
+          name="map-pin"
+          size={18}
+          color={geoLocation ? fullTheme.colors.success : fullTheme.colors.primary}
+        />
+        <View style={{ flex: 1 }}>
+          <ThemedText type="body">
+            {geoLocation ? t.form.locationUpdate : t.form.locationAdd}
+          </ThemedText>
+          <ThemedText type="small" secondary>
+            {geoLocation
+              ? `${geoLocation.latitude.toFixed(5)}, ${geoLocation.longitude.toFixed(5)}`
+              : t.form.locationNone}
+          </ThemedText>
+        </View>
+        <Feather name="chevron-right" size={18} color={fullTheme.colors.textSecondary} />
+      </Pressable>
+
+      <Spacer height={Spacing["2xl"]} />
+
       <ThemedText type="h3">{t.form.observations}</ThemedText>
       <Spacer height={Spacing.sm} />
       <TextInput
@@ -1311,5 +1348,14 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     borderWidth: 0,
+  },
+  locationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
   },
 });

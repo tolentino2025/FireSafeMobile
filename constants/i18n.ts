@@ -229,6 +229,16 @@ export const translations = {
       cancel: "Cancelar",
       autoSaved: "Salvo automaticamente",
       observations: "Observações",
+      locationSection: "Localização da inspeção",
+      locationAdd: "Registrar localização (GPS)",
+      locationUpdate: "Atualizar localização",
+      locationNone: "Localização não registrada",
+      locationDisclosureTitle: "Usar sua localização?",
+      locationDisclosureMessage:
+        "O FireSafe ITM usará a localização do dispositivo agora, apenas em primeiro plano, para registrar o local desta inspeção no relatório. A localização não é coletada em segundo plano.",
+      locationDisclosureConfirm: "Usar localização",
+      locationDenied:
+        "Permissão de localização negada. Você pode continuar sem registrar o local.",
       signature: "Assinatura do Inspetor",
       accompanyingSignature: "Assinatura do Acompanhante",
       accompanyingName: "Nome do acompanhante / responsável",
@@ -3043,6 +3053,16 @@ export const translations = {
       cancel: "Cancel",
       autoSaved: "Auto-saved",
       observations: "Observations",
+      locationSection: "Inspection location",
+      locationAdd: "Record location (GPS)",
+      locationUpdate: "Update location",
+      locationNone: "Location not recorded",
+      locationDisclosureTitle: "Use your location?",
+      locationDisclosureMessage:
+        "FireSafe ITM will use your device location now, in the foreground only, to record the site of this inspection on the report. Location is never collected in the background.",
+      locationDisclosureConfirm: "Use location",
+      locationDenied:
+        "Location permission denied. You can continue without recording the site.",
       signature: "Inspector Signature",
       accompanyingSignature: "Accompanying Person Signature",
       accompanyingName: "Accompanying person / responsible name",
