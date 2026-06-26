@@ -1,7 +1,39 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import * as ImageManipulator from "expo-image-manipulator";
 import { Inspection, InspectionType } from "@/contexts/InspectionContext";
-import { ensureAllPhotosBase64 } from "@/utils/photoUtils";
+import { ensurePhotoBase64, InspectionPhoto } from "@/utils/photoUtils";
+
+// Comprime uma foto (resize por largura, mantém proporção) antes de embutir no
+// PDF — reduz muito o tamanho do HTML/uso de memória em inspeções com muitas
+// fotos. Best-effort: em qualquer falha cai no original (nunca remove a foto).
+async function compressPhotoForPdf(uri: string): Promise<string | null> {
+  try {
+    const r = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }],
+      { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG, base64: true },
+    );
+    return r.base64 ? `data:image/jpeg;base64,${r.base64}` : null;
+  } catch {
+    return null;
+  }
+}
+
+async function ensurePhotoForPdf(photo: InspectionPhoto): Promise<InspectionPhoto> {
+  // URI de arquivo (não data:) → comprime para o PDF.
+  if (photo.uri && !photo.uri.startsWith("data:")) {
+    const b64 = await compressPhotoForPdf(photo.uri);
+    if (b64) return { ...photo, base64: b64 };
+  }
+  // Fallback: base64 existente ou leitura do arquivo cheio (comportamento atual).
+  return ensurePhotoBase64(photo);
+}
+
+async function ensurePhotosForPdf(photos: InspectionPhoto[]): Promise<InspectionPhoto[]> {
+  if (!photos || photos.length === 0) return [];
+  return Promise.all(photos.map(ensurePhotoForPdf));
+}
 import { parseLocalYMD, getLocalTimeZone } from "@/utils/dateUtils";
 import { 
   PDF_THEME, 
@@ -399,6 +431,8 @@ const generateInspectionPdfHtmlWithPhotos = (
     typeof inspection.accompanyingSignature === "string" &&
     inspection.accompanyingSignature.startsWith("data:");
 
+  // Quando não há imagem de assinatura, renderiza uma LINHA de assinatura (em vez
+  // de omitir o cartão) — laudo sempre traz o campo de assinatura do inspetor.
   const signatureCard = (
     label: string,
     img: string,
@@ -407,20 +441,23 @@ const generateInspectionPdfHtmlWithPhotos = (
   ) => `
       <div style="flex: 1; min-width: 220px; padding: 15px; background: #F9FAFB; border-radius: 8px;">
         <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em;">${label}</p>
-        <img src="${img}" style="max-height: 80px;" />
+        ${
+          img && img.startsWith("data:")
+            ? `<img src="${img}" style="max-height: 80px;" />`
+            : `<div style="height: 60px; border-bottom: 1px solid #9CA3AF; margin: 8px 0 4px 0;"></div>`
+        }
         <p style="margin: 10px 0 0 0; font-size: 12px; color: #6B7280;">${sanitizeHtml(name) || "-"}</p>
         ${role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #9CA3AF;">${sanitizeHtml(role)}</p>` : ""}
       </div>`;
 
   const signatureCards = [
-    hasSignatureImage
-      ? signatureCard(
-          t.signature,
-          inspection.signature as string,
-          inspection.inspectorName,
-          inspectorData?.role,
-        )
-      : "",
+    // Cartão do inspetor SEMPRE presente (com imagem ou com linha de assinatura).
+    signatureCard(
+      t.signature,
+      hasSignatureImage ? (inspection.signature as string) : "",
+      inspection.inspectorName,
+      inspectorData?.role,
+    ),
     hasAccompanyingSignature
       ? signatureCard(
           t.accompanyingSignature,
@@ -751,14 +788,14 @@ export const buildInspectionPdfHtml = async (
   options: GeneratePdfOptions,
 ): Promise<string> => {
   const [photosWithBase64, logoDataUri] = await Promise.all([
-    ensureAllPhotosBase64(options.inspection.photos || []),
+    ensurePhotosForPdf(options.inspection.photos || []),
     getLogoDataUri(),
   ]);
 
   const checklistWithPhotos = await Promise.all(
     (options.inspection.checklist || []).map(async (item) => {
       if (!item.photos || item.photos.length === 0) return item;
-      const photosWithBase64Item = await ensureAllPhotosBase64(item.photos as any);
+      const photosWithBase64Item = await ensurePhotosForPdf(item.photos as any);
       return { ...item, photos: photosWithBase64Item };
     })
   );
