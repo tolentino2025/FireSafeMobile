@@ -159,6 +159,7 @@ export const getBaseCss = (): string => {
       border-radius: 8px;
       padding: 15px;
       margin-top: 10px;
+      white-space: pre-wrap;
     }
     .footer {
       margin-top: 40px;

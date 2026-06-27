@@ -89,7 +89,7 @@ const formatDate = (dateString: string, language: string): string => {
   if (language === "pt-BR") {
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
-      month: "long",
+      month: "2-digit",
       year: "numeric",
       timeZone,
     });
@@ -222,7 +222,9 @@ const translations = {
       weekly: "Weekly",
       monthly: "Monthly",
       quarterly: "Quarterly",
+      semiannually: "Semiannually",
       annually: "Annually",
+      three_years: "3 Years",
       five_years: "5 Years",
     },
   },
@@ -291,7 +293,9 @@ const translations = {
       weekly: "Semanal",
       monthly: "Mensal",
       quarterly: "Trimestral",
+      semiannually: "Semestral",
       annually: "Anual",
+      three_years: "3 Anos",
       five_years: "5 Anos",
     },
   },

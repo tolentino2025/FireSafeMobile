@@ -80,11 +80,28 @@ export async function syncItmOccurrencesToSupabase(
         updated_at: new Date().toISOString(),
       }));
 
-    if (rows.length === 0) return;
-
-    await supabase
+    // Reconciliação: remove ocorrências PENDENTES (não concluídas) que não estão
+    // mais na lista atual do cliente (plano removido/regenerado/sem data) — evita
+    // e-mail 48h órfão. Roda mesmo com `rows` vazio (ex.: todos os planos removidos).
+    const keepIds = rows.map((r) => r.occurrence_id);
+    let del = supabase
       .from("itm_occurrences")
-      .upsert(rows, { onConflict: "user_id,occurrence_id" });
+      .delete()
+      .eq("user_id", user.id)
+      .is("completed_at", null);
+    if (keepIds.length > 0) {
+      const list = keepIds
+        .map((id) => `"${String(id).replace(/["()]/g, "")}"`)
+        .join(",");
+      del = del.not("occurrence_id", "in", `(${list})`);
+    }
+    await del;
+
+    if (rows.length > 0) {
+      await supabase
+        .from("itm_occurrences")
+        .upsert(rows, { onConflict: "user_id,occurrence_id" });
+    }
   } catch (e) {
     // Silencioso: offline-first. O próximo sync tenta de novo.
     console.warn("[itm] syncItmOccurrencesToSupabase falhou:", e);

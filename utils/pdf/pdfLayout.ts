@@ -1,4 +1,6 @@
-import { getBaseCss, PDF_THEME } from './pdfTheme';
+import { getBaseCss, PDF_THEME, sanitizeHtml } from './pdfTheme';
+
+const esc = (v?: string | null): string => (v ? sanitizeHtml(v) : '');
 
 export interface HeaderParams {
   companyName?: string;
@@ -41,12 +43,12 @@ export const renderHeader = (params: HeaderParams): string => {
         <div class="logo-section">
           ${logoHtml}
           <div>
-            <div class="company-name">${companyName}</div>
-            <div class="report-title">${reportTitle}</div>
+            <div class="company-name">${esc(companyName)}</div>
+            <div class="report-title">${esc(reportTitle)}</div>
           </div>
         </div>
       </div>
-      ${showBadge && badgeText ? `<div class="compliance-badge">${badgeText}</div>` : ''}
+      ${showBadge && badgeText ? `<div class="compliance-badge">${esc(badgeText)}</div>` : ''}
     </div>
   `;
 };
@@ -81,7 +83,7 @@ export const wrapDocument = (params: WrapDocumentParams): string => {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title}</title>
+      <title>${esc(title)}</title>
       <style>
         ${getBaseCss()}
         ${extraCss}
@@ -110,8 +112,8 @@ export const renderSection = (title: string, content: string): string => {
 export const renderInfoGrid = (items: Array<{ label: string; value: string; span?: number }>): string => {
   const itemsHtml = items.map(item => `
     <div class="info-item"${item.span ? ` style="grid-column: span ${item.span};"` : ''}>
-      <div class="info-label">${item.label}</div>
-      <div class="info-value">${item.value || "-"}</div>
+      <div class="info-label">${esc(item.label)}</div>
+      <div class="info-value">${item.value ? esc(item.value) : "-"}</div>
     </div>
   `).join('');
   
@@ -131,8 +133,8 @@ export const renderSignatureBlock = (params: {
       <h2 style="color: ${PDF_THEME.brandPrimary}; border-bottom: 2px solid ${PDF_THEME.brandAccent}; padding-bottom: 8px; font-size: 16px;">${params.title}</h2>
       <div style="margin-top: 15px; padding: 15px; background: ${PDF_THEME.bgSoft}; border-radius: 8px; display: inline-block;">
         <img src="${params.signatureBase64}" style="max-height: 80px;" />
-        ${params.name ? `<p style="margin: 10px 0 0 0; font-size: 12px; color: ${PDF_THEME.muted};">${params.name}</p>` : ''}
-        ${params.role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: ${PDF_THEME.mutedLight};">${params.role}</p>` : ''}
+        ${params.name ? `<p style="margin: 10px 0 0 0; font-size: 12px; color: ${PDF_THEME.muted};">${esc(params.name)}</p>` : ''}
+        ${params.role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: ${PDF_THEME.mutedLight};">${esc(params.role)}</p>` : ''}
       </div>
     </div>
   `;
@@ -152,7 +154,7 @@ export const renderPhotosSection = (params: {
         ${validPhotos.map(photo => `
           <div style="width: 200px; border: 1px solid ${PDF_THEME.border}; border-radius: 8px; overflow: hidden;">
             <img src="${photo.base64}" style="width: 100%; height: 150px; object-fit: cover;" />
-            ${photo.caption ? `<p style="margin: 0; padding: 8px; font-size: 11px; color: #4B5563;">${photo.caption}</p>` : ''}
+            ${photo.caption ? `<p style="margin: 0; padding: 8px; font-size: 11px; color: #4B5563;">${esc(photo.caption)}</p>` : ''}
           </div>
         `).join('')}
       </div>
