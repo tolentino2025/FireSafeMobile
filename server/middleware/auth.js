@@ -6,11 +6,10 @@ const supabase = createClient(
 );
 
 async function requireAuth(req, res, next) {
-  // Skip auth if Supabase not configured yet
+  // Fail-CLOSED: sem Supabase configurado, NÃO liberar acesso (antes deixava
+  // passar sem autenticação — brecha de segurança).
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    req.userId = null;
-    req.tenantId = null;
-    return next();
+    return res.status(503).json({ error: 'Auth backend not configured' });
   }
 
   const authHeader = req.headers.authorization;

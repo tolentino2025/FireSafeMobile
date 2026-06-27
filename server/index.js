@@ -64,7 +64,15 @@ async function ensureItmTables() {
   }
 }
 
-const SECRET_KEY = process.env.LICENSE_SECRET_KEY || 'FIRESAFE_ITM_LICENSE_SECRET_2025_NFPA25';
+// Em produção o segredo é OBRIGATÓRIO (sem default hardcoded). Em dev usa um
+// default explicitamente inseguro, nunca aplicável a produção.
+const SECRET_KEY =
+  process.env.LICENSE_SECRET_KEY ||
+  (process.env.NODE_ENV === "production"
+    ? (() => {
+        throw new Error("LICENSE_SECRET_KEY é obrigatório em produção");
+      })()
+    : "DEV_ONLY_INSECURE_LICENSE_SECRET");
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function decodeBase32Custom(str) {
