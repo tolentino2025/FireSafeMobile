@@ -123,6 +123,9 @@ export default function MainTabNavigator() {
   const { fullTheme, isDark } = useTheme();
   const { t } = useLanguage();
   const navigation = useNavigation<any>();
+  // Safe area inferior (barra de navegação do sistema Android / home indicator
+  // iOS). Sem isto, com edge-to-edge a tab bar fica SOB os botões do sistema.
+  const insets = useSafeAreaInsets();
 
   // So mostra o FAB nas telas raiz das abas (nao no detalhe/formulario).
   // Usa getState()+listener (nao useNavigationState) para nao lançar no nivel
@@ -151,8 +154,9 @@ export default function MainTabNavigator() {
         tabBarInactiveTintColor: fullTheme.colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
-          height: 78,
+          height: 78 + insets.bottom,
           paddingTop: 8,
+          paddingBottom: insets.bottom,
           backgroundColor: Platform.select({
             ios: "transparent",
             android: fullTheme.colors.surface,
