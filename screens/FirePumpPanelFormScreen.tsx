@@ -117,7 +117,7 @@ export default function FirePumpPanelFormScreen({ navigation, route }: FirePumpP
       navigation.goBack();
     } catch (error) {
       console.error("Error saving panel:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 

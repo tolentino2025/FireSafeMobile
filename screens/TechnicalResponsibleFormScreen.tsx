@@ -56,7 +56,7 @@ export default function TechnicalResponsibleFormScreen({ navigation, route }: Te
       navigation.goBack();
     } catch (error) {
       console.error("Error saving technical responsible:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 

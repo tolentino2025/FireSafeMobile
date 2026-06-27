@@ -62,7 +62,7 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
 
   const handleSave = async () => {
     if (!name.trim()) {
-      showAlert(t.common.error, "Name is required");
+      showAlert(t.common.error, t.form.required);
       return;
     }
 
@@ -106,7 +106,7 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
       }
       navigation.goBack();
     } catch (error) {
-      showAlert(t.common.error, "Failed to save");
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 
@@ -124,7 +124,7 @@ export default function PropertyFormScreen({ navigation, route }: PropertyFormSc
           }
           navigation.goBack();
         } catch (error) {
-          showAlert(t.common.error, "Failed to delete");
+          showAlert(t.common.error, t.common.deleteError);
         }
       },
       { confirmText: t.common.delete, cancelText: t.common.cancel, destructive: true }

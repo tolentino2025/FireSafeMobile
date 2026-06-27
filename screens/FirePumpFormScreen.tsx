@@ -244,7 +244,7 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
       navigation.goBack();
     } catch (error) {
       console.error("Error saving pump:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 

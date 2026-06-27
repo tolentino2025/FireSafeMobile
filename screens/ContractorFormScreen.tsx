@@ -75,7 +75,7 @@ export default function ContractorFormScreen({ navigation, route }: ContractorFo
       navigation.goBack();
     } catch (error) {
       console.error("Error saving contractor:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 

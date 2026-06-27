@@ -87,7 +87,7 @@ export default function JobSiteFormScreen({ navigation, route }: JobSiteFormScre
       navigation.goBack();
     } catch (error) {
       console.error("Error saving job site:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 

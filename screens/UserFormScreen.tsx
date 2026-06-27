@@ -54,7 +54,7 @@ export default function UserFormScreen({ navigation, route }: UserFormScreenProp
       navigation.goBack();
     } catch (error) {
       console.error("Error saving user:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 

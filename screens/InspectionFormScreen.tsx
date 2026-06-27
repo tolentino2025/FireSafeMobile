@@ -435,7 +435,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       navigation.goBack();
     } catch (error) {
       console.error("Error saving inspection:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     }
   };
 
@@ -496,7 +496,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       );
     } catch (error) {
       console.error("Error saving draft:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.saveError);
     } finally {
       setIsSaving(false);
     }
@@ -517,7 +517,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
           navigation.goBack();
         } catch (error) {
           console.error("Error deleting inspection:", error);
-          showAlert(t.common.error, t.report.shareError);
+          showAlert(t.common.error, t.common.deleteError);
         }
       },
       {
