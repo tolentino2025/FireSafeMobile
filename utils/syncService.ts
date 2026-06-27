@@ -54,7 +54,13 @@ export const setLastSyncTime = async (time: string): Promise<void> => {
 export const getPendingSync = async (): Promise<PendingSync> => {
   const data = await scopedStorage.getItem(PENDING_SYNC_KEY);
   if (data) {
-    const parsed = JSON.parse(data);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(data);
+    } catch (e) {
+      console.warn("getPendingSync: registro de sync corrompido ignorado", e);
+      parsed = {};
+    }
     // Backfill de chaves novas para dados persistidos por versoes antigas.
     return {
       companies: parsed.companies ?? [],

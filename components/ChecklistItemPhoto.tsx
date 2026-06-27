@@ -192,10 +192,9 @@ export function ChecklistItemPhoto({
 
   const showPhotoOptions = () => {
     if (Platform.OS === "web") {
-      showAlert(t.common.error, t.common.runInExpoGo);
+      pickFromGallery();
       return;
     }
-    // TODO(web-alert): Alert.alert é no-op na web — revisar
     Alert.alert(t.form.addPhoto, "", [
       { text: t.form.takePhoto, onPress: takePhoto },
       { text: t.form.chooseFromGallery, onPress: pickFromGallery },

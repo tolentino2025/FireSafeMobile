@@ -4,6 +4,7 @@ import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/dat
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface TimePickerFieldProps {
@@ -15,6 +16,7 @@ interface TimePickerFieldProps {
 
 export function TimePickerField({ value, onChange, placeholder, label }: TimePickerFieldProps) {
   const { fullTheme } = useTheme();
+  const { language } = useLanguage();
   const [showPicker, setShowPicker] = useState(false);
   const [tempTime, setTempTime] = useState<Date>(new Date());
 
@@ -136,10 +138,14 @@ export function TimePickerField({ value, onChange, placeholder, label }: TimePic
             <View style={[styles.modalContent, { backgroundColor: fullTheme.colors.cardBackground }]}>
               <View style={styles.modalHeader}>
                 <Pressable onPress={handleCancelIOS}>
-                  <ThemedText style={{ color: fullTheme.colors.primary }}>Cancelar</ThemedText>
+                  <ThemedText style={{ color: fullTheme.colors.primary }}>
+                    {language === "pt-BR" ? "Cancelar" : "Cancel"}
+                  </ThemedText>
                 </Pressable>
                 <Pressable onPress={handleConfirmIOS}>
-                  <ThemedText style={{ color: fullTheme.colors.primary, fontWeight: "600" }}>Confirmar</ThemedText>
+                  <ThemedText style={{ color: fullTheme.colors.primary, fontWeight: "600" }}>
+                    {language === "pt-BR" ? "Confirmar" : "Confirm"}
+                  </ThemedText>
                 </Pressable>
               </View>
               <DateTimePicker

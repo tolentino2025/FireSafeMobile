@@ -137,7 +137,7 @@ function TypeCard({ item, onPress }: TypeCardProps) {
           ]}
         >
           <ThemedText mono secondary style={styles.nfpaBadgeText}>
-            NFPA 25
+            {item.nfpaRef}
           </ThemedText>
         </View>
       </View>

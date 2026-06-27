@@ -11,7 +11,7 @@ import { getCommonScreenOptions } from "@/navigation/screenOptions";
 import { InspectionType } from "@/contexts/InspectionContext";
 
 export type InspectionsStackParamList = {
-  InspectionsList: undefined;
+  InspectionsList: { propertyId?: string; scheduleId?: string } | undefined;
   InspectionSchedule: undefined;
   InspectionDetail: { inspectionId: string };
   InspectionForm: { type: InspectionType; inspectionId?: string };

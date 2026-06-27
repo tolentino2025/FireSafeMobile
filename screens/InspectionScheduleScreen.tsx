@@ -81,7 +81,10 @@ export default function InspectionScheduleScreen({ navigation }: InspectionSched
   };
 
   const handleSchedulePress = (schedule: InspectionSchedule) => {
-    navigation.navigate("InspectionsList");
+    navigation.navigate("InspectionsList", {
+      propertyId: schedule.propertyId,
+      scheduleId: schedule.id,
+    });
   };
 
   const renderItem = ({ item }: { item: InspectionSchedule }) => {

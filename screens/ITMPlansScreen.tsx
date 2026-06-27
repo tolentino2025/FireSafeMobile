@@ -137,6 +137,13 @@ export default function ITMPlansScreen({ navigation }: Props) {
                     {plan.propertyName}
                   </ThemedText>
                   <View style={[styles.dot, { backgroundColor: corGeral }]} />
+                  <Pressable
+                    onPress={() => confirmarRemocao(plan)}
+                    hitSlop={8}
+                    style={styles.deleteButton}
+                  >
+                    <Feather name="trash-2" size={18} color={fullTheme.colors.error} />
+                  </Pressable>
                 </View>
 
                 <View style={styles.cardRow}>
@@ -237,6 +244,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: { flex: 1 },
   dot: { width: 10, height: 10, borderRadius: 5 },
+  deleteButton: { padding: Spacing.xs },
   cardRow: { flexDirection: "row", justifyContent: "space-between" },
   metricsRow: {
     flexDirection: "row",

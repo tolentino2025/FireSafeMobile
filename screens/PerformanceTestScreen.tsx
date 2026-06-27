@@ -692,6 +692,7 @@ export default function PerformanceTestScreen({ navigation, route }: Performance
       console.error("Error saving performance test:", error);
       showAlert(t.common.error, t.performanceTest?.saveError || "Error saving test");
     } finally {
+      isSubmittingRef.current = false;
       setIsSaving(false);
     }
   };

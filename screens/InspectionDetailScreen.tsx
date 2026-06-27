@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator, Pressable } from "react-native";
+import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator, Pressable, Platform } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { Image as ExpoImage } from "expo-image";
@@ -268,7 +268,12 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
   };
 
   const showFM85AOptions = () => {
-    // TODO(web-alert): Alert.alert é no-op na web — revisar
+    // Web: Alert.alert é no-op no react-native-web, então o menu de 3 botões
+    // nunca aparece. Gera/imprime o certificado diretamente para que fique acessível.
+    if (Platform.OS === "web") {
+      handleFM85APdf('print');
+      return;
+    }
     Alert.alert(
       "FM Global Certificate FM85A",
       "",

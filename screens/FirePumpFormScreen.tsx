@@ -181,6 +181,15 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
       return;
     }
 
+    const toNum = (s: string) => {
+      const n = parseFloat(s);
+      return isNaN(n) ? undefined : n;
+    };
+    const toInt = (s: string) => {
+      const n = parseInt(s, 10);
+      return isNaN(n) ? undefined : n;
+    };
+
     const pumpData: FirePump = {
       id: existingPump?.id || Date.now().toString(),
       companyId: existingPump?.companyId || companyId || "",
@@ -189,15 +198,15 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
       manufacturer: manufacturer || undefined,
       model: model || undefined,
       serialNumber: serialNumber || undefined,
-      ratedFlowGpm: ratedFlowGpm ? parseFloat(ratedFlowGpm) : undefined,
-      ratedPressurePsi: ratedPressurePsi ? parseFloat(ratedPressurePsi) : undefined,
-      ratedSpeedRpm: ratedSpeedRpm ? parseFloat(ratedSpeedRpm) : undefined,
-      powerHP: powerHP ? parseFloat(powerHP) : undefined,
+      ratedFlowGpm: toNum(ratedFlowGpm),
+      ratedPressurePsi: toNum(ratedPressurePsi),
+      ratedSpeedRpm: toNum(ratedSpeedRpm),
+      powerHP: toNum(powerHP),
       voltage: voltage || undefined,
-      phases: phases ? parseInt(phases, 10) : undefined,
-      frequency: frequency ? parseInt(frequency, 10) : undefined,
+      phases: toInt(phases),
+      frequency: toInt(frequency),
       pumpOrientation: pumpOrientation || undefined,
-      numberOfStages: numberOfStages ? parseInt(numberOfStages, 10) : undefined,
+      numberOfStages: toInt(numberOfStages),
       impellerDiameter: impellerDiameter || undefined,
       suctionSize: suctionSize || undefined,
       dischargeSize: dischargeSize || undefined,
@@ -205,29 +214,29 @@ export default function FirePumpFormScreen({ navigation, route }: FirePumpFormSc
       motorManufacturer: isElectric ? motorManufacturer || undefined : undefined,
       motorModel: isElectric ? motorModel || undefined : undefined,
       motorSerialNumber: isElectric ? motorSerialNumber || undefined : undefined,
-      fullLoadAmperage: isElectric && fullLoadAmperage ? parseFloat(fullLoadAmperage) : undefined,
-      lockedRotorAmperage: isElectric && lockedRotorAmperage ? parseFloat(lockedRotorAmperage) : undefined,
-      serviceFactor: isElectric && serviceFactor ? parseFloat(serviceFactor) : undefined,
+      fullLoadAmperage: isElectric ? toNum(fullLoadAmperage) : undefined,
+      lockedRotorAmperage: isElectric ? toNum(lockedRotorAmperage) : undefined,
+      serviceFactor: isElectric ? toNum(serviceFactor) : undefined,
       frameSize: isElectric ? frameSize || undefined : undefined,
       enclosureType: isElectric ? enclosureType : undefined,
       insulationClass: isElectric ? insulationClass : undefined,
       engineManufacturer: isDiesel ? engineManufacturer || undefined : undefined,
       engineModel: isDiesel ? engineModel || undefined : undefined,
       engineSerialNumber: isDiesel ? engineSerialNumber || undefined : undefined,
-      numberOfCylinders: isDiesel && numberOfCylinders ? parseInt(numberOfCylinders, 10) : undefined,
+      numberOfCylinders: isDiesel ? toInt(numberOfCylinders) : undefined,
       displacement: isDiesel ? displacement || undefined : undefined,
-      ratedEngineHP: isDiesel && ratedEngineHP ? parseFloat(ratedEngineHP) : undefined,
-      ratedEngineRPM: isDiesel && ratedEngineRPM ? parseFloat(ratedEngineRPM) : undefined,
+      ratedEngineHP: isDiesel ? toNum(ratedEngineHP) : undefined,
+      ratedEngineRPM: isDiesel ? toNum(ratedEngineRPM) : undefined,
       fuelType: isDiesel ? fuelType : undefined,
-      fuelTankCapacity: isDiesel && fuelTankCapacity ? parseFloat(fuelTankCapacity) : undefined,
-      oilCapacity: isDiesel && oilCapacity ? parseFloat(oilCapacity) : undefined,
-      coolantCapacity: isDiesel && coolantCapacity ? parseFloat(coolantCapacity) : undefined,
+      fuelTankCapacity: isDiesel ? toNum(fuelTankCapacity) : undefined,
+      oilCapacity: isDiesel ? toNum(oilCapacity) : undefined,
+      coolantCapacity: isDiesel ? toNum(coolantCapacity) : undefined,
       governorType: isDiesel ? governorType : undefined,
       isTurboSupercharged: isDiesel ? isTurboSupercharged : undefined,
-      battery1Voltage: isDiesel && battery1Voltage ? parseFloat(battery1Voltage) : undefined,
-      battery1CCA: isDiesel && battery1CCA ? parseFloat(battery1CCA) : undefined,
-      battery2Voltage: isDiesel && battery2Voltage ? parseFloat(battery2Voltage) : undefined,
-      battery2CCA: isDiesel && battery2CCA ? parseFloat(battery2CCA) : undefined,
+      battery1Voltage: isDiesel ? toNum(battery1Voltage) : undefined,
+      battery1CCA: isDiesel ? toNum(battery1CCA) : undefined,
+      battery2Voltage: isDiesel ? toNum(battery2Voltage) : undefined,
+      battery2CCA: isDiesel ? toNum(battery2CCA) : undefined,
       batteryChargerManufacturer: isDiesel ? batteryChargerManufacturer || undefined : undefined,
       batteryChargerModel: isDiesel ? batteryChargerModel || undefined : undefined,
       comments: comments || undefined,

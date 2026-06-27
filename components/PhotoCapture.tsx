@@ -186,7 +186,10 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
   };
 
   const showPhotoOptions = () => {
-    // TODO(web-alert): Alert.alert é no-op na web — revisar
+    if (Platform.OS === "web") {
+      pickFromGallery();
+      return;
+    }
     Alert.alert(t.form.addPhoto, "", [
       { text: t.form.takePhoto, onPress: takePhoto },
       { text: t.form.chooseFromGallery, onPress: pickFromGallery },

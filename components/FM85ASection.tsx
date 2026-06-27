@@ -43,12 +43,11 @@ import {
 interface FM85ASectionProps {
   certificate: FM85ACertificate;
   onCertificateChange: (certificate: FM85ACertificate) => void;
-  onSave?: () => Promise<void>;
 }
 
 type YesNo = 'Y' | 'N' | '';
 
-export function FM85ASection({ certificate, onCertificateChange, onSave }: FM85ASectionProps) {
+export function FM85ASection({ certificate, onCertificateChange }: FM85ASectionProps) {
   const { theme, fullTheme } = useTheme();
   const { t, language } = useLanguage();
   const fm85a = (t as any).fm85a || {};

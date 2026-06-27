@@ -505,7 +505,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       showAlert(
-        "Success",
+        t.common.success,
         t.performanceTest?.draftSaved || "Draft saved successfully"
       );
     } catch (error) {
@@ -616,7 +616,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       }
       
       showAlert(
-        "Success",
+        t.common.success,
         t.performanceTest?.testSaved || "Performance test saved successfully",
       );
       navigation.goBack();
@@ -624,6 +624,7 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
       console.error("Error saving performance test:", error);
       showAlert(t.common?.error || "Error", t.performanceTest?.saveError || "Error saving test");
     } finally {
+      isSubmittingRef.current = false;
       setIsSaving(false);
     }
   };
