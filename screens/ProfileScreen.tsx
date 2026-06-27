@@ -159,26 +159,25 @@ export default function ProfileScreen() {
     if (value && !hasPermission) {
       const granted = await requestNotificationPermissions();
       if (!granted) {
-        // TODO(web-alert): Alert.alert é no-op na web — revisar
-        Alert.alert(
-          t.notifications.title,
-          t.notifications.permissionRequired,
-          [
-            { text: t.common.cancel, style: "cancel" },
-            Platform.OS !== "web"
-              ? {
-                  text: "Settings",
-                  onPress: () => {
-                    try {
-                      Linking.openSettings();
-                    } catch (error) {
-                      console.error("Failed to open settings:", error);
-                    }
-                  },
-                }
-              : null,
-          ].filter(Boolean) as any
-        );
+        // Na web Alert.alert (multi-botão) é no-op; usa o shim. No nativo,
+        // oferece abrir as Configurações do sistema.
+        if (Platform.OS === "web") {
+          showAlert(t.notifications.title, t.notifications.permissionRequired);
+          return;
+        }
+        Alert.alert(t.notifications.title, t.notifications.permissionRequired, [
+          { text: t.common.cancel, style: "cancel" },
+          {
+            text: "Settings",
+            onPress: () => {
+              try {
+                Linking.openSettings();
+              } catch (error) {
+                console.error("Failed to open settings:", error);
+              }
+            },
+          },
+        ]);
         return;
       }
       setHasPermission(true);
@@ -346,7 +345,7 @@ export default function ProfileScreen() {
         <Spacer height={Spacing.lg} />
         <ThemedText type="h2">{t.profile.inspector}</ThemedText>
         <ThemedText type="body" secondary>
-          NFPA 25 Certified
+          {t.profile.certifiedNfpa25}
         </ThemedText>
       </View>
 
@@ -363,7 +362,7 @@ export default function ProfileScreen() {
         <View style={styles.certInfo}>
           <ThemedText type="h4">NFPA 25 ITM</ThemedText>
           <ThemedText type="small" secondary>
-            Fire Protection Systems
+            {t.profile.fireProtectionSystems}
           </ThemedText>
         </View>
         <Feather name="check-circle" size={20} color={fullTheme.colors.success} />
@@ -401,7 +400,7 @@ export default function ProfileScreen() {
       <Spacer height={Spacing["3xl"]} />
 
       <ThemedText type="h3" style={styles.sectionTitle}>
-        Settings
+        {t.profile.settingsTitle}
       </ThemedText>
       <Spacer height={Spacing.md} />
 
@@ -582,7 +581,7 @@ export default function ProfileScreen() {
           >
             <Feather name="log-out" size={18} color={fullTheme.colors.error} />
             <ThemedText type="body" style={[styles.signOutText, { color: fullTheme.colors.error }]}>
-              Sair
+              {t.profile.logout}
             </ThemedText>
           </Pressable>
           <Spacer height={Spacing.md} />

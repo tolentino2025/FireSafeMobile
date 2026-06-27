@@ -1155,18 +1155,18 @@ export default function DieselPerformanceTestScreen({ navigation, route }: Diese
         {/* Section 15: Attachments */}
         <SectionCard title={dt?.sections?.attachments || "15. Attachments"}>
           {renderInputField(
-            "Additional Notes",
+            t.performanceTest?.additionalNotes || "Additional Notes",
             test.attachments?.additionalNotes || "",
             (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, additionalNotes: v } })),
             { multiline: true }
           )}
           {renderSwitchField(
-            "Pump Curve Attached",
+            t.performanceTest?.pumpCurveAttached || "Pump Curve Attached",
             test.attachments?.pumpCurveAttached || false,
             (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, pumpCurveAttached: v } }))
           )}
           {renderSwitchField(
-            "Previous Test Report Attached",
+            t.performanceTest?.previousTestAttached || "Previous Test Report Attached",
             test.attachments?.previousTestReportAttached || false,
             (v) => setTest(prev => ({ ...prev, attachments: { ...prev.attachments!, previousTestReportAttached: v } }))
           )}

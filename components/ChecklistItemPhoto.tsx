@@ -116,7 +116,7 @@ export function ChecklistItemPhoto({
       }
     } catch (error) {
       console.error("Error taking photo:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.photoError);
     }
   };
 
@@ -163,7 +163,7 @@ export function ChecklistItemPhoto({
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      showAlert(t.common.error, t.report.shareError);
+      showAlert(t.common.error, t.common.photoError);
     }
   };
 

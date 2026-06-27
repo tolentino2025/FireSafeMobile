@@ -15,11 +15,13 @@ import { useNavigation } from "@react-navigation/native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { BorderRadius, Spacing } from "@/constants/theme";
 
 export default function LoginScreen() {
   const { fullTheme } = useTheme();
+  const { t } = useLanguage();
   const { signIn, signUp, resetPassword, updatePassword, isConfigured, isPasswordRecovery } = useAuth();
   const navigation = useNavigation<{ canGoBack: () => boolean; goBack: () => void }>();
 
@@ -98,15 +100,19 @@ export default function LoginScreen() {
     }
 
     if (!email.trim()) {
-      setErrorMessage("Informe o e-mail.");
+      setErrorMessage(t.login.emailRequired);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage(t.login.emailInvalid);
       return;
     }
     if (!password.trim() || password.length < 6) {
-      setErrorMessage("A senha deve ter pelo menos 6 caracteres.");
+      setErrorMessage(t.login.passwordTooShort);
       return;
     }
     if (mode === "register" && !name.trim()) {
-      setErrorMessage("Informe o nome completo.");
+      setErrorMessage(t.login.nameRequired);
       return;
     }
 
@@ -120,7 +126,7 @@ export default function LoginScreen() {
       if (result.error) {
         setErrorMessage(result.error);
       } else if (mode === "register") {
-        setSuccessMessage("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
+        setSuccessMessage(t.login.registerSuccess);
         setErrorMessage(null);
         if (navigation.canGoBack()) {
           navigation.goBack();
