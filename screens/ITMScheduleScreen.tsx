@@ -480,7 +480,7 @@ export default function ITMScheduleScreen({ route, navigation }: Props) {
         onRequestClose={() => setAlvo(null)}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior="padding"
           style={styles.modalOverlay}
         >
           <View
