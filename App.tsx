@@ -6,11 +6,15 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
+// KeyboardProvider precisa envolver o app em TODAS as plataformas nativas.
+// No Android sem o provider, o KeyboardAwareScrollView não recebe a altura do
+// teclado e a tela de login fica coberta ao digitar. Na web não há teclado
+// virtual, então evitamos o provider (que depende de APIs nativas).
 function KeyboardRoot({ children }: { children: React.ReactNode }) {
-  if (Platform.OS === "ios") {
-    return <KeyboardProvider>{children}</KeyboardProvider>;
+  if (Platform.OS === "web") {
+    return <>{children}</>;
   }
-  return <>{children}</>;
+  return <KeyboardProvider>{children}</KeyboardProvider>;
 }
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
