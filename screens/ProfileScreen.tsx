@@ -853,7 +853,7 @@ function SettingsRow({ icon, label, value, onPress, isLast, rightElement, testID
     >
       <View style={styles.settingsRowLeft}>
         <Feather name={icon} size={20} color={tint} />
-        <ThemedText type="body" style={{ marginLeft: Spacing.md, color: destructive ? fullTheme.colors.error : undefined }}>
+        <ThemedText type="body" style={destructive ? { marginLeft: Spacing.md, color: fullTheme.colors.error } : { marginLeft: Spacing.md }}>
           {label}
         </ThemedText>
       </View>
