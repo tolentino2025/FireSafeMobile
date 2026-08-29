@@ -157,7 +157,7 @@ Subcategoria sugerida: Utilities / Productivity
 - Contact Email: cleiton@jonelincendio.com.br
 - Support URL: https://fire-safe-mobile.vercel.app
 - Marketing URL: https://fire-safe-mobile.vercel.app (opcional)
-- Review Notes para Apple: "App para uso profissional em inspeções de sistemas de proteção contra incêndio. Requer cadastro pois os dados são sincronizados em nuvem por empresa/contratante. Conta de teste disponível mediante solicitação."
+- Review Notes para Apple: ver `APP_STORE_SUBMISSAO.md` (a Apple exige credenciais reais de uma conta de demonstração, não "mediante solicitação")
 
 ---
 
