@@ -9,14 +9,17 @@
 -- ──────────────────────────────────────────────────────────────────────────
 drop policy if exists company_data_rw on public.company_data;
 
+drop policy if exists company_data_select on public.company_data;
 create policy company_data_select on public.company_data for select to authenticated
   using (company_id in (select public.user_company_ids()));
 
+drop policy if exists company_data_insert on public.company_data;
 create policy company_data_insert on public.company_data for insert to authenticated
   with check (
     public.user_role_in(company_id) in ('owner','admin','supervisor','inspector')
   );
 
+drop policy if exists company_data_update on public.company_data;
 create policy company_data_update on public.company_data for update to authenticated
   using (
     public.user_role_in(company_id) in ('owner','admin','supervisor','inspector')
@@ -25,6 +28,7 @@ create policy company_data_update on public.company_data for update to authentic
     public.user_role_in(company_id) in ('owner','admin','supervisor','inspector')
   );
 
+drop policy if exists company_data_delete on public.company_data;
 create policy company_data_delete on public.company_data for delete to authenticated
   using (
     public.user_role_in(company_id) in ('owner','admin','supervisor','inspector')

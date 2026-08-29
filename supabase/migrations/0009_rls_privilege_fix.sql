@@ -22,6 +22,7 @@ drop policy if exists members_write on public.company_members;
 
 -- INSERT (defesa; fluxo normal é via RPC): owner/admin adiciona membros;
 -- somente owner pode criar um 'owner'.
+drop policy if exists members_insert on public.company_members;
 create policy members_insert on public.company_members for insert to authenticated
   with check (
     public.user_role_in(company_id) in ('owner','admin')
@@ -31,6 +32,7 @@ create policy members_insert on public.company_members for insert to authenticat
 -- UPDATE: owner/admin altera OUTROS membros; ninguém altera a própria linha
 -- (impede auto-promoção); só owner mexe numa linha de owner; só owner pode
 -- definir role='owner'. (user_role_in retorna o papel do ATOR — outra linha.)
+drop policy if exists members_update on public.company_members;
 create policy members_update on public.company_members for update to authenticated
   using (
     public.user_role_in(company_id) in ('owner','admin')
@@ -44,6 +46,7 @@ create policy members_update on public.company_members for update to authenticat
 
 -- DELETE: owner/admin remove OUTROS membros; só owner remove owners.
 -- (A exclusão de conta usa service_role e ignora RLS, então não é afetada.)
+drop policy if exists members_delete on public.company_members;
 create policy members_delete on public.company_members for delete to authenticated
   using (
     public.user_role_in(company_id) in ('owner','admin')

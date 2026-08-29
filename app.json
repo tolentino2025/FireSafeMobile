@@ -16,9 +16,9 @@
     "description": "Professional fire protection systems inspection app following NFPA 25 standards. Manage inspections, generate PDF reports, and track maintenance schedules.",
     "githubUrl": "https://github.com/firesafe-itm",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.firesafe.itm",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "LSApplicationQueriesSchemes": ["whatsapp"],
         "NSLocationWhenInUseUsageDescription": "FireSafe ITM requests your location only while you are actively using the app to record the GPS coordinates of the inspection site on your report. Location is used solely for documentation purposes and is never collected in the background.",

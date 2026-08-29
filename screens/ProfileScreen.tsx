@@ -26,6 +26,7 @@ import {
 } from "@/utils/notifications";
 import { shareUserManualPdf } from "@/utils/manualPdfGenerator";
 import { exportAllData, importAllData } from "@/utils/backupUtils";
+import { formatShortDateWithTimezone } from "@/utils/dateUtils";
 import { showAlert, showConfirm } from "@/utils/appAlert";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "@/utils/supabase";
@@ -44,7 +45,7 @@ export default function ProfileScreen() {
   const { fullTheme, mode, setMode } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const { inspections, refreshData } = useInspections();
-  const { isPremium, activePlan, showPaywall } = useSubscription();
+  const { isPremium, expiresAt, showAccessGate } = useSubscription();
   const { user, isConfigured, signOut } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
@@ -504,23 +505,24 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.subscriptionInfo}>
             <ThemedText type="h4">
-              {isPremium
-                ? (activePlan === "annual" ? t.subscription.annualPlan : t.subscription.monthlyPlan) + " — " + t.subscription.premiumPlan
-                : t.subscription.freePlan}
+              {isPremium ? t.subscription.premiumPlan : t.subscription.freePlan}
             </ThemedText>
             <ThemedText type="small" secondary>
               {isPremium
-                ? t.subscription.featureUnlimited
+                ? expiresAt
+                  ? `${t.subscription.activeUntil} ${formatShortDateWithTimezone(expiresAt, language)}`
+                  : t.subscription.featureUnlimited
                 : `${inspections.length}/${FREE_INSPECTION_LIMIT} ${t.subscription.usage}`}
             </ThemedText>
           </View>
           {!isPremium ? (
             <Pressable
-              onPress={showPaywall}
+              onPress={showAccessGate}
+              testID="settings-access-key"
               style={[styles.upgradeBtn, { backgroundColor: fullTheme.colors.primary }]}
             >
               <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "700" }}>
-                {t.subscription.upgradeButton}
+                {t.subscription.enterKeyButton}
               </ThemedText>
             </Pressable>
           ) : null}

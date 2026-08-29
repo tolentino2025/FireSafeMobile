@@ -19,7 +19,7 @@ function KeyboardRoot({ children }: { children: React.ReactNode }) {
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
 import AuthNavigator from "@/navigation/AuthNavigator";
-import PaywallScreen from "@/screens/PaywallScreen";
+import AccessKeyScreen from "@/screens/AccessKeyScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider, useThemeContext } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -57,7 +57,7 @@ function AppContent() {
       <NavigationContainer>
         {showAuthGate ? <AuthNavigator /> : <MainTabNavigator />}
       </NavigationContainer>
-      {!showAuthGate && <PaywallScreen />}
+      {!showAuthGate && <AccessKeyScreen />}
       <StatusBar style={isDark ? "light" : "dark"} />
     </>
   );

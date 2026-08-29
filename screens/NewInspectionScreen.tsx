@@ -158,11 +158,11 @@ export default function NewInspectionScreen({ navigation }: NewInspectionScreenP
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const { inspections } = useInspections();
-  const { canCreateInspection, showPaywall } = useSubscription();
+  const { canCreateInspection, showAccessGate } = useSubscription();
 
   const handleTypeSelect = (type: InspectionType | "performance_test" | "diesel_performance_test") => {
     if (!canCreateInspection(inspections.length)) {
-      showPaywall();
+      showAccessGate();
       return;
     }
     if (type === "performance_test") {
