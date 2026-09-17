@@ -91,7 +91,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   const [accompanyingSignature, setAccompanyingSignature] = useState<string | null>(existingInspection?.accompanyingSignature || null);
   const [photos, setPhotos] = useState<InspectionPhoto[]>(existingInspection?.photos || []);
   const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(existingInspection?.geoLocation || null);
-  const [autoSaved, setAutoSaved] = useState(false);
+  const [autoSaveState, setAutoSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isNewInspection] = useState(!existingInspection);
   const [isSaving, setIsSaving] = useState(false);
   // ID gerado UMA vez para evitar duplicação: salvar draft + concluir
@@ -112,30 +112,33 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     opacity: autoSaveOpacity.value,
   }));
 
-  const showAutoSaveIndicator = useCallback(() => {
+  // ── Salvamento automático ───────────────────────────────────────────────
+  // Antes, este indicador era decorativo: piscava "Salvo automaticamente" a cada
+  // 5 s sem gravar nada, e quem saía da tela confiando nele perdia o trabalho.
+  // Agora ele reflete gravações de verdade (ver persistDraft mais abaixo).
+  const mountedRef = React.useRef(true);
+  const isSavingRef = React.useRef(false);
+  const lastSavedSnapshotRef = React.useRef<string | null>(null);
+  const lastSavedAtRef = React.useRef(0);
+  // Concluir ou excluir encerram o rascunho: um salvamento automático depois
+  // disso reescreveria a inspeção concluída como rascunho.
+  const autoSaveDisabledRef = React.useRef(false);
+  // Status de origem: salvar (manual ou automático) não rebaixa a concluída.
+  const originalStatusRef = React.useRef(existingInspection?.status);
+
+  const flashAutoSaveIndicator = useCallback(() => {
     autoSaveOpacity.value = withSequence(
       withSpring(1, { damping: 15 }),
       withRepeat(
         withSequence(
-          withSpring(0.5, { damping: 15 }),
+          withSpring(0.6, { damping: 15 }),
           withSpring(1, { damping: 15 })
         ),
         2
       ),
       withSpring(0, { damping: 15 })
     );
-    setAutoSaved(true);
-    setTimeout(() => setAutoSaved(false), 3000);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (propertyName || observations || checklist.some((item) => item.value !== null)) {
-        showAutoSaveIndicator();
-      }
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [propertyName, observations, checklist, showAutoSaveIndicator]);
+  }, [autoSaveOpacity]);
 
   useEffect(() => {
     if (isNewInspection) {
@@ -421,6 +424,9 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       updatedAt: new Date().toISOString(),
     };
 
+    // A partir daqui o registro deixa de ser rascunho: um salvamento automático
+    // pendente não pode reescrevê-lo depois.
+    autoSaveDisabledRef.current = true;
     try {
       if (hasSavedRef.current) {
         await updateInspection(stableId, inspectionData);
@@ -436,72 +442,179 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       navigation.goBack();
     } catch (error) {
       console.error("Error saving inspection:", error);
+      autoSaveDisabledRef.current = false; // falhou: o rascunho segue protegido
       showAlert(t.common.error, isStorageFullError(error) ? t.common.storageFullError : t.common.saveError);
     }
   };
 
-  const handleSaveDraft = async () => {
-    setIsSaving(true);
-    try {
-      const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
-      const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
-      const selectedPump = selectedFirePumpId ? firePumps.find((p) => p.id === selectedFirePumpId) : undefined;
-      const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
+  // Monta o registro a partir do estado atual do formulário.
+  const buildDraftData = (): Inspection => {
+    const selectedCompany = selectedCompanyId ? companies.find((c) => c.id === selectedCompanyId) : undefined;
+    const selectedInspector = selectedInspectorId ? appUsers.find((u) => u.id === selectedInspectorId) : undefined;
+    const selectedPump = selectedFirePumpId ? firePumps.find((p) => p.id === selectedFirePumpId) : undefined;
+    const selectedPanel = selectedFirePumpPanelId ? firePumpPanels.find((p) => p.id === selectedFirePumpPanelId) : undefined;
 
-      const inspectionData: Inspection = {
-        id: stableId,
-        type,
-        status: "draft",
-        propertyId: "",
-        propertyName: isHydrostatic ? (hydrostaticTest.owner.corporateName || "") : propertyName,
-        propertyAddress: isHydrostatic ? (hydrostaticTest.owner.address || "") : propertyAddress,
-        propertyPhone: isHydrostatic ? (hydrostaticTest.owner.contact || "") : propertyPhone,
-        inspectorName: isHydrostatic ? (hydrostaticTest.inspector.name || "") : inspectorName,
-        contractNo,
-        date: isHydrostatic ? (hydrostaticTest.testDate || date) : date,
-        frequency,
-        checklist,
-        observations,
-        signature,
+    return {
+      id: stableId,
+      type,
+      status: originalStatusRef.current === "completed" ? "completed" : "draft",
+      propertyId: "",
+      propertyName: isHydrostatic ? (hydrostaticTest.owner.corporateName || "") : propertyName,
+      propertyAddress: isHydrostatic ? (hydrostaticTest.owner.address || "") : propertyAddress,
+      propertyPhone: isHydrostatic ? (hydrostaticTest.owner.contact || "") : propertyPhone,
+      inspectorName: isHydrostatic ? (hydrostaticTest.inspector.name || "") : inspectorName,
+      contractNo,
+      date: isHydrostatic ? (hydrostaticTest.testDate || date) : date,
+      frequency,
+      checklist,
+      observations,
+      signature,
       accompanyingName,
       accompanyingSignature,
-        photos,
-        companyId: selectedCompanyId,
-        companyData: selectedCompany,
-        inspectorId: selectedInspectorId,
-        inspectorData: selectedInspector,
-        firePumpId: isPumpInspection ? selectedFirePumpId : undefined,
-        firePumpData: isPumpInspection ? selectedPump : undefined,
-        firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
-        firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
-        geoLocation,
-        fm85aCertificate: fm85aCertificate,
-        hydrostaticTest: isHydrostatic ? hydrostaticTest : undefined,
-        createdAt: existingInspection?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      photos,
+      companyId: selectedCompanyId,
+      companyData: selectedCompany,
+      inspectorId: selectedInspectorId,
+      inspectorData: selectedInspector,
+      firePumpId: isPumpInspection ? selectedFirePumpId : undefined,
+      firePumpData: isPumpInspection ? selectedPump : undefined,
+      firePumpPanelId: isPumpInspection ? selectedFirePumpPanelId : undefined,
+      firePumpPanelData: isPumpInspection ? selectedPanel : undefined,
+      geoLocation,
+      fm85aCertificate: fm85aCertificate,
+      hydrostaticTest: isHydrostatic ? hydrostaticTest : undefined,
+      createdAt: existingInspection?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  };
 
+  // Identifica mudança real de conteúdo (updatedAt muda a cada montagem).
+  const draftSnapshot = (data: Inspection): string =>
+    JSON.stringify({ ...data, updatedAt: "", createdAt: "" });
+
+  // Formulário em branco não vira rascunho: evita encher a lista de registros
+  // vazios de quem só abriu a tela e saiu.
+  const hasDraftContent = (): boolean => {
+    if (isHydrostatic) {
+      return Boolean(
+        hydrostaticTest.owner.corporateName ||
+          hydrostaticTest.systemName ||
+          hydrostaticTest.inspector.name ||
+          photos.length,
+      );
+    }
+    return Boolean(
+      propertyName || observations || photos.length || checklist.some((item) => item.value !== null),
+    );
+  };
+
+  const persistDraft = async (options: { silent: boolean }): Promise<boolean> => {
+    if (isSavingRef.current) return false;
+    if (options.silent && autoSaveDisabledRef.current) return false;
+    isSavingRef.current = true;
+    if (options.silent) setAutoSaveState("saving");
+    else setIsSaving(true);
+
+    try {
+      const inspectionData = buildDraftData();
       if (hasSavedRef.current) {
         await updateInspection(stableId, inspectionData);
       } else {
         await addInspection(inspectionData);
         hasSavedRef.current = true;
       }
+      lastSavedSnapshotRef.current = draftSnapshot(inspectionData);
+      lastSavedAtRef.current = Date.now();
 
-      if (Platform.OS !== "web") {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      if (!mountedRef.current) return true;
+      if (options.silent) {
+        setAutoSaveState("saved");
+        flashAutoSaveIndicator();
+      } else {
+        if (Platform.OS !== "web") {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+        showAlert(
+          t.common.success,
+          language === "pt-BR" ? "Rascunho salvo com sucesso" : "Draft saved successfully",
+        );
       }
-      showAlert(
-        t.common.success,
-        language === "pt-BR" ? "Rascunho salvo com sucesso" : "Draft saved successfully"
-      );
+      return true;
     } catch (error) {
       console.error("Error saving draft:", error);
-      showAlert(t.common.error, isStorageFullError(error) ? t.common.storageFullError : t.common.saveError);
+      if (mountedRef.current) {
+        // Falhar em silêncio seria pior que o indicador antigo: o usuário
+        // seguiria achando que está salvo.
+        if (options.silent) setAutoSaveState("error");
+        else showAlert(t.common.error, isStorageFullError(error) ? t.common.storageFullError : t.common.saveError);
+      }
+      return false;
     } finally {
-      setIsSaving(false);
+      isSavingRef.current = false;
+      if (!options.silent && mountedRef.current) setIsSaving(false);
     }
   };
+
+  const handleSaveDraft = () => persistDraft({ silent: false });
+
+  // Só aparece quando há algo real a dizer. "Salvando" e o erro ficam fixos;
+  // o "salvo" pisca e some.
+  const renderAutoSaveIndicator = () => {
+    if (autoSaveState === "idle") return null;
+    const saving = autoSaveState === "saving";
+    const failed = autoSaveState === "error";
+    const color = failed ? AppColors.error : AppColors.success;
+    const label = saving ? t.form.autoSaving : failed ? t.form.autoSaveError : t.form.autoSaved;
+    const content = (
+      <>
+        <Feather name={failed ? "alert-circle" : saving ? "upload-cloud" : "check-circle"} size={14} color={color} />
+        <ThemedText type="small" style={{ color, marginLeft: Spacing.xs }}>
+          {label}
+        </ThemedText>
+      </>
+    );
+    if (autoSaveState === "saved") {
+      return <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>{content}</Animated.View>;
+    }
+    return <View style={styles.autoSaveIndicator}>{content}</View>;
+  };
+
+  // Grava sozinho depois de uma pausa na digitação, com um intervalo mínimo
+  // entre gravações (cada uma é espelhada no servidor).
+  const AUTOSAVE_DEBOUNCE_MS = 4_000;
+  const AUTOSAVE_MIN_INTERVAL_MS = 15_000;
+  const buildDraftRef = React.useRef(buildDraftData);
+  const hasDraftContentRef = React.useRef(hasDraftContent);
+  buildDraftRef.current = buildDraftData;
+  hasDraftContentRef.current = hasDraftContent;
+
+  useEffect(() => {
+    if (autoSaveDisabledRef.current || isSavingRef.current || !hasDraftContent()) return;
+    if (draftSnapshot(buildDraftData()) === lastSavedSnapshotRef.current) return;
+
+    const sinceLastSave = Date.now() - lastSavedAtRef.current;
+    const delay = Math.max(AUTOSAVE_DEBOUNCE_MS, AUTOSAVE_MIN_INTERVAL_MS - sinceLastSave);
+    const timer = setTimeout(() => {
+      void persistDraft({ silent: true });
+    }, delay);
+    return () => clearTimeout(timer);
+  });
+
+  // Sair da tela grava o que ainda não tinha sido salvo.
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (autoSaveDisabledRef.current || isSavingRef.current || !hasDraftContentRef.current()) return;
+      const inspectionData = buildDraftRef.current();
+      if (draftSnapshot(inspectionData) === lastSavedSnapshotRef.current) return;
+      const save = hasSavedRef.current
+        ? updateInspection(stableId, inspectionData)
+        : addInspection(inspectionData);
+      save.catch((e) => console.error("Error saving draft on exit:", e));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Excluir disponível também na edição (somente quando já existe registro salvo).
   const handleDelete = () => {
@@ -513,11 +626,13 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       t.common.delete,
       t.common.deleteConfirmation,
       async () => {
+        autoSaveDisabledRef.current = true; // excluída não pode ressuscitar
         try {
           await deleteInspection(targetId);
           navigation.goBack();
         } catch (error) {
           console.error("Error deleting inspection:", error);
+          autoSaveDisabledRef.current = false;
           showAlert(t.common.error, t.common.deleteError);
         }
       },
@@ -805,12 +920,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     return (
       <>
         <ScreenKeyboardAwareScrollView>
-          <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>
-            <Feather name="check-circle" size={14} color={AppColors.success} />
-            <ThemedText type="small" style={{ color: AppColors.success, marginLeft: Spacing.xs }}>
-              {t.form.autoSaved}
-            </ThemedText>
-          </Animated.View>
+          {renderAutoSaveIndicator()}
 
           <ThemedText type="h3">{language === 'pt-BR' ? 'Empresa Contratada (Contractor)' : 'Contractor Company'}</ThemedText>
           <Spacer height={Spacing.sm} />
@@ -900,12 +1010,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
     return (
       <>
         <ScreenKeyboardAwareScrollView>
-          <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>
-            <Feather name="check-circle" size={14} color={AppColors.success} />
-            <ThemedText type="small" style={{ color: AppColors.success, marginLeft: Spacing.xs }}>
-              {t.form.autoSaved}
-            </ThemedText>
-          </Animated.View>
+          {renderAutoSaveIndicator()}
 
           <HydrostaticTestSection
             hydrostaticTest={hydrostaticTest}
@@ -968,12 +1073,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
   return (
     <>
     <ScreenKeyboardAwareScrollView>
-      <Animated.View style={[styles.autoSaveIndicator, autoSaveStyle]}>
-        <Feather name="check-circle" size={14} color={AppColors.success} />
-        <ThemedText type="small" style={{ color: AppColors.success, marginLeft: Spacing.xs }}>
-          {t.form.autoSaved}
-        </ThemedText>
-      </Animated.View>
+      {renderAutoSaveIndicator()}
 
       <ThemedText type="h3">{t.companies.selectCompany}</ThemedText>
       <Spacer height={Spacing.sm} />
