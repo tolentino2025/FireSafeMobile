@@ -132,6 +132,9 @@ export interface ChecklistItemPhoto {
   id: string;
   uri: string;
   base64?: string;
+  storagePath?: string;
+  /** Binário no armazenamento local de fotos (utils/photoStore), não no JSON. */
+  stored?: boolean;
   caption: string;
   timestamp: string;
 }
@@ -237,8 +240,9 @@ export interface InspectionPhoto {
   uri: string;
   base64?: string;
   // Fase 2D: caminho no bucket company-files (fonte para outros dispositivos).
-  // O base64/uri continuam locais para exibição/PDF; o sync usa storagePath.
   storagePath?: string;
+  /** Binário no armazenamento local de fotos (utils/photoStore), não no JSON. */
+  stored?: boolean;
   caption: string;
   timestamp: string;
 }

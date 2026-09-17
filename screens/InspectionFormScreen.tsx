@@ -39,6 +39,7 @@ import { toUpperIfNotEmail } from "@/utils/textTransform";
 import { showAlert, showConfirm } from "@/utils/appAlert";
 import { generateAndPrintPdf } from "@/utils/pdfGenerator";
 import { generateAndShareFM85APdf } from "@/utils/fm85aPdfGenerator";
+import { isStorageFullError } from "@/utils/storageErrors";
 import { generateAndPrintHydrostaticTestPdf, generateHydrostaticTestPdf, generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGenerator";
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
 
@@ -435,7 +436,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       navigation.goBack();
     } catch (error) {
       console.error("Error saving inspection:", error);
-      showAlert(t.common.error, t.common.saveError);
+      showAlert(t.common.error, isStorageFullError(error) ? t.common.storageFullError : t.common.saveError);
     }
   };
 
@@ -496,7 +497,7 @@ export default function InspectionFormScreen({ navigation, route }: InspectionFo
       );
     } catch (error) {
       console.error("Error saving draft:", error);
-      showAlert(t.common.error, t.common.saveError);
+      showAlert(t.common.error, isStorageFullError(error) ? t.common.storageFullError : t.common.saveError);
     } finally {
       setIsSaving(false);
     }

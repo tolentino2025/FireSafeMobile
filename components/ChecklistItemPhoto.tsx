@@ -10,9 +10,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { readAsStringAsync } from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -21,6 +19,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { ChecklistItemPhoto as PhotoType } from "@/types/inspection";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { showAlert, showConfirm } from "@/utils/appAlert";
+import { newPhotoId, PICKER_OPTIONS, storePickedPhoto } from "@/utils/photoCapture";
+import { StoredPhotoImage } from "@/components/StoredPhotoImage";
 
 interface ChecklistItemPhotoProps {
   photos: PhotoType[];
@@ -29,21 +29,6 @@ interface ChecklistItemPhotoProps {
 }
 
 const MAX_PHOTOS_DEFAULT = 3;
-
-async function getBase64FromUri(uri: string): Promise<string | undefined> {
-  try {
-    if (Platform.OS === "web") {
-      return undefined;
-    }
-    const base64 = await readAsStringAsync(uri, {
-      encoding: "base64",
-    });
-    return base64;
-  } catch (error) {
-    console.log("Erro ao converter foto para base64:", error);
-    return undefined;
-  }
-}
 
 export function ChecklistItemPhoto({ 
   photos, 
@@ -93,22 +78,14 @@ export function ChecklistItemPhoto({
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
-        quality: 0.7,
-        base64: true,
+        ...PICKER_OPTIONS,
       });
 
       if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        let base64Data = asset.base64;
-
-        if (!base64Data && asset.uri) {
-          base64Data = await getBase64FromUri(asset.uri);
-        }
-
+        const id = newPhotoId();
         const newPhoto: PhotoType = {
-          id: Date.now().toString(),
-          uri: asset.uri,
-          base64: base64Data ? `data:image/jpeg;base64,${base64Data}` : undefined,
+          id,
+          ...(await storePickedPhoto(result.assets[0], id)),
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -140,22 +117,14 @@ export function ChecklistItemPhoto({
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
-        quality: 0.7,
-        base64: true,
+        ...PICKER_OPTIONS,
       });
 
       if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        let base64Data = asset.base64;
-
-        if (!base64Data && asset.uri) {
-          base64Data = await getBase64FromUri(asset.uri);
-        }
-
+        const id = newPhotoId();
         const newPhoto: PhotoType = {
-          id: Date.now().toString(),
-          uri: asset.uri,
-          base64: base64Data ? `data:image/jpeg;base64,${base64Data}` : undefined,
+          id,
+          ...(await storePickedPhoto(result.assets[0], id)),
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -226,8 +195,8 @@ export function ChecklistItemPhoto({
           >
             <Pressable onPress={() => openPhotoModal(photo)}>
               <View style={[styles.thumbnailContainer, { borderColor: fullTheme.colors.border }]}>
-                <Image
-                  source={{ uri: photo.base64 || photo.uri }}
+                <StoredPhotoImage
+                  photo={photo}
                   style={styles.thumbnail}
                   contentFit="cover"
                 />
@@ -273,8 +242,8 @@ export function ChecklistItemPhoto({
           <View style={[styles.modalContent, { backgroundColor: fullTheme.colors.cardBackground }]}>
             {selectedPhoto && (
               <>
-                <Image
-                  source={{ uri: selectedPhoto.base64 || selectedPhoto.uri }}
+                <StoredPhotoImage
+                  photo={selectedPhoto}
                   style={styles.modalImage}
                   contentFit="contain"
                 />

@@ -1,31 +1,21 @@
-import { readAsStringAsync } from "expo-file-system/legacy";
+import { resolvePhotoDataUri } from "@/utils/photoResolver";
 
 export interface InspectionPhoto {
   id: string;
   uri: string;
   base64?: string;
+  storagePath?: string;
+  stored?: boolean;
   caption: string;
   timestamp: string;
 }
 
+// Garante o base64 da foto para embutir no PDF. A foto pode estar embutida
+// (dados antigos), no armazenamento local de fotos ou só no bucket da empresa.
 export async function ensurePhotoBase64(photo: InspectionPhoto): Promise<InspectionPhoto> {
   if (photo.base64) return photo;
-
-  if (!photo.uri) return photo;
-
-  try {
-    const fileBase64 = await readAsStringAsync(photo.uri, {
-      encoding: "base64",
-    });
-
-    return {
-      ...photo,
-      base64: `data:image/jpeg;base64,${fileBase64}`,
-    };
-  } catch (error) {
-    console.log("Erro ao converter foto para base64:", error);
-    return photo;
-  }
+  const dataUri = await resolvePhotoDataUri(photo);
+  return dataUri ? { ...photo, base64: dataUri } : photo;
 }
 
 export async function ensureAllPhotosBase64(photos: InspectionPhoto[]): Promise<InspectionPhoto[]> {

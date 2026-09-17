@@ -13,7 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useInspections } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { toUpperIfNotEmail } from "@/utils/textTransform";
-import { showConfirm } from "@/utils/appAlert";
+import { showAlert, showConfirm } from "@/utils/appAlert";
 import {
   HydrostaticTest,
   HydrostaticSystemType,
@@ -27,7 +27,8 @@ import {
 } from "@/types/hydrostaticTest";
 import { InspectionPhoto } from "@/contexts/InspectionContext";
 import * as ImagePicker from "expo-image-picker";
-import { Image } from "expo-image";
+import { StoredPhotoImage } from "@/components/StoredPhotoImage";
+import { newPhotoId, PICKER_OPTIONS, storePickedPhoto } from "@/utils/photoCapture";
 
 interface HydrostaticTestSectionProps {
   hydrostaticTest: HydrostaticTest;
@@ -430,22 +431,33 @@ export function HydrostaticTestSection({
   const pickImage = async (category: string) => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 0.8,
-      base64: true,
+      ...PICKER_OPTIONS,
     });
     if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      const base64Data = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined;
+      await addPhoto(result.assets[0], category);
+    }
+  };
+
+  // Reduz a foto, guarda o binário no armazenamento local e registra só a
+  // referência na categoria (ver utils/photoCapture).
+  const addPhoto = async (asset: ImagePicker.ImagePickerAsset, category: string) => {
+    try {
+      const id = newPhotoId(category);
       const newPhoto: InspectionPhoto = {
-        id: `${category}_${Date.now()}`,
-        uri: asset.uri,
-        base64: base64Data,
+        id,
+        ...(await storePickedPhoto(asset, id)),
         caption: category,
         timestamp: new Date().toISOString(),
       };
       onPhotosChange([...photos, newPhoto]);
       const photoIds = [...(hydrostaticTest.photoEvidence as any)[category] || [], newPhoto.id];
       update({ photoEvidence: { ...hydrostaticTest.photoEvidence, [category]: photoIds } });
+    } catch (error) {
+      console.error("Error adding hydrostatic photo:", error);
+      showAlert(
+        language === "pt-BR" ? "Erro" : "Error",
+        language === "pt-BR" ? "Não foi possível adicionar a foto. Tente novamente." : "Could not add the photo. Please try again.",
+      );
     }
   };
 
@@ -478,22 +490,10 @@ export function HydrostaticTestSection({
     }
     
     const result = await ImagePicker.launchCameraAsync({
-      quality: 0.8,
-      base64: true,
+      ...PICKER_OPTIONS,
     });
     if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      const base64Data = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined;
-      const newPhoto: InspectionPhoto = {
-        id: `${category}_${Date.now()}`,
-        uri: asset.uri,
-        base64: base64Data,
-        caption: category,
-        timestamp: new Date().toISOString(),
-      };
-      onPhotosChange([...photos, newPhoto]);
-      const photoIds = [...(hydrostaticTest.photoEvidence as any)[category] || [], newPhoto.id];
-      update({ photoEvidence: { ...hydrostaticTest.photoEvidence, [category]: photoIds } });
+      await addPhoto(result.assets[0], category);
     }
   };
 
@@ -512,7 +512,7 @@ export function HydrostaticTestSection({
         <View style={styles.photoGrid}>
           {categoryPhotos.map((photo) => (
             <View key={photo.id} style={styles.photoItem}>
-              <Image source={{ uri: photo.uri }} style={styles.photoImage} contentFit="cover" />
+              <StoredPhotoImage photo={photo} style={styles.photoImage} contentFit="cover" />
               <Pressable onPress={() => removePhoto(photo.id, category)} style={styles.removePhotoBtn}>
                 <Feather name="x" size={14} color="#FFFFFF" />
               </Pressable>

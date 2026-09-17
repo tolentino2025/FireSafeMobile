@@ -20,8 +20,12 @@ export async function uploadCompanyBase64(
   relativePath: string,
   base64OrDataUri: string,
   contentType = "image/jpeg",
+  /** Empresa dona do arquivo. Sem isto usaria a empresa ATIVA no momento do
+   *  upload — que pode já ser outra, se o usuário trocou de empresa entre a
+   *  gravação e o envio, e o arquivo iria para o bucket errado. */
+  companyIdOverride?: string | null,
 ): Promise<string | null> {
-  const companyId = getActiveCompanyId();
+  const companyId = companyIdOverride ?? getActiveCompanyId();
   if (!isSupabaseConfigured || !companyId) return null;
   try {
     const path = `${companyId}/${relativePath}`;

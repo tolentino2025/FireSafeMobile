@@ -5,81 +5,60 @@
 //       local (preserva escritas offline/locais mais novas). RLS isola por empresa.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
-import {
-  scopedStorage,
-  OPERATIONAL_KEYS,
-  setWriteHook,
-} from "@/utils/scopedStorage";
-import {
-  uploadCompanyBase64,
-  downloadCompanyFileAsBase64,
-} from "@/utils/companyStorage";
+import { scopedStorage, OPERATIONAL_KEYS, setWriteHook } from "@/utils/scopedStorage";
+import { uploadCompanyBase64 } from "@/utils/companyStorage";
+import { photoStore } from "@/utils/photoStore";
+import { inlineDataUri, walkPhotoNodes } from "@/utils/photoRefs";
+import { prefetchRemotePhotos, resolvePhotoDataUri } from "@/utils/photoResolver";
 
-// Detecta um "nó de foto": objeto com id e base64 (ou uri data:).
-function isPhotoNode(n: unknown): n is { id: string; base64?: string; uri?: string; storagePath?: string } {
-  if (!n || typeof n !== "object") return false;
-  const o = n as Record<string, unknown>;
-  if (typeof o.id !== "string") return false;
-  const hasB64 = typeof o.base64 === "string" && (o.base64 as string).length > 0;
-  const hasDataUri = typeof o.uri === "string" && (o.uri as string).startsWith("data:");
-  return hasB64 || hasDataUri || typeof o.storagePath === "string";
-}
-
-// Percorre o payload aplicando fn em cada nó de foto (deep, em arrays/objetos).
-async function walkPhotos(
-  node: unknown,
-  fn: (photo: Record<string, unknown>) => Promise<void>,
-): Promise<void> {
-  if (Array.isArray(node)) {
-    for (const item of node) await walkPhotos(item, fn);
-    return;
-  }
-  if (node && typeof node === "object") {
-    if (isPhotoNode(node)) await fn(node as Record<string, unknown>);
-    for (const v of Object.values(node as Record<string, unknown>)) {
-      if (v && typeof v === "object") await walkPhotos(v, fn);
-    }
-  }
-}
-
-// PUSH: sobe base64 ao bucket, guarda storagePath e remove o binário do payload.
+// PUSH: garante cada foto no bucket, grava o storagePath e tira o binário do
+// payload que vai ao servidor. O binário vem do nó (dados antigos) ou do
+// armazenamento local de fotos (utils/photoStore).
+// Fotos já enviadas (índice local) não são reenviadas a cada salvamento.
 // `allUploaded=false` se alguma foto precisava subir mas o upload falhou — nesse
 // caso o caller ABORTA o push (não grava base64 no company_data) e re-tenta.
 async function stripPhotosForServer(
   payload: unknown,
+  companyId: string | null,
 ): Promise<{ payload: unknown; allUploaded: boolean }> {
   const clone = JSON.parse(JSON.stringify(payload));
   let allUploaded = true;
-  await walkPhotos(clone, async (photo) => {
-    const b64 =
-      (photo.base64 as string) ||
-      (typeof photo.uri === "string" && photo.uri.startsWith("data:") ? (photo.uri as string) : "");
-    if (b64 && !photo.storagePath) {
-      const path = await uploadCompanyBase64(`photos/${photo.id}.jpg`, b64, "image/jpeg");
-      if (path) photo.storagePath = path;
-      else allUploaded = false; // upload falhou — não enviar base64; re-tentar depois
+  await walkPhotoNodes(clone, async (photo) => {
+    if (!photo.storagePath) {
+      // Um binário ainda embutido no nó só acontece quando o armazenamento local
+      // recusou a foto (ex.: colisão de id vinda de um backup). Nesse caso o
+      // índice de envio pode apontar para OUTRA imagem com o mesmo id — então
+      // ele não é consultado, e a foto sobe como ela é.
+      const inline = inlineDataUri(photo);
+      const knownPath = inline ? null : await photoStore.getUploadedPath(photo.id).catch(() => null);
+      // Só vale um caminho da MESMA empresa: a RLS do bucket isola por pasta.
+      if (knownPath && companyId && knownPath.startsWith(`${companyId}/`)) {
+        photo.storagePath = knownPath;
+      } else {
+        const dataUri = inline || (await resolvePhotoDataUri(photo));
+        if (dataUri) {
+          const path = await uploadCompanyBase64(`photos/${photo.id}.jpg`, dataUri, "image/jpeg", companyId);
+          if (path) {
+            photo.storagePath = path;
+            await photoStore.setUploadedPath(photo.id, path).catch(() => {});
+          } else {
+            allUploaded = false; // upload falhou — não enviar base64; re-tentar depois
+          }
+        }
+        // Sem binário neste dispositivo e sem storagePath: nada a enviar, não
+        // bloqueia o restante da coleção.
+      }
     }
     // Remove o binário pesado do que vai para o servidor (fica só o storagePath).
     if (photo.storagePath) {
       delete photo.base64;
-      if (typeof photo.uri === "string" && photo.uri.startsWith("data:")) photo.uri = "";
-    }
-  });
-  return { payload: clone, allUploaded };
-}
-
-// PULL: baixa do bucket de volta para base64 local (display/PDF inalterados).
-async function hydratePhotosFromServer(payload: unknown): Promise<unknown> {
-  await walkPhotos(payload, async (photo) => {
-    if (photo.storagePath && !photo.base64) {
-      const dataUri = await downloadCompanyFileAsBase64(photo.storagePath as string);
-      if (dataUri) {
-        photo.base64 = dataUri;
-        if (!photo.uri || photo.uri === "") photo.uri = dataUri;
+      delete photo.stored;
+      if (typeof photo.uri === "string" && (photo.uri.startsWith("data:") || photo.uri.startsWith("blob:"))) {
+        photo.uri = "";
       }
     }
   });
-  return payload;
+  return { payload: clone, allUploaded };
 }
 
 // Mescla duas coleções por `id`, mantendo o item mais novo (por updatedAt) e
@@ -152,7 +131,7 @@ async function pushEntity(
   }
   try {
     // Fase 2D: tira os binários (base64) e sobe ao Storage antes de espelhar.
-    const { payload: stripped, allUploaded } = await stripPhotosForServer(payload);
+    const { payload: stripped, allUploaded } = await stripPhotosForServer(payload, companyId);
     if (!allUploaded) {
       // Alguma foto não subiu: não grava base64 no servidor; re-tenta depois.
       schedulePushRetry(companyId, entityType, value, attempt);
@@ -181,8 +160,9 @@ async function pushEntity(
 // Registra o hook UMA vez (debounce simples por coleção para evitar excesso).
 const timers: Record<string, ReturnType<typeof setTimeout>> = {};
 export function registerCompanyWriteHook(): void {
-  setWriteHook((baseKey, value) => {
-    const companyAtWrite = syncCompanyId; // captura a empresa no instante da escrita
+  setWriteHook((baseKey, value, companyAtWrite) => {
+    // A empresa vem de quem gravou (capturada ANTES da escrita): gravar a foto
+    // pode demorar, e nesse meio-tempo o usuário pode ter trocado de empresa.
     if (timers[baseKey]) clearTimeout(timers[baseKey]);
     timers[baseKey] = setTimeout(() => {
       pushEntity(companyAtWrite, baseKey, value, 0).catch(() => {});
@@ -204,7 +184,14 @@ export async function seedCompanyFromUserScope(
       if (!raw) continue;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length === 0) continue;
-      const { payload } = await stripPhotosForServer(parsed);
+      const { payload, allUploaded } = await stripPhotosForServer(parsed, companyId);
+      if (!allUploaded) {
+        // Semear referências mortas (sem binário e sem storagePath) deixaria os
+        // outros membros sem essas fotos para sempre — o seed roda uma vez só.
+        // Empurra pelo caminho normal, que tem re-tentativa.
+        schedulePushRetry(companyId, key, raw, 0);
+        continue;
+      }
       await supabase.from("company_data").upsert(
         {
           company_id: companyId,
@@ -233,9 +220,10 @@ export async function pullCompanyData(companyId: string | null): Promise<void> {
     for (const row of data ?? []) {
       const et = (row as { entity_type: string }).entity_type;
       if (!OPERATIONAL_KEYS.includes(et)) continue;
-      let serverPayload: unknown = (row as { payload: unknown }).payload ?? [];
-      // Fase 2D: rehidrata os binários a partir do Storage (display/PDF locais).
-      serverPayload = await hydratePhotosFromServer(serverPayload);
+      // As fotos vêm só com storagePath: o binário NÃO volta para o JSON local
+      // (reinflaria o armazenamento). É baixado para o armazenamento de fotos
+      // em segundo plano, logo após gravar a coleção.
+      const serverPayload: unknown = (row as { payload: unknown }).payload ?? [];
       // Lê o local atual (mesmo escopo de empresa) e mescla por id.
       let localPayload: unknown = [];
       try {
@@ -246,6 +234,7 @@ export async function pullCompanyData(companyId: string | null): Promise<void> {
       }
       const merged = mergeCollectionById(localPayload, serverPayload);
       await scopedStorage.setItemRaw(et, JSON.stringify(merged));
+      prefetchRemotePhotos(merged).catch(() => {});
     }
   } catch (e) {
     console.warn("[company] pull falhou:", e);

@@ -497,6 +497,9 @@ export interface TestPhoto {
   id: string;
   uri: string;
   base64?: string;
+  storagePath?: string;
+  /** Binário no armazenamento local de fotos (utils/photoStore), não no JSON. */
+  stored?: boolean;
   caption: string;
   category: "pump" | "controller" | "driver" | "gauges" | "readings" | "deficiency" | "general";
   timestamp: string;

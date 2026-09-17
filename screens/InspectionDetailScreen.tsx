@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import { View, StyleSheet, ScrollView, Image, Alert, ActivityIndicator, Pressable, Platform } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import { Image as ExpoImage } from "expo-image";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -24,6 +23,7 @@ import { generateHydrostaticTestHtml } from "@/utils/pdf/hydrostaticTestPdfGener
 import { shareViaWhatsApp, sendViaEmail } from "@/utils/inspectionShareActions";
 import { showAlert, showConfirm } from "@/utils/appAlert";
 import { parseLocalYMD } from "@/utils/dateUtils";
+import { StoredPhotoImage } from "@/components/StoredPhotoImage";
 
 const TAB_BAR_HEIGHT = 90;
 
@@ -474,8 +474,8 @@ export default function InspectionDetailScreen({ navigation, route }: Inspection
             >
               {inspection.photos.map((photo) => (
                 <View key={photo.id} style={[styles.photoCard, { backgroundColor: fullTheme.colors.cardBackground }]}>
-                  <ExpoImage
-                    source={{ uri: photo.uri }}
+                  <StoredPhotoImage
+                    photo={photo}
                     style={styles.photoImage}
                     contentFit="cover"
                   />

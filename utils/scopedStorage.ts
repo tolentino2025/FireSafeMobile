@@ -13,11 +13,13 @@
 // Dados de DISPOSITIVO (tema, idioma, assinatura) continuam globais (AsyncStorage direto).
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { externalizeInlinePhotos } from "@/utils/photoStore";
+
 const GUEST = "guest";
 let activeUserId: string | null = null;
 let activeCompanyId: string | null = null;
 
-type WriteHook = (baseKey: string, value: string) => void;
+type WriteHook = (baseKey: string, value: string, companyId: string | null) => void;
 let onWrite: WriteHook | null = null;
 
 // Coleções operacionais que pertencem à empresa (sincronizam no servidor).
@@ -70,21 +72,29 @@ export const scopedStorage = {
   getItem(baseKey: string) {
     return AsyncStorage.getItem(scopedKey(baseKey));
   },
-  setItem(baseKey: string, value: string) {
-    const p = AsyncStorage.setItem(scopedKey(baseKey), value);
+  async setItem(baseKey: string, value: string) {
+    // Escopo e empresa capturados ANTES de qualquer await: uma troca de empresa
+    // durante a gravação não pode desviar o dado para outro escopo.
+    const key = scopedKey(baseKey);
+    const companyAtWrite = activeCompanyId;
+    // Fotos nunca vão embutidas para o armazenamento pequeno (ver photoRefs).
+    const stored = await externalizeInlinePhotos(value);
+    await AsyncStorage.setItem(key, stored);
     // Espelha no servidor apenas coleções operacionais sob escopo de empresa.
-    if (activeCompanyId && OPERATIONAL.has(baseKey) && onWrite) {
+    // A empresa é a capturada acima: gravar a foto pode demorar e o usuário
+    // pode ter trocado de empresa nesse meio-tempo.
+    if (companyAtWrite && OPERATIONAL.has(baseKey) && onWrite) {
       try {
-        onWrite(baseKey, value);
+        onWrite(baseKey, stored, companyAtWrite);
       } catch {
         /* noop */
       }
     }
-    return p;
   },
   // Escrita "crua": não dispara o hook (usada pelo pull para hidratar o local).
-  setItemRaw(baseKey: string, value: string) {
-    return AsyncStorage.setItem(scopedKey(baseKey), value);
+  async setItemRaw(baseKey: string, value: string) {
+    const key = scopedKey(baseKey);
+    await AsyncStorage.setItem(key, await externalizeInlinePhotos(value));
   },
   removeItem(baseKey: string) {
     return AsyncStorage.removeItem(scopedKey(baseKey));

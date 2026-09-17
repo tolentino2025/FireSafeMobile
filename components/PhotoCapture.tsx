@@ -10,9 +10,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { readAsStringAsync } from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -27,6 +25,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { InspectionPhoto } from "@/contexts/InspectionContext";
 import { Spacing, BorderRadius, AppColors } from "@/constants/theme";
 import { showAlert, showConfirm } from "@/utils/appAlert";
+import { newPhotoId, PICKER_OPTIONS, storePickedPhoto } from "@/utils/photoCapture";
+import { StoredPhotoImage } from "@/components/StoredPhotoImage";
 
 interface PhotoCaptureProps {
   photos: InspectionPhoto[];
@@ -34,21 +34,6 @@ interface PhotoCaptureProps {
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-async function getBase64FromUri(uri: string): Promise<string | undefined> {
-  try {
-    if (Platform.OS === "web") {
-      return undefined;
-    }
-    const base64 = await readAsStringAsync(uri, {
-      encoding: "base64",
-    });
-    return base64;
-  } catch (error) {
-    console.log("Erro ao converter foto para base64:", error);
-    return undefined;
-  }
-}
 
 export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
   const { theme } = useTheme();
@@ -99,22 +84,14 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
-        quality: 0.8,
-        base64: true,
+        ...PICKER_OPTIONS,
       });
 
       if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        let base64Data = asset.base64;
-        
-        if (!base64Data && asset.uri) {
-          base64Data = await getBase64FromUri(asset.uri);
-        }
-        
+        const id = newPhotoId();
         const newPhoto: InspectionPhoto = {
-          id: Date.now().toString(),
-          uri: asset.uri,
-          base64: base64Data ? `data:image/jpeg;base64,${base64Data}` : undefined,
+          id,
+          ...(await storePickedPhoto(result.assets[0], id)),
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -138,22 +115,14 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
-        quality: 0.8,
-        base64: true,
+        ...PICKER_OPTIONS,
       });
 
       if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        let base64Data = asset.base64;
-        
-        if (!base64Data && asset.uri) {
-          base64Data = await getBase64FromUri(asset.uri);
-        }
-        
+        const id = newPhotoId();
         const newPhoto: InspectionPhoto = {
-          id: Date.now().toString(),
-          uri: asset.uri,
-          base64: base64Data ? `data:image/jpeg;base64,${base64Data}` : undefined,
+          id,
+          ...(await storePickedPhoto(result.assets[0], id)),
           caption: "",
           timestamp: new Date().toISOString(),
         };
@@ -230,8 +199,8 @@ export function PhotoCapture({ photos, onPhotosChange }: PhotoCaptureProps) {
               exiting={FadeOut}
               style={[styles.photoCard, { backgroundColor: theme.backgroundDefault }]}
             >
-              <Image
-                source={{ uri: photo.base64 || photo.uri }}
+              <StoredPhotoImage
+                photo={photo}
                 style={styles.photoImage}
                 contentFit="cover"
               />

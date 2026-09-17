@@ -2,6 +2,7 @@ import { Paths, File } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { scopedStorage } from "@/utils/scopedStorage";
+import { inlinePhotosForExport } from "@/utils/photoResolver";
 import { Platform } from "react-native";
 
 const STORAGE_KEYS = [
@@ -41,7 +42,8 @@ export async function exportAllData(): Promise<{ success: boolean; filePath?: st
       try {
         const value = await scopedStorage.getItem(key);
         if (value) {
-          backupData.data[key] = JSON.parse(value);
+          // As fotos ficam fora do JSON; o backup embute de volta para ser completo.
+          backupData.data[key] = await inlinePhotosForExport(JSON.parse(value));
         }
       } catch (e) {
         console.log(`Could not read key ${key}:`, e);
