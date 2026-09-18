@@ -6,7 +6,7 @@
 // Saída em .pdf-preview/: um PDF por relatório e um PNG por página (renderizado
 // com pdf.js, então mostra a paginação real — cabeçalho repetido inclusive).
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, readdirSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -30,6 +30,14 @@ if (specs.length === 0) {
 const browser = await chromium.launch();
 try {
   for (const name of specs) {
+    // Limpa a saída anterior deste relatório: um PDF que encolheu deixaria PNGs
+    // de páginas que não existem mais, e a revisão olharia para lixo.
+    for (const f of readdirSync(outDir)) {
+      if (f === `${name}.pdf` || f === `${name}.html` || f.startsWith(`${name}-p`)) {
+        rmSync(resolve(outDir, f), { force: true });
+      }
+    }
+
     const htmlPath = resolve(outDir, `${name}.html`);
     execFileSync(
       "npx",
