@@ -59,3 +59,4 @@ google-play-service-account.json
 
 # Supabase CLI cache
 supabase/.temp/
+.pdf-preview/

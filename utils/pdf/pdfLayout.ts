@@ -98,9 +98,11 @@ export const wrapDocument = (params: WrapDocumentParams): string => {
     </head>
     <body>
       <div class="page">
-        ${headerHtml}
-        ${bodyHtml}
-        ${footerHtml}
+        <table class="doc-frame">
+          <thead><tr><td>${headerHtml}</td></tr></thead>
+          <tbody><tr><td>${bodyHtml}</td></tr></tbody>
+          <tfoot><tr><td>${footerHtml}</td></tr></tfoot>
+        </table>
       </div>
     </body>
     </html>

@@ -791,7 +791,7 @@ export const generateElectricPumpPdfHtml = (options: GenerateElectricPdfOptions)
 
         <div class="footer">
           <p>${t.generatedOn} ${formatDate(new Date().toISOString(), language)}</p>
-          <p style="margin-top: 5px;">FireSafe ITM - Fire Protection Systems Inspection, Testing & Maintenance</p>
+          <span>${language === "pt-BR" ? "FireSafe ITM — Inspeção, Teste e Manutenção de Sistemas de Proteção contra Incêndio" : "FireSafe ITM — Inspection, Testing & Maintenance of Fire Protection Systems"}</span>
         </div>
       </div>
     </body>
@@ -1323,7 +1323,7 @@ export const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): st
 
         <div class="footer">
           <p>${t.generatedOn} ${formatDate(new Date().toISOString(), language)}</p>
-          <p style="margin-top: 5px;">FireSafe ITM - Fire Protection Systems Inspection, Testing & Maintenance</p>
+          <span>${language === "pt-BR" ? "FireSafe ITM — Inspeção, Teste e Manutenção de Sistemas de Proteção contra Incêndio" : "FireSafe ITM — Inspection, Testing & Maintenance of Fire Protection Systems"}</span>
         </div>
       </div>
     </body>

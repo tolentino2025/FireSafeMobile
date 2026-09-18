@@ -778,7 +778,10 @@ const generateInspectionPdfHtmlWithPhotos = (
   const footerHtml = renderFooter({
     generatedText: t.generatedOn,
     dateText: formatDate(new Date().toISOString(), language),
-    tagline: "FireSafe ITM - Fire Protection System Inspection, Testing & Maintenance",
+    // O rodapé seguia em inglês mesmo no relatório em português.
+    tagline: language === "pt-BR"
+      ? "FireSafe ITM — Inspeção, Teste e Manutenção de Sistemas de Proteção contra Incêndio"
+      : "FireSafe ITM — Inspection, Testing & Maintenance of Fire Protection Systems",
   });
 
   return wrapDocument({

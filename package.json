@@ -17,7 +17,8 @@
     "test:e2e:ui": "playwright test --ui",
     "scheduler:golden": "tsx scripts/generate-golden.ts",
     "scheduler:report": "tsx scripts/report.ts",
-    "scheduler:app-templates": "tsx scripts/generate-app-templates.ts"
+    "scheduler:app-templates": "tsx scripts/generate-app-templates.ts",
+    "pdf:preview": "node scripts/pdf-preview/run.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

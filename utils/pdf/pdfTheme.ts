@@ -67,6 +67,19 @@ export const getBaseCss = (): string => {
     /* O respiro lateral vem do conteúdo, não da margem da página. */
     .page { padding: 0 12mm; }
 
+    /* ── Moldura do documento ─────────────────────────────────────────────
+       Cabeçalho e rodapé repetidos em toda página. Nenhum motor acessível ao
+       app expõe a API de cabeçalho de impressão (nem o expo-print, nem o
+       window.print), mas thead/tfoot de tabela repetem em WebKit e Chromium —
+       é o único caminho que funciona igual no iOS, no Android e no navegador. */
+    .doc-frame { width: 100%; border-collapse: collapse; }
+    .doc-frame > thead > tr > td,
+    .doc-frame > tbody > tr > td,
+    .doc-frame > tfoot > tr > td {
+      padding: 0; border: 0; vertical-align: top;
+      font-size: inherit; color: inherit;
+    }
+
     /* ── Cabeçalho ────────────────────────────────────────────────────── */
     .header {
       display: flex;
