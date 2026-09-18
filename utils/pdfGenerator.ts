@@ -309,6 +309,31 @@ interface PhotoWithBase64 {
   timestamp: string;
 }
 
+// Campo sem valor não renderiza, e seção sem nenhum campo preenchido também
+// some: um relatório de sistema simples saía com dezenas de "-" e com barras de
+// título sem nada embaixo.
+const infoItem = (label: string, value: string, span?: number): string => {
+  const v = (value ?? "").trim();
+  if (!v || v === "-") return "";
+  const spanStyle = span ? ` style="grid-column: span ${span};"` : "";
+  return [
+    `<div class="info-item"${spanStyle}>`,
+    `<div class="info-label">${label}</div>`,
+    `<div class="info-value">${v}</div>`,
+    `</div>`,
+  ].join("");
+};
+
+const infoSection = (title: string, items: string, gridClass = "info-grid"): string => {
+  if (!items.trim()) return "";
+  return [
+    `<div class="section">`,
+    `<h2 class="section-title">${title}</h2>`,
+    `<div class="${gridClass}">${items}</div>`,
+    `</div>`,
+  ].join("");
+};
+
 const generateInspectionPdfHtmlWithPhotos = (
   options: GeneratePdfOptions,
   photosWithBase64: PhotoWithBase64[],
@@ -490,83 +515,26 @@ const generateInspectionPdfHtmlWithPhotos = (
 
   const companySection = companyData
     ? `
-    <div class="section">
-      <h2 class="section-title">${t.companyInformation}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.companyName}</div>
-          <div class="info-value">${sanitizeHtml(companyData.name) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.cnpj}</div>
-          <div class="info-value">${sanitizeHtml(companyData.cnpj) || "-"}</div>
-        </div>
-        <div class="info-item" style="grid-column: span 2;">
-          <div class="info-label">${t.address}</div>
-          <div class="info-value">${sanitizeHtml(companyAddress) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.contact}</div>
-          <div class="info-value">${sanitizeHtml(companyData.contactName) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.phone}</div>
-          <div class="info-value">${sanitizeHtml(companyData.contactPhone) || "-"}</div>
-        </div>
-        <div class="info-item" style="grid-column: span 2;">
-          <div class="info-label">${t.email}</div>
-          <div class="info-value">${sanitizeHtml(companyData.contactEmail) || "-"}</div>
-        </div>
-      </div>
-    </div>
+    ${infoSection(`${t.companyInformation}`, `${infoItem(`${t.companyName}`, `${sanitizeHtml(companyData.name) || "-"}`)}
+        ${infoItem(`${t.cnpj}`, `${sanitizeHtml(companyData.cnpj) || "-"}`)}
+        ${infoItem(`${t.address}`, `${sanitizeHtml(companyAddress) || "-"}`, 2)}
+        ${infoItem(`${t.contact}`, `${sanitizeHtml(companyData.contactName) || "-"}`)}
+        ${infoItem(`${t.phone}`, `${sanitizeHtml(companyData.contactPhone) || "-"}`)}
+        ${infoItem(`${t.email}`, `${sanitizeHtml(companyData.contactEmail) || "-"}`, 2)}`)}
     `
     : `
-    <div class="section">
-      <h2 class="section-title">${t.propertyInformation}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.propertyName}</div>
-          <div class="info-value">${sanitizeHtml(inspection.propertyName) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.address}</div>
-          <div class="info-value">${sanitizeHtml(inspection.propertyAddress) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.phone}</div>
-          <div class="info-value">${sanitizeHtml(inspection.propertyPhone) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.contractNo}</div>
-          <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
-        </div>
-      </div>
-    </div>
+    ${infoSection(`${t.propertyInformation}`, `${infoItem(`${t.propertyName}`, `${sanitizeHtml(inspection.propertyName) || "-"}`)}
+        ${infoItem(`${t.address}`, `${sanitizeHtml(inspection.propertyAddress) || "-"}`)}
+        ${infoItem(`${t.phone}`, `${sanitizeHtml(inspection.propertyPhone) || "-"}`)}
+        ${infoItem(`${t.contractNo}`, `${sanitizeHtml(inspection.contractNo) || "-"}`)}`)}
     `;
 
   const inspectorSection = inspectorData
     ? `
-    <div class="section">
-      <h2 class="section-title">${t.inspectorInformation}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.inspector}</div>
-          <div class="info-value">${sanitizeHtml(inspectorData.name) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.inspectorRole}</div>
-          <div class="info-value">${sanitizeHtml(inspectorData.role) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.phone}</div>
-          <div class="info-value">${sanitizeHtml(inspectorData.phone) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.email}</div>
-          <div class="info-value">${sanitizeHtml(inspectorData.email) || "-"}</div>
-        </div>
-      </div>
-    </div>
+    ${infoSection(`${t.inspectorInformation}`, `${infoItem(`${t.inspector}`, `${sanitizeHtml(inspectorData.name) || "-"}`)}
+        ${infoItem(`${t.inspectorRole}`, `${sanitizeHtml(inspectorData.role) || "-"}`)}
+        ${infoItem(`${t.phone}`, `${sanitizeHtml(inspectorData.phone) || "-"}`)}
+        ${infoItem(`${t.email}`, `${sanitizeHtml(inspectorData.email) || "-"}`)}`)}
     `
     : "";
 
@@ -588,73 +556,24 @@ const generateInspectionPdfHtmlWithPhotos = (
 
   const firePumpSection = firePumpData
     ? `
-    <div class="section">
-      <h2 class="section-title">${t.firePumpInformation}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.pumpTag}</div>
-          <div class="info-value">${sanitizeHtml(firePumpData.tag) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.pumpType}</div>
-          <div class="info-value">${getPumpTypeLabel(firePumpData.type)}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.manufacturer}</div>
-          <div class="info-value">${sanitizeHtml(firePumpData.manufacturer) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.model}</div>
-          <div class="info-value">${sanitizeHtml(firePumpData.model) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.flowRate}</div>
-          <div class="info-value">${firePumpData.ratedFlowGpm ? `${firePumpData.ratedFlowGpm} GPM` : "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.pressure}</div>
-          <div class="info-value">${firePumpData.ratedPressurePsi ? `${firePumpData.ratedPressurePsi} PSI` : "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.motorPower}</div>
-          <div class="info-value">${firePumpData.powerHP ? `${firePumpData.powerHP} HP` : "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.serialNumber}</div>
-          <div class="info-value">${sanitizeHtml(firePumpData.serialNumber) || "-"}</div>
-        </div>
-      </div>
-    </div>
+    ${infoSection(`${t.firePumpInformation}`, `${infoItem(`${t.pumpTag}`, `${sanitizeHtml(firePumpData.tag) || "-"}`)}
+        ${infoItem(`${t.pumpType}`, `${getPumpTypeLabel(firePumpData.type)}`)}
+        ${infoItem(`${t.manufacturer}`, `${sanitizeHtml(firePumpData.manufacturer) || "-"}`)}
+        ${infoItem(`${t.model}`, `${sanitizeHtml(firePumpData.model) || "-"}`)}
+        ${infoItem(`${t.flowRate}`, `${firePumpData.ratedFlowGpm ? `${firePumpData.ratedFlowGpm} GPM` : "-"}`)}
+        ${infoItem(`${t.pressure}`, `${firePumpData.ratedPressurePsi ? `${firePumpData.ratedPressurePsi} PSI` : "-"}`)}
+        ${infoItem(`${t.motorPower}`, `${firePumpData.powerHP ? `${firePumpData.powerHP} HP` : "-"}`)}
+        ${infoItem(`${t.serialNumber}`, `${sanitizeHtml(firePumpData.serialNumber) || "-"}`)}`)}
     `
     : "";
 
   const firePumpPanelSection = firePumpPanelData
     ? `
-    <div class="section">
-      <h2 class="section-title">${t.controlPanelInformation}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.panelTag}</div>
-          <div class="info-value">${sanitizeHtml(firePumpPanelData.tag) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.manufacturer}</div>
-          <div class="info-value">${sanitizeHtml(firePumpPanelData.manufacturer) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.model}</div>
-          <div class="info-value">${sanitizeHtml(firePumpPanelData.model) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.startingType}</div>
-          <div class="info-value">${sanitizeHtml(firePumpPanelData.startingType) || "-"}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.automaticTransfer}</div>
-          <div class="info-value">${firePumpPanelData.hasAutomaticTransfer ? t.yes : t.no}</div>
-        </div>
-      </div>
-    </div>
+    ${infoSection(`${t.controlPanelInformation}`, `${infoItem(`${t.panelTag}`, `${sanitizeHtml(firePumpPanelData.tag) || "-"}`)}
+        ${infoItem(`${t.manufacturer}`, `${sanitizeHtml(firePumpPanelData.manufacturer) || "-"}`)}
+        ${infoItem(`${t.model}`, `${sanitizeHtml(firePumpPanelData.model) || "-"}`)}
+        ${infoItem(`${t.startingType}`, `${sanitizeHtml(firePumpPanelData.startingType) || "-"}`)}
+        ${infoItem(`${t.automaticTransfer}`, `${firePumpPanelData.hasAutomaticTransfer ? t.yes : t.no}`)}`)}
     `
     : "";
 
@@ -682,34 +601,14 @@ const generateInspectionPdfHtmlWithPhotos = (
 
     ${firePumpPanelSection}
 
-    <div class="section">
-      <h2 class="section-title">${t.inspectionDetails}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.inspectionType}</div>
-          <div class="info-value">${typeName}</div>
-        </div>
+    ${infoSection(`${t.inspectionDetails}`, `${infoItem(`${t.inspectionType}`, `${typeName}`)}
         ${!inspectorData ? `
-        <div class="info-item">
-          <div class="info-label">${t.inspector}</div>
-          <div class="info-value">${sanitizeHtml(inspection.inspectorName) || "-"}</div>
-        </div>
+        ${infoItem(`${t.inspector}`, `${sanitizeHtml(inspection.inspectorName) || "-"}`)}
         ` : `
-        <div class="info-item">
-          <div class="info-label">${t.contractNo}</div>
-          <div class="info-value">${sanitizeHtml(inspection.contractNo) || "-"}</div>
-        </div>
+        ${infoItem(`${t.contractNo}`, `${sanitizeHtml(inspection.contractNo) || "-"}`)}
         `}
-        <div class="info-item">
-          <div class="info-label">${t.date}</div>
-          <div class="info-value">${formatDate(inspection.date, language)}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.frequency}</div>
-          <div class="info-value">${freq}</div>
-        </div>
-      </div>
-    </div>
+        ${infoItem(`${t.date}`, `${formatDate(inspection.date, language)}`)}
+        ${infoItem(`${t.frequency}`, `${freq}`)}`)}
 
     <div class="section" style="page-break-inside: avoid;">
       <h2 class="section-title">${t.checklistResults}</h2>
@@ -733,21 +632,12 @@ const generateInspectionPdfHtmlWithPhotos = (
     <div class="section" style="page-break-inside: avoid;">
       <h2 class="section-title">${t.geolocation}</h2>
       <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">${t.latitude}</div>
-          <div class="info-value">${inspection.geoLocation.latitude.toFixed(6)}</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">${t.longitude}</div>
-          <div class="info-value">${inspection.geoLocation.longitude.toFixed(6)}</div>
-        </div>
+        ${infoItem(`${t.latitude}`, `${inspection.geoLocation.latitude.toFixed(6)}`)}
+        ${infoItem(`${t.longitude}`, `${inspection.geoLocation.longitude.toFixed(6)}`)}
         ${
           inspection.geoLocation.accuracy
             ? `
-        <div class="info-item">
-          <div class="info-label">${t.accuracy}</div>
-          <div class="info-value">${inspection.geoLocation.accuracy.toFixed(1)} ${t.meters}</div>
-        </div>
+        ${infoItem(`${t.accuracy}`, `${inspection.geoLocation.accuracy.toFixed(1)} ${t.meters}`)}
         `
             : ""
         }

@@ -1,190 +1,134 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-export async function generateUserManualPdf(language: 'pt-BR' | 'en' = 'pt-BR'): Promise<string | null> {
+// Monta o HTML do manual. Exportado para poder ser revisado fora do app
+// (npm run pdf:preview), como os demais documentos.
+export function buildUserManualHtml(language: 'pt-BR' | 'en' = 'pt-BR'): string {
   const isPtBR = language === 'pt-BR';
-  
-  const htmlContent = `
+
+  return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* O manual é documento de LEITURA, não relatório: mantém capa, sumário e
+       capítulos. Do sistema dos relatórios (utils/pdf/pdfTheme) vêm a paleta, a
+       tipografia e a geometria de papel, para os documentos do app falarem a
+       mesma língua. Cor aqui também significa alguma coisa: laranja é a marca,
+       vermelho é advertência. */
+    :root {
+      --ink: #111827; --graphite: #2B2F36; --text: #4B5563; --muted: #8A8F98;
+      --line: #D4D6DA; --line-soft: #E7E9EC; --surface: #F4F5F6;
+      --brand: #FF6B00; --danger: #B91C1C;
     }
+    @page { size: A4; margin: 16mm 14mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      font-size: 11pt;
-      line-height: 1.5;
-      color: #1f2937;
-      padding: 20px;
+      font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 10pt; line-height: 1.55; color: var(--text);
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
+
+    /* ── Capa ─────────────────────────────────────────────────────────── */
     .cover {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      height: 240mm;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
       text-align: center;
       page-break-after: always;
     }
     .cover-logo {
-      width: 120px;
-      height: 120px;
-      background: linear-gradient(135deg, #DC2626, #991B1B);
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 30px;
+      width: 28mm; height: 28mm;
+      background: var(--brand); border-radius: 4mm;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10mm;
     }
-    .cover-logo-icon {
-      font-size: 60px;
-      color: white;
-    }
+    .cover-logo-icon { font-size: 30pt; color: #fff; }
     .cover h1 {
-      font-size: 36pt;
-      color: #DC2626;
-      margin-bottom: 10px;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: 26pt; font-weight: 800; color: var(--ink);
+      text-transform: uppercase; letter-spacing: .04em;
+      margin-bottom: 3mm; border: 0; padding: 0;
     }
-    .cover h2 {
-      font-size: 18pt;
-      color: #6b7280;
-      font-weight: normal;
-      margin-bottom: 40px;
-    }
-    .cover .version {
-      font-size: 12pt;
-      color: #9ca3af;
-    }
+    .cover h2 { font-size: 12pt; font-weight: 400; color: var(--muted); margin-bottom: 12mm; }
+    .cover .version { font-size: 9pt; color: var(--muted); font-variant-numeric: tabular-nums; }
     .cover .nfpa-badge {
-      margin-top: 40px;
-      padding: 12px 24px;
-      background: #dcfce7;
-      border-radius: 8px;
-      color: #166534;
-      font-weight: 600;
+      display: inline-block; margin-top: 6mm;
+      border: .3mm solid var(--graphite); border-radius: 1mm;
+      padding: 1.4mm 3mm;
+      font-size: 8pt; font-weight: 800; color: var(--ink);
+      text-transform: uppercase; letter-spacing: .04em;
+      background: transparent;
     }
+
+    /* ── Títulos ──────────────────────────────────────────────────────── */
     h1 {
-      font-size: 20pt;
-      color: #DC2626;
-      margin: 30px 0 15px 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #DC2626;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: 15pt; font-weight: 800; color: #fff;
+      text-transform: uppercase; letter-spacing: .04em;
+      background: var(--ink); padding: 2.4mm 4mm; border-radius: 1.5mm;
+      margin: 8mm 0 4mm; break-after: avoid;
     }
     h2 {
-      font-size: 14pt;
-      color: #111827;
-      margin: 20px 0 10px 0;
+      font-size: 12pt; font-weight: 700; color: var(--ink);
+      margin: 6mm 0 2.5mm; padding-bottom: 1.5mm;
+      border-bottom: .3mm solid var(--line); break-after: avoid;
     }
-    h3 {
-      font-size: 12pt;
-      color: #374151;
-      margin: 15px 0 8px 0;
+    h3 { font-size: 10.5pt; font-weight: 700; color: var(--graphite); margin: 4mm 0 2mm; break-after: avoid; }
+    p { margin-bottom: 2.5mm; }
+    strong { color: var(--ink); }
+
+    .section { margin-bottom: 6mm; }
+
+    /* ── Destaques: cada um com um papel ──────────────────────────────── */
+    .important, .tip, .warning {
+      border: .25mm solid var(--line); border-left: .8mm solid var(--graphite);
+      background: var(--surface); border-radius: 1.5mm;
+      padding: 3mm 3.5mm; margin: 3mm 0;
+      break-inside: avoid;
     }
-    p {
-      margin: 8px 0;
-      text-align: justify;
-    }
-    ul, ol {
-      margin: 10px 0 10px 20px;
-    }
-    li {
-      margin: 5px 0;
-    }
-    .section {
-      page-break-inside: avoid;
-      margin-bottom: 20px;
-    }
-    .important {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .tip {
-      background: #dbeafe;
-      border-left: 4px solid #3b82f6;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .warning {
-      background: #fee2e2;
-      border-left: 4px solid #ef4444;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .step-list {
-      counter-reset: step-counter;
-      list-style: none;
-      margin-left: 0;
-    }
+    .tip { border-left-color: var(--line); }
+    .warning { border-left-color: var(--danger); }
+    .warning strong { color: var(--danger); }
+
+    /* ── Passo a passo ────────────────────────────────────────────────── */
+    .step-list { list-style: none; counter-reset: step; margin: 3mm 0; }
     .step-list li {
-      counter-increment: step-counter;
-      position: relative;
-      padding-left: 35px;
-      margin: 12px 0;
+      position: relative; counter-increment: step;
+      padding-left: 9mm; margin-bottom: 2.5mm;
+      break-inside: avoid;
     }
     .step-list li::before {
-      content: counter(step-counter);
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 24px;
-      height: 24px;
-      background: #DC2626;
-      color: white;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 24px;
-      font-size: 12px;
-      font-weight: bold;
+      content: counter(step);
+      position: absolute; left: 0; top: 0;
+      width: 5.5mm; height: 5.5mm; border-radius: 50%;
+      background: var(--ink); color: #fff;
+      font-size: 7.5pt; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
     }
-    .feature-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 15px 0;
-    }
+
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 3mm 0; }
     .feature-item {
-      padding: 10px;
-      background: #f9fafb;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
+      background: var(--surface); border: .25mm solid var(--line-soft);
+      border-radius: 1.5mm; padding: 3mm; break-inside: avoid;
     }
-    .toc {
-      page-break-after: always;
-    }
-    .toc h2 {
-      font-size: 18pt;
-      margin-bottom: 20px;
-    }
+
+    /* ── Sumário ──────────────────────────────────────────────────────── */
+    .toc { page-break-after: always; }
+    .toc h2 { border-bottom: .3mm solid var(--line); }
     .toc-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dotted #d1d5db;
+      padding: 1.6mm 0; border-bottom: .18mm solid var(--line-soft);
+      font-size: 9.5pt; color: var(--text);
     }
+
     .footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
-      text-align: center;
-      color: #6b7280;
-      font-size: 10pt;
+      margin-top: 10mm; padding-top: 2.5mm;
+      border-top: .35mm solid var(--graphite);
+      font-size: 8pt; color: var(--muted); text-align: center;
     }
-    @media print {
-      .page-break {
-        page-break-before: always;
-      }
-    }
+
+    @media print { .page-break { page-break-before: always; } }
   </style>
 </head>
 <body>
@@ -678,6 +622,10 @@ export async function generateUserManualPdf(language: 'pt-BR' | 'en' = 'pt-BR'):
 </body>
 </html>
   `;
+}
+
+export async function generateUserManualPdf(language: 'pt-BR' | 'en' = 'pt-BR'): Promise<string | null> {
+  const htmlContent = buildUserManualHtml(language);
 
   try {
     const { uri } = await Print.printToFileAsync({
