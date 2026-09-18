@@ -172,6 +172,7 @@ export const getBaseCss = (): string => {
       font-variant-numeric: tabular-nums;
     }
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm; }
+    .info-grid:empty { display: none; }
     .info-item {
       background: ${c.surface};
       border: .25mm solid ${c.lineSoft};

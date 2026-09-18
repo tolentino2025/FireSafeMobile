@@ -350,6 +350,61 @@ const translations = {
 
 // Usa o sistema visual compartilhado (utils/pdf/pdfTheme) e acrescenta só o que
 // é específico do teste de desempenho: leituras, deficiências e resultado geral.
+// Enumerações do formulário saíam cruas no PDF ("flow_meter", "city_water").
+const TEST_METHOD_LABELS: Record<string, { en: string; "pt-BR": string }> = {
+  flow_meter: { en: "Flow meter", "pt-BR": "Medidor de vazão" },
+  pitot_tube: { en: "Pitot tube", "pt-BR": "Tubo de Pitot" },
+  flow_loop: { en: "Flow loop", "pt-BR": "Circuito de vazão" },
+  bypass: { en: "Bypass", "pt-BR": "Bypass" },
+  other: { en: "Other", "pt-BR": "Outro" },
+};
+
+const SUPPLY_SOURCE_LABELS: Record<string, { en: string; "pt-BR": string }> = {
+  city_water: { en: "City water", "pt-BR": "Rede pública" },
+  tank: { en: "Tank", "pt-BR": "Reservatório elevado" },
+  reservoir: { en: "Reservoir", "pt-BR": "Reservatório" },
+  pond: { en: "Pond", "pt-BR": "Lago/açude" },
+  well: { en: "Well", "pt-BR": "Poço" },
+  other: { en: "Other", "pt-BR": "Outro" },
+};
+
+const labelFor = (
+  dict: Record<string, { en: string; "pt-BR": string }>,
+  value: string | undefined,
+  language: "en" | "pt-BR",
+  otherText?: string,
+): string => {
+  if (!value) return "";
+  const label = dict[value]?.[language] ?? value;
+  return value === "other" && otherText ? `${label}: ${sanitizeHtml(otherText)}` : label;
+};
+
+// Seção sem nenhum campo preenchido não renderiza — barra de título sozinha,
+// sem conteúdo embaixo, parecia defeito.
+const infoSection = (title: string, items: string, gridClass = "info-grid"): string => {
+  if (!items.trim()) return "";
+  return [
+    `<div class="section">`,
+    `<h2 class="section-title">${title}</h2>`,
+    `<div class="${gridClass}">${items}</div>`,
+    `</div>`,
+  ].join("");
+};
+
+// Campo sem valor não renderiza. Um teste parcial — o normal em campo — saía
+// com dezenas de "-" na página, escondendo o que de fato foi medido.
+const infoItem = (label: string, value: string, span?: number): string => {
+  const v = (value ?? "").trim();
+  if (!v || v === "-") return "";
+  const spanStyle = span ? ` style="grid-column: span ${span};"` : "";
+  return [
+    `<div class="info-item"${spanStyle}>`,
+    `<div class="info-label">${label}</div>`,
+    `<div class="info-value">${v}</div>`,
+    `</div>`,
+  ].join("");
+};
+
 const getCommonStyles = (): string => `
   ${getBaseCss()}
 
@@ -468,207 +523,52 @@ export const generateElectricPumpPdfHtml = (options: GenerateElectricPdfOptions)
           <div class="compliance-badge">${t.nfpaCompliance}</div>
         </div>
 
-        <div class="section">
-          <h2 class="section-title">${t.contractorInfo}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.companyName}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.companyName) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.license}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.licenseNumber) || "-"}</div>
-            </div>
-            <div class="info-item" style="grid-column: span 2;">
-              <div class="info-label">${t.address}</div>
-              <div class="info-value">${sanitizeHtml(contractorAddress) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.phone}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.phone) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.email}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.email) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.contractorInfo}`, `${infoItem(`${t.companyName}`, `${sanitizeHtml(test.contractorInfo?.companyName) || "-"}`)}
+            ${infoItem(`${t.license}`, `${sanitizeHtml(test.contractorInfo?.licenseNumber) || "-"}`)}
+            ${infoItem(`${t.address}`, `${sanitizeHtml(contractorAddress) || "-"}`, 2)}
+            ${infoItem(`${t.phone}`, `${sanitizeHtml(test.contractorInfo?.phone) || "-"}`)}
+            ${infoItem(`${t.email}`, `${sanitizeHtml(test.contractorInfo?.email) || "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.jobInfo}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.jobName}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.jobName) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.jobNumber}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.jobNumber) || "-"}</div>
-            </div>
-            <div class="info-item" style="grid-column: span 2;">
-              <div class="info-label">${t.address}</div>
-              <div class="info-value">${sanitizeHtml(jobAddress) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.testDate}</div>
-              <div class="info-value">${formatDate(test.jobInfo?.testDate || "", language)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.testMethod}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.testMethod) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.weather}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.weatherConditions) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ambientTemp}</div>
-              <div class="info-value">${test.jobInfo?.ambientTemperatureF ? `${sanitizeHtml(test.jobInfo.ambientTemperatureF)} °F` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.jobInfo}`, `${infoItem(`${t.jobName}`, `${sanitizeHtml(test.jobInfo?.jobName) || "-"}`)}
+            ${infoItem(`${t.jobNumber}`, `${sanitizeHtml(test.jobInfo?.jobNumber) || "-"}`)}
+            ${infoItem(`${t.address}`, `${sanitizeHtml(jobAddress) || "-"}`, 2)}
+            ${infoItem(`${t.testDate}`, `${formatDate(test.jobInfo?.testDate || "", language)}`)}
+            ${infoItem(`${t.testMethod}`, `${labelFor(TEST_METHOD_LABELS, test.jobInfo?.testMethod, language, test.jobInfo?.testMethodOther)}`)}
+            ${infoItem(`${t.weather}`, `${sanitizeHtml(test.jobInfo?.weatherConditions) || "-"}`)}
+            ${infoItem(`${t.ambientTemp}`, `${test.jobInfo?.ambientTemperatureF ? `${sanitizeHtml(test.jobInfo.ambientTemperatureF)} °F` : "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.pumpEquipment}</h2>
-          <div class="info-grid-3">
-            <div class="info-item">
-              <div class="info-label">${t.pumpTag}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.pumpTag) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.manufacturer}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.manufacturer) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.model}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.model) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.serialNumber}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.serialNumber) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedFlow}</div>
-              <div class="info-value">${test.pumpEquipment?.ratedFlowGpm ? `${sanitizeHtml(test.pumpEquipment.ratedFlowGpm)} GPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedPressure}</div>
-              <div class="info-value">${test.pumpEquipment?.ratedPressurePsi ? `${sanitizeHtml(test.pumpEquipment.ratedPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedSpeed}</div>
-              <div class="info-value">${test.pumpEquipment?.ratedSpeedRpm ? `${sanitizeHtml(test.pumpEquipment.ratedSpeedRpm)} RPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.shutoffPressure}</div>
-              <div class="info-value">${test.pumpEquipment?.shutoffPressurePsi ? `${sanitizeHtml(test.pumpEquipment.shutoffPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.peakFlow}</div>
-              <div class="info-value">${test.pumpEquipment?.peakFlowGpm ? `${sanitizeHtml(test.pumpEquipment.peakFlowGpm)} GPM` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.pumpEquipment}`, `${infoItem(`${t.pumpTag}`, `${sanitizeHtml(test.pumpEquipment?.pumpTag) || "-"}`)}
+            ${infoItem(`${t.manufacturer}`, `${sanitizeHtml(test.pumpEquipment?.manufacturer) || "-"}`)}
+            ${infoItem(`${t.model}`, `${sanitizeHtml(test.pumpEquipment?.model) || "-"}`)}
+            ${infoItem(`${t.serialNumber}`, `${sanitizeHtml(test.pumpEquipment?.serialNumber) || "-"}`)}
+            ${infoItem(`${t.ratedFlow}`, `${test.pumpEquipment?.ratedFlowGpm ? `${sanitizeHtml(test.pumpEquipment.ratedFlowGpm)} GPM` : "-"}`)}
+            ${infoItem(`${t.ratedPressure}`, `${test.pumpEquipment?.ratedPressurePsi ? `${sanitizeHtml(test.pumpEquipment.ratedPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.ratedSpeed}`, `${test.pumpEquipment?.ratedSpeedRpm ? `${sanitizeHtml(test.pumpEquipment.ratedSpeedRpm)} RPM` : "-"}`)}
+            ${infoItem(`${t.shutoffPressure}`, `${test.pumpEquipment?.shutoffPressurePsi ? `${sanitizeHtml(test.pumpEquipment.shutoffPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.peakFlow}`, `${test.pumpEquipment?.peakFlowGpm ? `${sanitizeHtml(test.pumpEquipment.peakFlowGpm)} GPM` : "-"}`)}`, "info-grid-3")}
 
-        <div class="section">
-          <h2 class="section-title">${t.driverInfo}</h2>
-          <div class="info-grid-3">
-            <div class="info-item">
-              <div class="info-label">${t.driverType}</div>
-              <div class="info-value">${t.electricPump}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.manufacturer}</div>
-              <div class="info-value">${sanitizeHtml((test.driverInfo as any)?.manufacturer) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.model}</div>
-              <div class="info-value">${sanitizeHtml((test.driverInfo as any)?.model) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.horsePower}</div>
-              <div class="info-value">${(test.driverInfo as any)?.horsePower ? `${sanitizeHtml((test.driverInfo as any).horsePower)} HP` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedVoltage}</div>
-              <div class="info-value">${(test.driverInfo as any)?.ratedVoltage ? `${sanitizeHtml((test.driverInfo as any).ratedVoltage)} V` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.fullLoadAmp}</div>
-              <div class="info-value">${(test.driverInfo as any)?.fullLoadAmperage ? `${sanitizeHtml((test.driverInfo as any).fullLoadAmperage)} A` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.driverInfo}`, `${infoItem(`${t.driverType}`, `${t.electricPump}`)}
+            ${infoItem(`${t.manufacturer}`, `${sanitizeHtml((test.driverInfo as any)?.manufacturer) || "-"}`)}
+            ${infoItem(`${t.model}`, `${sanitizeHtml((test.driverInfo as any)?.model) || "-"}`)}
+            ${infoItem(`${t.horsePower}`, `${(test.driverInfo as any)?.horsePower ? `${sanitizeHtml((test.driverInfo as any).horsePower)} HP` : "-"}`)}
+            ${infoItem(`${t.ratedVoltage}`, `${(test.driverInfo as any)?.ratedVoltage ? `${sanitizeHtml((test.driverInfo as any).ratedVoltage)} V` : "-"}`)}
+            ${infoItem(`${t.fullLoadAmp}`, `${(test.driverInfo as any)?.fullLoadAmperage ? `${sanitizeHtml((test.driverInfo as any).fullLoadAmperage)} A` : "-"}`)}`, "info-grid-3")}
 
-        <div class="section">
-          <h2 class="section-title">${t.controllerInfo}</h2>
-          <div class="info-grid-3">
-            <div class="info-item">
-              <div class="info-label">${t.panelTag}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.panelTag) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.manufacturer}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.manufacturer) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.model}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.model) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.startingType}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.startingType) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.supplyVoltage}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.supplyVoltage) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.autoTransfer}</div>
-              <div class="info-value">${test.controllerInfo?.hasAutomaticTransfer ? t.yes : t.no}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.controllerInfo}`, `${infoItem(`${t.panelTag}`, `${sanitizeHtml(test.controllerInfo?.panelTag) || "-"}`)}
+            ${infoItem(`${t.manufacturer}`, `${sanitizeHtml(test.controllerInfo?.manufacturer) || "-"}`)}
+            ${infoItem(`${t.model}`, `${sanitizeHtml(test.controllerInfo?.model) || "-"}`)}
+            ${infoItem(`${t.startingType}`, `${sanitizeHtml(test.controllerInfo?.startingType) || "-"}`)}
+            ${infoItem(`${t.supplyVoltage}`, `${sanitizeHtml(test.controllerInfo?.supplyVoltage) || "-"}`)}
+            ${infoItem(`${t.autoTransfer}`, `${test.controllerInfo?.hasAutomaticTransfer ? t.yes : t.no}`)}`, "info-grid-3")}
 
-        <div class="section">
-          <h2 class="section-title">${t.supplyConditions}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.supplySource}</div>
-              <div class="info-value">${sanitizeHtml(test.supplyConditions?.supplySource) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.staticPressure}</div>
-              <div class="info-value">${test.supplyConditions?.staticPressurePsi ? `${sanitizeHtml(test.supplyConditions.staticPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.residualPressure}</div>
-              <div class="info-value">${test.supplyConditions?.residualPressurePsi ? `${sanitizeHtml(test.supplyConditions.residualPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.waterTemp}</div>
-              <div class="info-value">${test.supplyConditions?.waterTemperatureF ? `${sanitizeHtml(test.supplyConditions.waterTemperatureF)} °F` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.supplyConditions}`, `${infoItem(`${t.supplySource}`, `${labelFor(SUPPLY_SOURCE_LABELS, test.supplyConditions?.supplySource, language, test.supplyConditions?.supplySourceOther)}`)}
+            ${infoItem(`${t.staticPressure}`, `${test.supplyConditions?.staticPressurePsi ? `${sanitizeHtml(test.supplyConditions.staticPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.residualPressure}`, `${test.supplyConditions?.residualPressurePsi ? `${sanitizeHtml(test.supplyConditions.residualPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.waterTemp}`, `${test.supplyConditions?.waterTemperatureF ? `${sanitizeHtml(test.supplyConditions.waterTemperatureF)} °F` : "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.systemDemand}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.demandGpm}</div>
-              <div class="info-value">${test.systemDemand?.systemDemandGpm ? `${sanitizeHtml(test.systemDemand.systemDemandGpm)} GPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.demandPsi}</div>
-              <div class="info-value">${test.systemDemand?.systemDemandPsi ? `${sanitizeHtml(test.systemDemand.systemDemandPsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.totalDemand}</div>
-              <div class="info-value">${test.systemDemand?.totalDemandGpm ? `${sanitizeHtml(test.systemDemand.totalDemandGpm)} GPM @ ${sanitizeHtml(test.systemDemand?.totalDemandPsi || "")} PSI` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.systemDemand}`, `${infoItem(`${t.demandGpm}`, `${test.systemDemand?.systemDemandGpm ? `${sanitizeHtml(test.systemDemand.systemDemandGpm)} GPM` : "-"}`)}
+            ${infoItem(`${t.demandPsi}`, `${test.systemDemand?.systemDemandPsi ? `${sanitizeHtml(test.systemDemand.systemDemandPsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.totalDemand}`, `${test.systemDemand?.totalDemandGpm ? `${sanitizeHtml(test.systemDemand.totalDemandGpm)} GPM @ ${sanitizeHtml(test.systemDemand?.totalDemandPsi || "")} PSI` : "-"}`)}`)}
 
         <div class="section">
           <h2 class="section-title">${t.testReadings}</h2>
@@ -765,22 +665,10 @@ export const generateElectricPumpPdfHtml = (options: GenerateElectricPdfOptions)
           <div class="signature-box">
             <div style="font-weight: 600; margin-bottom: 10px;">${t.conductedBy}</div>
             <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">${t.name}</div>
-                <div class="info-value">${sanitizeHtml(test.signatures?.conductedBy?.name) || "-"}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">${t.title_label}</div>
-                <div class="info-value">${sanitizeHtml(test.signatures?.conductedBy?.title) || "-"}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">${t.company}</div>
-                <div class="info-value">${sanitizeHtml(test.signatures?.conductedBy?.company) || "-"}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">${t.date}</div>
-                <div class="info-value">${formatDate(test.signatures?.conductedBy?.date || "", language)}</div>
-              </div>
+              ${infoItem(`${t.name}`, `${sanitizeHtml(test.signatures?.conductedBy?.name) || "-"}`)}
+              ${infoItem(`${t.title_label}`, `${sanitizeHtml(test.signatures?.conductedBy?.title) || "-"}`)}
+              ${infoItem(`${t.company}`, `${sanitizeHtml(test.signatures?.conductedBy?.company) || "-"}`)}
+              ${infoItem(`${t.date}`, `${formatDate(test.signatures?.conductedBy?.date || "", language)}`)}
             </div>
             <div style="margin-top: 15px;">
               <div style="font-size: 10px; color: #6B7280; margin-bottom: 5px;">${t.signature}</div>
@@ -868,312 +756,83 @@ export const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): st
           <div class="compliance-badge">${t.nfpaCompliance}</div>
         </div>
 
-        <div class="section">
-          <h2 class="section-title">${t.contractorInfo}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.companyName}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.companyName) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.license}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.licenseNumber) || "-"}</div>
-            </div>
-            <div class="info-item" style="grid-column: span 2;">
-              <div class="info-label">${t.address}</div>
-              <div class="info-value">${sanitizeHtml(contractorAddress) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.phone}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.phone) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.email}</div>
-              <div class="info-value">${sanitizeHtml(test.contractorInfo?.email) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.contractorInfo}`, `${infoItem(`${t.companyName}`, `${sanitizeHtml(test.contractorInfo?.companyName) || "-"}`)}
+            ${infoItem(`${t.license}`, `${sanitizeHtml(test.contractorInfo?.licenseNumber) || "-"}`)}
+            ${infoItem(`${t.address}`, `${sanitizeHtml(contractorAddress) || "-"}`, 2)}
+            ${infoItem(`${t.phone}`, `${sanitizeHtml(test.contractorInfo?.phone) || "-"}`)}
+            ${infoItem(`${t.email}`, `${sanitizeHtml(test.contractorInfo?.email) || "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.jobInfo}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.jobName}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.jobName) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.jobNumber}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.jobNumber) || "-"}</div>
-            </div>
-            <div class="info-item" style="grid-column: span 2;">
-              <div class="info-label">${t.address}</div>
-              <div class="info-value">${sanitizeHtml(jobAddress) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.testDate}</div>
-              <div class="info-value">${formatDate(test.jobInfo?.testDate || "", language)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.testMethod}</div>
-              <div class="info-value">${sanitizeHtml(test.jobInfo?.testMethod) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.jobInfo}`, `${infoItem(`${t.jobName}`, `${sanitizeHtml(test.jobInfo?.jobName) || "-"}`)}
+            ${infoItem(`${t.jobNumber}`, `${sanitizeHtml(test.jobInfo?.jobNumber) || "-"}`)}
+            ${infoItem(`${t.address}`, `${sanitizeHtml(jobAddress) || "-"}`, 2)}
+            ${infoItem(`${t.testDate}`, `${formatDate(test.jobInfo?.testDate || "", language)}`)}
+            ${infoItem(`${t.testMethod}`, `${labelFor(TEST_METHOD_LABELS, test.jobInfo?.testMethod, language, test.jobInfo?.testMethodOther)}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.pumpEquipment}</h2>
-          <div class="info-grid-3">
-            <div class="info-item">
-              <div class="info-label">${t.pumpTag}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.pumpTag) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.manufacturer}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.manufacturer) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.model}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.model) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.serialNumber}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.serialNumber) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedFlow}</div>
-              <div class="info-value">${test.pumpEquipment?.ratedFlowGpm ? `${sanitizeHtml(test.pumpEquipment.ratedFlowGpm)} GPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedPressure}</div>
-              <div class="info-value">${test.pumpEquipment?.ratedPressurePsi ? `${sanitizeHtml(test.pumpEquipment.ratedPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedSpeed}</div>
-              <div class="info-value">${test.pumpEquipment?.ratedSpeedRpm ? `${sanitizeHtml(test.pumpEquipment.ratedSpeedRpm)} RPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.shutoffPressure}</div>
-              <div class="info-value">${test.pumpEquipment?.shutoffPressurePsi ? `${sanitizeHtml(test.pumpEquipment.shutoffPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.peakFlow}</div>
-              <div class="info-value">${test.pumpEquipment?.peakFlowGpm ? `${sanitizeHtml(test.pumpEquipment.peakFlowGpm)} GPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.stages}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.numberOfStages) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.impellerDiameter}</div>
-              <div class="info-value">${test.pumpEquipment?.impellerDiameterIn ? `${sanitizeHtml(test.pumpEquipment.impellerDiameterIn)} in` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.yearInstalled}</div>
-              <div class="info-value">${sanitizeHtml(test.pumpEquipment?.yearInstalled) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.pumpEquipment}`, `${infoItem(`${t.pumpTag}`, `${sanitizeHtml(test.pumpEquipment?.pumpTag) || "-"}`)}
+            ${infoItem(`${t.manufacturer}`, `${sanitizeHtml(test.pumpEquipment?.manufacturer) || "-"}`)}
+            ${infoItem(`${t.model}`, `${sanitizeHtml(test.pumpEquipment?.model) || "-"}`)}
+            ${infoItem(`${t.serialNumber}`, `${sanitizeHtml(test.pumpEquipment?.serialNumber) || "-"}`)}
+            ${infoItem(`${t.ratedFlow}`, `${test.pumpEquipment?.ratedFlowGpm ? `${sanitizeHtml(test.pumpEquipment.ratedFlowGpm)} GPM` : "-"}`)}
+            ${infoItem(`${t.ratedPressure}`, `${test.pumpEquipment?.ratedPressurePsi ? `${sanitizeHtml(test.pumpEquipment.ratedPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.ratedSpeed}`, `${test.pumpEquipment?.ratedSpeedRpm ? `${sanitizeHtml(test.pumpEquipment.ratedSpeedRpm)} RPM` : "-"}`)}
+            ${infoItem(`${t.shutoffPressure}`, `${test.pumpEquipment?.shutoffPressurePsi ? `${sanitizeHtml(test.pumpEquipment.shutoffPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.peakFlow}`, `${test.pumpEquipment?.peakFlowGpm ? `${sanitizeHtml(test.pumpEquipment.peakFlowGpm)} GPM` : "-"}`)}
+            ${infoItem(`${t.stages}`, `${sanitizeHtml(test.pumpEquipment?.numberOfStages) || "-"}`)}
+            ${infoItem(`${t.impellerDiameter}`, `${test.pumpEquipment?.impellerDiameterIn ? `${sanitizeHtml(test.pumpEquipment.impellerDiameterIn)} in` : "-"}`)}
+            ${infoItem(`${t.yearInstalled}`, `${sanitizeHtml(test.pumpEquipment?.yearInstalled) || "-"}`)}`, "info-grid-3")}
 
-        <div class="section">
-          <h2 class="section-title">${t.dieselInfo}</h2>
-          <div class="info-grid-3">
-            <div class="info-item">
-              <div class="info-label">${t.manufacturer}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.manufacturer) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.model}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.model) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.serialNumber}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.serialNumber) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.horsePower}</div>
-              <div class="info-value">${test.driverInfo?.horsePower ? `${sanitizeHtml(test.driverInfo.horsePower)} HP` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.ratedRpm}</div>
-              <div class="info-value">${test.driverInfo?.ratedRpm ? `${sanitizeHtml(test.driverInfo.ratedRpm)} RPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.cylinders}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.numberOfCylinders) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.displacement}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.displacement) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.fuelTankCapacity}</div>
-              <div class="info-value">${test.driverInfo?.fuelTankCapacityGal ? `${sanitizeHtml(test.driverInfo.fuelTankCapacityGal)} gal` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.fuelLevel}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.fuelLevel) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.oilLevel}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.oilLevel) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.coolantLevel}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.coolantLevel) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.batteryVoltage} 1</div>
-              <div class="info-value">${test.driverInfo?.batteryVoltage1 ? `${sanitizeHtml(test.driverInfo.batteryVoltage1)} V` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.batteryVoltage} 2</div>
-              <div class="info-value">${test.driverInfo?.batteryVoltage2 ? `${sanitizeHtml(test.driverInfo.batteryVoltage2)} V` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.engineBlockHeater}</div>
-              <div class="info-value">${sanitizeHtml(test.driverInfo?.engineBlockHeaterStatus) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.dieselInfo}`, `${infoItem(`${t.manufacturer}`, `${sanitizeHtml(test.driverInfo?.manufacturer) || "-"}`)}
+            ${infoItem(`${t.model}`, `${sanitizeHtml(test.driverInfo?.model) || "-"}`)}
+            ${infoItem(`${t.serialNumber}`, `${sanitizeHtml(test.driverInfo?.serialNumber) || "-"}`)}
+            ${infoItem(`${t.horsePower}`, `${test.driverInfo?.horsePower ? `${sanitizeHtml(test.driverInfo.horsePower)} HP` : "-"}`)}
+            ${infoItem(`${t.ratedRpm}`, `${test.driverInfo?.ratedRpm ? `${sanitizeHtml(test.driverInfo.ratedRpm)} RPM` : "-"}`)}
+            ${infoItem(`${t.cylinders}`, `${sanitizeHtml(test.driverInfo?.numberOfCylinders) || "-"}`)}
+            ${infoItem(`${t.displacement}`, `${sanitizeHtml(test.driverInfo?.displacement) || "-"}`)}
+            ${infoItem(`${t.fuelTankCapacity}`, `${test.driverInfo?.fuelTankCapacityGal ? `${sanitizeHtml(test.driverInfo.fuelTankCapacityGal)} gal` : "-"}`)}
+            ${infoItem(`${t.fuelLevel}`, `${sanitizeHtml(test.driverInfo?.fuelLevel) || "-"}`)}
+            ${infoItem(`${t.oilLevel}`, `${sanitizeHtml(test.driverInfo?.oilLevel) || "-"}`)}
+            ${infoItem(`${t.coolantLevel}`, `${sanitizeHtml(test.driverInfo?.coolantLevel) || "-"}`)}
+            ${infoItem(`${t.batteryVoltage} 1`, `${test.driverInfo?.batteryVoltage1 ? `${sanitizeHtml(test.driverInfo.batteryVoltage1)} V` : "-"}`)}
+            ${infoItem(`${t.batteryVoltage} 2`, `${test.driverInfo?.batteryVoltage2 ? `${sanitizeHtml(test.driverInfo.batteryVoltage2)} V` : "-"}`)}
+            ${infoItem(`${t.engineBlockHeater}`, `${sanitizeHtml(test.driverInfo?.engineBlockHeaterStatus) || "-"}`)}`, "info-grid-3")}
 
-        <div class="section">
-          <h2 class="section-title">${t.batteryInfo}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.startingBatteries}</div>
-              <div class="info-value">${sanitizeHtml(test.batteryInfo?.startingBatteriesType) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.chargerType}</div>
-              <div class="info-value">${sanitizeHtml(test.batteryInfo?.chargerType) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.chargerVoltage}</div>
-              <div class="info-value">${test.batteryInfo?.chargerVoltage ? `${sanitizeHtml(test.batteryInfo.chargerVoltage)} V` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.alternateSource}</div>
-              <div class="info-value">${sanitizeHtml(test.batteryInfo?.alternatePowerSource) || "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.batteryInfo}`, `${infoItem(`${t.startingBatteries}`, `${sanitizeHtml(test.batteryInfo?.startingBatteriesType) || "-"}`)}
+            ${infoItem(`${t.chargerType}`, `${sanitizeHtml(test.batteryInfo?.chargerType) || "-"}`)}
+            ${infoItem(`${t.chargerVoltage}`, `${test.batteryInfo?.chargerVoltage ? `${sanitizeHtml(test.batteryInfo.chargerVoltage)} V` : "-"}`)}
+            ${infoItem(`${t.alternateSource}`, `${sanitizeHtml(test.batteryInfo?.alternatePowerSource) || "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.controllerInfo}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.panelTag}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.panelTag) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.manufacturer}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.manufacturer) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.model}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.model) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.serialNumber}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.serialNumber) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.supplyVoltage}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.supplyVoltage) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.startingType}</div>
-              <div class="info-value">${sanitizeHtml(test.controllerInfo?.startingType) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.autoTransfer}</div>
-              <div class="info-value">${test.controllerInfo?.hasAutomaticTransfer ? t.yes : t.no}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.pressureStart}</div>
-              <div class="info-value">${test.controllerInfo?.pressureSettingStart ? `${sanitizeHtml(test.controllerInfo.pressureSettingStart)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.pressureStop}</div>
-              <div class="info-value">${test.controllerInfo?.pressureSettingStop ? `${sanitizeHtml(test.controllerInfo.pressureSettingStop)} PSI` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.controllerInfo}`, `${infoItem(`${t.panelTag}`, `${sanitizeHtml(test.controllerInfo?.panelTag) || "-"}`)}
+            ${infoItem(`${t.manufacturer}`, `${sanitizeHtml(test.controllerInfo?.manufacturer) || "-"}`)}
+            ${infoItem(`${t.model}`, `${sanitizeHtml(test.controllerInfo?.model) || "-"}`)}
+            ${infoItem(`${t.serialNumber}`, `${sanitizeHtml(test.controllerInfo?.serialNumber) || "-"}`)}
+            ${infoItem(`${t.supplyVoltage}`, `${sanitizeHtml(test.controllerInfo?.supplyVoltage) || "-"}`)}
+            ${infoItem(`${t.startingType}`, `${sanitizeHtml(test.controllerInfo?.startingType) || "-"}`)}
+            ${infoItem(`${t.autoTransfer}`, `${test.controllerInfo?.hasAutomaticTransfer ? t.yes : t.no}`)}
+            ${infoItem(`${t.pressureStart}`, `${test.controllerInfo?.pressureSettingStart ? `${sanitizeHtml(test.controllerInfo.pressureSettingStart)} PSI` : "-"}`)}
+            ${infoItem(`${t.pressureStop}`, `${test.controllerInfo?.pressureSettingStop ? `${sanitizeHtml(test.controllerInfo.pressureSettingStop)} PSI` : "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.supplyConditions}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.supplySource}</div>
-              <div class="info-value">${sanitizeHtml(test.supplyConditions?.supplySource) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.staticPressure}</div>
-              <div class="info-value">${test.supplyConditions?.staticPressurePsi ? `${sanitizeHtml(test.supplyConditions.staticPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.residualPressure}</div>
-              <div class="info-value">${test.supplyConditions?.residualPressurePsi ? `${sanitizeHtml(test.supplyConditions.residualPressurePsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.waterTemp}</div>
-              <div class="info-value">${test.supplyConditions?.waterTemperatureF ? `${sanitizeHtml(test.supplyConditions.waterTemperatureF)} °F` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.supplyConditions}`, `${infoItem(`${t.supplySource}`, `${labelFor(SUPPLY_SOURCE_LABELS, test.supplyConditions?.supplySource, language, test.supplyConditions?.supplySourceOther)}`)}
+            ${infoItem(`${t.staticPressure}`, `${test.supplyConditions?.staticPressurePsi ? `${sanitizeHtml(test.supplyConditions.staticPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.residualPressure}`, `${test.supplyConditions?.residualPressurePsi ? `${sanitizeHtml(test.supplyConditions.residualPressurePsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.waterTemp}`, `${test.supplyConditions?.waterTemperatureF ? `${sanitizeHtml(test.supplyConditions.waterTemperatureF)} °F` : "-"}`)}`)}
 
-        <div class="section">
-          <h2 class="section-title">${t.systemDemand}</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.demandGpm}</div>
-              <div class="info-value">${test.systemDemand?.systemDemandGpm ? `${sanitizeHtml(test.systemDemand.systemDemandGpm)} GPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.demandPsi}</div>
-              <div class="info-value">${test.systemDemand?.systemDemandPsi ? `${sanitizeHtml(test.systemDemand.systemDemandPsi)} PSI` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.hoseDemand}</div>
-              <div class="info-value">${test.systemDemand?.hoseDemandGpm ? `${sanitizeHtml(test.systemDemand.hoseDemandGpm)} GPM` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.totalDemand}</div>
-              <div class="info-value">${test.systemDemand?.totalDemandGpm ? `${sanitizeHtml(test.systemDemand.totalDemandGpm)} GPM` : "-"}</div>
-            </div>
-          </div>
-        </div>
+        ${infoSection(`${t.systemDemand}`, `${infoItem(`${t.demandGpm}`, `${test.systemDemand?.systemDemandGpm ? `${sanitizeHtml(test.systemDemand.systemDemandGpm)} GPM` : "-"}`)}
+            ${infoItem(`${t.demandPsi}`, `${test.systemDemand?.systemDemandPsi ? `${sanitizeHtml(test.systemDemand.systemDemandPsi)} PSI` : "-"}`)}
+            ${infoItem(`${t.hoseDemand}`, `${test.systemDemand?.hoseDemandGpm ? `${sanitizeHtml(test.systemDemand.hoseDemandGpm)} GPM` : "-"}`)}
+            ${infoItem(`${t.totalDemand}`, `${test.systemDemand?.totalDemandGpm ? `${sanitizeHtml(test.systemDemand.totalDemandGpm)} GPM` : "-"}`)}`)}
 
         <div class="section">
           <h2 class="section-title">${t.multiplePumpOperation}</h2>
           <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.isMultiplePumpSystem}</div>
-              <div class="info-value">${test.multiplePumpOperation?.isMultiplePumpSystem ? t.yes : t.no}</div>
-            </div>
+            ${infoItem(`${t.isMultiplePumpSystem}`, `${test.multiplePumpOperation?.isMultiplePumpSystem ? t.yes : t.no}`)}
             ${test.multiplePumpOperation?.isMultiplePumpSystem ? `
-            <div class="info-item">
-              <div class="info-label">${t.numberOfPumps}</div>
-              <div class="info-value">${sanitizeHtml(test.multiplePumpOperation?.numberOfPumps) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.operationSequence}</div>
-              <div class="info-value">${sanitizeHtml(test.multiplePumpOperation?.pumpOperationSequence) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.allPumpsTested}</div>
-              <div class="info-value">${test.multiplePumpOperation?.allPumpsTestedIndividually ? t.yes : t.no}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.combinedFlowTest}</div>
-              <div class="info-value">${test.multiplePumpOperation?.combinedFlowTest ? t.yes : t.no}</div>
-            </div>
+            ${infoItem(`${t.numberOfPumps}`, `${sanitizeHtml(test.multiplePumpOperation?.numberOfPumps) || "-"}`)}
+            ${infoItem(`${t.operationSequence}`, `${sanitizeHtml(test.multiplePumpOperation?.pumpOperationSequence) || "-"}`)}
+            ${infoItem(`${t.allPumpsTested}`, `${test.multiplePumpOperation?.allPumpsTestedIndividually ? t.yes : t.no}`)}
+            ${infoItem(`${t.combinedFlowTest}`, `${test.multiplePumpOperation?.combinedFlowTest ? t.yes : t.no}`)}
             ` : ""}
             ${test.multiplePumpOperation?.notes ? `
-            <div class="info-item" style="grid-column: span 2;">
-              <div class="info-label">${t.notes}</div>
-              <div class="info-value">${sanitizeHtml(test.multiplePumpOperation.notes)}</div>
-            </div>
+            ${infoItem(`${t.notes}`, `${sanitizeHtml(test.multiplePumpOperation.notes)}`, 2)}
             ` : ""}
           </div>
         </div>
@@ -1181,37 +840,16 @@ export const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): st
         <div class="section">
           <h2 class="section-title">${t.transferSwitchTest}</h2>
           <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t.hasTransferSwitch}</div>
-              <div class="info-value">${test.transferSwitchTest?.hasTransferSwitch ? t.yes : t.no}</div>
-            </div>
+            ${infoItem(`${t.hasTransferSwitch}`, `${test.transferSwitchTest?.hasTransferSwitch ? t.yes : t.no}`)}
             ${test.transferSwitchTest?.hasTransferSwitch ? `
-            <div class="info-item">
-              <div class="info-label">${t.startingType}</div>
-              <div class="info-value">${sanitizeHtml(test.transferSwitchTest?.transferSwitchType) || "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.normalToEmergency}</div>
-              <div class="info-value">${test.transferSwitchTest?.normalToEmergencySeconds ? `${sanitizeHtml(test.transferSwitchTest.normalToEmergencySeconds)} sec` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.emergencyToNormal}</div>
-              <div class="info-value">${test.transferSwitchTest?.emergencyToNormalSeconds ? `${sanitizeHtml(test.transferSwitchTest.emergencyToNormalSeconds)} sec` : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.testDate}</div>
-              <div class="info-value">${test.transferSwitchTest?.testDate ? formatDate(test.transferSwitchTest.testDate, language) : "-"}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">${t.testResult}</div>
-              <div class="info-value">${test.transferSwitchTest?.testResult === "pass" ? t.pass : test.transferSwitchTest?.testResult === "fail" ? t.fail : "-"}</div>
-            </div>
+            ${infoItem(`${t.startingType}`, `${sanitizeHtml(test.transferSwitchTest?.transferSwitchType) || "-"}`)}
+            ${infoItem(`${t.normalToEmergency}`, `${test.transferSwitchTest?.normalToEmergencySeconds ? `${sanitizeHtml(test.transferSwitchTest.normalToEmergencySeconds)} sec` : "-"}`)}
+            ${infoItem(`${t.emergencyToNormal}`, `${test.transferSwitchTest?.emergencyToNormalSeconds ? `${sanitizeHtml(test.transferSwitchTest.emergencyToNormalSeconds)} sec` : "-"}`)}
+            ${infoItem(`${t.testDate}`, `${test.transferSwitchTest?.testDate ? formatDate(test.transferSwitchTest.testDate, language) : "-"}`)}
+            ${infoItem(`${t.testResult}`, `${test.transferSwitchTest?.testResult === "pass" ? t.pass : test.transferSwitchTest?.testResult === "fail" ? t.fail : "-"}`)}
             ` : ""}
             ${test.transferSwitchTest?.notes ? `
-            <div class="info-item" style="grid-column: span 2;">
-              <div class="info-label">${t.notes}</div>
-              <div class="info-value">${sanitizeHtml(test.transferSwitchTest.notes)}</div>
-            </div>
+            ${infoItem(`${t.notes}`, `${sanitizeHtml(test.transferSwitchTest.notes)}`, 2)}
             ` : ""}
           </div>
         </div>
@@ -1297,22 +935,10 @@ export const generateDieselPumpPdfHtml = (options: GenerateDieselPdfOptions): st
           <div class="signature-box">
             <div style="font-weight: 600; margin-bottom: 10px;">${t.conductedBy}</div>
             <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">${t.name}</div>
-                <div class="info-value">${sanitizeHtml(test.signatures?.conductedBy?.name) || "-"}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">${t.title_label}</div>
-                <div class="info-value">${sanitizeHtml(test.signatures?.conductedBy?.title) || "-"}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">${t.company}</div>
-                <div class="info-value">${sanitizeHtml(test.signatures?.conductedBy?.company) || "-"}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">${t.date}</div>
-                <div class="info-value">${formatDate(test.signatures?.conductedBy?.date || "", language)}</div>
-              </div>
+              ${infoItem(`${t.name}`, `${sanitizeHtml(test.signatures?.conductedBy?.name) || "-"}`)}
+              ${infoItem(`${t.title_label}`, `${sanitizeHtml(test.signatures?.conductedBy?.title) || "-"}`)}
+              ${infoItem(`${t.company}`, `${sanitizeHtml(test.signatures?.conductedBy?.company) || "-"}`)}
+              ${infoItem(`${t.date}`, `${formatDate(test.signatures?.conductedBy?.date || "", language)}`)}
             </div>
             <div style="margin-top: 15px;">
               <div style="font-size: 10px; color: #6B7280; margin-bottom: 5px;">${t.signature}</div>
