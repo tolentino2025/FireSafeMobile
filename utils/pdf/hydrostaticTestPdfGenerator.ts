@@ -133,16 +133,16 @@ const translations = {
     meters: "m",
   },
   "pt-BR": {
-    title: "RELATORIO DE TESTE HIDROSTATICO",
-    subtitle: "Sistema de Protecao Contra Incendio",
-    testIdentification: "IDENTIFICACAO DO TESTE",
+    title: "RELATÓRIO DE TESTE HIDROSTÁTICO",
+    subtitle: "Sistema de Proteção Contra Incêndio",
+    testIdentification: "IDENTIFICAÇÃO DO TESTE",
     systemType: "Tipo de Sistema",
     hydrants: "Hidrantes",
     sprinklers: "Sprinklers",
     systemName: "Nome do Sistema",
-    buildingType: "Tipo de Edificacao",
-    protectedArea: "Area Protegida",
-    normativeReferences: "Normas de Referencia",
+    buildingType: "Tipo de Edificação",
+    protectedArea: "Área Protegida",
+    normativeReferences: "Normas de Referência",
     fmDataSheet: "Data Sheet FM Global",
     nbrStandard: "Norma NBR",
     approvedBy: "Projeto Aprovado por",
@@ -150,101 +150,101 @@ const translations = {
     fm: "FM Global",
     other: "Outro",
     testDate: "Data do Teste",
-    startTime: "Hora Inicio",
-    endTime: "Hora Termino",
-    weather: "Condicoes Climaticas",
+    startTime: "Hora Início",
+    endTime: "Hora Término",
+    weather: "Condições Climáticas",
     weatherSunny: "Ensolarado",
     weatherCloudy: "Nublado",
     weatherRainy: "Chuvoso",
     weatherPartlyCloudy: "Parcialmente Nublado",
     weatherStormy: "Tempestuoso",
     partiesInvolved: "PARTES ENVOLVIDAS",
-    owner: "Proprietario/Contratante",
-    corporateName: "Razao Social",
-    address: "Endereco",
-    localResponsible: "Responsavel Local",
-    role: "Cargo/Funcao",
+    owner: "Proprietário/Contratante",
+    corporateName: "Razão Social",
+    address: "Endereço",
+    localResponsible: "Responsável Local",
+    role: "Cargo/Função",
     contact: "Contato",
     executorCompany: "Empresa Executora",
     cnpj: "CNPJ",
-    technicalResponsible: "Responsavel Tecnico",
+    technicalResponsible: "Responsável Técnico",
     name: "Nome",
     creaCau: "CREA/CAU",
     artRrt: "ART/RRT",
     inspector: "Inspetor",
-    preparation: "PREPARACAO",
-    preChecks: "Verificacoes Previas",
+    preparation: "PREPARAÇÃO",
+    preChecks: "Verificações Prévias",
     installedAsApprovedProject: "Sistema instalado conforme projeto aprovado",
-    pipesAnchoredAndSupported: "Tubulacoes ancoradas e suportadas adequadamente",
-    valvesCorrectlyInstalled: "Valvulas corretamente instaladas e acessiveis",
-    visibleConnectionsAccessible: "Conexoes visiveis e acessiveis",
-    untestedSectionsIsolated: "Trechos nao testados isolados",
-    sensitiveEquipmentProtected: "Equipamentos sensiveis protegidos",
-    instrumentation: "Instrumentacao",
-    manometerBrand: "Marca do Manometro",
+    pipesAnchoredAndSupported: "Tubulações ancoradas e suportadas adequadamente",
+    valvesCorrectlyInstalled: "Válvulas corretamente instaladas e acessíveis",
+    visibleConnectionsAccessible: "Conexões visíveis e acessíveis",
+    untestedSectionsIsolated: "Trechos não testados isolados",
+    sensitiveEquipmentProtected: "Equipamentos sensíveis protegidos",
+    instrumentation: "Instrumentação",
+    manometerBrand: "Marca do Manômetro",
     manometerModel: "Modelo",
-    measurementRange: "Faixa de Medicao",
-    calibrationCertificate: "Certificado de Calibracao",
-    pressureReadingPoint: "Ponto de Leitura de Pressao",
+    measurementRange: "Faixa de Medição",
+    calibrationCertificate: "Certificado de Calibração",
+    pressureReadingPoint: "Ponto de Leitura de Pressão",
     highestPoint: "Ponto mais Alto",
-    nearPump: "Proximo a Bomba",
+    nearPump: "Próximo à Bomba",
     otherPoint: "Outro",
-    execution: "EXECUCAO",
+    execution: "EXECUÇÃO",
     filling: "Enchimento",
-    fillingMethod: "Metodo de Enchimento",
+    fillingMethod: "Método de Enchimento",
     gradual: "Gradual",
     bySector: "Por Setor",
-    airElimination: "Eliminacao de Ar",
-    reliefValvesOpen: "Valvulas de alivio abertas",
+    airElimination: "Eliminação de Ar",
+    reliefValvesOpen: "Válvulas de alívio abertas",
     purgersUsed: "Purgadores utilizados",
-    pressure: "Pressao",
-    workingPressure: "Pressao de Trabalho",
-    testPressure: "Pressao de Teste",
-    normativeCriteria: "Criterio Normativo Aplicado",
-    minimumTestTime: "Tempo Minimo de Teste",
+    pressure: "Pressão",
+    workingPressure: "Pressão de Trabalho",
+    testPressure: "Pressão de Teste",
+    normativeCriteria: "Critério Normativo Aplicado",
+    minimumTestTime: "Tempo Mínimo de Teste",
     minutes: "min",
     hours: "h",
     monitoring: "Monitoramento",
-    stabilizationStartTime: "Hora Inicio Estabilizacao",
-    testEndTime: "Hora Termino Teste",
-    initialPressure: "Pressao Inicial",
-    finalPressure: "Pressao Final",
-    pressureVariation: "Variacao de Pressao",
+    stabilizationStartTime: "Hora Início Estabilização",
+    testEndTime: "Hora Término Teste",
+    initialPressure: "Pressão Inicial",
+    finalPressure: "Pressão Final",
+    pressureVariation: "Variação de Pressão",
     results: "RESULTADOS",
     tightness: "Estanqueidade",
-    noLeaks: "Nao houve vazamentos",
-    noPressureDrop: "Nao houve queda de pressao",
-    noVisibleDeformation: "Nao houve deformacao visivel",
-    occurrences: "Ocorrencias",
+    noLeaks: "Não houve vazamentos",
+    noPressureDrop: "Não houve queda de pressão",
+    noVisibleDeformation: "Não houve deformação visível",
+    occurrences: "Ocorrências",
     leaksFound: "Houve vazamento(s)",
-    leaksDescription: "Descricao do(s) Vazamento(s)",
-    pressureDropAboveAllowed: "Queda de pressao acima do permitido",
+    leaksDescription: "Descrição do(s) Vazamento(s)",
+    pressureDropAboveAllowed: "Queda de pressão acima do permitido",
     structuralFailure: "Falha estrutural",
-    failureDescription: "Descricao da Falha",
-    photoEvidence: "REGISTRO FOTOGRAFICO",
-    initialGaugePhotos: "Inicial - Manometro",
-    initialGeneralPhotos: "Inicial - Visao Geral",
+    failureDescription: "Descrição da Falha",
+    photoEvidence: "REGISTRO FOTOGRÁFICO",
+    initialGaugePhotos: "Inicial — Manômetro",
+    initialGeneralPhotos: "Inicial — Visão Geral",
     duringTestPhotos: "Durante o Teste",
-    finalGaugePhotos: "Final - Manometro",
-    finalGeneralPhotos: "Final - Visao Geral",
-    conclusion: "CONCLUSAO TECNICA",
+    finalGaugePhotos: "Final — Manômetro",
+    finalGeneralPhotos: "Final — Visão Geral",
+    conclusion: "CONCLUSÃO TÉCNICA",
     status: "Status",
     approved: "APROVADO",
     reproved: "REPROVADO",
     technicalConclusion: "Parecer Tecnico",
-    declarationSignatures: "DECLARACAO E ASSINATURAS",
-    declarationText: "Declaro que todas as informacoes prestadas neste relatorio sao verdadeiras e que o teste foi conduzido em conformidade com as normas aplicaveis.",
-    technicalResponsibleSignature: "Responsavel Tecnico",
+    declarationSignatures: "DECLARAÇÃO E ASSINATURAS",
+    declarationText: "Declaro que todas as informações prestadas neste relatório são verdadeiras e que o teste foi conduzido em conformidade com as normas aplicáveis.",
+    technicalResponsibleSignature: "Responsável Técnico",
     inspectorSignature: "Inspetor",
     ownerRepSignature: "Representante Proprietario",
     date: "Data",
     yes: "Sim",
     no: "Nao",
     generatedBy: "Gerado por FireSafe ITM",
-    geolocation: "Geolocalizacao",
+    geolocation: "Geolocalização",
     latitude: "Latitude",
     longitude: "Longitude",
-    accuracy: "Precisao",
+    accuracy: "Precisão",
     meters: "m",
   },
 };
@@ -264,9 +264,9 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   const t = translations[language];
   const h = hydrostaticTest;
 
-  const checkIcon = (checked: boolean) => checked 
-    ? '<span class="check-icon-yes">[X]</span>' 
-    : '<span class="check-icon-no">[ ]</span>';
+  // A marcação é desenhada (caixa preenchida), não escrita como "[X]".
+  const checkIcon = (checked: boolean) =>
+    checked ? '<span class="check-icon-yes">&#10003;</span>' : '<span class="check-icon-no">&nbsp;</span>';
 
   const formatPressureReading = (point: string) => {
     if (point === "HIGHEST_POINT") return t.highestPoint;
@@ -288,6 +288,14 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     return approvedBy;
   };
 
+  // Data chega do banco como AAAA-MM-DD; no documento, dd/mm/aaaa.
+  const formatDate = (value?: string | null): string => {
+    if (!value) return "";
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+    if (!m) return sanitizeHtml(value);
+    return language === "pt-BR" ? `${m[3]}/${m[2]}/${m[1]}` : `${m[2]}/${m[3]}/${m[1]}`;
+  };
+
   const formatWeather = (weather: string) => {
     if (weather === "ENSOLARADO") return t.weatherSunny;
     if (weather === "NUBLADO") return t.weatherCloudy;
@@ -306,21 +314,26 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     return ref;
   }).join(", ");
 
-  const renderPhotoGrid = (categoryIds: string[], caption: string): string => {
-    const categoryPhotos = photosWithBase64.filter(p => categoryIds.includes(p.id));
-    if (categoryPhotos.length === 0) return "";
-
-    let html = `<div class="photo-section"><h4>${sanitizeHtml(caption)}</h4><div class="photo-grid">`;
-    
-    for (const photo of categoryPhotos) {
-      const base64 = photo.base64 || (photo.uri && photo.uri.startsWith("data:") ? photo.uri : null);
-      if (base64) {
-        html += `<div class="photo-item"><img src="${base64}" alt="${sanitizeHtml(caption)}" /><p class="photo-caption">${sanitizeHtml(caption)}</p></div>`;
-      }
+  // Uma grade só para todo o registro fotográfico, em duas colunas. Antes cada
+  // categoria abria a sua própria grade e cada foto ocupava uma linha inteira,
+  // o que esticava o relatório sem necessidade.
+  const renderPhotoEvidence = (
+    groups: Array<{ ids: string[]; caption: string }>,
+  ): string => {
+    const cells: string[] = [];
+    for (const group of groups) {
+      const groupPhotos = photosWithBase64.filter((p) => (group.ids || []).includes(p.id));
+      groupPhotos.forEach((photo, index) => {
+        const base64 = photo.base64 || (photo.uri && photo.uri.startsWith("data:") ? photo.uri : null);
+        if (!base64) return;
+        const caption = groupPhotos.length > 1 ? `${group.caption} ${index + 1}` : group.caption;
+        cells.push(
+          `<div class="photo-item"><img src="${base64}" alt="${sanitizeHtml(group.caption)}" /><p class="photo-caption">${sanitizeHtml(caption)}</p></div>`,
+        );
+      });
     }
-    
-    html += `</div></div>`;
-    return html;
+    if (cells.length === 0) return "";
+    return `<div class="photo-grid">${cells.join("")}</div>`;
   };
 
   const getSignatureImage = (signatureData: string | undefined): string => {
@@ -343,11 +356,13 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   const inspectorSignatureHtml = getSignatureImage(h.signatures.inspectorSignatureId);
   const ownerRepSignatureHtml = getSignatureImage(h.signatures.ownerRepSignatureId);
 
-  const initialGaugePhotosHtml = renderPhotoGrid(h.photoEvidence.initialGaugePhotoIds || [], t.initialGaugePhotos);
-  const initialGeneralPhotosHtml = renderPhotoGrid(h.photoEvidence.initialGeneralPhotoIds || [], t.initialGeneralPhotos);
-  const duringTestPhotosHtml = renderPhotoGrid(h.photoEvidence.duringTestPhotoIds || [], t.duringTestPhotos);
-  const finalGaugePhotosHtml = renderPhotoGrid(h.photoEvidence.finalGaugePhotoIds || [], t.finalGaugePhotos);
-  const finalGeneralPhotosHtml = renderPhotoGrid(h.photoEvidence.finalGeneralPhotoIds || [], t.finalGeneralPhotos);
+  const photoEvidenceHtml = renderPhotoEvidence([
+    { ids: h.photoEvidence.initialGaugePhotoIds || [], caption: t.initialGaugePhotos },
+    { ids: h.photoEvidence.initialGeneralPhotoIds || [], caption: t.initialGeneralPhotos },
+    { ids: h.photoEvidence.duringTestPhotoIds || [], caption: t.duringTestPhotos },
+    { ids: h.photoEvidence.finalGaugePhotoIds || [], caption: t.finalGaugePhotos },
+    { ids: h.photoEvidence.finalGeneralPhotoIds || [], caption: t.finalGeneralPhotos },
+  ]);
 
   const statusClass = h.conclusion.status === "APPROVED" ? "status-approved" : "status-reproved";
   const statusText = h.conclusion.status === "APPROVED" ? t.approved : t.reproved;
@@ -357,6 +372,10 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
     reportTitle: t.subtitle,
     showBadge: false,
     logoDataUri,
+    meta: [
+      { label: language === "pt-BR" ? "Contrato nº" : "Contract no.", value: inspection?.contractNo || "" },
+      { label: language === "pt-BR" ? "Data do teste" : "Test date", value: formatDate(h.testDate) },
+    ],
   });
 
   const bodyHtml = `
@@ -373,7 +392,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
         <div class="col-3">
           <div class="field">
             <div class="field-label">${t.testDate}</div>
-            <div class="field-value">${sanitizeHtml(h.testDate)}</div>
+            <div class="field-value">${formatDate(h.testDate)}</div>
           </div>
         </div>
         <div class="col-3">
@@ -690,11 +709,7 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
   <div class="section">
     <h2 class="section-title">${t.photoEvidence}</h2>
     <div class="section-content">
-      ${initialGaugePhotosHtml}
-      ${initialGeneralPhotosHtml}
-      ${duringTestPhotosHtml}
-      ${finalGaugePhotosHtml}
-      ${finalGeneralPhotosHtml}
+      ${photoEvidenceHtml}
     </div>
   </div>
 
@@ -715,30 +730,28 @@ const generateHtml = async (options: HydrostaticPdfOptions): Promise<string> => 
       
       <div class="signature-section">
         <div class="signature-row">
-          <div class="signature-box">
-            ${technicalResponsibleSignatureHtml}
+          <div class="signature-box-container">
+            ${technicalResponsibleSignatureHtml ? `<div class="signature-box">${technicalResponsibleSignatureHtml}</div>` : `<div class="signature-box"></div>`}
             <div class="signature-line">
               <div class="signature-label">${t.technicalResponsibleSignature}</div>
               <div class="signature-name">${sanitizeHtml(h.executorCompany.technicalResponsible.name)}</div>
-              ${h.signatures.dates.technicalResponsibleDate ? `<div class="signature-date">${t.date}: ${sanitizeHtml(h.signatures.dates.technicalResponsibleDate)}</div>` : ""}
+              ${h.signatures.dates.technicalResponsibleDate ? `<div class="signature-date">${t.date}: ${formatDate(h.signatures.dates.technicalResponsibleDate)}</div>` : ""}
             </div>
           </div>
-          <div class="signature-box">
-            ${inspectorSignatureHtml}
+          <div class="signature-box-container">
+            ${inspectorSignatureHtml ? `<div class="signature-box">${inspectorSignatureHtml}</div>` : `<div class="signature-box"></div>`}
             <div class="signature-line">
               <div class="signature-label">${t.inspectorSignature}</div>
               <div class="signature-name">${sanitizeHtml(h.inspector.name)}</div>
-              ${h.signatures.dates.inspectorDate ? `<div class="signature-date">${t.date}: ${sanitizeHtml(h.signatures.dates.inspectorDate)}</div>` : ""}
+              ${h.signatures.dates.inspectorDate ? `<div class="signature-date">${t.date}: ${formatDate(h.signatures.dates.inspectorDate)}</div>` : ""}
             </div>
           </div>
-        </div>
-        <div class="signature-row">
-          <div class="signature-box">
-            ${ownerRepSignatureHtml}
+          <div class="signature-box-container">
+            ${ownerRepSignatureHtml ? `<div class="signature-box">${ownerRepSignatureHtml}</div>` : `<div class="signature-box"></div>`}
             <div class="signature-line">
               <div class="signature-label">${t.ownerRepSignature}</div>
               <div class="signature-name">${sanitizeHtml(h.owner.localResponsible)}</div>
-              ${h.signatures.dates.ownerRepDate ? `<div class="signature-date">${t.date}: ${sanitizeHtml(h.signatures.dates.ownerRepDate)}</div>` : ""}
+              ${h.signatures.dates.ownerRepDate ? `<div class="signature-date">${t.date}: ${formatDate(h.signatures.dates.ownerRepDate)}</div>` : ""}
             </div>
           </div>
         </div>

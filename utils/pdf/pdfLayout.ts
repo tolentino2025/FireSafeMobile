@@ -8,6 +8,8 @@ export interface HeaderParams {
   badgeText?: string;
   showBadge?: boolean;
   logoDataUri?: string | null;
+  /** Caixa de identificação do documento, à direita (nº do contrato, emissão…). */
+  meta?: Array<{ label: string; value: string }>;
 }
 
 export interface FooterParams {
@@ -25,45 +27,50 @@ export interface WrapDocumentParams {
 }
 
 export const renderHeader = (params: HeaderParams): string => {
-  const { 
-    companyName = "FireSafe ITM", 
-    reportTitle, 
+  const {
+    companyName = "FireSafe ITM",
+    reportTitle,
     badgeText,
     showBadge = true,
-    logoDataUri
+    logoDataUri,
+    meta = [],
   } = params;
-  
-  const logoHtml = logoDataUri 
+
+  const logoHtml = logoDataUri
     ? `<img src="${logoDataUri}" class="brand-logo" alt="FireSafe ITM" />`
     : `<div class="logo-icon">F</div>`;
-  
+
+  // Campo sem valor não renderiza — nada de célula vazia no cabeçalho.
+  const metaHtml = meta.filter((m) => m.value)
+    .map((m) => `<div><div class="k">${esc(m.label)}</div><div class="v">${esc(m.value)}</div></div>`)
+    .join("");
+
   return `
     <div class="header">
-      <div>
-        <div class="logo-section">
-          ${logoHtml}
-          <div>
-            <div class="company-name">${esc(companyName)}</div>
-            <div class="report-title">${esc(reportTitle)}</div>
-          </div>
+      <div class="logo-section">
+        ${logoHtml}
+        <div>
+          <div class="company-name">${esc(companyName)}</div>
+          <div class="report-title">${esc(reportTitle)}</div>
+          ${showBadge && badgeText ? `<div class="compliance-badge" style="margin-top:1.4mm;">${esc(badgeText)}</div>` : ""}
         </div>
       </div>
-      ${showBadge && badgeText ? `<div class="compliance-badge">${esc(badgeText)}</div>` : ''}
+      ${metaHtml ? `<div class="doc-meta">${metaHtml}</div>` : ""}
     </div>
   `;
 };
 
 export const renderFooter = (params: FooterParams): string => {
-  const { 
-    generatedText, 
-    dateText, 
-    tagline = "FireSafe ITM - Fire Protection System Inspection, Testing & Maintenance" 
+  const {
+    generatedText,
+    dateText,
+    tagline = "FireSafe ITM — Inspeção, Teste e Manutenção de Sistemas de Proteção contra Incêndio",
   } = params;
-  
+
   return `
     <div class="footer">
-      <p>${generatedText}: ${dateText}</p>
-      <p style="margin-top: 5px;">${tagline}</p>
+      <span class="generated">${esc(generatedText)}: ${esc(dateText)}</span>
+      <span>${esc(tagline)}</span>
     </div>
   `;
 };
