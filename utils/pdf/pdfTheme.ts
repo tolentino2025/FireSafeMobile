@@ -199,6 +199,21 @@ export const getBaseCss = (): string => {
     .checklist-table th:nth-child(2) { text-align: center; width: 18mm; }
     .checklist-table td:nth-child(2) { text-align: center; }
 
+    /* ── Detalhe do item de checklist ─────────────────────────────────── */
+    .item-fields { margin-top: 1mm; font-size: 6.6pt; color: ${c.muted}; font-variant-numeric: tabular-nums; }
+    .item-note {
+      margin-top: 1.2mm; padding: 1.2mm 2mm;
+      background: ${c.surface}; border-left: .6mm solid ${c.line};
+      font-size: 6.8pt; color: ${c.text}; font-style: italic;
+    }
+    .item-photos { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 1.6mm; }
+    .item-photo {
+      width: 26mm; border: .25mm solid ${c.line}; border-radius: 1mm;
+      overflow: hidden; background: ${c.surface};
+    }
+    .item-photo img { display: block; width: 100%; height: 18mm; object-fit: cover; }
+    .item-photo p { padding: .8mm 1.2mm; font-size: 5.6pt; color: ${c.muted}; word-break: break-word; }
+
     /* ── Marcações (conforme / não conforme) ──────────────────────────── */
     .check-item {
       display: flex; align-items: flex-start; gap: 2mm;
@@ -266,7 +281,8 @@ export const getBaseCss = (): string => {
 
     /* ── Assinaturas ──────────────────────────────────────────────────── */
     .signature-section { margin-top: 4mm; break-inside: avoid; }
-    .signature-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
+    /* Ajusta às assinaturas que o documento tiver (1, 2 ou 3). */
+    .signature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(48mm, 1fr)); gap: 6mm; }
     .signature-box-container { break-inside: avoid; }
     .signature-box { min-height: 16mm; display: flex; align-items: flex-end; justify-content: center; }
     .signature-img { max-height: 15mm; max-width: 100%; }

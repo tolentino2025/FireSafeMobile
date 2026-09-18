@@ -3,6 +3,7 @@ import * as Sharing from "expo-sharing";
 import { FM85ACertificate } from "@/types/fm85a";
 import { getLogoDataUri } from "@/utils/pdf/pdfAssets";
 import { printHtml, shareOrPrintHtml } from "@/utils/pdf/pdfPrint";
+import { getBaseCss, PDF_THEME } from "@/utils/pdf/pdfTheme";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -284,7 +285,7 @@ const translations = {
   },
 };
 
-const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | null = null): string => {
+export const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | null = null): string => {
   const { certificate, language } = options;
   const t = translations[language];
   const c = certificate;
@@ -321,54 +322,35 @@ const generateFM85APdfHtml = (options: FM85APdfOptions, logoDataUri: string | nu
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          font-size: 10px;
-          line-height: 1.4;
-          color: #000;
-          background: white;
-        }
-        .page { padding: 20px 30px; max-width: 800px; margin: 0 auto; }
+        /* Sistema visual compartilhado (utils/pdf/pdfTheme) + o que é próprio
+           do FM85A: cabeçalho centralizado do certificado e campos de
+           preenchimento com linha. */
+        ${getBaseCss()}
+
         .header {
-          text-align: center;
-          border-bottom: 2px solid #000;
-          padding-bottom: 10px;
-          margin-bottom: 15px;
+          display: block; text-align: center;
+          border-bottom: .5mm solid ${PDF_THEME.ink};
+          padding-bottom: 2.5mm; margin-bottom: 4mm;
         }
-        .header h1 { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
-        .header h2 { font-size: 12px; font-weight: normal; margin-bottom: 2px; }
-        .header .form-no { font-size: 10px; color: #666; }
-        .section { margin-bottom: 15px; page-break-inside: avoid; }
-        .section-title {
-          background: #1a365d;
-          color: white;
-          padding: 4px 8px;
-          font-size: 11px;
-          font-weight: bold;
-          margin-bottom: 8px;
+        .header h1 {
+          font-family: "Arial Narrow", Arial, sans-serif;
+          font-size: 13pt; font-weight: 800;
+          text-transform: uppercase; letter-spacing: .04em;
+          color: ${PDF_THEME.ink};
         }
-        .info-row { display: flex; margin-bottom: 4px; }
-        .info-label { font-weight: bold; min-width: 180px; }
-        .info-value { flex: 1; border-bottom: 1px solid #ccc; min-height: 14px; padding-left: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 9px; }
-        th, td { border: 1px solid #000; padding: 3px 5px; text-align: left; }
-        th { background: #e5e7eb; font-weight: bold; }
-        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .question-row { display: flex; justify-content: space-between; margin-bottom: 4px; padding: 2px 0; border-bottom: 1px dotted #ccc; }
-        .question-label { flex: 1; }
-        .question-value { min-width: 40px; text-align: center; font-weight: bold; }
-        .signature-box { border: 1px solid #000; min-height: 60px; margin-top: 5px; padding: 5px; }
-        .signature-img { max-height: 50px; max-width: 100%; }
-        .footer { text-align: center; margin-top: 20px; font-size: 9px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
-        .notes-box { border: 1px solid #ccc; min-height: 60px; padding: 8px; margin-top: 5px; white-space: pre-wrap; }
-        .logo-section { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
-        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #FF6B00, #FF8533); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
-        .brand-logo { height: 40px; width: auto; border-radius: 8px; }
-        .geo-grid { display: flex; flex-wrap: wrap; gap: 15px; }
-        .geo-item { flex: 1; min-width: 120px; }
-        .geo-label { font-size: 9px; color: #666; text-transform: uppercase; }
-        .geo-value { font-size: 11px; font-weight: 500; color: #000; }
+        .header h2 { font-size: 8pt; font-weight: 400; color: ${PDF_THEME.text}; margin-top: .8mm; }
+        .header .form-no { font-size: 6.4pt; color: ${PDF_THEME.muted}; margin-top: .8mm; text-transform: uppercase; letter-spacing: .05em; }
+        .logo-section { justify-content: center; margin-bottom: 2.5mm; }
+
+        /* Campo com linha de preenchimento — é um certificado que também se
+           preenche à mão. */
+        .info-row .info-value {
+          border-bottom: .18mm solid ${PDF_THEME.line};
+          min-height: 4mm; padding-left: 1mm;
+        }
+        .question-row { border-bottom: .18mm dotted ${PDF_THEME.line}; }
+        .signature-box { border: .25mm solid ${PDF_THEME.line}; border-radius: 1.5mm; min-height: 18mm; padding: 2mm; }
+        .notes-box { min-height: 18mm; }
       </style>
     </head>
     <body>

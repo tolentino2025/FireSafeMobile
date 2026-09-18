@@ -336,7 +336,7 @@ const generateInspectionPdfHtmlWithPhotos = (
 
   const getNumericFieldsHtml = (item: any, excludePsi: boolean = false): string => {
     if (!excludePsi && item.psiValue && !item.numericFields?.length) {
-      return `<div style="font-size: 11px; color: #6B7280; margin-top: 4px;">${t.staticPsi || "Pressure"}: ${sanitizeHtml(item.psiValue)} psi</div>`;
+      return `<div class="item-fields">${t.staticPsi || "Pressure"}: ${sanitizeHtml(item.psiValue)} psi</div>`;
     }
     if (!item.numericFields?.length) return "";
     const filledFields = item.numericFields.filter((f: any) => {
@@ -345,14 +345,14 @@ const generateInspectionPdfHtmlWithPhotos = (
       return true;
     });
     if (!filledFields.length) return "";
-    return `<div style="margin-top: 6px; font-size: 11px; color: #6B7280;">
+    return `<div class="item-fields">
       ${filledFields.map((f: any) => `<div>${getNumericFieldLabel(f.labelKey)}: ${sanitizeHtml(f.value)} ${sanitizeHtml(f.unit) || ""}</div>`).join("")}
     </div>`;
   };
 
   const getNotesHtml = (notes: string | undefined): string => {
     if (!notes) return "";
-    return `<div style="margin-top: 6px; font-size: 11px; color: #4B5563; background: #F3F4F6; padding: 6px 8px; border-radius: 4px; font-style: italic;">${sanitizeHtml(notes)}</div>`;
+    return `<div class="item-note">${sanitizeHtml(notes)}</div>`;
   };
 
   const getItemPhotosHtml = (photos: any[] | undefined): string => {
@@ -360,11 +360,11 @@ const generateInspectionPdfHtmlWithPhotos = (
     const validPhotos = photos.filter((p) => p.base64);
     if (validPhotos.length === 0) return "";
     return `
-      <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+      <div class="item-photos">
         ${validPhotos.map((photo) => `
-          <div style="width: 100px; border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden; background: #F9FAFB;">
-            <img src="${photo.base64}" style="width: 100%; height: 75px; object-fit: cover;" />
-            ${photo.caption ? `<p style="margin: 0; padding: 4px 6px; font-size: 9px; color: #4B5563; word-break: break-word;">${sanitizeHtml(photo.caption)}</p>` : ""}
+          <div class="item-photo">
+            <img src="${photo.base64}" />
+            ${photo.caption ? `<p>${sanitizeHtml(photo.caption)}</p>` : ""}
           </div>
         `).join("")}
       </div>
@@ -392,14 +392,14 @@ const generateInspectionPdfHtmlWithPhotos = (
     .map(
       (item: any) => `
       <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB;">
+        <td>
           ${sanitizeHtml(item.label)}
           ${getNumericFieldsHtml(item, hasAnyPsi)}
           ${getNotesHtml(item.notes)}
           ${getItemPhotosHtml(item.photos)}
         </td>
-        <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getChecklistValueSymbol(item.value)}</td>
-        ${hasAnyPsi ? `<td style="padding: 10px; border-bottom: 1px solid #E5E7EB; text-align: center; vertical-align: top;">${getPsiCellValue(item)}</td>` : ""}
+        <td class="center">${getChecklistValueSymbol(item.value)}</td>
+        ${hasAnyPsi ? `<td class="num">${getPsiCellValue(item)}</td>` : ""}
       </tr>
     `
     )
@@ -410,19 +410,21 @@ const generateInspectionPdfHtmlWithPhotos = (
   const photosHtml =
     validPhotos.length > 0
       ? `
-    <div style="margin-top: 30px; page-break-inside: avoid;">
-      <h2 style="color: #1A365D; border-bottom: 2px solid #FF6B00; padding-bottom: 8px; font-size: 16px;">${t.photos}</h2>
-      <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;">
-        ${validPhotos
-          .map(
-            (photo) => `
-          <div style="width: 200px; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
-            <img src="${photo.base64}" style="width: 100%; height: 150px; object-fit: cover;" />
-            ${photo.caption ? `<p style="margin: 0; padding: 8px; font-size: 11px; color: #4B5563;">${sanitizeHtml(photo.caption)}</p>` : ""}
-          </div>
-        `
-          )
-          .join("")}
+    <div class="section">
+      <h2 class="section-title">${t.photos}</h2>
+      <div class="section-content">
+        <div class="photo-grid">
+          ${validPhotos
+            .map(
+              (photo) => `
+            <div class="photo-item">
+              <img src="${photo.base64}" />
+              ${photo.caption ? `<p class="photo-caption">${sanitizeHtml(photo.caption)}</p>` : ""}
+            </div>
+          `
+            )
+            .join("")}
+        </div>
       </div>
     </div>
   `
@@ -443,15 +445,15 @@ const generateInspectionPdfHtmlWithPhotos = (
     name: string,
     role?: string,
   ) => `
-      <div style="flex: 1; min-width: 220px; padding: 15px; background: #F9FAFB; border-radius: 8px;">
-        <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em;">${label}</p>
-        ${
-          img && img.startsWith("data:")
-            ? `<img src="${img}" style="max-height: 80px;" />`
-            : `<div style="height: 60px; border-bottom: 1px solid #9CA3AF; margin: 8px 0 4px 0;"></div>`
-        }
-        <p style="margin: 10px 0 0 0; font-size: 12px; color: #6B7280;">${sanitizeHtml(name) || "-"}</p>
-        ${role ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #9CA3AF;">${sanitizeHtml(role)}</p>` : ""}
+      <div class="signature-box-container">
+        <div class="signature-box">
+          ${img && img.startsWith("data:") ? `<img src="${img}" class="signature-img" />` : ""}
+        </div>
+        <div class="signature-line">
+          <div class="signature-label">${label}</div>
+          <div class="signature-name">${sanitizeHtml(name) || "&nbsp;"}</div>
+          ${role ? `<div class="signature-date">${sanitizeHtml(role)}</div>` : ""}
+        </div>
       </div>`;
 
   const signatureCards = [
@@ -475,10 +477,12 @@ const generateInspectionPdfHtmlWithPhotos = (
 
   const signatureHtml = signatureCards
     ? `
-    <div style="margin-top: 30px; page-break-inside: avoid;">
-      <h2 style="color: #1A365D; border-bottom: 2px solid #FF6B00; padding-bottom: 8px; font-size: 16px;">${t.signature}</h2>
-      <div style="margin-top: 15px; display: flex; gap: 16px; flex-wrap: wrap;">
-        ${signatureCards}
+    <div class="section">
+      <h2 class="section-title">${t.signature}</h2>
+      <div class="section-content">
+        <div class="signature-row">
+          ${signatureCards}
+        </div>
       </div>
     </div>
   `

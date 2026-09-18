@@ -9,6 +9,7 @@ import {
   Deficiency,
 } from "@/types/performanceTest";
 import { parseLocalYMD, getLocalTimeZone } from "@/utils/dateUtils";
+import { getBaseCss, PDF_THEME } from "@/utils/pdf/pdfTheme";
 
 const sanitizeHtml = (text: string | null | undefined): string => {
   if (!text) return "";
@@ -347,191 +348,51 @@ const translations = {
   },
 };
 
+// Usa o sistema visual compartilhado (utils/pdf/pdfTheme) e acrescenta só o que
+// é específico do teste de desempenho: leituras, deficiências e resultado geral.
 const getCommonStyles = (): string => `
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 11px;
-    line-height: 1.4;
-    color: #1F2937;
-    background: white;
-  }
-  .page {
-    padding: 30px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 3px solid #DC2626;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-  }
-  .logo-section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-  }
-  .company-name {
-    font-size: 20px;
-    font-weight: bold;
-    color: #1A365D;
-  }
-  .report-title {
-    font-size: 12px;
-    color: #6B7280;
-    margin-top: 4px;
-  }
-  .compliance-badge {
-    background: #22863A;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 15px;
-    font-size: 10px;
-    font-weight: 600;
-  }
-  .section {
-    margin-bottom: 20px;
-    page-break-inside: avoid;
-  }
-  .section-title {
-    color: #1A365D;
-    font-size: 14px;
-    font-weight: 600;
-    border-bottom: 2px solid #DC2626;
-    padding-bottom: 6px;
-    margin-bottom: 12px;
-  }
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .info-grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-  }
-  .info-item {
-    padding: 8px;
-    background: #F9FAFB;
-    border-radius: 4px;
-    border: 1px solid #E5E7EB;
-  }
-  .info-label {
-    font-size: 9px;
-    color: #6B7280;
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-  .info-value {
-    font-size: 11px;
-    color: #1F2937;
-    font-weight: 500;
-  }
-  .readings-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  .readings-table th {
-    background: #1A365D;
-    color: white;
-    padding: 8px 6px;
-    font-size: 10px;
-    text-align: center;
-    font-weight: 600;
-  }
-  .readings-table td {
-    padding: 6px;
-    border-bottom: 1px solid #E5E7EB;
-    text-align: center;
-    font-size: 10px;
-  }
-  .readings-table tr:nth-child(even) {
-    background: #F9FAFB;
-  }
-  .results-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  .results-table th {
-    background: #F3F4F6;
-    padding: 8px;
-    font-size: 10px;
-    text-align: left;
-    border-bottom: 2px solid #E5E7EB;
-  }
-  .results-table td {
-    padding: 8px;
-    border-bottom: 1px solid #E5E7EB;
-    font-size: 10px;
-  }
+  ${getBaseCss()}
+
+  .info-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5mm; }
+
+  /* Leituras: é tabela de números — tudo centralizado e em coluna. */
+  .readings-table, .results-table { width: 100%; border-collapse: collapse; margin-top: 2mm; }
+  .readings-table th { text-align: center; }
+  .readings-table td { text-align: center; }
+  .results-table th { text-align: left; }
+
+  /* Deficiência é desvio: fundo neutro, faixa vermelha marcando o que importa. */
   .deficiency-card {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 10px;
+    background: ${PDF_THEME.surface};
+    border: .25mm solid ${PDF_THEME.line};
+    border-left: .8mm solid ${PDF_THEME.danger};
+    border-radius: 1.5mm;
+    padding: 2.4mm 3mm;
+    margin-bottom: 2.4mm;
+    break-inside: avoid;
   }
-  .deficiency-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-  }
+  .deficiency-header { display: flex; justify-content: space-between; gap: 3mm; margin-bottom: 1.4mm; }
+
+  /* Severidade por peso de traço, não por semáforo de cores. */
   .severity-badge {
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 9px;
-    font-weight: 600;
+    display: inline-block;
+    padding: .6mm 2mm; border-radius: 1mm;
+    font-size: 6pt; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .04em;
   }
-  .severity-minor { background: #FEF3C7; color: #92400E; }
-  .severity-major { background: #FED7AA; color: #9A3412; }
-  .severity-critical { background: #FECACA; color: #991B1B; }
-  .signature-box {
-    border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    padding: 15px;
-    margin-top: 10px;
-  }
-  .signature-image {
-    max-height: 60px;
-    margin-top: 10px;
-  }
-  .footer {
-    margin-top: 30px;
-    padding-top: 15px;
-    border-top: 1px solid #E5E7EB;
-    text-align: center;
-    font-size: 9px;
-    color: #6B7280;
-  }
+  .severity-minor { border: .25mm solid ${PDF_THEME.line}; color: ${PDF_THEME.text}; }
+  .severity-major { border: .3mm solid ${PDF_THEME.danger}; color: ${PDF_THEME.danger}; }
+  .severity-critical { background: ${PDF_THEME.danger}; color: ${PDF_THEME.white}; }
+
+  .signature-image { max-height: 15mm; margin-top: 2mm; }
+
   .overall-result-box {
-    background: #F9FAFB;
-    border: 2px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 15px;
+    border: .6mm solid ${PDF_THEME.ink};
+    border-radius: 1.5mm;
+    padding: 3mm;
     text-align: center;
-    margin-top: 15px;
+    margin-top: 3mm;
+    break-inside: avoid;
   }
 `;
 
